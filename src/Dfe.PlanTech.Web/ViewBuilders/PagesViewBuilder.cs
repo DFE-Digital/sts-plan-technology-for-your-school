@@ -25,7 +25,8 @@ public class PagesViewBuilder(
     IEstablishmentService establishmentService,
     INotifyService notifyService,
     ISubmissionService submissionService,
-    IRecommendationService recommendationService
+    IRecommendationService recommendationService,
+    IGroupService groupService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
@@ -43,6 +44,8 @@ public class PagesViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationService _recommendationService =
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly IGroupService _groupService =
+    groupService ?? throw new ArgumentNullException(nameof(groupService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -78,12 +81,12 @@ public class PagesViewBuilder(
                     "User is a MAT user but does not have an organisation ID (for the group)"
                 );
 
-            var groupSchools =
-                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
+            var group =
+                await _groupService.GetGroupWithEstablishmentsBasic(groupId);
 
-            var selectedSchoolIsValid = groupSchools.Any(s =>
+            var selectedSchoolIsValid = group?.BasicEstablishments.Any(s =>
                 s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
-            );
+            ) ?? false;
 
             if (!selectedSchoolIsValid)
             {
