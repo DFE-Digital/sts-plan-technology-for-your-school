@@ -26,7 +26,7 @@ env:
   SQL_BACKUP_CONTAINER_NAME: sqlbackups
   SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
   MANIFEST: secret-manifest.txt
-  SOURCE_KV: "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+  SOURCE_KV: "${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv"
 
 jobs:
   backup-db:
@@ -56,7 +56,7 @@ jobs:
         shell: bash
         env:
           ENVIRONMENT: ${{ secrets.AZ_ENVIRONMENT }}
-          PROJECT_NAME: ${{ secrets.DFE_PROJECT_NAME }}
+          PROJECT_NAME: ${{ vars.DFE_PROJECT_NAME }}
         run: |
           resource_group="${ENVIRONMENT}${PROJECT_NAME}-backup"
           account_name="${resource_group//-/}"
@@ -75,8 +75,8 @@ jobs:
         uses: ./.github/actions/whitelist-sql
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
           verb: 'add'
 
       - name: Whitelist Runner for backup storage
@@ -94,15 +94,15 @@ jobs:
             --query accessToken -o tsv)"
 
           sqlpackage /Action:Export \
-            /SourceServerName:"tcp:${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net,1433" \
-            /SourceDatabaseName:"${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
+            /SourceServerName:"tcp:${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}.database.windows.net,1433" \
+            /SourceDatabaseName:"${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-sqldb" \
             /TargetFile:"db-$(date +%F).bacpac" \
             /AccessToken:"$ACCESS_TOKEN"
 
       - name: Save bacpac
         run: |
           az storage blob upload \
-          --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
+          --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
           --container-name ${{ env.SQL_BACKUP_CONTAINER_NAME }} \
           --name db-$(date +%F).bacpac \
           --file db-$(date +%F).bacpac \
@@ -120,8 +120,8 @@ jobs:
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-          account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup
+          account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup//-/}
           verb: remove
 
   backup-secrets:
@@ -154,8 +154,8 @@ jobs:
           id: backup_names
           shell: bash
           run: |
-            BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-            BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+            BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"
+            BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"
             BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
 
             echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
@@ -175,15 +175,15 @@ jobs:
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf
-            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv
+            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf
+            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf-kv
             verb: 'add'
 
         - name: Whitelist Runner for app keyvault
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
             keyvault-name: ${{ ENV.SOURCE_KV }}
             verb: 'add'
 
@@ -200,7 +200,7 @@ jobs:
           run: |
             set -euo pipefail
 
-            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv"
             TARGET_KV="${{ steps.backup_names.outputs.kv }}"
 
             az keyvault secret list \
@@ -234,7 +234,7 @@ jobs:
 
         - name: Copy app secret manifest
           run: |
-            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv"
             az keyvault secret list \
               --vault-name "$SOURCE_KV" \
               --query "[].name" \
@@ -254,7 +254,7 @@ jobs:
           run: |
             set -euo pipefail
 
-            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv"
             TARGET_KV="${{ steps.backup_names.outputs.kv }}"
             $SECRET_NAME = "${{ inputs.tfvars_secret_name }}"
 
@@ -290,7 +290,7 @@ jobs:
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
             keyvault-name: ${{ ENV.SOURCE_KV }}
             verb: 'remove'
 
@@ -307,6 +307,6 @@ jobs:
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf
-            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv
+            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf
+            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf-kv
             verb: 'remove'

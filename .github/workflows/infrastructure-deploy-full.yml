@@ -89,7 +89,7 @@ jobs:
           if [ "$IS_DR" = "true" ]; then
             DFE_PROJECT_NAME="pt-dr"
           else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+            DFE_PROJECT_NAME="${{ vars.DFE_PROJECT_NAME }}"
           fi
 
           RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
@@ -210,7 +210,7 @@ jobs:
           if [ "$IS_DR" = "true" ]; then
             DFE_PROJECT_NAME="pt-dr"
           else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+            DFE_PROJECT_NAME="${{ vars.DFE_PROJECT_NAME }}"
           fi
 
           RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
@@ -448,10 +448,10 @@ jobs:
           if [ "$IS_DR" = "true" ]; then
             DFE_PROJECT_NAME="pt-dr"
           else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+            DFE_PROJECT_NAME="${{ vars.DFE_PROJECT_NAME }}"
           fi
 
-          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
+          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"  #not df
           RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
 
           echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
@@ -524,8 +524,8 @@ jobs:
         id: backup_names
         shell: bash
         run: |
-          BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-          BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"
+          BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"
           BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
 
           echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
@@ -542,7 +542,7 @@ jobs:
           if [ "$IS_DR" = "true" ]; then
             DFE_PROJECT_NAME="pt-dr"
           else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+            DFE_PROJECT_NAME="${{ vars.DFE_PROJECT_NAME }}"
           fi
 
           RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
