@@ -7,5 +7,4 @@ public interface IGiasRepository
 {
     Task<GiasEstablishmentEntity?> GetSingleAcademySchool(int groupUid);
     Task<GroupEstablishmentDTO?> GetGiasGroupByGroupUIDAsync(int groupUid);
-    Task<GiasEstablishmentEntity?> GetSchoolEstablishmentByURN(int urn);
 }
