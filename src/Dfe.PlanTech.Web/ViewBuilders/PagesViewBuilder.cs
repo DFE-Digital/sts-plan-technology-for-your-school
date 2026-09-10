@@ -81,12 +81,7 @@ public class PagesViewBuilder(
                     "User is a MAT user but does not have an organisation ID (for the group)"
                 );
 
-            var group =
-                await _groupService.GetGroupWithEstablishmentsBasic(groupId);
-
-            var selectedSchoolIsValid = group?.BasicEstablishments.Any(s =>
-                s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
-            ) ?? false;
+            var selectedSchoolIsValid = String.IsNullOrEmpty(CurrentUser?.GroupSelectedSchoolUrn) ? false: await _groupService.IsSchoolWithinGroup(groupId, CurrentUser!.GroupSelectedSchoolUrn);
 
             if (!selectedSchoolIsValid)
             {

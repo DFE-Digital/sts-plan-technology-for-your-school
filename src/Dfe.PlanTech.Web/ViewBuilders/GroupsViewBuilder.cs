@@ -47,9 +47,16 @@ public class GroupsViewBuilder(
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
     private const string SelectSchoolsToAssessViewName = "GroupSelectSchoolsToAssess";
 
+    /// <summary>
+    /// Called when first logging in as group to load basic info page containing selectable schools with count of in progress or complete recommendations per school.
+    /// </summary>
+    /// <param name="controller"></param>
+    /// <returns></returns>
+    /// <exception cref="ContentfulDataUnavailableException"></exception>
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
         // Get the user's organisation ID (the MAT/group), not the active establishment
+        // dbo.GroupMembership id
         // At this point, the user hasn't selected a school yet
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
@@ -72,7 +79,7 @@ public class GroupsViewBuilder(
                 sections
             );
 
-        var group = await groupService.GetGroupWithEstablishmentsBasic(establishmentId);
+        var group = await groupService.GetGroupHomePageModel(establishmentId);
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
@@ -174,36 +181,13 @@ public class GroupsViewBuilder(
             );
         }
 
-        // establishments for the MAT
-        var matEstablishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(establishmentId) ?? [];
-
-        // Get urn's from links (filter for distinct, white spaces).
-        var matEstablishmentUrns = matEstablishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        // Retrieve the actual establishments.
-        var matEstablishments =
-            await _establishmentService.GetEstablishmentsByReferencesAsync(matEstablishmentUrns)
-            ?? [];
-
-        // Get the ids of the establishments.
-        var matEstablishmentIds = matEstablishments.Select(e => e.Id).Distinct().ToArray();
-
         // Get the completed submissions for the MAT.
-        var completedSubmissions =
-            matEstablishmentIds.Length != 0
-                ? await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds)
-                  ?? []
-                : [];
-
-        var completedCountBySectionId = completedSubmissions
-            .Where(cs => matEstablishmentIds.Contains(cs.EstablishmentId))
-            .GroupBy(cs => cs.SectionId)
-            .ToDictionary(g => g.Key, g => g.Select(cs => cs.EstablishmentId).Distinct().Count());
+        var group = await _groupService.GetGroupWithEstablishmentsBasic(establishmentId);
+        var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).ToList();
+        var totalSchools = matEstablishmentIds?.Count();
+        var anySchools = totalSchools.HasValue;
+        var completedCountBySectionId = matEstablishmentIds != null && matEstablishmentIds.Any() ?
+            await _groupService.GetGroupCompletedSubmissionCountBySection(establishmentId) : new Dictionary<string, int>();
 
         var viewModel = new GroupSelectAssessmentViewModel()
         {
@@ -218,10 +202,7 @@ public class GroupsViewBuilder(
                             var completedCount = completedCountBySectionId.GetValueOrDefault(
                                 ccs.Id
                             );
-                            var uncompletedCount = Math.Max(
-                                0,
-                                matEstablishmentIds.Length - completedCount
-                            );
+                            var uncompletedCount = anySchools ? totalSchools - completedCount : 0;
                             return new GroupSelectAssessmentSectionViewModel()
                             {
                                 SectionName = ccs.Name,
@@ -256,17 +237,8 @@ public class GroupsViewBuilder(
 
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
-
-        if (establishmentLinks == null || establishmentLinks.Count == 0)
-        {
-            throw new InvalidDataException(
-                $"Could not find linked establishments for group ID: {establishmentId}"
-            );
-        }
-
         var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(
-            establishmentLinks,
+            establishmentId,
             section.Id
         );
 
@@ -315,24 +287,13 @@ public class GroupsViewBuilder(
 
         var userEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(
-            userEstablishmentId
-        );
-
-        if (establishmentLinks == null || establishmentLinks.Count == 0)
-        {
-            throw new InvalidDataException(
-                $"Could not find linked establishments for group ID: {userEstablishmentId}"
-            );
-        }
-
         var selectedRefs = viewModel.SelectedSchoolsRefs.Contains("all")
             ? viewModel.PresentedSchoolRefs.ToArray()
             : viewModel.SelectedSchoolsRefs.ToArray();
 
         if (selectedRefs.Length == 1)
         {
-            var isGroupSchool = VerifyGroupSchoolMembership(selectedRefs[0], establishmentLinks);
+            var isGroupSchool = await _groupService.IsSchoolWithinGroup(userEstablishmentId, selectedRefs[0]);
             if (!isGroupSchool)
             {
                 throw new InvalidDataException(
@@ -391,7 +352,7 @@ public class GroupsViewBuilder(
 
             foreach (var schoolRef in selectedRefs)
             {
-                var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
+                var isGroupSchool = await _groupService.IsSchoolWithinGroup(userEstablishmentId, schoolRef);
                 if (isGroupSchool)
                 {
                     var school = await _establishmentService.GetEstablishmentByReferenceAsync(
@@ -440,26 +401,6 @@ public class GroupsViewBuilder(
                 questionSlug,
             }
         );
-    }
-
-
-    private bool VerifyGroupSchoolMembership(
-        string schoolRef,
-        List<SqlEstablishmentLinkDto> establishmentLinks
-    )
-    {
-        var establishment = establishmentLinks.Find(est => est.Urn == schoolRef);
-
-        if (establishment == null)
-        {
-            _logger.LogWarning(
-                "Selected school with ref {SchoolRef} not linked to user's group",
-                schoolRef
-            );
-            return false;
-        }
-
-        return true;
     }
 
     public async Task RecordGroupSelectionAsync(
