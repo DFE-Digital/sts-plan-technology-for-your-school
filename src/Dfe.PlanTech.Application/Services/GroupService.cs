@@ -21,8 +21,14 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     private readonly IGiasRepository _giasRepository =
     giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
 
+    public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds)
+    {
+        var submissions = await _groupWorkflow.GetGroupSubmissionsBySections(establishmentIds, SubmissionStatus.CompleteReviewed);
+        return submissions;
+    }
+
     /// <summary>
-    /// Get the total count of submissions per section id across the whole group
+    /// Get the total count of submissions per section id across the whole group using group dboID
     /// </summary>
     /// <param name="dboGroupId"></param>
     /// <param name="statuses"></param>
@@ -31,10 +37,21 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     {
         //1. get linked urns vias gias
         var groupUid = await GetGroupUIDAsync(dboGroupId);
-        var urns = await _giasRepository.GetLinkedURNSForGroupAsync(dboGroupId) ?? [];
+        var urns = await _giasRepository.GetLinkedURNSForGroupAsync(groupUid) ?? [];
         var urnStrs = urns.Select(u => u.ToString());
         //2.get the submissions counts
         return await _groupWorkflow.GetGroupSubmissionsCountBySectionsFromUrns(urnStrs, SubmissionStatus.CompleteReviewed);
+    }
+
+    /// <summary>
+    /// Get the total count of submissions per section id across the whole group using est URN strings
+    /// </summary>
+    /// <param name="dboGroupId"></param>
+    /// <param name="statuses"></param>
+    /// <returns></returns>
+    public async Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(IEnumerable<string> urns)
+    {
+        return await _groupWorkflow.GetGroupSubmissionsCountBySectionsFromUrns(urns, SubmissionStatus.CompleteReviewed);
     }
 
     public async Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(IEnumerable<int> dboSchoolIds)
@@ -64,7 +81,7 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
         {
             foreach (var e in groupDTO.BasicEstablishments)
             {
-                if (e.DboId.HasValue)
+                if (!e.DboId.HasValue)
                 {
                     var est =
                         await _establishmentService.GetOrCreateEstablishmentAsync(

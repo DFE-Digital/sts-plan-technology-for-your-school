@@ -182,12 +182,11 @@ public class GroupsViewBuilder(
         }
 
         // Get the completed submissions for the MAT.
-        var group = await _groupService.GetGroupWithEstablishmentsBasic(establishmentId);
-        var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).ToList();
-        var totalSchools = matEstablishmentIds?.Count();
-        var anySchools = totalSchools.HasValue;
+        var group = await _groupService.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(establishmentId);
+        var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).OfType<int>().ToList() ?? [];
+        var totalSchools = matEstablishmentIds?.Count() ?? 0;
         var completedCountBySectionId = matEstablishmentIds != null && matEstablishmentIds.Any() ?
-            await _groupService.GetGroupCompletedSubmissionCountBySection(establishmentId) : new Dictionary<string, int>();
+            await _groupService.GetGroupCompletedSubmissionCountBySection(matEstablishmentIds) : new Dictionary<string, int>();
 
         var viewModel = new GroupSelectAssessmentViewModel()
         {
@@ -202,7 +201,7 @@ public class GroupsViewBuilder(
                             var completedCount = completedCountBySectionId.GetValueOrDefault(
                                 ccs.Id
                             );
-                            var uncompletedCount = anySchools ? totalSchools - completedCount : 0;
+                            var uncompletedCount = totalSchools - completedCount;
                             return new GroupSelectAssessmentSectionViewModel()
                             {
                                 SectionName = ccs.Name,
@@ -446,12 +445,11 @@ public class GroupsViewBuilder(
         IEnumerable<QuestionnaireSectionEntry> sections
     )
     {
-        var group = await _groupService.GetGroupWithEstablishmentsBasic(matEstablishmentId);
-        var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).ToList();
-        var totalSchools = matEstablishmentIds?.Count();
-        var anySchools = totalSchools.HasValue;
+        var group = await _groupService.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(matEstablishmentId);
+        var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).OfType<int>().ToList() ?? [];
+        var totalSchools = matEstablishmentIds?.Count() ?? 0;
         var completedCountBySectionId = matEstablishmentIds != null && matEstablishmentIds.Any() ?
-            await _groupService.GetGroupCompletedSubmissionCountBySection(matEstablishmentId) : new Dictionary<string, int>();
+            await _groupService.GetGroupCompletedSubmissionCountBySection(matEstablishmentIds) : new Dictionary<string, int>();
 
         var requiredSectionIds = sections
             .Select(s => s.Id)

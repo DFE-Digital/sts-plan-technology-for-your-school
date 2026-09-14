@@ -56,9 +56,9 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
-                        EstablishmentId = est.DboId.Value,
-                        EstablishmentName = est.Name,
-                        EstablishmentRef = est.Urn,
+                        EstablishmentId = est.DboId.HasValue ? est.DboId.Value : 0,
+                        EstablishmentName = est.Name ?? string.Empty,
+                        EstablishmentRef = est.Urn ?? string.Empty,
                         SectionId = sectionId,
                         Status = SubmissionStatus.NotStarted
                     }
@@ -70,8 +70,8 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                     new SubmissionInformationModel
                     {
                         EstablishmentId = submission.EstablishmentId,
-                        EstablishmentName = est.OrgName ?? "",
-                        EstablishmentRef = est.EstablishmentRef ?? "",
+                        EstablishmentName = est.Name ?? "",
+                        EstablishmentRef = est.Urn ?? "",
                         SectionId = sectionId,
                         SubmissionId = submission.Id,
                         DateCreated = DateTimeHelper.FormattedDateShort(submission.DateCreated),

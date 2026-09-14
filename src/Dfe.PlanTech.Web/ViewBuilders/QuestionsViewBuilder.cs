@@ -27,7 +27,8 @@ public class QuestionsViewBuilder(
     IQuestionService questionService,
     ISubmissionService submissionService,
     IEstablishmentService establishmentService,
-    IMatEstablishmentProvider matEstablishmentProvider
+    IMatEstablishmentProvider matEstablishmentProvider,
+    IGroupService groupService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
@@ -45,6 +46,8 @@ public class QuestionsViewBuilder(
     private readonly IMatEstablishmentProvider _matEstablishmentProvider =
         matEstablishmentProvider
         ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
+    private readonly IGroupService _groupService =
+    groupService ?? throw new ArgumentNullException(nameof(groupService));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
@@ -259,21 +262,30 @@ public class QuestionsViewBuilder(
                 "User is a MAT user but does not have an organisation ID"
             );
 
-        var schools =
-            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
+        var group =
+            await _groupService.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(groupId);
 
         var rows = new List<TrustSchoolAssessmentRowViewModel>();
 
-        foreach (var school in schools)
+        if(group is null || group.BasicEstablishments.Count == 0)
         {
-            var schoolEstablishment = await establishmentService.GetEstablishmentByReferenceAsync(
-                school.Urn
-            );
+            return rows;
+        }
 
-            var submission = schoolEstablishment is null
+        foreach (var school in group.BasicEstablishments)
+        {
+            if (!school.DboId.HasValue)
+            {
+                var schoolEstablishment = await establishmentService.GetEstablishmentByReferenceAsync(
+                    school.Urn
+                );
+                school.DboId = schoolEstablishment?.Id;
+            }
+
+            var submission = school.DboId is null
                 ? null
                 : await _submissionService.GetLatestSubmissionResponsesModel(
-                    schoolEstablishment.Id,
+                    school.DboId.Value,
                     section,
                     [
                         SubmissionStatus.InProgress,
@@ -295,7 +307,7 @@ public class QuestionsViewBuilder(
             rows.Add(
                 new TrustSchoolAssessmentRowViewModel
                 {
-                    SchoolName = school.EstablishmentName,
+                    SchoolName = school.Name,
                     Status = status,
                     ViewAnswersHref = hasInProgressSubmission
                         ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"

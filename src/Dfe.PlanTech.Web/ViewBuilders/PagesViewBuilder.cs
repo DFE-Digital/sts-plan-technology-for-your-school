@@ -22,7 +22,6 @@ public class PagesViewBuilder(
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
-    IEstablishmentService establishmentService,
     INotifyService notifyService,
     ISubmissionService submissionService,
     IRecommendationService recommendationService,
@@ -101,7 +100,7 @@ public class PagesViewBuilder(
         var viewModel = new PageViewModel(page);
 
         viewModel.ShowTrustSchoolAssessmentTable =
-            CurrentUser.IsMat
+            CurrentUser!.IsMat
             && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
                 == true;
 
