@@ -99,8 +99,9 @@ jobs:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
           path: './.github/scripts/clear-submission-data-from-db.sql'
           arguments: >
-            --headers="-1" --variables "ESTABLISHMENT_REF=${{
-            steps.get-establishment-ref.outputs.ref }}" --error-level=1
+            --headers="-1"
+            --variables "ESTABLISHMENT_REF=${{ steps.get-establishment-ref.outputs.ref }}"
+            --error-level=1
 
       - name: Remove IP from Key Vault
         if: always()
