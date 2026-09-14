@@ -97,7 +97,7 @@ CREATE TABLE contentful.recommendation (
     [header] NVARCHAR(500),
     slug NVARCHAR(255),
     textBodyRef NVARCHAR(32),
-	questionContentfulRef NVARCHAR(32),
+    questionContentfulRef NVARCHAR(32),
     completingAnswerRefs NVARCHAR(MAX),
     inProgressAnswerRefs NVARCHAR(MAX)
 );
