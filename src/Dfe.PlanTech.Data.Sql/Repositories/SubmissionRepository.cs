@@ -487,6 +487,8 @@ public class SubmissionRepository(
 
         return await _db
             .Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef))
+            .GroupBy(r => r.ContentfulRef)
+            .Select(group => group.OrderBy(r => r.DateCreated).Last())
             .ToListAsync();
     }
 
@@ -749,8 +751,7 @@ public class SubmissionRepository(
         var establishmentIdList = establishmentIds.Distinct().ToList();
 
         var results = await _db
-            .Submissions
-            .Include(s => s.Establishment)
+            .Submissions.Include(s => s.Establishment)
             .Where(s =>
                 establishmentIdList.Contains(s.EstablishmentId)
                 && s.Status == SubmissionStatus.CompleteReviewed
