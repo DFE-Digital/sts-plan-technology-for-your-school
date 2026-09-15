@@ -98,7 +98,7 @@ public class SelfAssessmentSummaryViewBuilder(
             {
                 LinkText = CurrentUser.IsMat
                     ? organisationName
-                    : $"View the recommendations for {section.Name!.ToLowerInvariant()}",
+                    : $"View the recommendations for {section.Name.ToLowerInvariant()}",
 
                 SchoolUrn = CurrentUser.IsMat ? submission.Establishment!.EstablishmentRef : null,
 

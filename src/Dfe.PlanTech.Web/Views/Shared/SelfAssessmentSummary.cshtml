@@ -117,7 +117,7 @@ else if (Model.RecommendationLinks.Any())
 {
     <p class="govuk-body">
         <a class="govuk-link"
-           href="@Model.RecommendationLinks.First().Href">
+           href="@Model.RecommendationLinks[0].Href">
             @await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.SchoolSummaryRecLink,
                 dynamicValues

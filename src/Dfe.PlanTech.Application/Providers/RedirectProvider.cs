@@ -32,11 +32,11 @@ public class RedirectProvider : IRedirectProvider
             || _knownPaths.Value.Any(kp => path.Equals(kp, StringComparison.OrdinalIgnoreCase));
     }
 
-    public async Task<string?> TryGetRedirect(string path)
+    public async Task<string?> TryGetRedirect(string redirectFrom)
     {
         var redirects = await _redirectsTask.Value;
 
-        return redirects.TryGetValue(path, out string? redirectTo) ? redirectTo : null;
+        return redirects.TryGetValue(redirectFrom, out string? redirectTo) ? redirectTo : null;
     }
 
     private static HashSet<string> BuildKnownPaths()
@@ -148,7 +148,13 @@ public class RedirectProvider : IRedirectProvider
                 // Chain ends in a valid target.
                 foreach (var path in chain)
                 {
-                    if (string.Equals(path, targetPath.TrimStart('/'), StringComparison.OrdinalIgnoreCase))
+                    if (
+                        string.Equals(
+                            path,
+                            targetPath.TrimStart('/'),
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    )
                     {
                         continue;
                     }

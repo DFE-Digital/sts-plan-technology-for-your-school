@@ -19,7 +19,7 @@ using StackExchange.Redis;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<RecommendationsViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     INotifyService notifyService,
@@ -280,12 +280,6 @@ public class RecommendationsViewBuilder(
                 false
             );
         }
-
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
-            establishmentId,
-            section,
-            status: SubmissionStatus.CompleteReviewed
-        );
 
         var dynamicValues =
             currentStatus?.NewStatus != inputModel.SelectedStatusEnum
