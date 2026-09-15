@@ -116,7 +116,7 @@ public class PagesViewBuilderTests
         new QuestionnaireCategoryEntry
         {
             Header = new ComponentHeaderEntry { Text = header },
-            LandingPage = new PageEntry { Slug = header.ToLower() },
+            LandingPage = new PageEntry { Slug = header.ToLowerInvariant() },
             Sections = new List<QuestionnaireSectionEntry>(),
         };
 
@@ -306,7 +306,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Returns_CategoryLanding_View()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         var category = CreateCategory(categoryTitle);
 
@@ -715,7 +715,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Populates_RelatedActions_From_Page()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         page.RelatedActions.Add(
             new RelatedActionEntry
@@ -753,7 +753,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_With_No_RelatedActions_Returns_Empty_RelatedActions()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         var category = CreateCategory(categoryTitle);
 

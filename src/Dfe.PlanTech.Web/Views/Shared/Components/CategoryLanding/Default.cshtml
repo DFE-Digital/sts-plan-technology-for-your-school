@@ -6,8 +6,8 @@
 @{
     var dynamicValues = new Dictionary<string, string>
     {
-        ["topic"] = Model.SectionName?.ToLower() ?? "",
-        ["standard"] = Model.CategoryName.ToLower().Trim()
+        ["topic"] = Model.SectionName?.ToLowerInvariant() ?? "",
+        ["standard"] = Model.CategoryName.ToLowerInvariant().Trim()
     };
 }
 

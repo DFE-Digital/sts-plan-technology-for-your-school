@@ -72,7 +72,7 @@ public class SignedRequestAuthorisationPolicy(
 
         // Check timestamp is within the TTL
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(
-            long.Parse(requestTimestamp!, CultureInfo.InvariantCulture)
+            long.Parse(requestTimestamp, CultureInfo.InvariantCulture)
         );
         if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= DateTime.UtcNow)
         {
@@ -100,7 +100,7 @@ public class SignedRequestAuthorisationPolicy(
             signedHeaders
                 .ToString()
                 .Split(',')
-                .Select(header => header.ToLower() + ":" + request.Headers[header])
+                .Select(header => header.ToLowerInvariant() + ":" + request.Headers[header])
         );
 
         request.EnableBuffering();

@@ -42,7 +42,7 @@ public class ContentfulWorkflowTests
         var entry = new PageEntry { Sys = new SystemDetails(id) };
         _repo.GetEntryByIdAsync<PageEntry>("p1").Returns(entry);
 
-        var result = await sut.GetEntryById<PageEntry>("p1");
+        var result = await sut.GetEntryByIdAsync<PageEntry>("p1");
 
         Assert.Same(entry, result);
         await _repo.Received(1).GetEntryByIdAsync<PageEntry>("p1");
@@ -55,7 +55,7 @@ public class ContentfulWorkflowTests
         _repo.GetEntryByIdAsync<PageEntry>("missing").Returns((PageEntry?)null);
 
         var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.GetEntryById<PageEntry>("missing")
+            sut.GetEntryByIdAsync<PageEntry>("missing")
         );
 
         Assert.Contains("missing", ex.Message);
@@ -71,7 +71,7 @@ public class ContentfulWorkflowTests
             .Returns<Task<PageEntry?>>(_ => throw new InvalidOperationException("boom"));
 
         var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.GetEntryById<PageEntry>("x")
+            sut.GetEntryByIdAsync<PageEntry>("x")
         );
 
         Assert.Contains("x", ex.Message);
@@ -86,7 +86,7 @@ public class ContentfulWorkflowTests
         var list = new List<NavigationLinkEntry> { new() { Sys = new SystemDetails("N1") } };
         _repo.GetEntriesAsync<NavigationLinkEntry>().Returns(list);
 
-        var result = await sut.GetEntries<NavigationLinkEntry>();
+        var result = await sut.GetEntriesAsync<NavigationLinkEntry>();
 
         Assert.Equal(list, result);
         await _repo.Received(1).GetEntriesAsync<NavigationLinkEntry>();
@@ -99,7 +99,7 @@ public class ContentfulWorkflowTests
         _repo.GetEntriesAsync<NavigationLinkEntry>(Arg.Any<GetEntriesOptions>()).Returns([]);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.GetEntries<NavigationLinkEntry>()
+            sut.GetEntriesAsync<NavigationLinkEntry>()
         );
         _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
     }
@@ -113,7 +113,7 @@ public class ContentfulWorkflowTests
             .Returns<Task<IEnumerable<NavigationLinkEntry>>>(_ => throw new Exception("boom"));
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.GetEntries<NavigationLinkEntry>()
+            sut.GetEntriesAsync<NavigationLinkEntry>()
         );
         _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
     }
@@ -178,9 +178,10 @@ public class ContentfulWorkflowTests
         );
     }
 
-    // ---------- GetCategoryHeaderTextBySlugAsync ----------
+    // ---------- GetCategoryBySlugAsync ----------
+
     [Fact]
-    public async Task GetCategoryHeaderTextBySlug_Returns_Text()
+    public async Task GetCategoryBySlug_Returns_CorrectHeaderText()
     {
         var sut = CreateServiceUnderTest();
         var cat = new QuestionnaireCategoryEntry
@@ -189,26 +190,11 @@ public class ContentfulWorkflowTests
         };
         _repo
             .GetEntriesAsync<QuestionnaireCategoryEntry>(Arg.Any<GetEntriesOptions>())
-            .Returns(new[] { cat });
-
-        var text = await sut.GetCategoryHeaderTextBySlugAsync("networks");
-
-        Assert.Equal("Hello", text);
-    }
-
-    [Fact]
-    public async Task GetCategoryHeaderTextBySlug_Logs_And_Returns_Null_When_No_Text()
-    {
-        var sut = CreateServiceUnderTest();
-        var cat = new QuestionnaireCategoryEntry { Header = new ComponentHeaderEntry() };
-        _repo
-            .GetEntriesAsync<QuestionnaireCategoryEntry>(Arg.Any<GetEntriesOptions>())
             .Returns([cat]);
 
-        var text = await sut.GetCategoryHeaderTextBySlugAsync("missing");
+        var category = await sut.GetCategoryBySlugAsync("networks");
 
-        Assert.Null(text);
-        _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
+        Assert.Equal("Hello", category?.Header.Text);
     }
 
     // ---------- GetCategoryBySlugAsync ----------
@@ -284,6 +270,35 @@ public class ContentfulWorkflowTests
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
             sut.GetPageBySlugAsync("about")
         );
+    }
+
+    // ---------- GetPaginatedRecommendationEntriesAsync ----------
+
+    [Fact]
+    public async Task GetPaginatedRecommendationEntriesAsync_Calls_GetPaginatedEntriesAsync_Once()
+    {
+        var sut = CreateServiceUnderTest();
+        var options = new GetEntriesOptions(include: 3) { Page = 1 };
+
+        await sut.GetPaginatedRecommendationEntriesAsync(1);
+
+        await _repo
+            .Received(1)
+            .GetPaginatedEntriesAsync<RecommendationChunkEntry>(
+                Arg.Is<GetEntriesOptions>(o => o.Page == 1 && o.Include == 3)
+            );
+    }
+
+    // ---------- GetRecommendationChunkCountAsync ----------
+
+    [Fact]
+    public async Task GetRecommendationChunkCountAsync_Calls_GetEntriesCountAsync_Once()
+    {
+        var sut = CreateServiceUnderTest();
+
+        await sut.GetRecommendationChunkCountAsync();
+
+        await _repo.Received(1).GetEntriesCountAsync<RecommendationChunkEntry>();
     }
 
     // ---------- GetSectionBySlugAsync ----------
