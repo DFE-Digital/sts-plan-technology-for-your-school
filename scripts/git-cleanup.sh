@@ -54,6 +54,7 @@ set -uo pipefail
 
 DEV_REF="origin/development"
 MAIN_REF="origin/main"
+PROTECTED_PREFIXES=("origin/release/" "origin/tests/")
 
 
 # ----------------------------------------------------------------------------
@@ -330,6 +331,15 @@ mapfile -t merged_main < <(git branch -r --merged "$MAIN_REF" \
 declare -A tier1_seen
 TIER1=()
 for b in "${merged_dev[@]}" "${merged_main[@]}"; do
+  # Skip anything in PROTECTED_PREFIXES as these are protected branches.
+  # Exclude them from automatic deletion regardless of merge status. These
+  # will still fall through to Tier 3 for manual review if they are unmerged.
+  skip=false
+  for p in "${PROTECTED_PREFIXES[@]}"; do
+    [[ "$b" == "$p"* ]] && { skip=true; break; }
+  done
+  [ "$skip" = true ] && continue
+
   # "${tier1_seen[$b]:-}" looks up $b in the tier1_seen array; if it's
   # not there, ":-" supplies an empty string instead of erroring (remember
   # `set -u` above - without this fallback, looking up a missing key
