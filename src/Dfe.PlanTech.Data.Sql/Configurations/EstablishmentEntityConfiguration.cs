@@ -19,5 +19,7 @@ internal class EstablishmentEntityConfiguration : IEntityTypeConfiguration<Estab
         builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
         builder.Property(x => x.DateLastUpdated).HasDefaultValue();
         builder.Property(x => x.GroupUid).HasMaxLength(50).IsRequired(false);
+
+        builder.HasIndex(x => x.EstablishmentRef);
     }
 }

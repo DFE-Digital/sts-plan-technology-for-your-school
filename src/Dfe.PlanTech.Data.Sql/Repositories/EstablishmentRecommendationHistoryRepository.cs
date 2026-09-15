@@ -2,6 +2,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -15,14 +16,35 @@ public class EstablishmentRecommendationHistoryRepository
         _db = dbContext;
     }
 
-    public async Task<
-        IEnumerable<EstablishmentRecommendationHistoryEntity>
+    public async Task<IEnumerable<EstablishmentRecommendationHistoryEntity>
     > GetRecommendationHistoryByEstablishmentIdAsync(int establishmentId)
     {
         return await _db
             .EstablishmentRecommendationHistories.Include(erh => erh.Recommendation)
             .Where(erh => erh.EstablishmentId == establishmentId)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryForEstablishmentsAsync(Expression<Func<EstablishmentRecommendationHistoryEntity, bool>> predicate)
+    {
+        return await _db.EstablishmentRecommendationHistories
+            .Where(predicate)
+            .ToListAsync();
+    }
+
+    public async Task<Dictionary<string, int>> GetRecommendationHistoryCountsForEstablishmentsAsync(
+    Expression<Func<EstablishmentRecommendationHistoryEntity, bool>> predicate)
+    {
+        return await _db.EstablishmentRecommendationHistories
+            .Where(predicate)
+            .Where(x => x.Establishment.EstablishmentRef != null)
+            .GroupBy(x => x.Establishment.EstablishmentRef!)
+            .Select(g => new
+            {
+                Urn = g.Key,
+                Count = g.Count()
+            })
+            .ToDictionaryAsync(x => x.Urn, x => x.Count);
     }
 
     public async Task<

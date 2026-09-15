@@ -32,4 +32,6 @@ public interface IRecommendationWorkflow
         int establishmentId,
         string recommendationContentfulReference
     );
+
+    public Task<Dictionary<string, int>> GetRecommendationInProgressOrCompletedRecommendationsCount(IEnumerable<string> urns);
 }

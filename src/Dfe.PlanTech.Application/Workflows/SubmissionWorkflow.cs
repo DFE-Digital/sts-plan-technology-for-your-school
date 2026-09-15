@@ -1,3 +1,4 @@
+using Contentful.Core.Models.Management;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -22,7 +23,7 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
             await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
                 establishmentId,
                 sectionId,
-                status: SubmissionStatus.CompleteReviewed
+                statuses: [SubmissionStatus.CompleteReviewed]
             );
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
         newSubmission.Responses = GetOrderedResponses(newSubmission.Responses).ToList();
@@ -73,10 +74,11 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
         SubmissionStatus? status
     )
     {
+        IEnumerable<SubmissionStatus> statuses = status.HasValue ? [status.Value] : [];
         var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
             establishmentId,
             sectionId,
-            status
+            statuses
         );
         if (latestSubmission is null)
         {
@@ -155,7 +157,7 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
         var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
             establishmentId,
             sectionId,
-            status
+            [status]
         );
 
         if (latestSubmission is not null)

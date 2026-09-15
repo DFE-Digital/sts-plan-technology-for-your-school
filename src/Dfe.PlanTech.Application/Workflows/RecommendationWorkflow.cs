@@ -128,4 +128,17 @@ public class RecommendationWorkflow(
 
         return firstActivity?.AsDto();
     }
+
+    public async Task<Dictionary<string, int>> GetRecommendationInProgressOrCompletedRecommendationsCount(IEnumerable<string> urns)
+    {
+        var counts = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryCountsForEstablishmentsAsync(r =>
+                    urns.Contains(r.Establishment.EstablishmentRef) &&
+                    (r.NewStatus == RecommendationStatus.Complete || r.NewStatus == RecommendationStatus.InProgress)
+            );
+
+        return urns.ToDictionary(
+        urn => urn,
+        urn => counts.GetValueOrDefault(urn, 0));
+
+    }
 }
