@@ -89,13 +89,7 @@
                 }
             </govuk-panel>
         }
-
         @* The error summary is dynamically inserted at the top of the form. We want that at the top of the page. *@
-        <form asp-controller="@nameof(RecommendationsController).Replace("Controller", "")"
-              asp-action="@nameof(RecommendationsController.UpdateRecommendationStatus)"
-              asp-route-categorySlug="@categorySlug"
-              asp-route-sectionSlug="@sectionSlug"
-              asp-route-chunkSlug="@recommendation.Slug">
 
                 <div class="recommendation-piece-content">
                     <span class="govuk-caption-xl">
@@ -103,26 +97,8 @@
                     </span>
                     <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
-                <div class="dfe-table-scroll" tabindex="0">
-                    <table class="govuk-table">
-                        <thead class="govuk-table__head">
-                            <tr class="govuk-table__row">
-                                <th scope="col" class="govuk-table__header">Status</th>
-                                <th scope="col" class="govuk-table__header">Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody class="govuk-table__body">
-                            <tr class="govuk-table__row">
-                                <td class="govuk-table__cell">
-                                    <strong class="govuk-tag @Model.StatusTagClass">
-                                        @Model.StatusText
-                                    </strong>
-                                </td>
-                                <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    <partial name="Recommendations/_RecommendationStatusLastUpdated" model="(@Model.StatusText, @Model.StatusTagClass, @Model.LastUpdatedFormatted)" />
+
 
                 @foreach (var content in recommendation.Content)
                 {
@@ -139,48 +115,7 @@
 
             <hr class="govuk-section-break govuk-section-break--l" />
 
-                <govuk-radios name="SelectedStatus">
-                    <govuk-radios-fieldset>
-                        <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
-                            <h2 class="govuk-fieldset__heading">
-                                @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion)
-                            </h2>
-                        </govuk-radios-fieldset-legend>
-
-                    <govuk-radios-hint>
-                        Select the current status of this recommendation.
-                    </govuk-radios-hint>
-
-                    @if (!string.IsNullOrEmpty(Model.StatusErrorMessage))
-                    {
-                        <govuk-radios-error-message>
-                            @Model.StatusErrorMessage
-                        </govuk-radios-error-message>
-                    }
-
-                    @foreach (var option in Model.StatusOptions)
-                    {
-                        <govuk-radios-item value="@option.Key.ToString()" checked="@(Model.SelectedStatusKey == option.Key)">
-                            @option.Value
-                        </govuk-radios-item>
-                    }
-                </govuk-radios-fieldset>
-            </govuk-radios>
-
-                <govuk-textarea name="Notes" rows="5">
-                    <govuk-textarea-label class="govuk-label--s">
-                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel)
-                    </govuk-textarea-label>
-
-                    <govuk-textarea-hint>
-                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentHint)
-                    </govuk-textarea-hint>
-                </govuk-textarea>
-
-                <govuk-button type="submit" prevent-double-click="true">
-                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusButton)
-                </govuk-button>
-            </form>
+        <partial name="Recommendations/_UpdateRecommendationForm" model="Model" />
 
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
