@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Dfe.PlanTech.Core.DataTransferObjects;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
@@ -50,6 +51,15 @@ public class GiasEstablishmentEntity
             SyncedAt = SyncedAt,
             Ukprn = Ukprn,
             TypeOfEstablishmentCode = TypeOfEstablishmentCode,
+        };
+    }
+
+    public EstablishmentBasicDto AsEstablishmentBasicDto()
+    {
+        return new EstablishmentBasicDto
+        {
+            Urn = Urn.ToString(),
+            Name = EstablishmentName
         };
     }
 }

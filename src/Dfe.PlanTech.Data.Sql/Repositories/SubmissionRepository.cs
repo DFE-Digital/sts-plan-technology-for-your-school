@@ -159,7 +159,7 @@ public class SubmissionRepository(
         return GetPreviousSubmissionsInDescendingOrder(
                 establishmentId,
                 sectionId,
-                SubmissionStatus.CompleteReviewed
+                [SubmissionStatus.CompleteReviewed]
             )
             .FirstOrDefaultAsync();
     }
@@ -167,38 +167,7 @@ public class SubmissionRepository(
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
         int establishmentId,
         string sectionId,
-        SubmissionStatus? status
-    )
-    {
-        var submission = await GetPreviousSubmissionsInDescendingOrder(
-                establishmentId,
-                sectionId,
-                status
-            )
-            .FirstOrDefaultAsync();
-
-        if (submission is null)
-            return null;
-
-        submission.Responses = submission
-            .Responses.OrderByDescending(response => response.DateLastUpdated)
-            .GroupBy(response => response.QuestionId)
-            .Select(group =>
-                group
-                    .OrderByDescending(response => response.DateLastUpdated)
-                    .ThenByDescending(response => response.Id)
-                    .First()
-            )
-            .ToList();
-
-        return submission;
-    }
-
-    // Overload that allows for multiple statuses to be returned from the query
-    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
-        int establishmentId,
-        string sectionId,
-        IEnumerable<SubmissionStatus> statuses
+        IEnumerable<SubmissionStatus>? statuses
     )
     {
         // Get latest submission
@@ -360,41 +329,21 @@ public class SubmissionRepository(
     private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
         int establishmentId,
         string sectionId,
-        SubmissionStatus? status
+        IEnumerable<SubmissionStatus>? statuses
     )
     {
-        return GetSubmissionsBy(submission =>
-                !submission.Deleted
-                && submission.EstablishmentId == establishmentId
-                && submission.SectionId == sectionId
-                && (status == null || submission.Status == status)
-            )
-            .OrderByDescending(submission => submission.DateCreated);
-    }
+        var query = GetSubmissionsBy(submission =>
+            !submission.Deleted
+            && submission.EstablishmentId == establishmentId
+            && submission.SectionId == sectionId);
 
-    // Overload that returns submissions with any of the specified statuses
-    private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
-        int establishmentId,
-        string sectionId,
-        IEnumerable<SubmissionStatus> statuses
-    )
-    {
-        ArgumentNullException.ThrowIfNull(statuses);
+        if (statuses != null && statuses.Any())
+        {
+            query = query.Where(submission =>
+                statuses.Contains(submission.Status));
+        }
 
-        var statusOptions = statuses.ToList();
-
-        if (statusOptions.Count == 0)
-            throw new ArgumentException(
-                "At least one submission status must be provided",
-                nameof(statuses)
-            );
-
-        return GetSubmissionsBy(submission =>
-                !submission.Deleted
-                && submission.EstablishmentId == establishmentId
-                && submission.SectionId == sectionId
-                && statusOptions.Contains(submission.Status)
-            )
+        return query
             .OrderByDescending(submission => submission.DateCreated);
     }
 
@@ -742,36 +691,68 @@ public class SubmissionRepository(
         return question.Id;
     }
 
-    public async Task<
-        List<SubmissionEntity>
-    > GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds)
+    public async Task<List<SubmissionEntity>> GetLatestEstablishmentsSubmissionsByEstablishmentAndSectionAsync(
+        IEnumerable<int> establishmentIds,
+        SubmissionStatus status = SubmissionStatus.CompleteReviewed)
     {
-        var establishmentIdList = establishmentIds.Distinct().ToList();
+        var establishmentIdList = establishmentIds
+            .Distinct()
+            .ToList();
 
-        var results = await _db
-            .Submissions
+        return await _db.Submissions
             .Include(s => s.Establishment)
             .Where(s =>
                 establishmentIdList.Contains(s.EstablishmentId)
-                && s.Status == SubmissionStatus.CompleteReviewed
+                && s.Status == status
                 && !s.Deleted
                 && s.DateCompleted != null
-            )
-            .Where(s =>
-                !_db.Submissions.Any(s2 =>
+                && !_db.Submissions.Any(s2 =>
                     s2.EstablishmentId == s.EstablishmentId
                     && s2.SectionId == s.SectionId
-                    && s2.Status == SubmissionStatus.CompleteReviewed
+                    && s2.Status == status
                     && !s2.Deleted
                     && s2.DateCompleted != null
-                    && s2.DateCompleted > s.DateCompleted
-                )
-            )
+                    && (
+                        s2.DateCompleted > s.DateCompleted
+                        || (
+                            s2.DateCompleted == s.DateCompleted
+                            && s2.Id > s.Id
+                        )
+                    )
+                ))
             .OrderBy(s => s.EstablishmentId)
             .ThenBy(s => s.SectionName)
             .ToListAsync();
+    }
 
-        return results;
+    public async Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<string> urns, SubmissionStatus status = SubmissionStatus.CompleteReviewed)
+    {
+        return await _db.Submissions
+            .Where(s =>
+                urns.Contains(s.Establishment.EstablishmentRef)
+                && s.Status == status
+                && !s.Deleted
+                && s.DateCompleted != null)
+            .GroupBy(s => s.SectionId)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => group.Count()
+            );
+    }
+
+    public async Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<int> dboSchoolIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed)
+    {
+        return await _db.Submissions
+            .Where(s =>
+                dboSchoolIds.Contains(s.EstablishmentId)
+                && s.Status == status
+                && !s.Deleted
+                && s.DateCompleted != null)
+            .GroupBy(s => s.SectionId)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => group.Count()
+            );
     }
 
     public async Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(

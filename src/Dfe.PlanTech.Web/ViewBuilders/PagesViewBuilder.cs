@@ -22,10 +22,10 @@ public class PagesViewBuilder(
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
-    IEstablishmentService establishmentService,
     INotifyService notifyService,
     ISubmissionService submissionService,
-    IRecommendationService recommendationService
+    IRecommendationService recommendationService,
+    IGroupService groupService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
@@ -43,6 +43,8 @@ public class PagesViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationService _recommendationService =
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly IGroupService _groupService =
+    groupService ?? throw new ArgumentNullException(nameof(groupService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -78,12 +80,7 @@ public class PagesViewBuilder(
                     "User is a MAT user but does not have an organisation ID (for the group)"
                 );
 
-            var groupSchools =
-                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
-
-            var selectedSchoolIsValid = groupSchools.Any(s =>
-                s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
-            );
+            var selectedSchoolIsValid = String.IsNullOrEmpty(CurrentUser?.GroupSelectedSchoolUrn) ? false: await _groupService.IsSchoolWithinGroup(groupId, CurrentUser!.GroupSelectedSchoolUrn);
 
             if (!selectedSchoolIsValid)
             {
@@ -103,7 +100,7 @@ public class PagesViewBuilder(
         var viewModel = new PageViewModel(page);
 
         viewModel.ShowTrustSchoolAssessmentTable =
-            CurrentUser.IsMat
+            CurrentUser!.IsMat
             && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
                 == true;
 
