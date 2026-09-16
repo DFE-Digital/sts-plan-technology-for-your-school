@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
+[ExcludeFromCodeCoverage]
 public class UpdateRecommendationViewModel
 {
     public string CategorySlug { get; set; } = string.Empty;
