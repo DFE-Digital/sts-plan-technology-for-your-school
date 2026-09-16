@@ -24,7 +24,7 @@ public class ContentfulWorkflow(
     private readonly GetPageFromContentfulOptions _getPageOptions =
         getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
-    public async Task<TEntry> GetEntryById<TEntry>(string entryId)
+    public async Task<TEntry> GetEntryByIdAsync<TEntry>(string entryId)
         where TEntry : ContentfulEntry
     {
         try
@@ -47,7 +47,7 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<List<TEntry>> GetEntries<TEntry>()
+    public async Task<List<TEntry>> GetEntriesAsync<TEntry>()
         where TEntry : ContentfulEntry
     {
         try
@@ -96,9 +96,8 @@ public class ContentfulWorkflow(
         try
         {
             var options = new GetEntriesOptions(include: 2);
-            var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(
-                options
-            );
+            var categories =
+                await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
             return categories;
         }
         catch (Exception ex)
@@ -108,35 +107,6 @@ public class ContentfulWorkflow(
                 ex
             );
         }
-    }
-
-    public async Task<string?> GetCategoryHeaderTextBySlugAsync(string slug)
-    {
-        var contentTypeQuery = new ContentfulQuerySingleValue
-        {
-            Field = "fields.landingPage.sys.contentType.sys.id",
-            Value = "page",
-        };
-        var slugQuery = new ContentfulQuerySingleValue
-        {
-            Field = "fields.landingPage.fields.slug",
-            Value = slug,
-        };
-        var options = new GetEntriesOptions(include: 2, [contentTypeQuery, slugQuery]);
-
-        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(
-            options
-        );
-        var headerText = categories.FirstOrDefault()?.Header.Text;
-        if (headerText is null)
-        {
-            logger.LogError(
-                "Could not find header text for questionnaire category with slug {Slug} from Contentful",
-                slug
-            );
-        }
-
-        return headerText;
     }
 
     public async Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(
@@ -175,8 +145,7 @@ public class ContentfulWorkflow(
     public async Task<PageEntry> GetPageBySlugAsync(string slug)
     {
         var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
-
-        GetEntriesOptions options = PageIncludeLevelConstants.IncludeLevelOverrides.TryGetValue(
+        var options = PageIncludeLevelConstants.IncludeLevelOverrides.TryGetValue(
             slug,
             out int includeLevelOverride
         )
@@ -205,17 +174,17 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<int> GetRecommendationChunkCountAsync(int page)
-    {
-        return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
-    }
-
     public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(
         int page
     )
     {
         var options = new GetEntriesOptions(include: 3) { Page = page };
         return _contentfulRepository.GetPaginatedEntriesAsync<RecommendationChunkEntry>(options);
+    }
+
+    public Task<int> GetRecommendationChunkCountAsync()
+    {
+        return _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
     }
 
     public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(

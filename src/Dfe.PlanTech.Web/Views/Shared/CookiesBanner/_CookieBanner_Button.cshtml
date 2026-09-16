@@ -2,7 +2,7 @@
 
 @{
   var optionText = Model.ToString();
-  var value = optionText.ToLower();
+  var value = optionText.ToLowerInvariant();
   var buttonName = $"{value}-cookies";
   var userPreference = Model == CookieAcceptOption.Accept;
 }

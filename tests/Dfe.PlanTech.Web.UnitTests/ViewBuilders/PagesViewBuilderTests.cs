@@ -27,7 +27,7 @@ public class PagesViewBuilderTests
 
     // ---- Substitutes (collaborators)
 
-    private readonly ILogger<BaseViewBuilder> _logger = NullLogger<BaseViewBuilder>.Instance;
+    private readonly ILogger<PagesViewBuilder> _logger = NullLogger<PagesViewBuilder>.Instance;
     private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder =
         Substitute.For<ICategoryLandingViewComponentViewBuilder>();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
@@ -50,7 +50,7 @@ public class PagesViewBuilderTests
     private static TestController CreateController() => new TestController();
 
     private PagesViewBuilder CreateServiceUnderTest(
-        ILogger<BaseViewBuilder>? logger = null,
+        ILogger<PagesViewBuilder>? logger = null,
         IOptions<ContactOptionsConfiguration>? contact = null,
         IOptions<ErrorPagesConfiguration>? errors = null,
         ICategoryLandingViewComponentViewBuilder? viewBuilder = null,
@@ -63,7 +63,7 @@ public class PagesViewBuilderTests
         bool useCurrentUserDefaults = true
     )
     {
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+        logger ??= NullLogger<PagesViewBuilder>.Instance;
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
         viewBuilder ??= _viewBuilder;
@@ -116,7 +116,7 @@ public class PagesViewBuilderTests
         new QuestionnaireCategoryEntry
         {
             Header = new ComponentHeaderEntry { Text = header },
-            LandingPage = new PageEntry { Slug = header.ToLower() },
+            LandingPage = new PageEntry { Slug = header.ToLowerInvariant() },
             Sections = new List<QuestionnaireSectionEntry>(),
         };
 
@@ -152,7 +152,7 @@ public class PagesViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<PagesViewBuilder>.Instance,
                 null!,
                 errors,
                 contentful,
@@ -178,7 +178,7 @@ public class PagesViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<PagesViewBuilder>.Instance,
                 contact,
                 null!,
                 contentful,
@@ -306,7 +306,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Returns_CategoryLanding_View()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         var category = CreateCategory(categoryTitle);
 
@@ -715,7 +715,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Populates_RelatedActions_From_Page()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         page.RelatedActions.Add(
             new RelatedActionEntry
@@ -753,7 +753,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_With_No_RelatedActions_Returns_Empty_RelatedActions()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         var category = CreateCategory(categoryTitle);
 
