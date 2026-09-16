@@ -41,7 +41,7 @@ public class RecommendationsViewBuilderTests
 
     private RecommendationsViewBuilder CreateServiceUnderTest() =>
         new RecommendationsViewBuilder(
-            NullLogger<BaseViewBuilder>.Instance,
+            NullLogger<RecommendationsViewBuilder>.Instance,
             _contentfulService,
             _currentUser,
             _notifyService,

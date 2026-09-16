@@ -63,7 +63,7 @@ public class PagesViewBuilderTests
         bool useCurrentUserDefaults = true
     )
     {
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+        logger ??= NullLogger<PagesViewBuilder>.Instance;
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
         viewBuilder ??= _viewBuilder;
@@ -152,7 +152,7 @@ public class PagesViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<PagesViewBuilder>.Instance,
                 null!,
                 errors,
                 contentful,
@@ -178,7 +178,7 @@ public class PagesViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<PagesViewBuilder>.Instance,
                 contact,
                 null!,
                 contentful,
