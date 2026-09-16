@@ -27,7 +27,7 @@ public class PagesViewBuilderTests
 
     // ---- Substitutes (collaborators)
 
-    private readonly ILogger<BaseViewBuilder> _logger = NullLogger<BaseViewBuilder>.Instance;
+    private readonly ILogger<PagesViewBuilder> _logger = NullLogger<PagesViewBuilder>.Instance;
     private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder =
         Substitute.For<ICategoryLandingViewComponentViewBuilder>();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
@@ -50,7 +50,7 @@ public class PagesViewBuilderTests
     private static TestController CreateController() => new TestController();
 
     private PagesViewBuilder CreateServiceUnderTest(
-        ILogger<BaseViewBuilder>? logger = null,
+        ILogger<PagesViewBuilder>? logger = null,
         IOptions<ContactOptionsConfiguration>? contact = null,
         IOptions<ErrorPagesConfiguration>? errors = null,
         ICategoryLandingViewComponentViewBuilder? viewBuilder = null,

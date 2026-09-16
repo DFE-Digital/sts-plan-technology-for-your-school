@@ -72,7 +72,7 @@ public class SignedRequestAuthorisationPolicy(
 
         // Check timestamp is within the TTL
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(
-            long.Parse(requestTimestamp, CultureInfo.InvariantCulture)
+            long.Parse(requestTimestamp!, CultureInfo.InvariantCulture)
         );
         if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= DateTime.UtcNow)
         {
