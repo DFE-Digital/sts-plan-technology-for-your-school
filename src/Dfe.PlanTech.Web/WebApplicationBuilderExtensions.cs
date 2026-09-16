@@ -39,15 +39,6 @@ namespace Dfe.PlanTech.Web
                     sp.GetRequiredService<IOptions<ContentSecurityPolicyConfiguration>>().Value
                 );
 
-            app.Services.Configure<SupportedAssetTypesConfiguration>(
-                    app.Configuration.GetRequiredSection(
-                        ConfigurationConstants.CAndSSupportedAssetTypes
-                    )
-                )
-                .AddSingleton(sp =>
-                    sp.GetRequiredService<IOptions<SupportedAssetTypesConfiguration>>().Value
-                );
-
             app.Services.Configure<TrackingOptionsConfiguration>(
                     app.Configuration.GetSection("tracking")
                 )
