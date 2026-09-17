@@ -79,4 +79,42 @@ public class EstablishmentRecommendationHistoryRepository
         _db.EstablishmentRecommendationHistories.Add(historyEntry);
         await _db.SaveChangesAsync();
     }
+
+    public async Task<List<(
+            EstablishmentEntity Establishment,
+            EstablishmentRecommendationHistoryEntity? History)>>
+        GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+            int establishmentId,
+            int recommendationId)
+    {
+        var results = await (
+                from activeEstablishment in _db.Establishments
+
+                join link in _db.GiasGroupMemberships
+                    on activeEstablishment.GroupUid equals link.GroupUid.ToString()
+
+                join establishment in _db.Establishments
+                    on link.Urn.ToString() equals establishment.EstablishmentRef
+
+                where activeEstablishment.Id == establishmentId
+
+                select new
+                {
+                    Establishment = establishment,
+
+                    History = _db.EstablishmentRecommendationHistories
+                        .Where(history =>
+                            history.EstablishmentId == establishment.Id &&
+                            history.RecommendationId == recommendationId)
+                        .OrderByDescending(history => history.DateCreated)
+                        .ThenByDescending(history => history.Id)
+                        .FirstOrDefault()
+                })
+            .AsNoTracking()
+            .ToListAsync();
+
+        return results
+            .Select(x => (x.Establishment, x.History))
+            .ToList();
+    }
 }
