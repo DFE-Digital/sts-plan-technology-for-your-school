@@ -6,14 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class EstablishmentRepository : IEstablishmentRepository
+public class EstablishmentRepository(PlanTechDbContext dbContext) : IEstablishmentRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public EstablishmentRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(
         EstablishmentModel model
@@ -45,7 +41,8 @@ public class EstablishmentRepository : IEstablishmentRepository
         return establishments.FirstOrDefault();
     }
 
-    public async Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId) => await _db.Establishments.FindAsync(establishmentId);
+    public async Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId) =>
+        await _db.Establishments.FindAsync(establishmentId);
 
     public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences

@@ -484,6 +484,7 @@ public class RecommendationWorkflowTests
         var establishmentId = 123;
         var userId = 456;
         var newStatus = RecommendationStatus.Complete;
+        var responseId = 789;
         var noteText = "Work finished successfully";
         var matEstablishmentId = 789;
 
@@ -527,8 +528,9 @@ public class RecommendationWorkflowTests
             establishmentId,
             userId,
             newStatus,
-            noteText,
-            matEstablishmentId
+            responseId,
+            noteText: noteText,
+            matEstablishmentId: matEstablishmentId
         );
 
         // Assert - Verify correct status transition: current status becomes previous status
@@ -539,7 +541,7 @@ public class RecommendationWorkflowTests
                 1,
                 userId,
                 matEstablishmentId,
-                null,
+                responseId,
                 RecommendationStatus.InProgress, // Should use current status as previous
                 newStatus,
                 noteText
@@ -672,7 +674,7 @@ public class RecommendationWorkflowTests
             establishmentId,
             userId,
             newStatus,
-            null // Explicitly null noteText
+            noteText: null // Explicitly null noteText
         );
 
         // Assert - Verify that a null noteText is converted to empty string (database has non-nulllable column)

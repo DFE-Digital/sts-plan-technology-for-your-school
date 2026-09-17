@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;
@@ -36,6 +35,27 @@ public interface ISubmissionRepository
 
     Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId);
 
+    Task<SubmissionEntity?> GetSubmissionByIdWithResponsesAsync(int submissionId);
+
+    Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId);
+
+    Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
+
+    Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+        IEnumerable<int> establishmentIds
+    );
+
+    Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(
+        IEnumerable<int> establishmentIds,
+        string sectionId
+    );
+
+    Task<int> SelectOrInsertSubmissionIdAsync(
+        string sectionId,
+        string sectionName,
+        int establishmentId
+    );
+
     Task<SubmissionEntity> SetSubmissionInaccessibleAsync(int submissionId);
 
     Task<SubmissionEntity> SetSubmissionInProgressAsync(int submissionId);
@@ -48,18 +68,5 @@ public interface ISubmissionRepository
         int submissionId
     );
 
-    Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId);
-
-    Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
-
-    Task<int> SubmitResponse(AssessmentResponseModel response);
-
-    Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-        IEnumerable<int> establishmentIds
-    );
-
-    Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(
-        IEnumerable<int> establishmentIds,
-        string sectionId
-    );
+    Task UpdateSubmissionDatesAsync(int submissionId, Guid userActionId);
 }

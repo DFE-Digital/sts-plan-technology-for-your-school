@@ -145,7 +145,7 @@ public class ReviewAnswersViewBuilder(
         try
         {
             var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-            var userOrganisationId = CurrentUser.UserOrganisationId;
+            var groupEstablishmentId = CurrentUser.IsMat ? CurrentUser.UserOrganisationId : null;
             var userId = GetUserIdOrThrowException();
 
             var section =
@@ -154,44 +154,32 @@ public class ReviewAnswersViewBuilder(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            if (CurrentUser.IsMat)
+            var selectedEstablishmentIds = CurrentUser.IsMat
+                ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession()
+                : [];
+
+            if (selectedEstablishmentIds.Count > 0)
             {
-                var selectedEstablishmentIds =
-                    _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
-
-                if (selectedEstablishmentIds.Count > 0)
+                foreach (var selectedEstablishmentId in selectedEstablishmentIds)
                 {
-                    foreach (var selectedEstablishmentId in selectedEstablishmentIds)
-                    {
-                        var submissionModel =
-                            await _submissionService.GetLatestSubmissionResponsesModel(
-                                selectedEstablishmentId,
-                                section,
-                                SubmissionStatus.InProgress
-                            );
-
-                        if (submissionModel is null)
-                        {
-                            throw new InvalidOperationException(
-                                $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
-                            );
-                        }
-
-                        await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                    var submissionModel =
+                        await _submissionService.GetLatestSubmissionResponsesModel(
                             selectedEstablishmentId,
-                            userOrganisationId,
-                            submissionModel.SubmissionId,
-                            userId,
-                            section
+                            section,
+                            SubmissionStatus.InProgress
+                        );
+
+                    if (submissionModel is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
                         );
                     }
-                }
-                else
-                {
+
                     await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                        establishmentId,
-                        userOrganisationId,
-                        submissionId,
+                        selectedEstablishmentId,
+                        groupEstablishmentId,
+                        submissionModel.SubmissionId,
                         userId,
                         section
                     );
@@ -201,7 +189,7 @@ public class ReviewAnswersViewBuilder(
             {
                 await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
                     establishmentId,
-                    null,
+                    groupEstablishmentId,
                     submissionId,
                     userId,
                     section
@@ -215,11 +203,12 @@ public class ReviewAnswersViewBuilder(
                 "An error occurred while confirming a user's answers for submission {SubmissionId}",
                 submissionId
             );
-            controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            controller.TempData[StatePassingMechanismConstants.ErrorMessage] =
+                InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
-        controller.TempData["SectionName"] = sectionName;
+        controller.TempData[StatePassingMechanismConstants.SectionName] = sectionName;
 
         //Check to be removed when we have sorted routing of new pages
         if (CurrentUser.IsMat)
@@ -360,7 +349,6 @@ public class ReviewAnswersViewBuilder(
         var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(
             CurrentUser
         );
-
 
         var sectionId =
             routingData.QuestionnaireSection.Sys?.Id

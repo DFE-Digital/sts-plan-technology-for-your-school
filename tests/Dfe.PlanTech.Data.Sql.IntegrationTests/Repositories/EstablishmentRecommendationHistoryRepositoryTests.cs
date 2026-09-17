@@ -860,10 +860,29 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var submission = new SubmissionEntity
+        {
+            EstablishmentId = establishment.Id,
+            SectionId = "SECTION001",
+            SectionName = "Test Section",
+            DateCreated = DateTime.Now,
+            DateLastUpdated = DateTime.Now,
+            Deleted = false,
+            Status = SubmissionStatus.CompleteReviewed,
+            UserActionId = Guid.NewGuid(),
+            CreatedUserActionId = Guid.NewGuid(),
+            LastUpdatedUserActionId = Guid.NewGuid(),
+            CompletedUserActionId = Guid.NewGuid(),
+        };
+        DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
@@ -872,7 +891,19 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             ContentfulRef = "rec-001",
             QuestionId = question.Id,
         };
+        var response = new ResponseEntity
+        {
+            UserId = user.Id,
+            SubmissionId = submission.Id,
+            QuestionId = question.Id,
+            AnswerId = answer.Id,
+            DateCreated = DateTime.Now,
+            DateLastUpdated = DateTime.Now,
+            UserEstablishmentId = establishment.Id,
+            UserActionId = Guid.NewGuid(),
+        };
         DbContext.Recommendations.Add(recommendation);
+        DbContext.Responses.Add(response);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var initialCount = await CountEntitiesAsync<EstablishmentRecommendationHistoryEntity>();
@@ -884,7 +915,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             recommendation.Id,
             user.Id,
             null,
-            null,
+            response.Id,
             RecommendationStatus.InProgress,
             RecommendationStatus.Complete,
             "Recommendation completed successfully"

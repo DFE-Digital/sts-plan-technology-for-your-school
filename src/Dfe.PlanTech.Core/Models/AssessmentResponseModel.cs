@@ -11,9 +11,15 @@ public class AssessmentResponseModel
 
     public int EstablishmentId { get; set; }
 
+    public int SubmissionId { get; set; }
+
     public string SectionId { get; set; }
 
     public string SectionName { get; set; }
+
+    public int QuestionId { get; set; }
+
+    public int AnswerId { get; set; }
 
     public IdWithTextModel Question { get; init; }
 
@@ -23,15 +29,21 @@ public class AssessmentResponseModel
         int userId,
         int activeEstablishmentId,
         int userEstablishmentId,
+        int dbSubmissionId,
+        int dbQuestionId,
+        int dbAnswerid,
         SubmitAnswerModel questionAnswer
     )
     {
-        SectionId = questionAnswer.SectionId;
-        SectionName = questionAnswer.SectionName;
-        Answer = questionAnswer.ChosenAnswer;
-        Question = questionAnswer.Question;
-        EstablishmentId = activeEstablishmentId;
         UserId = userId;
         UserEstablishmentId = userEstablishmentId;
+        EstablishmentId = activeEstablishmentId;
+        SubmissionId = dbSubmissionId;
+        SectionId = questionAnswer.SectionId;
+        SectionName = questionAnswer.SectionName;
+        QuestionId = dbQuestionId;
+        AnswerId = dbAnswerid;
+        Question = questionAnswer.Question;
+        Answer = questionAnswer.ChosenAnswer;
     }
 }

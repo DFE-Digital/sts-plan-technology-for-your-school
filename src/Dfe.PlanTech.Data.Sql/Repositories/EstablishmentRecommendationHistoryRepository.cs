@@ -5,15 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class EstablishmentRecommendationHistoryRepository
+public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbContext)
     : IEstablishmentRecommendationHistoryRepository
 {
-    private PlanTechDbContext _db;
-
-    public EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<
         IEnumerable<EstablishmentRecommendationHistoryEntity>
@@ -57,7 +53,7 @@ public class EstablishmentRecommendationHistoryRepository
         int recommendationId,
         int userId,
         int? matEstablishmentId,
-        int? responseId,
+        int responseId,
         RecommendationStatus? previousStatus,
         RecommendationStatus? newStatus,
         string noteText
@@ -78,5 +74,46 @@ public class EstablishmentRecommendationHistoryRepository
 
         _db.EstablishmentRecommendationHistories.Add(historyEntry);
         await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateRecommendationStatusesAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int userId,
+        IDictionary<string, int> recommendationRefsToResponseIds,
+        IEnumerable<RecommendationEntity> recommendations,
+        IDictionary<string, RecommendationStatus> recommendationStatuses
+    )
+    {
+        var previousStatuses = await _db
+            .EstablishmentRecommendationHistories.Where(erh =>
+                erh.EstablishmentId == establishmentId
+                && erh.MatEstablishmentId == matEstablishmentId
+            )
+            .GroupBy(erh => erh.RecommendationId, erh => erh)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus
+            );
+
+        var erhEntities = recommendations.Select(
+            recommendation => new EstablishmentRecommendationHistoryEntity
+            {
+                EstablishmentId = establishmentId,
+                MatEstablishmentId = matEstablishmentId,
+                RecommendationId = recommendation.Id,
+                ResponseId = recommendationRefsToResponseIds[recommendation.ContentfulRef],
+                UserId = userId,
+                PreviousStatus = previousStatuses.TryGetValue(
+                    recommendation.Id,
+                    out var previousStatus
+                )
+                    ? previousStatus
+                    : null,
+                NewStatus = recommendationStatuses[recommendation.ContentfulRef],
+            }
+        );
+
+        await _db.EstablishmentRecommendationHistories.AddRangeAsync(erhEntities);
     }
 }

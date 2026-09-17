@@ -6,14 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class UserSettingsRepository : IUserSettingsRepository
+public class UserSettingsRepository(PlanTechDbContext dbContext) : IUserSettingsRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public UserSettingsRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<UserSettingsEntity> UpsertUserSettingsAsync(
         int userId,

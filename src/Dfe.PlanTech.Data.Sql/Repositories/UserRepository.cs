@@ -5,14 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(PlanTechDbContext dbContext) : IUserRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public UserRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<UserEntity> CreateUserBySignInRefAsync(string dfeSignInReference)
     {

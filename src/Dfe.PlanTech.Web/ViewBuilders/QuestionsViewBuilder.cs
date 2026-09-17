@@ -238,7 +238,8 @@ public class QuestionsViewBuilder(
             // Remove the current invalid submission and redirect to self-assessment page
             await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
 
-            controller.TempData["SubtopicError"] = await BuildErrorMessage();
+            controller.TempData[StatePassingMechanismConstants.SubtopicError] =
+                await BuildErrorMessage();
             return controller.RedirectToAction(
                 nameof(PagesController.GetByRoute),
                 nameof(PagesController).GetControllerNameSlug(),
@@ -344,7 +345,7 @@ public class QuestionsViewBuilder(
         }
         ;
 
-        var establishment =await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+        var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {

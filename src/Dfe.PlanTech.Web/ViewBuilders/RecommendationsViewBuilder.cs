@@ -117,8 +117,11 @@ public class RecommendationsViewBuilder(
             SelectedStatusKey =
                 currentRecommendationHistory?.NewStatus ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistory?.DateCreated,
-            SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
-            StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
+            SuccessMessageTitle =
+                controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle]
+                as string,
+            StatusErrorMessage =
+                controller.TempData[StatePassingMechanismConstants.StatusUpdateError] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key, key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
@@ -307,12 +310,12 @@ public class RecommendationsViewBuilder(
             establishmentId,
             userId,
             inputModel.SelectedStatusEnum!.Value,
-            inputModel.Notes ?? defaultNoteText,
-            CurrentUser.IsMat ? userOrganisationId : null
+            noteText: inputModel.Notes ?? defaultNoteText,
+            matEstablishmentId: CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
-        controller.TempData["StatusUpdateSuccessTitle"] =
+        controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle] =
             await _microcopyProvider.GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
                 dynamicValues

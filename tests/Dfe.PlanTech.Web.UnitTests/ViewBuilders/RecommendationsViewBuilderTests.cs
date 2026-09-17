@@ -703,7 +703,7 @@ public class RecommendationsViewBuilderTests
 
         var inputModel = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["test@example.com"],
         };
 
@@ -1164,8 +1164,8 @@ public class RecommendationsViewBuilderTests
                 default,
                 default,
                 default!,
-                default!,
-                default
+                noteText: default!,
+                matEstablishmentId: default
             );
     }
 
@@ -1264,7 +1264,9 @@ public class RecommendationsViewBuilderTests
         // Assert
 
         // TempData success banner should be set
-        var successResult = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
+        var successResult = Assert.IsType<string>(
+            ctl.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle]
+        );
         Assert.Equal(successHeader, successResult);
 
         // Service is called with the correct ids and a default note containing our literal text
@@ -1275,8 +1277,8 @@ public class RecommendationsViewBuilderTests
                 establishmentId,
                 userId,
                 selectedStatus,
-                Arg.Is<string>(n => n == notesEntry),
-                Arg.Any<int?>()
+                noteText: Arg.Is<string>(n => n == notesEntry),
+                matEstablishmentId: Arg.Any<int?>()
             );
 
         Assert.IsType<RedirectToActionResult>(result);
@@ -1353,8 +1355,8 @@ public class RecommendationsViewBuilderTests
                 establishmentId,
                 userId,
                 selectedStatus,
-                customNotes,
-                555
+                noteText: customNotes,
+                matEstablishmentId: 555
             );
 
         Assert.IsType<RedirectToActionResult>(result);
@@ -1470,7 +1472,7 @@ public class RecommendationsViewBuilderTests
     {
         return new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["drew@example.com"],
             UserMessage = "Hello",
         };

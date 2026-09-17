@@ -315,7 +315,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
-        controller.TempData["SectionName"] = "Some Section";
+        controller.TempData[StatePassingMechanismConstants.SectionName] = "Some Section";
 
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
@@ -530,7 +530,7 @@ public class PagesViewBuilderTests
 
         var inputModel = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["test@example.com"],
         };
 
@@ -735,7 +735,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
-        controller.TempData["SectionName"] = "Some Section";
+        controller.TempData[StatePassingMechanismConstants.SectionName] = "Some Section";
 
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
@@ -762,7 +762,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
-        controller.TempData["SectionName"] = "Some Section";
+        controller.TempData[StatePassingMechanismConstants.SectionName] = "Some Section";
 
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
@@ -798,7 +798,7 @@ public class PagesViewBuilderTests
     {
         return new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["drew@example.com"],
             UserMessage = "Hello",
         };

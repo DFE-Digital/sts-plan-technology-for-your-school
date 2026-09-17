@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -12,7 +13,6 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -237,7 +237,7 @@ public class PagesViewBuilder(
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData["SectionName"] as string,
+            SectionName = controller.TempData[StatePassingMechanismConstants.SectionName] as string,
             SortOrder = controller.Request.Query["sort"],
             HasBanner = category.HasBanner,
             AfterContentContent = category.AfterContentContent,
