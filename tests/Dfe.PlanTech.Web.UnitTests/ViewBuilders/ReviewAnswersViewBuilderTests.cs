@@ -714,7 +714,7 @@ public class ReviewAnswersViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec").Returns(section);
 
         _submissions
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                 Arg.Any<int>(),
                 Arg.Any<int?>(),
                 42,
@@ -727,7 +727,7 @@ public class ReviewAnswersViewBuilderTests
 
         await _submissions
             .Received(1)
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                 establishmentId: 2,
                 matEstablishmentId: null,
                 42,
@@ -771,11 +771,11 @@ public class ReviewAnswersViewBuilderTests
 
         await _submissions
             .Received(1)
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(101, 999, 11, 1, section);
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(101, 999, 11, 1, section);
 
         await _submissions
             .Received(1)
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(102, 999, 12, 1, section);
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(102, 999, 12, 1, section);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
 
@@ -810,7 +810,7 @@ public class ReviewAnswersViewBuilderTests
 
         await _submissions
             .Received(1)
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(2, 999, 42, 1, section);
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(2, 999, 42, 1, section);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
 
@@ -849,7 +849,7 @@ public class ReviewAnswersViewBuilderTests
 
         await _submissions
             .DidNotReceive()
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                 Arg.Any<int>(),
                 Arg.Any<int?>(),
                 Arg.Any<int>(),
@@ -873,7 +873,7 @@ public class ReviewAnswersViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec").Returns(section);
 
         _submissions
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                 Arg.Any<int>(),
                 Arg.Any<int?>(),
                 9,

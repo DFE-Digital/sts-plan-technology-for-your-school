@@ -24,7 +24,6 @@ public interface IRecommendationWorkflow
         int establishmentId,
         int userId,
         RecommendationStatus newStatus,
-        int responseId,
         string? noteText = null,
         int? matEstablishmentId = null
     );

@@ -89,6 +89,7 @@ public class RecommendationWorkflow(
             await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([
                 recommendationContentfulReference,
             ]);
+
         var recommendation =
             recommendations.FirstOrDefault()
             ?? throw new InvalidOperationException(
@@ -102,12 +103,11 @@ public class RecommendationWorkflow(
         );
         var previousStatus = currentStatus?.NewStatus;
 
-        await establishmentRecommendationHistoryRepository.CreateRecommendationHistoryAsync(
+        await establishmentRecommendationHistoryRepository.UpdateRecommendationStatusAsync(
             establishmentId,
             recommendation.Id,
             userId,
             matEstablishmentId,
-            null,
             previousStatus,
             newStatus,
             noteText ?? string.Empty

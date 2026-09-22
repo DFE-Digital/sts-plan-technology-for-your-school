@@ -93,7 +93,7 @@ public class NotifyServiceTests
         );
 
         var expectedMessage =
-            "Drew added a message:" + Environment.NewLine + Environment.NewLine + "^ Hello team";
+            "John added a message:" + Environment.NewLine + Environment.NewLine + "^ Hello team";
 
         _notifyWorkflow
             .Received(1)
@@ -131,7 +131,7 @@ public class NotifyServiceTests
 
         var expectedMessage = string.Join(
             Environment.NewLine,
-            ["Drew added a message:", string.Empty, "^ Line one", "^ Line two", "^ Line three"]
+            ["John added a message:", string.Empty, "^ Line one", "^ Line two", "^ Line three"]
         );
 
         _notifyWorkflow
@@ -269,7 +269,7 @@ public class NotifyServiceTests
         );
 
         var expectedMessage =
-            "Drew added a message:"
+            "John added a message:"
             + Environment.NewLine
             + Environment.NewLine
             + "^ Please take a look";

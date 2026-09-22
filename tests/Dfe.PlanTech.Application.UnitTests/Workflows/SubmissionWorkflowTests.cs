@@ -1,9 +1,12 @@
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Dfe.PlanTech.UnitTests.Shared.Builders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -14,24 +17,53 @@ public class SubmissionWorkflowTests
     private readonly ILogger<SubmissionWorkflow> _logger = Substitute.For<
         ILogger<SubmissionWorkflow>
     >();
-    private readonly IStoredProcedureRepository _sp = Substitute.For<IStoredProcedureRepository>();
-    private readonly ISubmissionRepository _repo = Substitute.For<ISubmissionRepository>();
-    private static readonly string[] q1q2 = new[] { "Q1", "Q2" };
-    private static readonly string[] a1a2 = new[] { "A1", "A2" };
 
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_repo);
+    private readonly IAnswerRepository _answerRepository = Substitute.For<IAnswerRepository>();
+    private readonly IEstablishmentRecommendationHistoryRepository _establishmentRecommendationHistoryRepository =
+        Substitute.For<IEstablishmentRecommendationHistoryRepository>();
+    private readonly IQuestionRepository _questionRepository =
+        Substitute.For<IQuestionRepository>();
+    private readonly IRecommendationRepository _recommendationRepository =
+        Substitute.For<IRecommendationRepository>();
+    private readonly IResponseRepository _responseRepository =
+        Substitute.For<IResponseRepository>();
+    private readonly ISubmissionRepository _submissionRepository =
+        Substitute.For<ISubmissionRepository>();
+    private readonly IUserActionIdProvider _userActionIdProvider =
+        Substitute.For<IUserActionIdProvider>();
+    private static readonly string[] q1q2 = ["Q1", "Q2"];
+    private static readonly string[] a1a2 = ["A1", "A2"];
+
+    private SubmissionWorkflow CreateServiceUnderTest() =>
+        new(
+            _answerRepository,
+            _establishmentRecommendationHistoryRepository,
+            _questionRepository,
+            _recommendationRepository,
+            _responseRepository,
+            _submissionRepository,
+            _userActionIdProvider
+        );
 
     // ---------- Helpers: minimal Contentful section graph ----------
-    private static EstablishmentEntity BuildEstablishment(int? id = 1)
-    {
-        return new EstablishmentEntity
+
+    private static ResponseEntity BuildResponse(
+        int id,
+        DateTime dateCreated,
+        SubmissionEntity submission,
+        string questionReference,
+        string answerReference
+    ) =>
+        new()
         {
-            Id = id!.Value,
-            EstablishmentRef = "testRef",
-            OrgName = "testName",
-            DateCreated = DateTime.UtcNow,
+            Id = id,
+            DateCreated = dateCreated,
+            DateLastUpdated = dateCreated,
+            QuestionId = id * 10,
+            Question = new QuestionEntity { ContentfulRef = questionReference },
+            Answer = new AnswerEntity { ContentfulRef = answerReference },
+            Submission = submission,
         };
-    }
 
     private static QuestionnaireSectionEntry BuildSection(
         out QuestionnaireQuestionEntry q1,
@@ -42,80 +74,37 @@ public class SubmissionWorkflowTests
         out QuestionnaireAnswerEntry a3_to_null
     )
     {
-        q3 = new QuestionnaireQuestionEntry
-        {
-            Sys = new SystemDetails("Q3"),
-            Answers = new List<QuestionnaireAnswerEntry>(),
-        };
+        q3 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("Q3"), Answers = [] };
         a3_to_null = new QuestionnaireAnswerEntry
         {
             Sys = new SystemDetails("A3"),
             NextQuestion = null,
         };
 
-        q2 = new QuestionnaireQuestionEntry
-        {
-            Sys = new SystemDetails("Q2"),
-            Answers = new List<QuestionnaireAnswerEntry>(),
-        };
+        q2 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("Q2"), Answers = [] };
         a2_to_q3 = new QuestionnaireAnswerEntry
         {
             Sys = new SystemDetails("A2"),
             NextQuestion = q3,
         };
-        q2.Answers = new List<QuestionnaireAnswerEntry> { a2_to_q3 };
+        q2.Answers = [a2_to_q3];
 
-        q1 = new QuestionnaireQuestionEntry
-        {
-            Sys = new SystemDetails("Q1"),
-            Answers = new List<QuestionnaireAnswerEntry>(),
-        };
+        q1 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("Q1"), Answers = [] };
         a1_to_q2 = new QuestionnaireAnswerEntry
         {
             Sys = new SystemDetails("A1"),
             NextQuestion = q2,
         };
-        q1.Answers = new List<QuestionnaireAnswerEntry> { a1_to_q2 };
+        q1.Answers = [a1_to_q2];
 
         return new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("SEC"),
-            Questions = new List<QuestionnaireQuestionEntry> { q1, q2, q3 },
+            Questions = [q1, q2, q3],
         };
     }
 
-    // Allows a quick workaround for self-referential submissions, which causes an endless loop when mapping to DTO.
-    private static SubmissionEntity BuildEmptySubmission()
-    {
-        return new SubmissionEntity
-        {
-            Id = 0,
-            SectionId = "emptyId",
-            SectionName = "emptyName",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.CompleteReviewed,
-            Responses = [],
-        };
-    }
-
-    private static ResponseEntity BuildResponse(
-        string questionReference,
-        string answerReference,
-        DateTime dateCreated,
-        int id,
-        SubmissionEntity submission
-    ) =>
-        new ResponseEntity
-        {
-            Id = id,
-            DateCreated = dateCreated,
-            DateLastUpdated = dateCreated,
-            QuestionId = id * 10,
-            Question = new QuestionEntity { ContentfulRef = questionReference },
-            Answer = new AnswerEntity { ContentfulRef = answerReference },
-            Submission = submission,
-        };
+    // ---------- CloneLatestCompletedSubmission ----------
 
     [Fact]
     public async Task CloneLatestCompletedSubmission_Clones_And_Orders_Responses_By_Journey()
@@ -130,50 +119,42 @@ public class SubmissionWorkflowTests
             out var a2,
             out _
         );
-        var emptySubmission = BuildEmptySubmission();
+        var emptySubmission = EntityBuilders.BuildEmptySubmission();
 
         // Latest completed submission (source to clone)
-        var latestCompleted = new SubmissionEntity
-        {
-            Id = 10,
-            SectionId = section.Id,
-            SectionName = "testName",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.CompleteReviewed,
-            Responses = new List<ResponseEntity>(),
-        };
+        var latestCompleted = EntityBuilders.BuildSubmission(
+            id: 10,
+            establishmentId: 1,
+            sectionId: "SEC11"
+        );
 
         // Cloned submission comes back with responses out of order and with duplicates by question;
         // ordering should pick the *latest per question* by DateCreated, then follow Q->A.NextQuestion chain.
         var now = DateTime.UtcNow;
-        var clone = new SubmissionEntity
+        var responses = new List<ResponseEntity>()
         {
-            Id = 99,
-            SectionId = section.Id,
-            SectionName = "testName",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.InProgress,
-            Responses = new List<ResponseEntity>
-            {
-                // Q1 older A1 (should be ignored because newer exists)
-                BuildResponse(q1.Id, a1.Id, now.AddMinutes(-10), 1, emptySubmission),
-                // Q2 A2
-                BuildResponse(q2.Id, a2.Id, now.AddMinutes(-5), 2, emptySubmission),
-                // Q1 newer A1 (should be selected for Q1)
-                BuildResponse(q1.Id, a1.Id, now.AddMinutes(-1), 3, emptySubmission),
-            },
+            BuildResponse(1, now.AddMinutes(-10), emptySubmission, q1.Id, a1.Id),
+            BuildResponse(1, now.AddMinutes(-5), emptySubmission, q2.Id, a2.Id),
+            BuildResponse(1, now.AddMinutes(-1), emptySubmission, q1.Id, a1.Id),
         };
 
-        _repo
+        var clone = EntityBuilders.BuildSubmission(
+            id: 99,
+            establishmentId: 1,
+            sectionId: "SEC11",
+            responses: responses,
+            submissionStatus: SubmissionStatus.InProgress
+        );
+
+        _submissionRepository
             .GetLatestSubmissionAndResponsesAsync(
                 123,
                 section.Id,
                 status: SubmissionStatus.CompleteReviewed
             )
             .Returns(latestCompleted);
-        _repo.CloneSubmission(latestCompleted).Returns(clone);
+
+        _submissionRepository.CloneSubmission(latestCompleted).Returns(clone);
 
         var dto = await sut.CloneLatestCompletedSubmission(123, section.Id);
 
@@ -181,7 +162,7 @@ public class SubmissionWorkflowTests
         Assert.Equal(q1q2, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
         Assert.Equal(a1a2, dto.Responses.Select(r => r.Answer.ContentfulSysId).ToArray());
 
-        await _repo.Received(1).CloneSubmission(latestCompleted);
+        await _submissionRepository.Received(1).CloneSubmission(latestCompleted);
     }
 
     // ---------- GetLatestSubmissionWithOrderedResponsesAsync ----------
@@ -191,11 +172,15 @@ public class SubmissionWorkflowTests
         var sut = CreateServiceUnderTest();
         var section = BuildSection(out _, out _, out _, out _, out _, out _);
 
-        _repo
+        _submissionRepository
             .GetLatestSubmissionAndResponsesAsync(1, section.Id, status: (SubmissionStatus?)null)
             .Returns((SubmissionEntity?)null);
 
-        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, (SubmissionStatus?)null);
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(
+            1,
+            section.Id,
+            (SubmissionStatus?)null
+        );
         Assert.Null(dto);
     }
 
@@ -213,24 +198,30 @@ public class SubmissionWorkflowTests
         );
         var now = DateTime.UtcNow;
 
-        var emptySubmission = BuildEmptySubmission();
+        var emptySubmission = EntityBuilders.BuildEmptySubmission();
 
-        var submission = new SubmissionEntity
+        var responses = new List<ResponseEntity>
         {
-            Id = 55,
-            SectionId = section.Id,
-            SectionName = "testName",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.InProgress,
-            Responses = new List<ResponseEntity>
-            {
-                BuildResponse(q2.Id, a2.Id, now.AddMinutes(-1), 22, emptySubmission),
-                BuildResponse(q1.Id, a1.Id, now.AddMinutes(-2), 11, emptySubmission),
-            },
+            BuildResponse(22, now.AddMinutes(-1), emptySubmission, q2.Id, a2.Id),
+            BuildResponse(11, now.AddMinutes(-2), emptySubmission, q1.Id, a1.Id),
         };
 
-        _repo
+        var submission = EntityBuilders.BuildSubmission(
+            id: 55,
+            establishmentId: 5,
+            sectionId: section.Id,
+            responses: responses,
+            submissionStatus: SubmissionStatus.InProgress
+        );
+
+        var submission2 = EntityBuilders.BuildSubmission(
+            id: 55,
+            establishmentId: 5,
+            sectionId: section.Id,
+            submissionStatus: SubmissionStatus.InProgress
+        );
+
+        _submissionRepository
             .GetLatestSubmissionAndResponsesAsync(5, section.Id, SubmissionStatus.InProgress)
             .Returns(submission);
 
@@ -252,27 +243,34 @@ public class SubmissionWorkflowTests
         var sut = CreateServiceUnderTest();
         var section = BuildSection(out _, out _, out _, out _, out _, out _);
 
-        _repo
-            .GetLatestSubmissionAndResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress])
+        _submissionRepository
+            .GetLatestSubmissionAndResponsesAsync(
+                1,
+                section.Id,
+                [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]
+            )
             .Returns((SubmissionEntity?)null);
 
-        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(
+            1,
+            section.Id,
+            [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]
+        );
 
-
-        await _repo.Received(1)
+        await _submissionRepository
+            .Received(1)
             .GetLatestSubmissionAndResponsesAsync(
                 1,
                 section.Id,
                 Arg.Is<IEnumerable<SubmissionStatus>>(s =>
-                    s.SequenceEqual(new[]
-                    {
-                        SubmissionStatus.Inaccessible,
-                        SubmissionStatus.InProgress
-                    })
+                    s.SequenceEqual(
+                        new[] { SubmissionStatus.Inaccessible, SubmissionStatus.InProgress }
+                    )
                 )
             );
 
-        await _repo.DidNotReceive()
+        await _submissionRepository
+            .DidNotReceive()
             .GetLatestSubmissionAndResponsesAsync(
                 Arg.Any<int>(),
                 Arg.Any<string>(),
@@ -282,10 +280,59 @@ public class SubmissionWorkflowTests
 
     // ---------- SubmitAnswer ----------
     [Fact]
-    public async Task SubmitAnswer_Throws_When_Model_Null()
+    public async Task SubmitAnswerAsync_Throws_When_Model_Null()
     {
         var sut = CreateServiceUnderTest();
-        await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, 2, null!));
+        await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswerAsync(1, 2, 2, null!));
+    }
+
+    [Fact]
+    public async Task SubmitAnswerAsync_Throws_When_Model_ChosenAnswer_Null()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var submitAnswer = new SubmitAnswerModel
+        {
+            SectionId = "S001",
+            SectionName = "Test Section 1",
+            Question = new IdWithTextModel { Id = "Q900", Text = "Question 900" },
+            ChosenAnswer = null,
+        };
+
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.SubmitAnswerAsync(1, 2, 2, submitAnswer)
+        );
+    }
+
+    [Theory]
+    [InlineData("", "Section 1", "Q1", "Question 1", "A1", "Answer 1")]
+    [InlineData("SEC001", "", "Q1", "Question 1", "A1", "Answer 1")]
+    [InlineData("SEC001", "Section 1", "", "Question 1", "A1", "Answer 1")]
+    [InlineData("SEC001", "Section 1", "Q1", "", "A1", "Answer 1")]
+    [InlineData("SEC001", "Section 1", "Q1", "Question 1", "", "Answer 1")]
+    [InlineData("SEC001", "Section 1", "Q1", "Question 1", "A1", "")]
+    public async Task SubmitAnswerAsync_Throws_When_Model_Properties_Empty(
+        string sectionId,
+        string sectionName,
+        string questionId,
+        string questionText,
+        string answerId,
+        string answerText
+    )
+    {
+        var sut = CreateServiceUnderTest();
+
+        var submitAnswer = new SubmitAnswerModel
+        {
+            SectionId = sectionId,
+            SectionName = sectionName,
+            Question = new IdWithTextModel { Id = questionId, Text = questionText },
+            ChosenAnswer = new IdWithTextModel { Id = answerId, Text = answerText },
+        };
+
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.SubmitAnswerAsync(1, 2, 2, submitAnswer)
+        );
     }
 
     // ---------- GetSectionStatusesAsync ----------
@@ -295,19 +342,11 @@ public class SubmissionWorkflowTests
         var sut = CreateServiceUnderTest();
         var entities = new List<SectionStatusEntity>
         {
-            new()
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.CompleteReviewed,
-            },
-            new()
-            {
-                SectionId = "S2",
-                Status = SubmissionStatus.NotStarted,
-            },
+            new() { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
+            new() { SectionId = "S2", Status = SubmissionStatus.NotStarted },
         };
 
-        _repo.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
+        _submissionRepository.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
 
         var result = await sut.GetSectionStatusesAsync(123, ["S1", "S2"]);
 
@@ -325,7 +364,7 @@ public class SubmissionWorkflowTests
             }
         );
 
-        await _repo.Received(1).GetSectionStatusesAsync("S1,S2", 123);
+        await _submissionRepository.Received(1).GetSectionStatusesAsync("S1,S2", 123);
     }
 
     // ---------- GetSectionSubmissionStatusAsync ----------
@@ -333,18 +372,15 @@ public class SubmissionWorkflowTests
     public async Task GetSectionSubmissionStatus_When_Found_Completed_True()
     {
         var sut = CreateServiceUnderTest();
-        var sub = new SubmissionEntity
-        {
-            SectionId = "S1",
-            SectionName = "testName",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.CompleteReviewed,
-        };
+        var submission = EntityBuilders.BuildSubmission(
+            id: 0,
+            establishmentId: 1,
+            sectionId: "SEC"
+        );
 
-        _repo
+        _submissionRepository
             .GetLatestSubmissionAndResponsesAsync(1, "SEC", SubmissionStatus.CompleteReviewed)
-            .Returns(sub);
+            .Returns(submission);
 
         var dto = await sut.GetSectionSubmissionStatusAsync(
             1,
@@ -359,18 +395,16 @@ public class SubmissionWorkflowTests
     public async Task GetSectionSubmissionStatus_When_Found_Completed_False()
     {
         var sut = CreateServiceUnderTest();
-        var sub = new SubmissionEntity
-        {
-            SectionId = "S1",
-            SectionName = "testName",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.InProgress,
-        };
+        var submission = EntityBuilders.BuildSubmission(
+            id: 0,
+            establishmentId: 1,
+            sectionId: "SEC",
+            submissionStatus: SubmissionStatus.InProgress
+        );
 
-        _repo
+        _submissionRepository
             .GetLatestSubmissionAndResponsesAsync(1, "SEC", SubmissionStatus.InProgress)
-            .Returns(sub);
+            .Returns(submission);
 
         var dto = await sut.GetSectionSubmissionStatusAsync(1, "SEC", SubmissionStatus.InProgress);
 
@@ -381,7 +415,7 @@ public class SubmissionWorkflowTests
     public async Task GetSectionSubmissionStatus_When_None_NotStarted()
     {
         var sut = CreateServiceUnderTest();
-        _repo
+        _submissionRepository
             .GetLatestSubmissionAndResponsesAsync(1, "SEC", SubmissionStatus.CompleteReviewed)
             .Returns((SubmissionEntity?)null);
 
@@ -401,7 +435,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionReviewedAsync(99);
-        await _repo
+        await _submissionRepository
             .Received(1)
             .SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(99);
     }
@@ -411,7 +445,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionInaccessibleAsync(1, "SEC");
-        await _repo.Received(1).SetSubmissionInaccessibleAsync(1, "SEC");
+        await _submissionRepository.Received(1).SetSubmissionInaccessibleAsync(1, "SEC");
     }
 
     [Fact]
@@ -419,7 +453,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionInaccessibleAsync(123);
-        await _repo.Received(1).SetSubmissionInaccessibleAsync(123);
+        await _submissionRepository.Received(1).SetSubmissionInaccessibleAsync(123);
     }
 
     [Fact]
@@ -427,7 +461,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionInProgressAsync(1, "SEC");
-        await _repo.Received(1).SetSubmissionInProgressAsync(1, "SEC");
+        await _submissionRepository.Received(1).SetSubmissionInProgressAsync(1, "SEC");
     }
 
     [Fact]
@@ -435,7 +469,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionInProgressAsync(123);
-        await _repo.Received(1).SetSubmissionInProgressAsync(123);
+        await _submissionRepository.Received(1).SetSubmissionInProgressAsync(123);
     }
 
     [Fact]
@@ -443,62 +477,244 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionDeletedAsync(1, "SEC");
-        await _repo.Received(1).SetSubmissionDeletedAsync(1, "SEC");
+        await _submissionRepository.Received(1).SetSubmissionDeletedAsync(1, "SEC");
     }
 
+    private void SetupConfirmCheckAnswersAndUpdateRecommendationsAsync(
+        out EstablishmentEntity establishment,
+        out QuestionnaireSectionEntry section,
+        out SubmissionEntity submission,
+        out int? matEstablishmentId,
+        out int userId
+    )
+    {
+        var establishmentId = Random.Shared.Next();
+        matEstablishmentId = Random.Shared.Next();
+        userId = Random.Shared.Next();
+
+        establishment = EntityBuilders.BuildEstablishment(establishmentId);
+        section = BuildSection(out var _, out var _, out var _, out var _, out var _, out var _);
+        submission = EntityBuilders.BuildEmptySubmission();
+
+        _submissionRepository
+            .GetSubmissionByIdWithResponsesAsync(submission.Id)
+            .Returns(submission);
+
+        _recommendationRepository
+            .UpsertRecommendations(Arg.Any<List<SqlRecommendationDto>>())
+            .Returns([]);
+    }
+
+    // ---------- ConfirmCheckAnswersAndUpdateRecommendationsAsync ----------
+
     [Fact]
-    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_CallsRepository()
+    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_UpsertsRecommendations()
     {
         var sut = CreateServiceUnderTest();
         var section = new QuestionnaireSectionEntry();
 
-        await sut.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 1, 123, 99, section);
-        await _repo
+        await sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(1, 1, 123, 99, section);
+
+        await _recommendationRepository
             .Received(1)
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 1, 123, 99, section);
+            .UpsertRecommendations(Arg.Any<List<SqlRecommendationDto>>());
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync_ThrowsWhenQuestionNotFound()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+
+        var user = EntityBuilders.BuildUser(101);
+        var establishment = EntityBuilders.BuildEstablishment(201);
+        var question1 = EntityBuilders.BuildQuestion(301);
+        var question2 = EntityBuilders.BuildQuestion(302);
+        var answer = EntityBuilders.BuildAnswer(401);
+        var submission = EntityBuilders.BuildSubmission(
+            501,
+            establishment.Id,
+            "SEC1",
+            submissionStatus: SubmissionStatus.CompleteNotReviewed
+        );
+        var response = EntityBuilders.BuildResponse(
+            601,
+            user.Id,
+            establishment.Id,
+            submission.Id,
+            null,
+            question1.Id,
+            question1.ContentfulRef,
+            answer.Id,
+            answer.ContentfulRef
+        );
+
+        var coreRecommendation = EntryBuilders.BuildRecommendationChunk("R1", "Q999");
+        var sectionQuestion = new QuestionnaireQuestionEntry { Sys = new(question2.ContentfulRef) };
+
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation],
+            Questions = [sectionQuestion],
+        };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+                establishment.Id,
+                null,
+                submission.Id,
+                user.Id,
+                section
+            )
+        );
+
+        // Assert
+        Assert.Equal("Could not find the question identified in the submission", exception.Message);
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync_UpsertsRecommendations()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+
+        var user = EntityBuilders.BuildUser(101);
+        var establishment = EntityBuilders.BuildEstablishment(201);
+        var question = EntityBuilders.BuildQuestion(301);
+        var answer = EntityBuilders.BuildAnswer(401);
+        var submission = EntityBuilders.BuildSubmission(
+            501,
+            establishment.Id,
+            "SEC1",
+            submissionStatus: SubmissionStatus.CompleteNotReviewed
+        );
+        var response = EntityBuilders.BuildResponse(
+            601,
+            user.Id,
+            establishment.Id,
+            submission.Id,
+            null,
+            question.Id,
+            question.ContentfulRef,
+            answer.Id,
+            answer.ContentfulRef
+        );
+
+        var coreRecommendation = EntryBuilders.BuildRecommendationChunk("R1", "Q999");
+        var sectionQuestion = new QuestionnaireQuestionEntry { Sys = new(question.ContentfulRef) };
+
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation],
+            Questions = [sectionQuestion],
+        };
+
+        // Act
+        await _recommendationRepository
+            .Received(1)
+            .UpsertRecommendations(
+                Arg.Is<List<SqlRecommendationDto>>(re =>
+                    re.First().ContentfulSysId == coreRecommendation.Id
+                    && re.First().RecommendationText == coreRecommendation.Header
+                    && re.First().QuestionId == question.Id
+                    && re.First().QuestionContentfulRef == question.ContentfulRef
+                )
+            );
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_CreatesRecommendationHistories()
+    {
+        SetupConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            out var establishment,
+            out var section,
+            out var submission,
+            out var matEstablishmentId,
+            out var userId
+        );
+
+        var sut = CreateServiceUnderTest();
+
+        await sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+            establishment.Id,
+            null,
+            submission.Id,
+            userId,
+            section
+        );
+
+        await _establishmentRecommendationHistoryRepository
+            .Received(1)
+            .CreateRecommendationHistoriesAsync(
+                establishment.Id,
+                matEstablishmentId,
+                userId,
+                Arg.Any<List<RecommendationEntity>>(),
+                Arg.Any<Dictionary<string, int>>(),
+                Arg.Any<Dictionary<string, RecommendationStatus>>()
+            );
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync_SetsSubmissionStatuses()
+    {
+        SetupConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            out var establishment,
+            out var section,
+            out var submission,
+            out var matEstablishmentId,
+            out var userId
+        );
+
+        var sut = CreateServiceUnderTest();
+
+        await sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+            establishment.Id,
+            matEstablishmentId,
+            submission.Id,
+            userId,
+            section
+        );
+
+        await _submissionRepository
+            .Received(1)
+            .SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+                Arg.Any<int>()
+            );
     }
 
     [Fact]
     public async Task GetSubmissionByIdAsync_CallsRepo()
     {
         var sut = CreateServiceUnderTest();
-        var submission = new SubmissionEntity
-        {
-            Id = 444,
-            SectionId = "secId",
-            SectionName = "testSection",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.CompleteReviewed,
-            Responses = new List<ResponseEntity>(),
-        };
+        var submission = EntityBuilders.BuildSubmission(
+            id: 444,
+            establishmentId: 1,
+            sectionId: "SEC04"
+        );
 
-        _repo.GetSubmissionByIdAsync(submission.Id).Returns(submission);
+        _submissionRepository.GetSubmissionByIdAsync(submission.Id).Returns(submission);
 
         await sut.GetSubmissionByIdAsync(submission.Id);
 
-        await _repo.Received(1).GetSubmissionByIdAsync(submission.Id);
+        await _submissionRepository.Received(1).GetSubmissionByIdAsync(submission.Id);
     }
 
     [Fact]
     public async Task GetSubmissionByIdAsync_ReturnsSubmissionDto()
     {
-        var submission = new SubmissionEntity
-        {
-            Id = 555,
-            SectionId = "secId",
-            SectionName = "testSection",
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Status = SubmissionStatus.CompleteReviewed,
-            Responses = new List<ResponseEntity>(),
-        };
+        var submission = EntityBuilders.BuildSubmission(
+            id: 555,
+            establishmentId: 1,
+            sectionId: "SEC05"
+        );
 
         var sut = CreateServiceUnderTest();
 
-        _repo.GetSubmissionByIdAsync(555).Returns(submission);
+        _submissionRepository.GetSubmissionByIdAsync(submission.Id).Returns(submission);
 
-        var dto = await sut.GetSubmissionByIdAsync(555);
+        var dto = await sut.GetSubmissionByIdAsync(submission.Id);
 
         Assert.NotNull(dto);
         Assert.Equal(submission.Id, dto.Id);
@@ -511,7 +727,7 @@ public class SubmissionWorkflowTests
         SubmissionEntity nullSubmission = null!;
         var submissionId = 666;
 
-        _repo.GetSubmissionByIdAsync(666).Returns(nullSubmission);
+        _submissionRepository.GetSubmissionByIdAsync(666).Returns(nullSubmission);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             sut.GetSubmissionByIdAsync(submissionId)

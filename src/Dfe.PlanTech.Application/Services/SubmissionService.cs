@@ -166,7 +166,7 @@ public class SubmissionService(
         SubmitAnswerModel answerModel
     )
     {
-        return _submissionWorkflow.SubmitAnswer(
+        return _submissionWorkflow.SubmitAnswerAsync(
             userId,
             activeEstablishmentId,
             userEstablishmentId,
@@ -174,7 +174,7 @@ public class SubmissionService(
         );
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+    public Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
         int establishmentId,
         int? matEstablishmentId,
         int submissionId,
@@ -182,7 +182,7 @@ public class SubmissionService(
         QuestionnaireSectionEntry section
     )
     {
-        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+        return _submissionWorkflow.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
             establishmentId,
             matEstablishmentId,
             submissionId,

@@ -176,7 +176,7 @@ public class ReviewAnswersViewBuilder(
                         );
                     }
 
-                    await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                    await _submissionService.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                         selectedEstablishmentId,
                         groupEstablishmentId,
                         submissionModel.SubmissionId,
@@ -187,7 +187,7 @@ public class ReviewAnswersViewBuilder(
             }
             else
             {
-                await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                await _submissionService.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                     establishmentId,
                     groupEstablishmentId,
                     submissionId,

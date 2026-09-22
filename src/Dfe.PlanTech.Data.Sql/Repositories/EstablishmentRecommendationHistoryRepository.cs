@@ -48,40 +48,12 @@ public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbCo
             .FirstOrDefaultAsync();
     }
 
-    public async Task CreateRecommendationHistoryAsync(
-        int establishmentId,
-        int recommendationId,
-        int userId,
-        int? matEstablishmentId,
-        int responseId,
-        RecommendationStatus? previousStatus,
-        RecommendationStatus? newStatus,
-        string noteText
-    )
-    {
-        var historyEntry = new EstablishmentRecommendationHistoryEntity
-        {
-            EstablishmentId = establishmentId,
-            RecommendationId = recommendationId,
-            UserId = userId,
-            MatEstablishmentId = matEstablishmentId,
-            ResponseId = responseId,
-            PreviousStatus = previousStatus,
-            NewStatus = newStatus,
-            NoteText = noteText,
-            DateCreated = DateTime.UtcNow,
-        };
-
-        _db.EstablishmentRecommendationHistories.Add(historyEntry);
-        await _db.SaveChangesAsync();
-    }
-
-    public async Task UpdateRecommendationStatusesAsync(
+    public async Task CreateRecommendationHistoriesAsync(
         int establishmentId,
         int? matEstablishmentId,
         int userId,
-        IDictionary<string, int> recommendationRefsToResponseIds,
         IEnumerable<RecommendationEntity> recommendations,
+        IDictionary<string, int> recommendationRefsToResponseIds,
         IDictionary<string, RecommendationStatus> recommendationStatuses
     )
     {
@@ -90,7 +62,7 @@ public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbCo
                 erh.EstablishmentId == establishmentId
                 && erh.MatEstablishmentId == matEstablishmentId
             )
-            .GroupBy(erh => erh.RecommendationId, erh => erh)
+            .GroupBy(erh => erh.Recommendation.ContentfulRef, erh => erh)
             .ToDictionaryAsync(
                 group => group.Key,
                 group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus
@@ -105,7 +77,7 @@ public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbCo
                 ResponseId = recommendationRefsToResponseIds[recommendation.ContentfulRef],
                 UserId = userId,
                 PreviousStatus = previousStatuses.TryGetValue(
-                    recommendation.Id,
+                    recommendation.ContentfulRef,
                     out var previousStatus
                 )
                     ? previousStatus
@@ -115,5 +87,33 @@ public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbCo
         );
 
         await _db.EstablishmentRecommendationHistories.AddRangeAsync(erhEntities);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateRecommendationStatusAsync(
+        int establishmentId,
+        int recommendationId,
+        int userId,
+        int? matEstablishmentId,
+        RecommendationStatus? previousStatus,
+        RecommendationStatus? newStatus,
+        string noteText
+    )
+    {
+        var historyEntry = new EstablishmentRecommendationHistoryEntity
+        {
+            EstablishmentId = establishmentId,
+            RecommendationId = recommendationId,
+            UserId = userId,
+            MatEstablishmentId = matEstablishmentId,
+            ResponseId = null,
+            PreviousStatus = previousStatus,
+            NewStatus = newStatus,
+            NoteText = noteText,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        _db.EstablishmentRecommendationHistories.Add(historyEntry);
+        await _db.SaveChangesAsync();
     }
 }

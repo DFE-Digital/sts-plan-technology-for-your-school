@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 
@@ -7,14 +6,6 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces;
 public interface ISubmissionRepository
 {
     Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission);
-
-    Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-        int establishmentId,
-        int? matEstablishmentId,
-        int submissionId,
-        int userId,
-        QuestionnaireSectionEntry section
-    );
 
     Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
         int establishmentId,
@@ -50,7 +41,7 @@ public interface ISubmissionRepository
         string sectionId
     );
 
-    Task<int> SelectOrInsertSubmissionIdAsync(
+    Task<int> SelectOrInsertSubmissionAsync(
         string sectionId,
         string sectionName,
         int establishmentId

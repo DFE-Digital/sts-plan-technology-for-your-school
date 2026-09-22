@@ -261,7 +261,6 @@ public class RecommendationServiceTests
         var establishmentId = 123;
         var userId = 456;
         var newStatus = RecommendationStatus.Complete;
-        var responseId = 789;
         var noteText = "Work completed successfully";
         var matEstablishmentId = 789;
 
@@ -273,7 +272,6 @@ public class RecommendationServiceTests
             establishmentId,
             userId,
             newStatus,
-            responseId,
             noteText: noteText,
             matEstablishmentId: matEstablishmentId
         );
@@ -286,7 +284,6 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                responseId,
                 noteText: noteText,
                 matEstablishmentId: matEstablishmentId
             );
@@ -300,7 +297,6 @@ public class RecommendationServiceTests
         var establishmentId = 987;
         var userId = 654;
         var newStatus = RecommendationStatus.InProgress;
-        var responseId = 789;
 
         var service = CreateServiceUnderTest();
 
@@ -309,8 +305,7 @@ public class RecommendationServiceTests
             recommendationContentfulReference,
             establishmentId,
             userId,
-            newStatus,
-            responseId
+            newStatus
         );
 
         // Assert - Confirms optional parameters are passed as null to workflow
@@ -321,7 +316,6 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                responseId,
                 noteText: null,
                 matEstablishmentId: null
             );
@@ -335,7 +329,6 @@ public class RecommendationServiceTests
         var establishmentId = 111;
         var userId = 222;
         var newStatus = RecommendationStatus.InProgress;
-        var responseId = 333;
 
         var expectedException = new InvalidOperationException("Recommendation not found");
 
@@ -345,7 +338,6 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                responseId,
                 noteText: null,
                 matEstablishmentId: null
             )
@@ -359,8 +351,7 @@ public class RecommendationServiceTests
                 recommendationContentfulReference,
                 establishmentId,
                 userId,
-                newStatus,
-                responseId
+                newStatus
             )
         );
 
@@ -372,7 +363,6 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                responseId,
                 noteText: null,
                 matEstablishmentId: null
             );
@@ -386,7 +376,6 @@ public class RecommendationServiceTests
         var establishmentId = 333;
         var userId = 444;
         var newStatus = RecommendationStatus.InProgress;
-        var responseId = 555;
         var emptyNoteText = "";
 
         var service = CreateServiceUnderTest();
@@ -397,7 +386,6 @@ public class RecommendationServiceTests
             establishmentId,
             userId,
             newStatus,
-            responseId,
             noteText: emptyNoteText
         );
 
@@ -409,7 +397,6 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                responseId,
                 noteText: emptyNoteText,
                 matEstablishmentId: null
             );

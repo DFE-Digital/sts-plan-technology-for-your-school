@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -201,317 +200,12 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var section = new QuestionnaireSectionEntry { CoreRecommendations = [] };
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, null, 100, 1, section)
-        );
-
-        Assert.Equal("Could not find submission with ID 100 in database", exception.Message);
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Throws_When_Question_Not_Found()
-    {
-        // Arrange
-        var user = CreateUser(101);
-        var establishment = CreateEstablishment(201);
-        var question = new QuestionEntity
-        {
-            ContentfulRef = "Q301ref",
-            QuestionText = "Question 301",
-        };
-        var answer = CreateAnswer(401);
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.Add(establishment);
-        DbContext.Questions.Add(question);
-        DbContext.Answers.Add(answer);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submission = CreateSubmission(
-            501,
-            establishment.Id,
-            SubmissionStatus.CompleteNotReviewed
-        );
-        DbContext.Submissions.Add(submission);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var response = CreateResponse(
-            601,
-            user.Id,
-            establishment.Id,
-            submission.Id,
-            question.Id,
-            answer.Id
-        );
-        DbContext.Responses.Add(response);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var coreRecommendation = CreateRecommendationChunkEntry("R1", "Q99999");
-        var sectionQuestions = new List<QuestionnaireQuestionEntry>
-        {
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } },
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            CoreRecommendations = [coreRecommendation],
-            Questions = sectionQuestions,
-        };
-
-        // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                establishment.Id,
-                null,
-                submission.Id,
-                user.Id,
-                section
+            _repository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+                100
             )
         );
 
-        // Assert
-        Assert.Equal("Could not find the question identified in the submission", exception.Message);
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Generates_SqlRecommendationDto_And_Passes_To_UpsertRecommendations()
-    {
-        // Arrange
-        var user = CreateUser(101);
-        var establishment = CreateEstablishment(201);
-        var question = new QuestionEntity
-        {
-            ContentfulRef = "Q301ref",
-            QuestionText = "Question 301",
-        };
-        var answer = CreateAnswer(401);
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.Add(establishment);
-        DbContext.Questions.Add(question);
-        DbContext.Answers.Add(answer);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submission = CreateSubmission(
-            501,
-            establishment.Id,
-            SubmissionStatus.CompleteNotReviewed
-        );
-        DbContext.Submissions.Add(submission);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var response = CreateResponse(
-            601,
-            user.Id,
-            establishment.Id,
-            submission.Id,
-            question.Id,
-            answer.Id
-        );
-        DbContext.Responses.Add(response);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef);
-        var sectionQuestions = new List<QuestionnaireQuestionEntry>
-        {
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } },
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            CoreRecommendations = [coreRecommendation],
-            Questions = sectionQuestions,
-        };
-
-        // Act
-        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            establishment.Id,
-            null,
-            submission.Id,
-            user.Id,
-            section
-        );
-
-        // Assert
-        var recommendation = DbContext.Recommendations.FirstOrDefault(r =>
-            string.Equals(r.ContentfulRef, coreRecommendation.Id)
-        );
-        Assert.NotNull(recommendation);
-        Assert.Equal(question.Id, recommendation.QuestionId);
-        Assert.Equal(coreRecommendation.Header, recommendation.RecommendationText);
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Creates_EstablishmentRecommendationHistories_With_Correct_Recommendation_Statuses()
-    {
-        // Arrange
-        var user = CreateUser(101);
-        var establishment = CreateEstablishment(201);
-        var question = new QuestionEntity
-        {
-            ContentfulRef = "Q301ref",
-            QuestionText = "Question 301",
-        };
-        var answer = CreateAnswer(401);
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.Add(establishment);
-        DbContext.Answers.Add(answer);
-        DbContext.Questions.Add(question);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submission = CreateSubmission(
-            501,
-            establishment.Id,
-            SubmissionStatus.CompleteNotReviewed
-        );
-        DbContext.Submissions.Add(submission);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var response = CreateResponse(
-            601,
-            user.Id,
-            establishment.Id,
-            submission.Id,
-            question.Id,
-            answer.Id
-        );
-        DbContext.Responses.Add(response);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var coreRecommendation = CreateRecommendationChunkEntry(
-            "R1",
-            question.ContentfulRef,
-            [answer.ContentfulRef]
-        );
-        var sectionQuestions = new List<QuestionnaireQuestionEntry>
-        {
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } },
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            CoreRecommendations = [coreRecommendation],
-            Questions = sectionQuestions,
-        };
-
-        // Act
-        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            establishment.Id,
-            null,
-            submission.Id,
-            user.Id,
-            section
-        );
-
-        // Assert
-        var recommendation = DbContext.Recommendations.FirstOrDefault(r =>
-            string.Equals(r.ContentfulRef, coreRecommendation.Id)
-        );
-        Assert.NotNull(recommendation);
-
-        var recommendationHistory = DbContext.EstablishmentRecommendationHistories.FirstOrDefault(
-            erh => erh.RecommendationId == recommendation.Id
-        );
-        Assert.NotNull(recommendationHistory);
-        Assert.Equal(RecommendationStatus.Complete, recommendationHistory.NewStatus);
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Calls_SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync()
-    {
-        // Arrange
-        var user = CreateUser(101);
-        var establishment = CreateEstablishment(201);
-        var question = new QuestionEntity
-        {
-            ContentfulRef = "Q301ref",
-            QuestionText = "Question 301",
-        };
-        var answer = CreateAnswer(401);
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.Add(establishment);
-        DbContext.Answers.Add(answer);
-        DbContext.Questions.Add(question);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var oldSubmission = CreateSubmission(
-            501,
-            establishment.Id,
-            SubmissionStatus.CompleteReviewed
-        );
-        var newSubmission = CreateSubmission(
-            502,
-            establishment.Id,
-            SubmissionStatus.CompleteNotReviewed
-        );
-        DbContext.Submissions.AddRange([oldSubmission, newSubmission]);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var response = CreateResponse(
-            601,
-            user.Id,
-            establishment.Id,
-            newSubmission.Id,
-            question.Id,
-            answer.Id
-        );
-        DbContext.Responses.Add(response);
-
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var coreRecommendation = CreateRecommendationChunkEntry(
-            "R1",
-            question.ContentfulRef,
-            [answer.ContentfulRef]
-        );
-        var sectionQuestions = new List<QuestionnaireQuestionEntry>
-        {
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } },
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            CoreRecommendations = [coreRecommendation],
-            Questions = sectionQuestions,
-        };
-
-        // Act
-        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            establishment.Id,
-            null,
-            newSubmission.Id,
-            user.Id,
-            section
-        );
-
-        // Assert
-        var oldSubmissionEntity = DbContext.Submissions.FirstOrDefault(s =>
-            s.Id == oldSubmission.Id
-        );
-        var newSubmissionEntity = DbContext.Submissions.FirstOrDefault(s =>
-            s.Id == newSubmission.Id
-        );
-        Assert.NotNull(oldSubmissionEntity);
-        Assert.NotNull(newSubmissionEntity);
-
-        Assert.Equal(SubmissionStatus.Inaccessible, oldSubmission.Status);
-        Assert.Equal(SubmissionStatus.CompleteReviewed, newSubmission.Status);
+        Assert.Equal("Could not find submission with ID 100 in database", exception.Message);
     }
 
     [Fact]
@@ -715,86 +409,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(otherSubmission);
         Assert.Equal(SubmissionStatus.Inaccessible, otherSubmission!.Status);
         Assert.True(otherSubmission.Deleted);
-    }
-
-    [Fact]
-    public async Task GetQuestionsForSection_ReturnsMatchingQuestions_WhenContentfulRefsMatch()
-    {
-        // Arrange
-        var question1 = new QuestionEntity { ContentfulRef = "ref-101" };
-        var question2 = new QuestionEntity { ContentfulRef = "ref-102" };
-
-        DbContext.Questions.AddRange(question1, question2);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var sectionQuestions = new List<QuestionnaireQuestionEntry>
-        {
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-101" } },
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-102" } },
-        };
-        var section = new QuestionnaireSectionEntry { Questions = sectionQuestions };
-
-        // Act
-        var result = await _repository.GetQuestionsForSection(section);
-
-        // Assert
-        Assert.Equal(2, result.Count);
-        Assert.Contains(result, q => q.ContentfulRef == "ref-101");
-        Assert.Contains(result, q => q.ContentfulRef == "ref-102");
-    }
-
-    [Fact]
-    public async Task GetQuestionsForSection_ReturnsEmptyList_WhenNoMatchingQuestions()
-    {
-        // Arrange
-        var question = new QuestionEntity { ContentfulRef = "ref-201" };
-
-        DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Questions = new List<QuestionnaireQuestionEntry>
-            {
-                new QuestionnaireQuestionEntry
-                {
-                    Sys = new SystemDetails { Id = "non-existent-ref" },
-                },
-            },
-        };
-
-        // Act
-        var result = await _repository.GetQuestionsForSection(section);
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetQuestionsForSection_IgnoresNullSysIds()
-    {
-        // Arrange
-        var question = new QuestionEntity { ContentfulRef = "ref-301" };
-
-        DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Questions = new List<QuestionnaireQuestionEntry>
-            {
-                new QuestionnaireQuestionEntry { Sys = null },
-                new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = null! } },
-                new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-301" } },
-            },
-        };
-
-        // Act
-        var result = await _repository.GetQuestionsForSection(section);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal("ref-301", result.First().ContentfulRef);
     }
 
     [Fact]
@@ -1056,301 +670,59 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenNoCurrentSubmissionExists_ThenCreatesSubmissionAndResponse()
+    public async Task SelectOrInsertSubmissionAsync_WhenCurrentSubmissionExists_ThenDoesNotCreateSubmission()
     {
+        var sectionId = "SEC001";
+        var sectionName = "Section 1";
+
         var establishment = CreateEstablishment(5001);
-        var user = CreateUser(5002);
-
         DbContext.Establishments.Add(establishment);
-        DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var submitAnswer = new SubmitAnswerModel
+        var submission = new SubmissionEntity
         {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            Question = new IdWithTextModel { Id = "Q900", Text = "Question 900" },
-            ChosenAnswer = new IdWithTextModel { Id = "A900", Text = "Answer 900" },
+            EstablishmentId = establishment.Id,
+            SectionId = sectionId,
+            SectionName = sectionName,
+            Status = SubmissionStatus.InProgress,
         };
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var response = new AssessmentResponseModel(
-            user.Id,
-            establishment.Id,
-            establishment.Id,
-            submitAnswer
+        var initialSubmissionCount = await DbContext.Submissions.CountAsync(
+            TestContext.Current.CancellationToken
         );
 
-        var responseId = await _repository.SubmitResponse(response);
+        await _repository.SelectOrInsertSubmissionAsync(sectionId, sectionName, establishment.Id);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(
-            r => r.Id == responseId,
-            cancellationToken: TestContext.Current.CancellationToken
+        var finalSubmissionCount = await DbContext.Submissions.CountAsync(
+            TestContext.Current.CancellationToken
         );
 
-        var createdSubmission = await DbContext.Submissions.SingleAsync(
-            s => s.Id == createdResponse.SubmissionId,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-
-        var createdQuestion = await DbContext.Questions.SingleAsync(
-            q => q.Id == createdResponse.QuestionId,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-
-        var createdAnswer = await DbContext.Answers.SingleAsync(
-            a => a.Id == createdResponse.AnswerId,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-
-        Assert.NotEqual(0, responseId);
-
-        Assert.Equal(establishment.Id, createdSubmission.EstablishmentId);
-        Assert.Equal("S001", createdSubmission.SectionId);
-        Assert.Equal("Test Section 1", createdSubmission.SectionName);
-        Assert.Equal(SubmissionStatus.InProgress, createdSubmission.Status);
-
-        Assert.Equal(_userActionId, createdSubmission.CreatedUserActionId);
-        Assert.Equal(_userActionId, createdSubmission.LastUpdatedUserActionId);
-        Assert.NotNull(createdSubmission.DateLastUpdated);
-
-        Assert.Equal(user.Id, createdResponse.UserId);
-        Assert.Equal(establishment.Id, createdResponse.UserEstablishmentId);
-
-        Assert.Equal("Q900", createdQuestion.ContentfulRef);
-        Assert.Equal("Question 900", createdQuestion.QuestionText);
-
-        Assert.Equal("A900", createdAnswer.ContentfulRef);
-        Assert.Equal("Answer 900", createdAnswer.AnswerText);
+        Assert.Equal(finalSubmissionCount, initialSubmissionCount);
     }
 
     [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenCurrentSubmissionExists_ThenUsesLatestInProgressSubmissionById()
+    public async Task SelectOrInsertSubmissionAsync_WhenNoCurrentSubmissionExists_ThenCreatesSubmission()
     {
-        var establishment = CreateEstablishment(5101);
-        var user = CreateUser(5102);
-
+        var establishment = CreateEstablishment(5002);
         DbContext.Establishments.Add(establishment);
-        DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var firstSubmission = new SubmissionEntity
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow,
-        };
-
-        DbContext.Submissions.Add(firstSubmission);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var secondSubmission = new SubmissionEntity
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow.AddDays(-10),
-        };
-
-        DbContext.Submissions.Add(secondSubmission);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submitAnswer = new SubmitAnswerModel
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            Question = new IdWithTextModel { Id = "Q910", Text = "Question 910" },
-            ChosenAnswer = new IdWithTextModel { Id = "A910", Text = "Answer 910" },
-        };
-
-        var response = new AssessmentResponseModel(
-            user.Id,
-            establishment.Id,
-            establishment.Id,
-            submitAnswer
+        var initialSubmissionCount = await DbContext.Submissions.CountAsync(
+            TestContext.Current.CancellationToken
         );
 
-        var responseId = await _repository.SubmitResponse(response);
+        var sectionId = "SEC001";
+        var sectionName = "Section 1";
 
-        var createdResponse = await DbContext.Responses.SingleAsync(
-            r => r.Id == responseId,
-            cancellationToken: TestContext.Current.CancellationToken
+        await _repository.SelectOrInsertSubmissionAsync(sectionId, sectionName, establishment.Id);
+
+        var finalSubmissionCount = await DbContext.Submissions.CountAsync(
+            TestContext.Current.CancellationToken
         );
 
-        Assert.Equal(secondSubmission.Id, createdResponse.SubmissionId);
-
-        var updatedSubmission = await DbContext
-            .Submissions.AsNoTracking()
-            .SingleAsync(
-                s => s.Id == secondSubmission.Id,
-                cancellationToken: TestContext.Current.CancellationToken
-            );
-
-        Assert.NotNull(updatedSubmission.DateLastUpdated);
-        Assert.Equal(_userActionId, updatedSubmission.LastUpdatedUserActionId);
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenMatchingQuestionAndAnswerExist_ThenReusesExistingRows()
-    {
-        var establishment = CreateEstablishment(5201);
-        var user = CreateUser(5202);
-        var question = new QuestionEntity { ContentfulRef = "Q920", QuestionText = "Question 920" };
-        var answer = new AnswerEntity { ContentfulRef = "A920", AnswerText = "Answer 920" };
-
-        DbContext.Establishments.Add(establishment);
-        DbContext.Users.Add(user);
-        DbContext.Questions.Add(question);
-        DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submitAnswer = new SubmitAnswerModel
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            Question = new IdWithTextModel { Id = "Q920", Text = "Question 920" },
-            ChosenAnswer = new IdWithTextModel { Id = "A920", Text = "Answer 920" },
-        };
-
-        var response = new AssessmentResponseModel(
-            user.Id,
-            establishment.Id,
-            establishment.Id,
-            submitAnswer
-        );
-
-        var responseId = await _repository.SubmitResponse(response);
-
-        var createdResponse = await DbContext.Responses.SingleAsync(
-            r => r.Id == responseId,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-
-        Assert.Equal(question.Id, createdResponse.QuestionId);
-        Assert.Equal(answer.Id, createdResponse.AnswerId);
-        Assert.Equal(
-            1,
-            await DbContext.Questions.CountAsync(
-                q => q.ContentfulRef == "Q920",
-                cancellationToken: TestContext.Current.CancellationToken
-            )
-        );
-        Assert.Equal(
-            1,
-            await DbContext.Answers.CountAsync(
-                a => a.ContentfulRef == "A920",
-                cancellationToken: TestContext.Current.CancellationToken
-            )
-        );
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenLatestInProgressSubmissionIsDeleted_ThenStillUsesIt()
-    {
-        var establishment = CreateEstablishment(5301);
-        var user = CreateUser(5302);
-
-        DbContext.Establishments.Add(establishment);
-        DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var activeSubmission = new SubmissionEntity
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress,
-            Deleted = false,
-        };
-
-        DbContext.Submissions.Add(activeSubmission);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var deletedSubmission = new SubmissionEntity
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress,
-            Deleted = true,
-        };
-
-        DbContext.Submissions.Add(deletedSubmission);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submitAnswer = new SubmitAnswerModel
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            Question = new IdWithTextModel { Id = "Q930", Text = "Question 930" },
-            ChosenAnswer = new IdWithTextModel { Id = "A930", Text = "Answer 930" },
-        };
-
-        var response = new AssessmentResponseModel(
-            user.Id,
-            establishment.Id,
-            establishment.Id,
-            submitAnswer
-        );
-
-        var responseId = await _repository.SubmitResponse(response);
-
-        var createdResponse = await DbContext.Responses.SingleAsync(
-            r => r.Id == responseId,
-            cancellationToken: TestContext.Current.CancellationToken
-        );
-
-        Assert.Equal(deletedSubmission.Id, createdResponse.SubmissionId);
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenAnswerIsNull_ThenThrowsInvalidDataException()
-    {
-        var submitAnswer = new SubmitAnswerModel
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            Question = new IdWithTextModel { Id = "Q940", Text = "Question 940" },
-            ChosenAnswer = null,
-        };
-
-        var response = new AssessmentResponseModel(1, 1, 1, submitAnswer);
-
-        await Assert.ThrowsAsync<InvalidDataException>(() => _repository.SubmitResponse(response));
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenQuestionIsNull_ThenThrowsInvalidDataException()
-    {
-        var submitAnswer = new SubmitAnswerModel
-        {
-            SectionId = "S001",
-            SectionName = "Test Section 1",
-            Question = null!,
-            ChosenAnswer = new IdWithTextModel { Id = "A950", Text = "Answer 950" },
-        };
-
-        var response = new AssessmentResponseModel(1, 1, 1, submitAnswer);
-
-        await Assert.ThrowsAsync<InvalidDataException>(() => _repository.SubmitResponse(response));
-    }
-
-    [Fact]
-    public async Task SubmissionRepository_SubmitResponse_WhenSectionIdIsEmpty_ThenThrowsArgumentException()
-    {
-        var submitAnswer = new SubmitAnswerModel
-        {
-            SectionId = "",
-            SectionName = "Test Section 1",
-            Question = new IdWithTextModel { Id = "Q960", Text = "Question 960" },
-            ChosenAnswer = new IdWithTextModel { Id = "A960", Text = "Answer 960" },
-        };
-
-        var response = new AssessmentResponseModel(1, 1, 1, submitAnswer);
-
-        await Assert.ThrowsAsync<ArgumentException>(() => _repository.SubmitResponse(response));
+        Assert.Equal(finalSubmissionCount, initialSubmissionCount + 1);
     }
 
     [Fact]
@@ -1432,9 +804,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.ChangeTracker.Clear();
 
         // Act
-        var result = await _repository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-            [establishment1.Id, establishment2.Id, establishment3.Id]
-        );
+        var result = await _repository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync([
+            establishment1.Id,
+            establishment2.Id,
+            establishment3.Id,
+        ]);
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -1445,11 +819,14 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.DoesNotContain(result, s => s.Id == deletedSubmission.Id);
         Assert.DoesNotContain(result, s => s.Id == inProgressSubmission.Id);
 
-        Assert.All(result, submission =>
-        {
-            Assert.NotNull(submission.Establishment);
-            Assert.False(string.IsNullOrWhiteSpace(submission.Establishment.OrgName));
-        });
+        Assert.All(
+            result,
+            submission =>
+            {
+                Assert.NotNull(submission.Establishment);
+                Assert.False(string.IsNullOrWhiteSpace(submission.Establishment.OrgName));
+            }
+        );
     }
 
     private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider

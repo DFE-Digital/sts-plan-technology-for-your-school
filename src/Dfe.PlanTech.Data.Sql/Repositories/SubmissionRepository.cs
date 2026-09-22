@@ -1,6 +1,4 @@
 using System.Linq.Expressions;
-using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -53,19 +51,6 @@ public class SubmissionRepository(
         await _db.SaveChangesAsync();
 
         return newSubmission;
-    }
-
-    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-        int establishmentId,
-        int? matEstablishmentId,
-        int submissionId,
-        int userId,
-        QuestionnaireSectionEntry section
-    )
-    {
-        await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
-            submissionId
-        );
     }
 
     public Task<SubmissionEntity?> GetLatestCompletedSubmissionBySectionIdAsync(
@@ -170,12 +155,9 @@ public class SubmissionRepository(
         int submissionId
     )
     {
-        var submission = await GetSubmissionByIdAsync(submissionId);
-        if (submission is null)
-        {
-            throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
-        }
-
+        var submission =
+            await GetSubmissionByIdAsync(submissionId)
+            ?? throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         var userActionId = _userActionIdProvider.GetUserActionId();
 
         submission.DateCompleted = DateTime.UtcNow;
@@ -330,19 +312,6 @@ public class SubmissionRepository(
         return query;
     }
 
-    public async Task<List<QuestionEntity>> GetQuestionsForSection(
-        QuestionnaireSectionEntry section
-    )
-    {
-        var sectionQuestionRefs = section.Questions.Select(q => q.Sys?.Id).ToList();
-
-        var sectionQuestions = await _db
-            .Questions.Where(question => sectionQuestionRefs.Contains(question.ContentfulRef))
-            .ToListAsync();
-
-        return sectionQuestions;
-    }
-
     public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
         string sectionIds,
         int establishmentId
@@ -449,7 +418,7 @@ public class SubmissionRepository(
             );
     }
 
-    public async Task<int> SelectOrInsertSubmissionIdAsync(
+    public async Task<int> SelectOrInsertSubmissionAsync(
         string sectionId,
         string sectionName,
         int establishmentId
@@ -553,17 +522,5 @@ public class SubmissionRepository(
             .ToListAsync();
 
         return results;
-    }
-
-    private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)
-    {
-        return new RecommendationEntity
-        {
-            ContentfulRef = recommendationDto.ContentfulSysId,
-            RecommendationText = recommendationDto.RecommendationText,
-            QuestionId = recommendationDto.QuestionId,
-            QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
-            Archived = recommendationDto.Archived,
-        };
     }
 }

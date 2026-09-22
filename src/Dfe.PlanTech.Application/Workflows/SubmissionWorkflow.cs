@@ -53,7 +53,7 @@ public class SubmissionWorkflow(
         return newSubmission.AsDto();
     }
 
-    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
         int establishmentId,
         int? matEstablishmentId,
         int submissionId,
@@ -71,16 +71,13 @@ public class SubmissionWorkflow(
             );
         }
 
-        var responses = submission
-            .Responses.GroupBy(r => r.QuestionId)
-            .Select(group => group.OrderByDescending(r => r.DateCreated).First());
-
-        var responseQuestionRefs = responses.ToDictionary(r => r.Id, r => r.Question.ContentfulRef);
-        var responseAnswerRefs = responses.ToDictionary(r => r.Id, r => r.Answer.ContentfulRef);
-
         var questionRefsToRecommendations = section
             .CoreRecommendations.Where(cr => cr.Question is not null)
             .ToDictionary(cr => cr.Question.Id, cr => cr);
+
+        var responses = submission
+            .Responses.GroupBy(r => r.QuestionId)
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First());
 
         var responseRecommendations = responses.ToDictionary(
             r => r.Id,
@@ -92,6 +89,8 @@ public class SubmissionWorkflow(
             r => r.Id
         );
 
+        var sectionQuestions = await _questionRepository.GetQuestionsForSection(section);
+
         var recommendationDtos = new List<SqlRecommendationDto>();
         var recommendationStatuses = new Dictionary<string, RecommendationStatus>();
         foreach (var response in responses)
@@ -99,19 +98,17 @@ public class SubmissionWorkflow(
             var coreRecommendation = responseRecommendations[response.Id];
 
             if (
-                responseRecommendations[response.Id]
-                    .CompletingAnswers.Any(ca =>
-                        string.Equals(ca.Id, response.Answer.ContentfulRef)
-                    )
+                coreRecommendation.CompletingAnswers.Any(ca =>
+                    string.Equals(ca.Id, response.Answer.ContentfulRef)
+                )
             )
             {
                 recommendationStatuses.Add(coreRecommendation.Id, RecommendationStatus.Complete);
             }
             else if (
-                responseRecommendations[response.Id]
-                    .InProgressAnswers.Any(ca =>
-                        string.Equals(ca.Id, response.Answer.ContentfulRef)
-                    )
+                coreRecommendation.InProgressAnswers.Any(ca =>
+                    string.Equals(ca.Id, response.Answer.ContentfulRef)
+                )
             )
             {
                 recommendationStatuses.Add(coreRecommendation.Id, RecommendationStatus.InProgress);
@@ -122,8 +119,8 @@ public class SubmissionWorkflow(
             }
 
             // Ensure the DB question's Contentful reference is associated with the Contentful Section
-            var question = section.Questions.FirstOrDefault(q =>
-                string.Equals(q.Id, questionRefsToRecommendations[q.Id].Id)
+            var question = sectionQuestions.FirstOrDefault(q =>
+                string.Equals(q.ContentfulRef, response.Question.ContentfulRef)
             );
 
             if (question is null)
@@ -148,12 +145,12 @@ public class SubmissionWorkflow(
             recommendationDtos
         );
 
-        await _establishmentRecommendationHistoryRepository.UpdateRecommendationStatusesAsync(
+        await _establishmentRecommendationHistoryRepository.CreateRecommendationHistoriesAsync(
             establishmentId,
             matEstablishmentId,
             userId,
-            recommendationRefsToResponseIds,
             recommendations,
+            recommendationRefsToResponseIds,
             recommendationStatuses
         );
 
@@ -225,7 +222,7 @@ public class SubmissionWorkflow(
 
     // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route.
-    public async Task<int> SubmitAnswer(
+    public async Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,
         int userEstablishmentId,
@@ -233,50 +230,36 @@ public class SubmissionWorkflow(
     )
     {
         if (answerModel is null)
-        {
             throw new InvalidDataException($"{nameof(answerModel)} is null");
-        }
 
-        if (answerModel.Question is null)
-        {
-            throw new InvalidDataException($"{nameof(answerModel.Question)} cannot be null");
-        }
+        if (string.IsNullOrWhiteSpace(answerModel.SectionId))
+            throw new InvalidDataException($"{nameof(answerModel.SectionId)} is empty");
+
+        if (string.IsNullOrWhiteSpace(answerModel.SectionName))
+            throw new InvalidDataException($"{nameof(answerModel.SectionName)} is empty");
 
         if (answerModel.ChosenAnswer is null)
-        {
             throw new InvalidDataException($"{nameof(answerModel.ChosenAnswer)} cannot be null");
-        }
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            answerModel.SectionId,
-            nameof(answerModel.SectionId)
-        );
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            answerModel.SectionName,
-            nameof(answerModel.SectionName)
-        );
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            answerModel.Question.Id,
-            nameof(answerModel.Question.Id)
-        );
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            answerModel.Question.Text,
-            nameof(answerModel.Question.Text)
-        );
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            answerModel.ChosenAnswer?.Id,
-            nameof(answerModel.ChosenAnswer.Id)
-        );
-        ArgumentException.ThrowIfNullOrWhiteSpace(
-            answerModel.ChosenAnswer.Text,
-            nameof(answerModel.ChosenAnswer.Text)
-        );
+        if (string.IsNullOrWhiteSpace(answerModel.Question.Id))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.Question)}.{nameof(answerModel.Question.Id)} cannot be null"
+            );
 
-        var submissionId = await _submissionRepository.SelectOrInsertSubmissionIdAsync(
-            answerModel.SectionId,
-            answerModel.SectionName,
-            activeEstablishmentId
-        );
+        if (string.IsNullOrWhiteSpace(answerModel.Question.Text))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.Question)}.{nameof(answerModel.Question.Text)} cannot be null"
+            );
+
+        if (string.IsNullOrWhiteSpace(answerModel.ChosenAnswer.Id))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.ChosenAnswer)}.{nameof(answerModel.ChosenAnswer.Id)} cannot be null"
+            );
+
+        if (string.IsNullOrWhiteSpace(answerModel.ChosenAnswer.Text))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.ChosenAnswer)}.{nameof(answerModel.ChosenAnswer.Text)} cannot be null"
+            );
 
         var questionId = await _questionRepository.GetOrCreateQuestionIdAsync(
             answerModel.Question.Id,
@@ -288,15 +271,18 @@ public class SubmissionWorkflow(
             answerModel.ChosenAnswer.Text
         );
 
-        var userActionId = _userActionIdProvider.GetUserActionId();
+        var submissionId = await _submissionRepository.SelectOrInsertSubmissionAsync(
+            answerModel.SectionId,
+            answerModel.SectionName,
+            activeEstablishmentId
+        );
 
-        return await _responseRepository.SubmitResponseAndReturnId(
+        return await _responseRepository.SubmitResponseAsync(
             userId,
             userEstablishmentId,
             submissionId,
             questionId,
-            answerId,
-            userActionId
+            answerId
         );
     }
 
