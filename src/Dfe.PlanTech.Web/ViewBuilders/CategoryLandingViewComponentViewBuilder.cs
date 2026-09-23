@@ -17,7 +17,8 @@ public class CategoryLandingViewComponentViewBuilder(
     ISubmissionService submissionService,
     IUserActionTrackingService userActionTrackingService,
     IEstablishmentService establishmentService,
-    IUserService userService
+    IUserService userService,
+    IGroupService groupService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
         ICategoryLandingViewComponentViewBuilder
@@ -27,9 +28,12 @@ public class CategoryLandingViewComponentViewBuilder(
     private readonly IUserService _userService =
         userService ?? throw new ArgumentNullException(nameof(userService));
     private readonly IUserActionTrackingService _userActionTrackingService =
-        userActionTrackingService ?? throw new ArgumentNullException(nameof(userActionTrackingService));
+        userActionTrackingService
+        ?? throw new ArgumentNullException(nameof(userActionTrackingService));
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IGroupService _groupService =
+        groupService ?? throw new ArgumentNullException(nameof(groupService));
 
     private const string CategoryLandingSectionAssessmentLink =
         "Components/CategoryLanding/SectionAssessmentLink";
@@ -41,7 +45,8 @@ public class CategoryLandingViewComponentViewBuilder(
         string slug,
         string? sectionName,
         string? sortOrder,
-        bool print = false
+        bool print = false,
+        CategoryLandingContext context = CategoryLandingContext.School
     )
     {
         if (category.Sections.Count == 0)
@@ -50,10 +55,37 @@ public class CategoryLandingViewComponentViewBuilder(
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
+        return context switch
+        {
+            CategoryLandingContext.MAT => await BuildMatViewModelAsync(
+                category,
+                slug,
+                sectionName
+            ),
+
+            _ => await BuildSchoolViewModelAsync(
+                category,
+                slug,
+                sectionName,
+                sortOrder,
+                print
+            ),
+        };
+    }
+
+    private async Task<CategoryLandingViewComponentViewModel> BuildSchoolViewModelAsync(
+        QuestionnaireCategoryEntry category,
+        string slug,
+        string? sectionName,
+        string? sortOrder,
+        bool print
+    )
+    {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
+
         try
         {
             sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
@@ -68,6 +100,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message
             );
+
             progressRetrievalErrorMessage =
                 "Unable to retrieve progress, please refresh your browser.";
         }
@@ -82,9 +115,10 @@ public class CategoryLandingViewComponentViewBuilder(
                 sortType
             )
             .ToListAsync();
+
         var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
 
-        var viewModel = new CategoryLandingViewComponentViewModel
+        return new CategoryLandingViewComponentViewModel
         {
             CompletedSectionsCount = completedSectionCount,
             CategoryLandingSections = categoryLandingSections,
@@ -98,9 +132,8 @@ public class CategoryLandingViewComponentViewBuilder(
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
                 : CategoryLandingSectionAssessmentLink,
+            Context = CategoryLandingContext.School,
         };
-
-        return viewModel;
     }
 
     private async IAsyncEnumerable<CategoryLandingSectionViewModel> BuildCategoryLandingSectionViewModels(
@@ -147,9 +180,15 @@ public class CategoryLandingViewComponentViewBuilder(
             {
                 var userAction = await _userActionTrackingService.GetAsync(id);
 
-                if ((userAction?.MatEstablishmentId ?? userAction?.EstablishmentId) is { } userActionEstablishmentId)
+                if (
+                    (userAction?.MatEstablishmentId ?? userAction?.EstablishmentId)
+                    is { } userActionEstablishmentId
+                )
                 {
-                    var userActionEstablishment = await _establishmentService.GetEstablishmentByIdAsync(userActionEstablishmentId);
+                    var userActionEstablishment =
+                        await _establishmentService.GetEstablishmentByIdAsync(
+                            userActionEstablishmentId
+                        );
                     establishmentName = userActionEstablishment.OrgName;
                 }
             }
@@ -170,6 +209,108 @@ public class CategoryLandingViewComponentViewBuilder(
                 hadRetrievalError,
                 establishmentName
             );
+        }
+    }
+
+    private async Task<CategoryLandingViewComponentViewModel> BuildMatViewModelAsync(
+    QuestionnaireCategoryEntry category,
+    string slug,
+    string? sectionName
+    )
+    {
+        try
+        {
+            var matEstablishmentId = GetUserOrganisationIdOrThrowException();
+
+            var establishmentLinks =
+                await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+
+            var establishmentUrns = establishmentLinks
+                .Select(e => e.Urn)
+                .Where(urn => !string.IsNullOrWhiteSpace(urn))
+                .Distinct()
+                .ToArray();
+
+            var establishments =
+                await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns)
+                ?? [];
+
+            var establishmentIds = establishments
+                .Select(e => e.Id)
+                .Distinct()
+                .ToArray();
+
+            var completedSubmissions =
+                establishmentIds.Length != 0
+                    ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
+                    : [];
+
+            var completedCountBySectionId = completedSubmissions
+                .Where(s => establishmentIds.Contains(s.EstablishmentId))
+                .GroupBy(s => s.SectionId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(s => s.EstablishmentId).Distinct().Count()
+                );
+
+            var categoryLandingSections = category.Sections
+                .Select(section =>
+                {
+                    var completedCount = completedCountBySectionId.GetValueOrDefault(section.Id);
+
+                    var hasSubmittedAssessments = completedCount > 0;
+
+                    var recommendations = hasSubmittedAssessments
+                        ? BuildMatSectionRecommendations(section)
+                        : null;
+
+                    return new CategoryLandingSectionViewModel(
+                        section,
+                        recommendations,
+                        sectionStatus: null,
+                        hadRetrievalError: false,
+                        establishmentName: null
+                    )
+                    {
+                        HasSubmittedAssessments = hasSubmittedAssessments,
+                        HasOutstandingAssessments = completedCount < establishmentIds.Length,
+                        OutstandingAssessmentCount = establishmentIds.Length - completedCount,
+                    };
+                })
+                .ToList();
+
+            return new CategoryLandingViewComponentViewModel
+            {
+                CategoryName = category.Header.Text,
+                CategorySlug = slug,
+                Sections = category.Sections,
+                SectionName = sectionName,
+                CategoryLandingSections = categoryLandingSections,
+                CompletedSectionsCount = categoryLandingSections.Count(x => x.HasSubmittedAssessments),
+                StatusLinkPartialName = CategoryLandingSectionAssessmentLink,
+                Context = CategoryLandingContext.MAT,
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(
+                ex,
+                "An exception occurred while retrieving MAT recommendation data for category {CategorySlug}",
+                slug
+            );
+
+            return new CategoryLandingViewComponentViewModel
+            {
+                CategoryName = category.Header.Text,
+                CategorySlug = slug,
+                Sections = category.Sections,
+                SectionName = sectionName,
+                CategoryLandingSections = [],
+                ProgressRetrievalErrorMessage =
+                    "Unable to retrieve recommendations, please refresh your browser.",
+                StatusLinkPartialName = CategoryLandingSectionAssessmentLink,
+                Context = CategoryLandingContext.MAT,
+            };
         }
     }
 
@@ -212,10 +353,12 @@ public class CategoryLandingViewComponentViewBuilder(
                 await _submissionService.GetLatestRecommendationStatusesByEstablishmentIdAsync(
                     establishmentId
                 );
+
             var sortedRecommendations = recommendationChunks.SortByStatus(
                 recommendations,
                 sortType
             );
+
             var chunks = sortedRecommendations
                 .Select(sr => new RecommendationChunkViewModel
                 {
@@ -243,10 +386,30 @@ public class CategoryLandingViewComponentViewBuilder(
             };
         }
     }
+    private static CategoryLandingSectionRecommendationsViewModel BuildMatSectionRecommendations(
+    QuestionnaireSectionEntry section
+)
+    {
+        var chunks = section.CoreRecommendations
+            .Select(recommendation => new RecommendationChunkViewModel
+            {
+                Header = recommendation.HeaderText,
+                Slug = recommendation.Slug,
+            })
+            .ToList();
+
+        return new CategoryLandingSectionRecommendationsViewModel
+        {
+            SectionName = section.Name,
+            SectionSlug = section.InterstitialPage?.Slug,
+            Chunks = chunks,
+        };
+    }
 
     private async Task<RecommendationSortOrder> GetUserSortType(string? sortOrder)
     {
         var sortType = sortOrder?.GetRecommendationSortEnumValue();
+
         if (CurrentUser.UserId != null)
         {
             if (sortType != null)

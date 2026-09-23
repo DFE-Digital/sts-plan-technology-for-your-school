@@ -20,6 +20,10 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string categorySlug,
             ShareByEmailInputViewModel? inputModel = null
         );
+        Task<IActionResult> RouteToMatCategoryLandingPageAsync(
+            Controller controller,
+            string categorySlug
+        );
         Task<NotFoundViewModel> BuildNotFoundViewModelAsync();
 
         NotifyShareResultsViewModel? BuildNotifyShareResultsViewModel(Controller controller);
