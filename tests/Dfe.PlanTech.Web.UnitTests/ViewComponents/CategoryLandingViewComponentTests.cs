@@ -41,7 +41,9 @@ public class CategoryLandingViewComponentTests
                 category,
                 slug,
                 sectionName,
-                RecommendationConstants.DefaultSortOrder
+                RecommendationConstants.DefaultSortOrder,
+                false,
+                CategoryLandingContext.School
             )
             .Returns(Task.FromResult(expectedViewModel));
 
@@ -58,7 +60,9 @@ public class CategoryLandingViewComponentTests
                 category,
                 slug,
                 sectionName,
-                RecommendationSortOrder.Default.ToString()
+                RecommendationSortOrder.Default.ToString(),
+                false,
+                CategoryLandingContext.School
             );
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
@@ -95,7 +99,9 @@ public class CategoryLandingViewComponentTests
                 category,
                 slug,
                 sectionName,
-                RecommendationConstants.DefaultSortOrder
+                RecommendationConstants.DefaultSortOrder,
+                false,
+                CategoryLandingContext.School
             )
             .Returns(Task.FromResult(expectedViewModel));
 
@@ -105,6 +111,66 @@ public class CategoryLandingViewComponentTests
             sectionName,
             RecommendationConstants.DefaultSortOrder
         );
+
+        var viewResult = Assert.IsType<ViewViewComponentResult>(result);
+        Assert.NotNull(viewResult.ViewData);
+        Assert.Equal(expectedViewModel, viewResult.ViewData.Model);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_ShouldPassMatContextToBuildViewModelAsync()
+    {
+        var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
+        var component = new CategoryLandingViewComponent(viewBuilder);
+
+        var category = new QuestionnaireCategoryEntry
+        {
+            Sections = new List<QuestionnaireSectionEntry> { new() },
+        };
+        var slug = "test-slug";
+        var sectionName = "test-section";
+
+        var expectedViewModel = new CategoryLandingViewComponentViewModel
+        {
+            CategoryName = "Test Category",
+            CategorySlug = slug,
+            SectionName = sectionName,
+            CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
+            Sections = category.Sections,
+            StatusLinkPartialName = "status",
+            Context = CategoryLandingContext.MAT,
+        };
+
+        viewBuilder
+            .BuildViewModelAsync(
+                category,
+                slug,
+                sectionName,
+                RecommendationConstants.DefaultSortOrder,
+                false,
+                CategoryLandingContext.MAT
+            )
+            .Returns(Task.FromResult(expectedViewModel));
+
+        var result = await component.InvokeAsync(
+            category,
+            slug,
+            sectionName,
+            RecommendationConstants.DefaultSortOrder,
+            false,
+            CategoryLandingContext.MAT
+        );
+
+        await viewBuilder
+            .Received(1)
+            .BuildViewModelAsync(
+                category,
+                slug,
+                sectionName,
+                RecommendationConstants.DefaultSortOrder,
+                false,
+                CategoryLandingContext.MAT
+            );
 
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
