@@ -20,6 +20,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private readonly ILogger<GroupsController> _logger;
         private readonly IGroupsViewBuilder _viewBuilder;
+        private readonly IPagesViewBuilder _pagesViewBuilder;
         private readonly ICurrentUserProvider _currentUser;
         private readonly GroupsController _controller;
         private readonly IGroupSelectSchoolsToAssessValidator _validator;
@@ -29,6 +30,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             _logger = Substitute.For<ILogger<GroupsController>>();
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
+            _pagesViewBuilder = Substitute.For<IPagesViewBuilder>();
             _currentUser = Substitute.For<ICurrentUserProvider>();
             _validator = Substitute.For<IGroupSelectSchoolsToAssessValidator>();
             _session = new TestSession();
@@ -42,6 +44,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _logger,
                 _currentUser,
                 _viewBuilder,
+                _pagesViewBuilder,
                 _validator
             )
             {
@@ -57,7 +60,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullCurrentUser_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, null!, _viewBuilder, _validator)
+                new GroupsController(_logger, null!, _viewBuilder, _pagesViewBuilder, _validator)
             );
 
             Assert.Equal("currentUser", ex.ParamName);
@@ -67,17 +70,27 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, null!, _validator)
+                new GroupsController(_logger, _currentUser, null!, _pagesViewBuilder, _validator)
             );
 
             Assert.Equal("groupsViewBuilder", ex.ParamName);
         }
 
         [Fact]
+        public void Constructor_WithNullPagesViewBuilder_ThrowsArgumentNullException()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+                new GroupsController(_logger, _currentUser, _viewBuilder, null!, _validator)
+            );
+
+            Assert.Equal("pagesViewBuilder", ex.ParamName);
+        }
+
+        [Fact]
         public void Constructor_WithNullValidator_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, _viewBuilder, null!)
+                new GroupsController(_logger, _currentUser, _viewBuilder, _pagesViewBuilder, null!)
             );
 
             Assert.Equal("validator", ex.ParamName);
@@ -520,6 +533,80 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 );
 
             Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task GetMatStandardsList_CallsViewBuilderAndReturnsResult()
+        {
+            _viewBuilder
+                .RouteToMatStandardsListAsync(_controller)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetMatStandardsList();
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToMatStandardsListAsync(_controller);
+
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task GetMatRecommendationsLanding_CallsPagesViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "leadership-governance-standard";
+
+            _pagesViewBuilder
+                .RouteToMatCategoryLandingPageAsync(
+                    _controller,
+                    categorySlug
+                )
+                .Returns(new OkResult());
+
+            var result = await _controller.GetMatRecommendationsLanding(categorySlug);
+
+            await _pagesViewBuilder
+                .Received(1)
+                .RouteToMatCategoryLandingPageAsync(
+                    _controller,
+                    categorySlug
+                );
+
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task GetMatRecommendationsLanding_WithNullCategorySlug_ThrowsArgumentNullException()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.GetMatRecommendationsLanding(null!)
+            );
+
+            await _pagesViewBuilder
+                .DidNotReceive()
+                .RouteToMatCategoryLandingPageAsync(
+                    Arg.Any<Controller>(),
+                    Arg.Any<string>()
+                );
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task GetMatRecommendationsLanding_WithEmptyCategorySlug_ThrowsArgumentException(
+            string categorySlug
+        )
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _controller.GetMatRecommendationsLanding(categorySlug)
+            );
+
+            await _pagesViewBuilder
+                .DidNotReceive()
+                .RouteToMatCategoryLandingPageAsync(
+                    Arg.Any<Controller>(),
+                    Arg.Any<string>()
+                );
         }
 
         private sealed class TestSession : ISession

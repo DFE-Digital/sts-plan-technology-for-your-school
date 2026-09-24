@@ -23,6 +23,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         IEstablishmentService? establishment = null,
         IUserActionTrackingService? userActionTracking = null,
         IUserService? user = null,
+        IGroupService? groupService = null,
         ICurrentUserProvider? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
     )
@@ -32,6 +33,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         establishment ??= Substitute.For<IEstablishmentService>();
         userActionTracking ??= Substitute.For<IUserActionTrackingService>();
         user ??= Substitute.For<IUserService>();
+        groupService ??= Substitute.For<IGroupService>();
         currentUser ??= Substitute.For<ICurrentUserProvider>();
 
         currentUser.GetActiveEstablishmentIdAsync().Returns(1001);
@@ -45,7 +47,8 @@ public class CategoryLandingViewComponentViewBuilderTests
             submission,
             userActionTracking,
             establishment,
-            user
+            user,
+            groupService
         );
     }
 
@@ -1001,4 +1004,284 @@ public class CategoryLandingViewComponentViewBuilderTests
         await userActionTracking.DidNotReceive().GetAsync(Arg.Any<Guid>());
         await establishment.DidNotReceive().GetEstablishmentByIdAsync(Arg.Any<int>());
     }
+
+    [Fact]
+    public async Task BuildViewModelAsync_When_Mat_No_Submissions_Sets_Outstanding_Assessments()
+    {
+        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
+        section.CoreRecommendations =
+        [
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("rec-1"),
+                Header = "Recommendation 1",
+                Slug = "recommendation-1",
+            },
+        ];
+        var category = MakeCategory(section);
+
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        currentUser.UserOrganisationId.Returns(5001);
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentLinks(5001)
+            .Returns(
+            [
+                new SqlEstablishmentLinkDto { Urn = "100001" },
+                new SqlEstablishmentLinkDto { Urn = "100002" },
+            ]);
+        establishment
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(urns =>
+                    urns.SequenceEqual(new[] { "100001", "100002" })
+                )
+            )
+            .Returns(
+            [
+                new SqlEstablishmentDto { Id = 101 },
+                new SqlEstablishmentDto { Id = 102 },
+            ]);
+
+        var groupService = Substitute.For<IGroupService>();
+        groupService
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
+            )
+            .Returns([]);
+
+        var submission = Substitute.For<ISubmissionService>();
+
+        var sut = CreateSut(
+            submission: submission,
+            establishment: establishment,
+            groupService: groupService,
+            currentUser: currentUser
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        Assert.False(secVm.HasSubmittedAssessments);
+        Assert.True(secVm.HasOutstandingAssessments);
+        Assert.Equal(2, secVm.OutstandingAssessmentCount);
+        Assert.Null(secVm.Recommendations);
+        Assert.Equal(0, vm.CompletedSectionsCount);
+
+        await submission
+            .DidNotReceive()
+            .GetSectionStatusesForSchoolAsync(
+                Arg.Any<int>(),
+                Arg.Any<IEnumerable<string>>()
+            );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_When_Mat_Some_Schools_Have_Submitted_Populates_Recommendations()
+    {
+        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
+        section.CoreRecommendations =
+        [
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("rec-1"),
+                Header = "Recommendation 1",
+                Slug = "recommendation-1",
+            },
+        ];
+        var category = MakeCategory(section);
+
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        currentUser.UserOrganisationId.Returns(5001);
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentLinks(5001)
+            .Returns(
+            [
+                new SqlEstablishmentLinkDto { Urn = "100001" },
+                new SqlEstablishmentLinkDto { Urn = "100002" },
+            ]);
+        establishment
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(urns =>
+                    urns.SequenceEqual(new[] { "100001", "100002" })
+                )
+            )
+            .Returns(
+            [
+                new SqlEstablishmentDto { Id = 101 },
+                new SqlEstablishmentDto { Id = 102 },
+            ]);
+
+        var groupService = Substitute.For<IGroupService>();
+        groupService
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
+            )
+            .Returns(
+            [
+                new SqlSubmissionDto
+                {
+                    Id = 1,
+                    EstablishmentId = 101,
+                    SectionId = "S1",
+                },
+            ]);
+
+        var sut = CreateSut(
+            establishment: establishment,
+            groupService: groupService,
+            currentUser: currentUser
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.True(secVm.HasSubmittedAssessments);
+        Assert.True(secVm.HasOutstandingAssessments);
+        Assert.Equal(1, secVm.OutstandingAssessmentCount);
+        Assert.NotNull(secVm.Recommendations);
+        Assert.Single(secVm.Recommendations.Chunks);
+        Assert.Equal("Recommendation 1", secVm.Recommendations.Chunks[0].Header);
+        Assert.Equal("recommendation-1", secVm.Recommendations.Chunks[0].Slug);
+        Assert.Equal(1, vm.CompletedSectionsCount);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_When_Mat_All_Schools_Have_Submitted_Has_No_Outstanding_Assessments()
+    {
+        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
+        section.CoreRecommendations =
+        [
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("rec-1"),
+                Header = "Recommendation 1",
+                Slug = "recommendation-1",
+            },
+        ];
+        var category = MakeCategory(section);
+
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        currentUser.UserOrganisationId.Returns(5001);
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentLinks(5001)
+            .Returns(
+            [
+                new SqlEstablishmentLinkDto { Urn = "100001" },
+                new SqlEstablishmentLinkDto { Urn = "100002" },
+            ]);
+        establishment
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(urns =>
+                    urns.SequenceEqual(new[] { "100001", "100002" })
+                )
+            )
+            .Returns(
+            [
+                new SqlEstablishmentDto { Id = 101 },
+                new SqlEstablishmentDto { Id = 102 },
+            ]);
+
+        var groupService = Substitute.For<IGroupService>();
+        groupService
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
+            )
+            .Returns(
+            [
+                new SqlSubmissionDto
+                {
+                    Id = 1,
+                    EstablishmentId = 101,
+                    SectionId = "S1",
+                },
+                new SqlSubmissionDto
+                {
+                    Id = 2,
+                    EstablishmentId = 102,
+                    SectionId = "S1",
+                },
+            ]);
+
+        var sut = CreateSut(
+            establishment: establishment,
+            groupService: groupService,
+            currentUser: currentUser
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.True(secVm.HasSubmittedAssessments);
+        Assert.False(secVm.HasOutstandingAssessments);
+        Assert.Equal(0, secVm.OutstandingAssessmentCount);
+        Assert.NotNull(secVm.Recommendations);
+        Assert.Equal(1, vm.CompletedSectionsCount);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_When_Mat_Retrieval_Fails_Sets_Error_Message()
+    {
+        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
+        var category = MakeCategory(section);
+
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        currentUser.UserOrganisationId.Returns(5001);
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentLinks(5001)
+            .Throws(new Exception("boom"));
+
+        var groupService = Substitute.For<IGroupService>();
+
+        var sut = CreateSut(
+            establishment: establishment,
+            groupService: groupService,
+            currentUser: currentUser
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        Assert.Equal(
+            "Unable to retrieve recommendations, please refresh your browser.",
+            vm.ProgressRetrievalErrorMessage
+        );
+        Assert.Empty(vm.CategoryLandingSections);
+
+        await groupService
+            .DidNotReceive()
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
+    }
+
 }

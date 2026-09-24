@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
@@ -160,6 +161,27 @@ public class RecommendationsController(
             sectionSlug,
             chunkSlug,
             inputModel
+        );
+    }
+
+    [HttpGet($"trust/{{categorySlug}}/{{sectionSlug}}/recommendations/{{chunkSlug}}", Name = "GetMatSingleRecommendation")]
+    public async Task<IActionResult> GetMatSingleRecommendation(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToSingleRecommendation(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            false,
+            CategoryLandingContext.MAT
         );
     }
 }

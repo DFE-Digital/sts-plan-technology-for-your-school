@@ -27,5 +27,6 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string sectionSlug,
             string schoolUrn
         );
+        Task<IActionResult> RouteToMatStandardsListAsync(Controller controller);
     }
 }

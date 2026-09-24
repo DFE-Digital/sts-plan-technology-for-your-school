@@ -18,4 +18,7 @@ public class CategoryLandingViewComponentViewModel
     public RecommendationSortOrder? SortType { get; set; }
     public bool Print { get; set; }
     public required string StatusLinkPartialName { get; set; }
+    public CategoryLandingContext Context { get; init; }
+    public bool IsMat => Context == CategoryLandingContext.MAT;
+    public int OutstandingAssessmentCount { get; init; }
 }

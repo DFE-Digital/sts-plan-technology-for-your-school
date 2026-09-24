@@ -1,5 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
@@ -15,7 +17,8 @@ public class CategoryLandingViewComponent(ICategoryLandingViewComponentViewBuild
         string slug,
         string? sectionName,
         string? sortOrder,
-        bool print = false
+        bool print = false,
+        CategoryLandingContext context = CategoryLandingContext.School
     )
     {
         var viewModel = await _viewBuilder.BuildViewModelAsync(
@@ -23,8 +26,10 @@ public class CategoryLandingViewComponent(ICategoryLandingViewComponentViewBuild
             slug,
             sectionName,
             sortOrder,
-            print
+            print,
+            context
         );
+
         return View(viewModel);
     }
 }
