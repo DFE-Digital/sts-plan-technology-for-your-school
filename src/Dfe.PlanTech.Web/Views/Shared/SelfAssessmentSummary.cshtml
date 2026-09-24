@@ -9,7 +9,7 @@
     {
         ["topic"] = Model.SectionName,
         ["schoolCount"] = Model.CompletedSchoolCount.ToString() ?? "0",
-        ["category"] = Model.CategoryName.ToLower()
+        ["category"] = Model.CategoryName.ToLowerInvariant()
     };
 
     var schoolSuccessValues = new Dictionary<string, string>
@@ -117,7 +117,7 @@ else if (Model.RecommendationLinks.Any())
 {
     <p class="govuk-body">
         <a class="govuk-link"
-           href="@Model.RecommendationLinks.First().Href">
+           href="@Model.RecommendationLinks[0].Href">
             @await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.SchoolSummaryRecLink,
                 dynamicValues

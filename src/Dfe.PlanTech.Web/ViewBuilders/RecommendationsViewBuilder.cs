@@ -19,7 +19,7 @@ using StackExchange.Redis;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<RecommendationsViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     INotifyService notifyService,
@@ -50,11 +50,13 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var categoryHeaderText =
-            await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
-                $"Could not find category header text for slug {categorySlug}"
+                $"Could not find category for slug {categorySlug}"
             );
+        var categoryHeaderText = category.Header.Text;
+
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
@@ -278,12 +280,6 @@ public class RecommendationsViewBuilder(
                 false
             );
         }
-
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
-            establishmentId,
-            section,
-            status: SubmissionStatus.CompleteReviewed
-        );
 
         var dynamicValues =
             currentStatus?.NewStatus != inputModel.SelectedStatusEnum

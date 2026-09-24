@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -12,12 +13,11 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class PagesViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<PagesViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
@@ -206,7 +206,7 @@ public class PagesViewBuilder(
         var returnToModel = new ActionViewModel(
             actionName: nameof(PagesController.GetByRoute),
             controllerName: nameof(PagesController),
-            linkText: $"Back to {category.Header.Text.ToLower()}",
+            linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
             routeValues: new Dictionary<string, string> { { "route", categorySlug } }
         );
 
@@ -220,17 +220,6 @@ public class PagesViewBuilder(
         List<RelatedActionEntry>? relatedActions = null
     )
     {
-        var relatedActionsViewModels =
-            relatedActions
-                ?.Where(x => x is not null)
-                .Select(x => new RelatedActionViewModel
-                {
-                    Text = x.Title ?? string.Empty,
-                    Url = x.Url ?? string.Empty,
-                })
-                .ToList()
-            ?? [];
-
         return new CategoryLandingPageViewModel
         {
             Slug = categorySlug,
@@ -300,13 +289,8 @@ public class PagesViewBuilder(
         }
 
         return relatedActions
-            .Where(x => x is not null)
-            .Select(x => new RelatedActionViewModel
-            {
-                Text = x.Title ?? string.Empty,
-                Url = x.Url ?? string.Empty,
-            })
-            .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Url))
+            .Where(x => !string.IsNullOrWhiteSpace(x?.Title) && !string.IsNullOrWhiteSpace(x?.Url))
+            .Select(x => new RelatedActionViewModel { Text = x.Title!, Url = x.Url! })
             .ToList();
     }
 }

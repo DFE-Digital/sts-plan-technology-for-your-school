@@ -43,7 +43,7 @@
     (function (w, d, s, l, i) {
         w[l] = w[l] || [];
 
-        if (@isAuthenticated.ToString().ToLower()) {
+        if (@isAuthenticated.ToString().ToLowerInvariant()) {
             // Push server-derived context first
             w[l].push(@Html.Raw(dataLayerJson));
         }
