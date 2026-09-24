@@ -2,17 +2,17 @@
 # General #
 ###########
 variable "project_name" {
-  description = "project name, used along with `environment` as a prefix for all resources"
+  description = "Project name, used along with `environment` as a prefix for all resources"
   type        = string
 }
 
 variable "environment" {
-  description = "Environment name, used along with `project_name` as a prefix for all resources"
+  description = "Environment name, used along with `project_name` as a prefix for all resources. NOT the github env"
   type        = string
 }
 
 variable "azure_location" {
-  description = "Recourse location"
+  description = "Resource location"
   type        = string
 }
 
@@ -24,6 +24,16 @@ variable "az_tag_environment" {
 variable "az_tag_product" {
   description = "Product tag to be applied to all resources"
   type        = string
+}
+
+##################
+# Resource Group #
+##################
+
+variable "create_rg_separately" {
+  description = "Flag to create the RG before the shared module"
+  type        = bool
+  default     = true
 }
 
 ############
@@ -113,6 +123,12 @@ variable "redis_public_access_enabled" {
 ############
 # KeyVault #
 ############
+variable "kv_use_rbac" {
+  description = "create kv with rbac instead of access."
+  type        = bool
+  default     = false
+}
+
 variable "key_type" {
   description = "The JsonWebKeyType of the key to be created."
   default     = "RSA"
@@ -139,6 +155,18 @@ variable "key_vault_cidr_rules" {
   description = "A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv"
   type        = set(string)
   default     = []
+}
+
+variable "add_secrets" {
+  description = "Add secrets using TF - leave false if restoring from backup in pipeline"
+  type        = bool
+  default     = false
+}
+
+variable "include_kv_subnet_acl" {
+  description = "Whether to add the link to the virtual network"
+  type        = bool
+  default     = true
 }
 
 #######################
@@ -190,13 +218,102 @@ variable "container_environment_variables" {
   default     = {}
 }
 
-##################
-# CDN/Front Door #
-##################
-variable "cdn_create_custom_domain" {
-  description = "A flag to create the A and TXT records for the container app as part of setting up the cdn"
+variable "container_app_environment_workload_profile_type" {
+  description = "Container app environment type"
+  type        = string
+  default     = "Consumption"
+}
+
+variable "launch_in_vnet" {
+  description = "Needed to force container app to be made with internal load balancer to avoid Public IP within shared module"
+  type        = bool
+  default     = true
+}
+
+variable "container_app_environment_internal_load_balancer_enabled" {
+  description = "Force container app to be made with internal load balancer to avoid Public IP within shared module"
+  type        = bool
+  default     = true
+}
+
+##############################################################
+# Azure Container Registry creation - settings to match shared module #
+##############################################################
+variable "enable_container_registry" {
+  description = "Create registry within shared module"
   type        = bool
   default     = false
+}
+
+variable "registry_sku" {
+  description = "Container registry sku level"
+  type        = string
+  default     = "Standard"
+}
+
+variable "registry_admin_enabled" {
+  description = "Create admin logon on ACR"
+  type        = bool
+  default     = true
+}
+
+variable "registry_public_access_enabled" {
+  description = "Create public access on ACR"
+  type        = bool
+  default     = true
+}
+
+variable "enable_registry_retention_policy" {
+  description = "Create public access on ACR"
+  type        = bool
+  default     = false
+}
+
+variable "registry_retention_days" {
+  description = "registry retention days"
+  type        = number
+  default     = null
+}
+
+variable "registry_ipv4_allow_list" {
+  description = "IPv4 allow list for ACR"
+  type = map(object({
+    start_ip_range : string,
+    end_ip_range : optional(string, "")
+  }))
+  default = {}
+}
+#######
+# DNS #
+#######
+variable "manage_dns_in_app_state" {
+  description = "A flag to have this terraform create the DNS zone using local module & app tfstate. currently prod has dns in its own tf state file. so we will only create resources in container-app terraforming for other envs"
+  type        = bool
+  default     = true
+}
+
+variable "primary_fqdn" {
+  description = "The host name to use in the custom domain in front door"
+  type        = string
+  default     = null
+}
+
+#unusued, even staging is not set up as a subdomain.
+#variable "subdomains" {
+#  description = "A list of subdomain names to use in the dns a records"
+#  type        = list(string)
+#  default     = []
+#}
+
+########################
+# CDN/Front Door & DNS #
+########################
+#has shared container app set up OR  WAF module can add custom domain to Front Door. Set up DNS first to associate.
+
+variable "cdn_create_custom_domain_waf" {
+  description = "A flag to have the custom front door domain created IN SHARED WAF MODULE"
+  type        = bool
+  default     = true
 }
 
 variable "cdn_frontdoor_host_add_response_headers" {
@@ -222,29 +339,33 @@ variable "cdn_frontdoor_url_path_redirects" {
 }
 
 ###################
-# Github Registry #
+# Azure Registry - existing #
 ###################
 
 variable "registry_server" {
   description = "Container registry server"
   type        = string
+  default     = null
 }
 
 variable "registry_username" {
   description = "Container registry username"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "registry_password" {
   description = "Container registry password"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "image_tag" {
   description = "Image tag"
   type        = string
+  default     = null
 }
 
 ####################
@@ -273,37 +394,39 @@ variable "storage_account_expiration_period" {
 # Contentful #
 ##############
 
-variable "contentful_management_token" {
-  description = "Contentful management token"
-  type        = string
-  sensitive   = true
-  default     = null
-}
+##didn't find the hook creation to work from here as it needs the secrt
+# variable "contentful_management_token" {
+#   description = "Contentful management token"
+#   type        = string
+#   sensitive   = true
+#   default     = null
+# }
 
-variable "contentful_webhook_endpoint" {
-  description = "Endpoint for Contentful webhook"
-  type        = string
-  sensitive   = false
-  default     = "/api/cms/webhook"
-}
+# variable "contentful_webhook_endpoint" {
+#   description = "Endpoint for Contentful webhook"
+#   type        = string
+#   sensitive   = false
+#   default     = "/api/cms/webhook"
+# }
 
-variable "contentful_upsert_webhook" {
-  description = "Whether to create/update the webhook or not"
-  type        = bool
-  default     = false
-}
+# variable "contentful_upsert_webhook" {
+#   description = "Whether to create/update the webhook or not"
+#   type        = bool
+#   default     = false
+# }
 
-variable "contentful_webhook_name" {
-  description = "Prefix for the Contentful webhook name"
-  type        = string
-  default     = "Plan Tech Webhook"
-}
+# variable "contentful_webhook_name" {
+#   description = "Prefix for the Contentful webhook name"
+#   type        = string
+#   default     = "Plan Tech Webhook"
+# }
 
 #########
 # Misc #
 #########
 
-variable "workflow_runner_ip" {
-  type    = string
-  default = null
+variable "create_self_delete_resources" {
+  type        = bool
+  default     = true
+  description = "If these have been created previously, their soft delete will resurrect them then cause a TF error. make this false to not try create them"
 }

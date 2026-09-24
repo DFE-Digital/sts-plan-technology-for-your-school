@@ -1,0 +1,57 @@
+name: Terraform Apply
+
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        required: true
+        type: string
+    secrets: inherit
+
+jobs:
+  apply:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: terraform/container-app
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.7
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Set image tag
+        run: echo "TF_VAR_image_tag=${{ needs.promote-image.outputs.image_tag }}" >> $GITHUB_ENV
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
+      - name: Get tfvars
+        shell: pwsh
+        run: |
+          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
+
+      - name: Apply Terraform
+        run: terraform apply -auto-approve -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=${{ inputs.workflow_runner_ip }}"
+
+      - name: Cleanup
+        shell: pwsh
+        run: ./scripts-workflow/remove-generated-files.ps1

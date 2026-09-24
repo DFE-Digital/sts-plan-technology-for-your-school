@@ -1,0 +1,22 @@
+# Shared with container-app. Keep these in sync.
+project_name                = "plantech"
+github_actions_principal_id = ""
+environment                 = ""
+azure_location              = "westeurope"
+az_tag_environment          = ""
+az_tag_product              = "Plan Technology for your School"
+
+# Backups-specific
+backup_resource_group_name   = ""
+backup_storage_account_name  = "plantechsqlbackups"
+backup_container_name        = "sqlbackups"
+
+blob_delete_retention_days      = 14
+container_delete_retention_days = 14
+immutability_enabled            = false
+immutability_period_days        = 7
+
+tags = {
+  Product          = ""
+  ServiceOffering  = ""
+}

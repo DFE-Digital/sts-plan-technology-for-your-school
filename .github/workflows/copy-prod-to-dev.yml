@@ -1,0 +1,122 @@
+name: Copy of Production to Dev
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      backup_environment:
+        required: false
+        type: choice
+        options: ['ProductionUnprotected', 'Dev']
+        default: 'ProductionUnprotected'
+      db_environment:
+        required: false
+        type: choice
+        options: ['ProductionUnprotected', 'Dev']
+        default: 'Dev'
+      db_name_suffix:
+        required: false
+        default: '-sqldb-prod-backup'
+      backup_filename:
+        required: false
+        default: ''
+      backup_filename_search_term:
+        required: false
+        default: ''
+  #push:
+    #branches: ['feature/322958/copy-prod-into-dev']
+  
+env:
+  BACKUP_ENVIRONMENT: ${{ github.event.inputs.backup_environment || 'ProductionUnprotected' }}
+  DB_ENVIRONMENT: ${{ github.event.inputs.db_environment || 'Dev' }}  
+  BACKUP_CONTAINER_NAME: sqlbackups
+  SQL_BACKUP_FILE_NAME: ${{ github.event.inputs.backup_filename || '' }}
+  SQL_BACKUP_FILE_NAME_SEARCH: ${{ github.event.inputs.backup_filename_search_term || '' }}
+  SQL_TARGET_DATABASE_SUFFIX: ${{ github.event.inputs.db_name_suffix || '-sqldb-prod-backup' }}
+  USE_LATEST_IF_NOT_SPECIFIED: true
+
+jobs:
+  cadence:
+      runs-on: ubuntu-latest
+      outputs:
+        run: ${{ steps.check.outputs.run }}
+
+      steps:
+        - name: Check fortnightly cadence
+          id: check
+          shell: bash
+          run: |
+            ANCHOR="2026-07-27"
+            TODAY=$(date -u +%Y-%m-%d)
+
+            DAYS=$(( ($(date -u -d "$TODAY" +%s) - $(date -u -d "$ANCHOR" +%s)) / 86400 ))
+
+            if (( DAYS % 14 == 0 )); then
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            fi  
+  copydb:
+    needs: cadence
+    if: needs.cadence.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    environment: 'ProductionUnprotected'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: clone repo
+        uses: actions/checkout@v4
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: | 
+          set -euo pipefail
+
+          if [[ "$BACKUP_ENVIRONMENT" == *"Production"* ]]; then
+            BACKUP_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_PROD }}"
+          else
+            BACKUP_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_DEV }}"
+          fi
+          if [[ "DB_ENVIRONMENT" == *"Production"* ]]; then
+            DB_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_PROD }}"
+          else
+            DB_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_DEV }}"
+          fi
+
+          RESOURCE_PREFIX_BACKUP="${BACKUP_AZ_ENVIRONMENT}${{ vars.DFE_PROJECT_NAME }}"-backup
+          RESOURCE_PREFIX_DB="${DB_AZ_ENVIRONMENT}${{ vars.DFE_PROJECT_NAME }}"
+
+          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_DB_SHORT=${RESOURCE_PREFIX_DB//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_DB=$RESOURCE_PREFIX_DB" >> "$GITHUB_OUTPUT"
+
+      - name: Restore DB from BACPAC
+        uses: ./.github/actions/restore-db-from-bacpac
+        with:
+          backup_env: ${{ env.BACKUP_ENVIRONMENT }}
+          db_env: ${{ env.DB_ENVIRONMENT }}
+          resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
+          resource_group_db: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}
+          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}${{ env.SQL_TARGET_DATABASE_SUFFIX }}
+          storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
+          container_name: ${{ env.BACKUP_CONTAINER_NAME }}
+          bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
+          bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
+          use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
+          delete_if_exists: true
+          dev_client_id: ${{ secrets.DEV_CLIENT_ID }}
+          dev_tenant_id: ${{ secrets.DEV_TENANT_ID }}
+          dev_subscription_id: ${{ secrets.DEV_SUBSCRIPTION_ID }}
+          prod_client_id: ${{ secrets.PROD_CLIENT_ID }}
+          prod_tenant_id: ${{ secrets.PROD_TENANT_ID }}
+          prod_subscription_id: ${{ secrets.PROD_SUBSCRIPTION_ID }}

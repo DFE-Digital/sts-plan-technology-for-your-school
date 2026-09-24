@@ -7,7 +7,7 @@
     {
         ["position"] = Model.CurrentChunkPosition.ToString(),
         ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
-        ["topic"] = Model.Section.Name.ToLower(),
+        ["topic"] = Model.Section.Name.ToLowerInvariant(),
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };
@@ -26,7 +26,7 @@
         Home
     </govuk-back-link>
     <govuk-back-link id="nonjs-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
-        Back to @Model.CategoryName.ToLower()
+        Back to @Model.CategoryName.ToLowerInvariant()
     </govuk-back-link>
 }
 

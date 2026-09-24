@@ -1,0 +1,8 @@
+category
+page
+title
+section
+question
+answer
+recommendationChunk
+textBody

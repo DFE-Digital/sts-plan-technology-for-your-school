@@ -94,7 +94,7 @@ jobs:
           az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
       - name: Run clear DB SQL script
-        uses: azure/sql-action@v2.3
+        uses: azure/sql-action@v2.4
         env:
           ESTABLISHMENT_REF: ${{ steps.get-establishment-ref.outputs.ref }}
         with:

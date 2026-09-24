@@ -53,6 +53,7 @@ public class ServiceExceptionHandlerMiddleware(
             ContentfulDataUnavailableException => internalErrorSlug,
             DatabaseException => internalErrorSlug,
             InvalidEstablishmentException => internalErrorSlug,
+            InvalidGiasDataException => internalErrorSlug,
             KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) =>
                 UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(internalErrorSlug, exception.InnerException),

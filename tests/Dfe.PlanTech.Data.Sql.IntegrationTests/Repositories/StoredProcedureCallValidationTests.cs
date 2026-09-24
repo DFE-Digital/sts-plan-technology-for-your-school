@@ -25,28 +25,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     [Fact]
     public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenCalledWithValidParameters_ThenReturnsExpectedData_WithNullGroupName()
     {
-        async Task insertSectionRecommendationAsync(
-            string sectionRef,
-            string recommendationContentfulRef
-        )
-        {
-            var sql =
-                @$"
-                IF OBJECT_ID('migration.sectionRecommendations', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [migration].[sectionRecommendations](
-	                    [sectionRef] [nvarchar](100) NULL,
-	                    [recommendationRef] [nvarchar](100) NULL
-                    ) ON [PRIMARY]
-                END;
-
-                INSERT INTO migration.sectionRecommendations (sectionRef, recommendationRef)
-                VALUES ('{sectionRef}', '{recommendationContentfulRef}');
-            ";
-
-            await DbContext.Database.ExecuteSqlRawAsync(sql);
-        }
-
         // Arrange
         var school = new EstablishmentEntity
         {
@@ -66,8 +44,9 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
 
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
-        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
         DbContext.Questions.Add(question);
+
+        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
         DbContext.Answers.Add(answer);
 
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
@@ -80,7 +59,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             EstablishmentId = school.Id,
             SectionId = sectionRef,
             SectionName = "Section XYZ",
-            Status = SubmissionStatus.InProgress,
+            Status = SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-10),
         };
         DbContext.Submissions.Add(submission);
@@ -102,6 +81,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         {
             ContentfulRef = recommendationContentfulRef,
             QuestionId = question.Id,
+            QuestionContentfulRef = question.ContentfulRef,
             RecommendationText = "Test Recommendation",
             Question = question,
             DateCreated = DateTime.UtcNow,
@@ -109,8 +89,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        await insertSectionRecommendationAsync(sectionRef, recommendationContentfulRef);
 
         var earliest = DateTime.UtcNow.AddDays(-8);
         var later = DateTime.UtcNow.AddDays(-7);
@@ -171,28 +149,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     [Fact]
     public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenGroupNameIsNull_ThenReturnsNullGroupName()
     {
-        async Task insertSectionRecommendationAsync(
-            string sectionRef,
-            string recommendationContentfulRef
-        )
-        {
-            var sql =
-                @$"
-                IF OBJECT_ID('migration.sectionRecommendations', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [migration].[sectionRecommendations](
-	                    [sectionRef] [nvarchar](100) NULL,
-	                    [recommendationRef] [nvarchar](100) NULL
-                    ) ON [PRIMARY]
-                END;
-
-                INSERT INTO migration.sectionRecommendations (sectionRef, recommendationRef)
-                VALUES ('{sectionRef}', '{recommendationContentfulRef}');
-            ";
-
-            await DbContext.Database.ExecuteSqlRawAsync(sql);
-        }
-
         // Arrange
         var school = new EstablishmentEntity
         {
@@ -219,7 +175,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             EstablishmentId = school.Id,
             SectionId = sectionRef,
             SectionName = "Section XYZ",
-            Status = SubmissionStatus.InProgress,
+            Status = SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-10),
         };
         DbContext.Submissions.Add(submission);
@@ -241,6 +197,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         {
             ContentfulRef = recommendationContentfulRef,
             QuestionId = question.Id,
+            QuestionContentfulRef = question.ContentfulRef,
             RecommendationText = "Test Recommendation",
             Question = question,
             DateCreated = DateTime.UtcNow,
@@ -248,8 +205,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        await insertSectionRecommendationAsync(sectionRef, recommendationContentfulRef);
 
         var earliest = DateTime.UtcNow.AddDays(-8);
         var later = DateTime.UtcNow.AddDays(-7);

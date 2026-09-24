@@ -68,16 +68,31 @@ Before(async function (scenario: ITestCaseHookParameter) {
   this.page = page;
   this.shouldRecord = shouldRecord;
 
-  const resetTag = scenario.pickle.tags.find(
-    (t) => t.name === '@clear-data-school' || t.name === '@clear-data-mat',
+  const resetTags = scenario.pickle.tags.filter(
+    (t) =>
+      t.name === '@clear-data-school' ||
+      t.name === '@clear-data-mat' ||
+      t.name.startsWith('@clear-data-school-'),
   );
 
-  if (resetTag) {
+  for (const resetTag of resetTags) {
     const tagName = resetTag.name;
 
     let establishmentRef: string | undefined;
 
-    if (tagName === '@clear-data-school') {
+    if (tagName.startsWith('@clear-data-school-')) {
+      const rawKey = tagName.replace('@clear-data-school-', '');
+      const keyFromTag = rawKey.toUpperCase() as MatSchoolKey;
+
+      if (!(keyFromTag in MAT_SCHOOLS)) {
+        throw new Error(
+          `Unknown school key "${keyFromTag}" in tag ${tagName}. ` +
+          `Expected one of: ${Object.keys(MAT_SCHOOLS).join(', ')}`,
+        );
+      }
+
+      establishmentRef = MAT_SCHOOLS[keyFromTag].URN;
+    } else if (tagName === '@clear-data-school') {
       establishmentRef = process.env.DSI_SCHOOL_ESTABLISHMENT_REF;
     } else if (tagName === '@clear-data-mat') {
       establishmentRef = process.env.DSI_MAT_ESTABLISHMENT_REF;
@@ -89,12 +104,17 @@ Before(async function (scenario: ITestCaseHookParameter) {
       );
     }
 
-    console.log(`Clearing establishment data for establishmentRef: ${establishmentRef}`);
+    console.log(
+      `Clearing establishment data for establishmentRef: ${establishmentRef}`,
+    );
 
     await clearTestEstablishmentData(establishmentRef);
+
   }
 
-  const schoolTag = scenario.pickle.tags.find((t) => t.name.startsWith('@selected-school-'));
+  const schoolTag = scenario.pickle.tags.find((t) =>
+    t.name.startsWith('@selected-school-'),
+  );
 
   if (schoolTag) {
     const rawKey = schoolTag.name.replace('@selected-school-', '');
@@ -113,13 +133,17 @@ Before(async function (scenario: ITestCaseHookParameter) {
       console.log(`Auto-selecting school: ${this.selectedSchool.NAME}`);
 
       await this.page.goto(`${process.env.URL}home`);
-      
+
       try {
-        await this.page.getByRole('button', {
-          name: this.selectedSchool.NAME,
-        }).click();
+        await this.page
+          .getByRole('button', {
+            name: this.selectedSchool.NAME,
+          })
+          .click();
       } catch {
-          console.warn(`Failed to select school ${this.selectedSchool.NAME} on dashboard. `);
+        console.warn(
+          `Failed to select school ${this.selectedSchool.NAME} on dashboard. `,
+        );
       }
       console.log(`Navigated to dashboard for: ${this.selectedSchool.NAME}`);
     }

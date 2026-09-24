@@ -1,0 +1,138 @@
+name: Restore Azure SQL DB from BACPAC
+
+#todo: consider auto generating naming from project and env vars? less flexible tho
+on:
+  workflow_call:
+    inputs:
+      resource_group:
+        required: true
+        type: string
+      backup_resource_group:
+        required: true
+        type: string
+      sql_server_name:
+        required: true
+        type: string
+      target_database:
+        required: true
+        type: string
+      storage_account:
+        required: true
+        type: string
+      container_name:
+        required: true
+        type: string
+      bacpac_file:
+        required: false
+        type: string
+        default: ""
+      bacpac_prefix:
+        required: false
+        type: string
+        default: ""
+      use_latest_if_not_specified:
+        required: false
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        required: true
+        type: string
+      backup_resource_group:
+        required: true
+        type: string
+      sql_server_name:
+        required: true
+        type: string
+      target_database:
+        required: true
+        type: string
+      storage_account:
+        required: true
+        type: string
+      container_name:
+        required: true
+        type: string
+      bacpac_file:
+        required: false
+        type: string
+        default: ""
+      bacpac_prefix:
+        required: false
+        type: string
+        default: ""
+      use_latest_if_not_specified:
+        required: false
+        type: boolean
+        default: true
+
+  # push:
+  #   branches:
+  #      - disaster-recovery-e2e-terraform
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      BACKUP_RESOURCE_GROUP: ${{ inputs.resource_group }}
+      RESOURCE_GROUP: ${{ inputs.resource_group }}
+      SQL_SERVER_NAME: ${{ inputs.sql_server_name }}
+      TARGET_DATABASE: ${{ inputs.target_database }}
+      BACKUP_STORAGE_ACCOUNT: ${{ inputs.storage_account }}
+      CONTAINER_NAME: ${{ inputs.container_name }}
+      BACPAC_FILE: ${{ inputs.bacpac_file }}
+      BACPAC_PREFIX: ${{ inputs.bacpac_prefix }}
+      USE_LATEST_IF_NOT_SPECIFIED: ${{ inputs.use_latest_if_not_specified }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
+          az_aca_resource_group: ${{ env.RESOURCE_GROUP }}
+          sql_server_name: ${{ env.SQL_SERVER_NAME }}
+          sa_resource_group: ${{ env.BACKUP_RESOURCE_GROUP }}
+          sa_name: ${{ env.BACKUP_STORAGE_ACCOUNT }}
+          removeRules: 'false'
+
+      - name: Restore 
+        uses: ./.github/actions/restore-db-from-bacpac
+        with:
+          resource_group: ${{ env.BACKUP_RESOURCE_GROUP }}
+          sql_server_name: ${{ env.SQL_SERVER_NAME }}
+          target_database: ${{ env.TARGET_DATABASE }}
+          storage_account: ${{ env.BACKUP_STORAGE_ACCOUNT }}
+          container_name: ${{ env.CONTAINER_NAME }}
+          bacpac_file: ${{ env.BACPAC_FILE }}
+          bacpac_prefix: ${{ env.BACPAC_PREFIX }}
+          use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
+
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
+          az_aca_resource_group: ${{ env.RESOURCE_GROUP }}
+          sql_server_name: ${{ env.SQL_SERVER_NAME }}
+          sa_resource_group: ${{ env.BACKUP_RESOURCE_GROUP }}
+          sa_name: ${{ env.BACKUP_STORAGE_ACCOUNT }}
+          removeRules: 'true'

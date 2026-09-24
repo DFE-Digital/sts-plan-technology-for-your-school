@@ -130,7 +130,7 @@ public class CurrentUserProvider : ICurrentUserProvider
 
     public bool UserOrganisationIsGroup =>
         Organisation != null
-        && DsiConstants.OrganisationGroupCategoryIds.Contains(
+        && DsiConstants.SelectASchoolOrganisationCategoryIds.Contains(
             Organisation.Category?.Id ?? string.Empty
         );
 
