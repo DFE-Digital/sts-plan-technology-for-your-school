@@ -52,7 +52,7 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                     .FirstOrDefault(s => s.Establishment.EstablishmentRef == est.Urn);
 
             if (submission == null)
-            {               
+            {
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
