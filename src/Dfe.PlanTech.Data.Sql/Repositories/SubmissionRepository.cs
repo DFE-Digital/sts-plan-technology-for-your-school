@@ -157,7 +157,9 @@ public class SubmissionRepository(
     {
         var submission =
             await GetSubmissionByIdAsync(submissionId)
-            ?? throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
+            ?? throw new InvalidOperationException(
+                $"Could not find submission with ID '{submissionId}'"
+            );
         var userActionId = _userActionIdProvider.GetUserActionId();
 
         submission.DateCompleted = DateTime.UtcNow;

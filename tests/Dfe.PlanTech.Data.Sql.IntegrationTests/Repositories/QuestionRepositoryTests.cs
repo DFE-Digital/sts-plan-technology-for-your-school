@@ -23,21 +23,30 @@ public class QuestionRepositoryTests : DatabaseIntegrationTestBase
     public async Task GetQuestionsForSection_ReturnsMatchingQuestions_WhenContentfulRefsMatch()
     {
         // Arrange
-        var question1 = new QuestionEntity { ContentfulRef = "ref-101" };
-        var question2 = new QuestionEntity { ContentfulRef = "ref-102" };
+        var question1 = new QuestionEntity
+        {
+            DateCreated = DateTime.Now,
+            ContentfulRef = "ref-101",
+        };
+        var question2 = new QuestionEntity
+        {
+            DateCreated = DateTime.Now,
+            ContentfulRef = "ref-102",
+        };
 
         DbContext.Questions.AddRange(question1, question2);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sectionQuestions = new List<QuestionnaireQuestionEntry>
         {
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-101" } },
-            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-102" } },
+            new QuestionnaireQuestionEntry { Sys = new("ref-101") },
+            new QuestionnaireQuestionEntry { Sys = new("ref-102") },
         };
         var section = new QuestionnaireSectionEntry { Questions = sectionQuestions };
+        var questionRefs = sectionQuestions.Select(q => q.Id);
 
         // Act
-        var result = await _questionRepository.GetQuestionsForSection(section);
+        var result = await _questionRepository.GetQuestionsByContenfulRef(questionRefs);
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -46,7 +55,7 @@ public class QuestionRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task GetQuestionsForSection_ReturnsEmptyList_WhenNoMatchingQuestions()
+    public async Task GetQuestionsByContenfulRef_ReturnsEmptyList_WhenNoMatchingQuestions()
     {
         // Arrange
         var question = new QuestionEntity { ContentfulRef = "ref-201" };
@@ -54,26 +63,15 @@ public class QuestionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Questions.Add(question);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var section = new QuestionnaireSectionEntry
-        {
-            Questions =
-            [
-                new QuestionnaireQuestionEntry
-                {
-                    Sys = new SystemDetails { Id = "non-existent-ref" },
-                },
-            ],
-        };
-
         // Act
-        var result = await _questionRepository.GetQuestionsForSection(section);
+        var result = await _questionRepository.GetQuestionsByContenfulRef(["non-existent-ref"]);
 
         // Assert
         Assert.Empty(result);
     }
 
     [Fact]
-    public async Task GetQuestionsForSection_IgnoresNullSysIds()
+    public async Task GetQuestionsByContenfulRef_IgnoresNullSysIds()
     {
         // Arrange
         var question = new QuestionEntity { ContentfulRef = "ref-301" };
@@ -92,7 +90,9 @@ public class QuestionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         // Act
-        var result = await _questionRepository.GetQuestionsForSection(section);
+        var result = await _questionRepository.GetQuestionsByContenfulRef(
+            section.Questions.Select(q => q.Id)
+        );
 
         // Assert
         Assert.NotNull(result);

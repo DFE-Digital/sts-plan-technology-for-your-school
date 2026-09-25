@@ -79,6 +79,24 @@ public class SubmissionWorkflow(
             .Responses.GroupBy(r => r.QuestionId)
             .Select(group => group.OrderByDescending(r => r.DateCreated).First());
 
+        // Ensure the responses' questions' Contentful references are the same as the ones in the Contentful Section
+        var sectionQuestionRefs = questionRefsToRecommendations.Keys;
+        var responseQuestionRefs = responses.Select(r => r.Question.ContentfulRef);
+        var questionRefsMissingFromSection = string.Join(
+            ", ",
+            responseQuestionRefs.Where(responseQuestionRef =>
+                !sectionQuestionRefs.Contains(responseQuestionRef)
+            )
+        );
+
+        if (questionRefsMissingFromSection.Length > 0)
+        {
+            throw new InvalidOperationException(
+                "Could not find a question in Contentful matching response "
+                    + $"question reference(s): {questionRefsMissingFromSection}"
+            );
+        }
+
         var responseRecommendations = responses.ToDictionary(
             r => r.Id,
             r => questionRefsToRecommendations[r.Question.ContentfulRef]
@@ -88,8 +106,6 @@ public class SubmissionWorkflow(
             r => responseRecommendations[r.Id].Id,
             r => r.Id
         );
-
-        var sectionQuestions = await _questionRepository.GetQuestionsForSection(section);
 
         var recommendationDtos = new List<SqlRecommendationDto>();
         var recommendationStatuses = new Dictionary<string, RecommendationStatus>();
@@ -116,18 +132,6 @@ public class SubmissionWorkflow(
             else
             {
                 recommendationStatuses.Add(coreRecommendation.Id, RecommendationStatus.NotStarted);
-            }
-
-            // Ensure the DB question's Contentful reference is associated with the Contentful Section
-            var question = sectionQuestions.FirstOrDefault(q =>
-                string.Equals(q.ContentfulRef, response.Question.ContentfulRef)
-            );
-
-            if (question is null)
-            {
-                throw new InvalidOperationException(
-                    "Could not find the question associated with the submission in the database"
-                );
             }
 
             recommendationDtos.Add(

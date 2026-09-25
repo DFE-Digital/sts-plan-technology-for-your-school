@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +9,20 @@ public class QuestionRepository(PlanTechDbContext dbContext) : IQuestionReposito
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-    public async Task<List<QuestionEntity>> GetQuestionsForSection(
-        QuestionnaireSectionEntry section
+    public async Task<List<QuestionEntity>> GetQuestionsByContenfulRef(
+        IEnumerable<string> sectionQuestionRefs
     )
     {
-        var sectionQuestionRefs = section.Questions.Select(q => q.Sys?.Id).ToList();
-
-        var sectionQuestions = await _db
+        var entities = await _db
             .Questions.Where(question => sectionQuestionRefs.Contains(question.ContentfulRef))
             .ToListAsync();
 
-        return sectionQuestions;
+        return entities
+            .GroupBy(q => q.ContentfulRef)
+            .Select(group => group.OrderByDescending(q => q.DateCreated).FirstOrDefault())
+            .Where(q => q != null)
+            .Cast<QuestionEntity>()
+            .ToList();
     }
 
     public async Task<int> GetOrCreateQuestionIdAsync(

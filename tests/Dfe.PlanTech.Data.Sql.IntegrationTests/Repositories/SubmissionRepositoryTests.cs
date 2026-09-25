@@ -205,7 +205,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             )
         );
 
-        Assert.Equal("Could not find submission with ID 100 in database", exception.Message);
+        Assert.Equal("Could not find submission with ID '100'", exception.Message);
     }
 
     [Fact]

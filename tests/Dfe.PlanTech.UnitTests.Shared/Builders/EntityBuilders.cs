@@ -36,12 +36,14 @@ public class EntityBuilders
     public static RecommendationEntity BuildRecommendation(
         int id,
         string contentfulRef,
+        int questionId,
         string? recommendationText = null
     ) =>
         new()
         {
             Id = id,
             ContentfulRef = contentfulRef,
+            QuestionId = questionId,
             RecommendationText = recommendationText ?? $"Recommendation {id}",
         };
 
@@ -76,11 +78,11 @@ public class EntityBuilders
     }
 
     public static SubmissionEntity BuildEmptySubmission() =>
-        BuildSubmission(id: 0, establishmentId: 1, sectionId: "SEC000");
+        BuildSubmission(id: 0, establishment: BuildEstablishment(1), sectionId: "SEC000");
 
     public static SubmissionEntity BuildSubmission(
         int? id,
-        int? establishmentId,
+        EstablishmentEntity establishment,
         string? sectionId,
         int? dateCreatedDaysBefore = null,
         int? dateLastUpdatedDaysBefore = null,
@@ -91,8 +93,8 @@ public class EntityBuilders
         new()
         {
             Id = id ?? 0,
-            EstablishmentId = establishmentId ?? 0,
-            Establishment = BuildEstablishment(establishmentId ?? 0),
+            EstablishmentId = establishment.Id,
+            Establishment = establishment,
             SectionId = $"S{sectionId:000}",
             SectionName = $"Test Section {sectionId}",
             Responses = responses ?? [],
@@ -105,23 +107,25 @@ public class EntityBuilders
     public static ResponseEntity BuildResponse(
         int id,
         DateTime dateCreated,
+        UserEntity user,
         SubmissionEntity submission,
-        int questionId,
-        string questionRef,
-        int answerId,
-        string answerRef
+        QuestionEntity question,
+        AnswerEntity answer
     ) =>
         new()
         {
             Id = id,
             DateCreated = dateCreated,
             DateLastUpdated = dateCreated,
-            QuestionId = id * 10,
-            Question = BuildQuestion(questionId, questionRef),
-            Answer = BuildAnswer(answerId, answerRef),
+            UserId = user.Id,
+            User = user,
+            QuestionId = question.Id,
+            Question = question,
+            AnswerId = answer.Id,
+            Answer = answer,
             SubmissionId = submission.Id,
             Submission = submission,
         };
 
-    public static UserEntity BuildUser(int id) => new() { DfeSignInRef = $"User{id}" };
+    public static UserEntity BuildUser(int id) => new() { Id = id, DfeSignInRef = $"User{id}" };
 }
