@@ -212,6 +212,83 @@ public class ResponseRepositoryTests : DatabaseIntegrationTestBase
     //    Assert.Contains(responses, r => r.ContentfulRef == "rec-archived" && r.Archived);
     //}
 
+    [Fact]
+    public async Task SubmitResponseAsync_WhenSubmissionAlreadyExists_ThenPersistsEachResponse()
+    {
+        // Arrange - Answering a second question against an existing submission must persist on its
+        // own, rather than relying on a later SaveChanges elsewhere in the request to flush it.
+        var user = EntityBuilders.BuildUser(102);
+        await DbContext.Users.AddAsync(user, TestContext.Current.CancellationToken);
+        await SetIdentityInsert("user", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("user", "OFF");
+
+        var establishment = EntityBuilders.BuildEstablishment(202);
+        await DbContext.Establishments.AddAsync(
+            establishment,
+            TestContext.Current.CancellationToken
+        );
+        await SetIdentityInsert("establishment", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("establishment", "OFF");
+
+        var submission = EntityBuilders.BuildSubmission(302, establishment, "SEC2");
+        await DbContext.Submissions.AddAsync(submission, TestContext.Current.CancellationToken);
+        await SetIdentityInsert("submission", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("submission", "OFF");
+
+        var firstQuestion = EntityBuilders.BuildQuestion(402);
+        var secondQuestion = EntityBuilders.BuildQuestion(403);
+        await DbContext.Questions.AddRangeAsync(
+            [firstQuestion, secondQuestion],
+            TestContext.Current.CancellationToken
+        );
+        await SetIdentityInsert("question", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("question", "OFF");
+
+        var firstAnswer = EntityBuilders.BuildAnswer(502);
+        var secondAnswer = EntityBuilders.BuildAnswer(503);
+        await DbContext.Answers.AddRangeAsync(
+            [firstAnswer, secondAnswer],
+            TestContext.Current.CancellationToken
+        );
+        await SetIdentityInsert("answer", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("answer", "OFF");
+
+        // Act
+        var firstResponseId = await _repository.SubmitResponseAsync(
+            user.Id,
+            establishment.Id,
+            submission.Id,
+            firstQuestion.Id,
+            firstAnswer.Id
+        );
+
+        var secondResponseId = await _repository.SubmitResponseAsync(
+            user.Id,
+            establishment.Id,
+            submission.Id,
+            secondQuestion.Id,
+            secondAnswer.Id
+        );
+
+        // Assert
+        Assert.NotEqual(0, firstResponseId);
+        Assert.NotEqual(0, secondResponseId);
+        Assert.NotEqual(firstResponseId, secondResponseId);
+
+        var responses = await DbContext
+            .Responses.Where(r => r.SubmissionId == submission.Id)
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, responses.Count);
+        Assert.Contains(responses, r => r.QuestionId == firstQuestion.Id);
+        Assert.Contains(responses, r => r.QuestionId == secondQuestion.Id);
+    }
+
     private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider
     {
         public Guid GetUserActionId() => userActionId;

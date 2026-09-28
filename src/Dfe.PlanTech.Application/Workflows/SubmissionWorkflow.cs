@@ -71,13 +71,36 @@ public class SubmissionWorkflow(
             );
         }
 
-        var questionRefsToRecommendations = section
+        // A question is expected to have at most one core recommendation within a section. Guard
+        // explicitly so that a content model change surfaces as a diagnostic error rather than an
+        // opaque duplicate key exception from ToDictionary.
+        var coreRecommendations = section
             .CoreRecommendations.Where(cr => cr.Question is not null)
-            .ToDictionary(cr => cr.Question.Id, cr => cr);
+            .ToList();
+
+        var duplicatedQuestionRefs = coreRecommendations
+            .GroupBy(cr => cr.Question.Id)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToList();
+
+        if (duplicatedQuestionRefs.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Expected at most one core recommendation per question, but found more than one for "
+                    + $"question reference(s): {string.Join(", ", duplicatedQuestionRefs)}"
+            );
+        }
+
+        var questionRefsToRecommendations = coreRecommendations.ToDictionary(
+            cr => cr.Question.Id,
+            cr => cr
+        );
 
         var responses = submission
             .Responses.GroupBy(r => r.QuestionId)
-            .Select(group => group.OrderByDescending(r => r.DateCreated).First());
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First())
+            .ToList();
 
         // Ensure the responses' questions' Contentful references are the same as the ones in the Contentful Section
         var sectionQuestionRefs = questionRefsToRecommendations.Keys;
@@ -101,6 +124,23 @@ public class SubmissionWorkflow(
             r => r.Id,
             r => questionRefsToRecommendations[r.Question.ContentfulRef]
         );
+
+        // Two responses resolving to the same core recommendation would silently drop one of the
+        // response-to-recommendation links, so report it rather than throwing on a duplicate key.
+        var duplicatedRecommendationRefs = responses
+            .GroupBy(r => responseRecommendations[r.Id].Id)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToList();
+
+        if (duplicatedRecommendationRefs.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Expected each response to resolve to a different core recommendation, but more "
+                    + "than one response resolved to recommendation reference(s): "
+                    + $"{string.Join(", ", duplicatedRecommendationRefs)}"
+            );
+        }
 
         var recommendationRefsToResponseIds = responses.ToDictionary(
             r => responseRecommendations[r.Id].Id,
@@ -281,13 +321,20 @@ public class SubmissionWorkflow(
             activeEstablishmentId
         );
 
-        return await _responseRepository.SubmitResponseAsync(
+        var responseId = await _responseRepository.SubmitResponseAsync(
             userId,
             userEstablishmentId,
             submissionId,
             questionId,
             answerId
         );
+
+        await _submissionRepository.UpdateSubmissionDatesAsync(
+            submissionId,
+            _userActionIdProvider.GetUserActionId()
+        );
+
+        return responseId;
     }
 
     public async Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(
