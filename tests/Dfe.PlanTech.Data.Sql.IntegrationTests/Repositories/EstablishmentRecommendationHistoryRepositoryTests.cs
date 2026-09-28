@@ -1368,6 +1368,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         Assert.Equal(RecommendationStatus.InProgress, createdHistory.PreviousStatus);
         Assert.Equal(RecommendationStatus.Complete, createdHistory.NewStatus);
         Assert.Equal("Recommendation completed successfully", createdHistory.NoteText);
+        // A manual status change has no originating response, so responseId stays null
+        Assert.Null(createdHistory.ResponseId);
         Assert.True(createdHistory.DateCreated >= beforeCreate);
         Assert.True(createdHistory.DateCreated <= afterCreate);
     }

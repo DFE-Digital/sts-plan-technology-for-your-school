@@ -29,10 +29,20 @@ public class SubmissionWorkflowTests
         Substitute.For<IResponseRepository>();
     private readonly ISubmissionRepository _submissionRepository =
         Substitute.For<ISubmissionRepository>();
+    private readonly ITransactionManager _transactionManager =
+        Substitute.For<ITransactionManager>();
     private readonly IUserActionIdProvider _userActionIdProvider =
         Substitute.For<IUserActionIdProvider>();
     private static readonly string[] q1q2 = ["Q1", "Q2"];
     private static readonly string[] a1a2 = ["A1", "A2"];
+
+    public SubmissionWorkflowTests()
+    {
+        // Invoke the wrapped work for real, so tests exercise the operations inside the transaction
+        _transactionManager
+            .ExecuteInTransactionAsync(Arg.Any<Func<Task>>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<Func<Task>>().Invoke());
+    }
 
     private SubmissionWorkflow CreateServiceUnderTest() =>
         new(
@@ -42,6 +52,7 @@ public class SubmissionWorkflowTests
             _recommendationRepository,
             _responseRepository,
             _submissionRepository,
+            _transactionManager,
             _userActionIdProvider
         );
 
@@ -750,6 +761,75 @@ public class SubmissionWorkflowTests
                 + "question reference(s): Q001",
             exception.Message
         );
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync_RunsTheWritesInATransaction()
+    {
+        SetupConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            out var establishment,
+            out var section,
+            out var submission,
+            out var matEstablishmentId,
+            out var userId
+        );
+
+        var sut = CreateServiceUnderTest();
+
+        await sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+            establishment.Id,
+            matEstablishmentId,
+            submission.Id,
+            userId,
+            section
+        );
+
+        await _transactionManager
+            .Received(1)
+            .ExecuteInTransactionAsync(Arg.Any<Func<Task>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync_WhenCreatingHistoriesFails_ThenDoesNotMarkSubmissionReviewed()
+    {
+        SetupConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            out var establishment,
+            out var section,
+            out var submission,
+            out var matEstablishmentId,
+            out var userId
+        );
+
+        _establishmentRecommendationHistoryRepository
+            .CreateRecommendationHistoriesAsync(
+                Arg.Any<int>(),
+                Arg.Any<int?>(),
+                Arg.Any<int>(),
+                Arg.Any<IEnumerable<RecommendationEntity>>(),
+                Arg.Any<IDictionary<string, int>>(),
+                Arg.Any<IDictionary<string, RecommendationStatus>>()
+            )
+            .Returns(Task.FromException(new InvalidOperationException("history write failed")));
+
+        var sut = CreateServiceUnderTest();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+                establishment.Id,
+                matEstablishmentId,
+                submission.Id,
+                userId,
+                section
+            )
+        );
+
+        // Marking the submission reviewed is the last write inside the transaction, so a failure
+        // before it must leave the submission untouched rather than half-applied.
+        await _submissionRepository
+            .DidNotReceive()
+            .SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+                Arg.Any<int>()
+            );
     }
 
     [Fact]

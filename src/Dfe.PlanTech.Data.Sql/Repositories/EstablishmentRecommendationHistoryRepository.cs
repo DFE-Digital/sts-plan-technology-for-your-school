@@ -106,6 +106,8 @@ public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbCo
             RecommendationId = recommendationId,
             UserId = userId,
             MatEstablishmentId = matEstablishmentId,
+            // Deliberately null: a manual status change is not driven by a self-assessment
+            // response, so there is no response to link it to.
             ResponseId = null,
             PreviousStatus = previousStatus,
             NewStatus = newStatus,

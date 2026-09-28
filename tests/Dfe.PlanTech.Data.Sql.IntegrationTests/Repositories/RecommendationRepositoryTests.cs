@@ -194,7 +194,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task UpsertRecommendations_WhenRecommendationIsNew_ThenInsertsAndReturnsIt()
+    public async Task UpsertRecommendationsAsync_WhenRecommendationIsNew_ThenInsertsAndReturnsIt()
     {
         // Arrange - No recommendation exists for the reference being upserted
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
@@ -225,7 +225,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task UpsertRecommendations_WhenRecommendationTextUnchanged_ThenDoesNotInsertAnotherRow()
+    public async Task UpsertRecommendationsAsync_WhenRecommendationTextUnchanged_ThenDoesNotInsertAnotherRow()
     {
         // Arrange - An identical recommendation already exists, so the upsert should be a no-op
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
@@ -262,7 +262,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task UpsertRecommendations_WhenRecommendationTextChanged_ThenInsertsANewVersion()
+    public async Task UpsertRecommendationsAsync_WhenRecommendationTextChanged_ThenInsertsANewVersion()
     {
         // Arrange - The recommendation text has changed, so a new version row should be written
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };

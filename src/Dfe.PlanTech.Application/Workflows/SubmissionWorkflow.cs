@@ -16,6 +16,7 @@ public class SubmissionWorkflow(
     IRecommendationRepository recommendationRepository,
     IResponseRepository responseRepository,
     ISubmissionRepository submissionRepository,
+    ITransactionManager transactionManager,
     IUserActionIdProvider userActionIdProvider
 ) : ISubmissionWorkflow
 {
@@ -33,6 +34,8 @@ public class SubmissionWorkflow(
         responseRepository ?? throw new ArgumentNullException(nameof(responseRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly ITransactionManager _transactionManager =
+        transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
     private readonly IUserActionIdProvider _userActionIdProvider =
         userActionIdProvider ?? throw new ArgumentNullException(nameof(userActionIdProvider));
 
@@ -185,22 +188,28 @@ public class SubmissionWorkflow(
             );
         }
 
-        var recommendations = await _recommendationRepository.UpsertRecommendationsAsync(
-            recommendationDtos
-        );
+        // These three writes must land together. Each repository saves independently, so without a
+        // transaction a failure part-way through can leave recommendations upserted and history
+        // rows written against a submission that was never marked reviewed.
+        await _transactionManager.ExecuteInTransactionAsync(async () =>
+        {
+            var recommendations = await _recommendationRepository.UpsertRecommendationsAsync(
+                recommendationDtos
+            );
 
-        await _establishmentRecommendationHistoryRepository.CreateRecommendationHistoriesAsync(
-            establishmentId,
-            matEstablishmentId,
-            userId,
-            recommendations,
-            recommendationRefsToResponseIds,
-            recommendationStatuses
-        );
+            await _establishmentRecommendationHistoryRepository.CreateRecommendationHistoriesAsync(
+                establishmentId,
+                matEstablishmentId,
+                userId,
+                recommendations,
+                recommendationRefsToResponseIds,
+                recommendationStatuses
+            );
 
-        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
-            submissionId
-        );
+            await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+                submissionId
+            );
+        });
     }
 
     public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)

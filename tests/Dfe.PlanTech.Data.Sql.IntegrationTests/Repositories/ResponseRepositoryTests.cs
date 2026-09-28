@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Dfe.PlanTech.UnitTests.Shared.Builders;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +7,6 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 public class ResponseRepositoryTests : DatabaseIntegrationTestBase
 {
     private ResponseRepository _repository = null!;
-    private readonly Guid _userActionId = Guid.NewGuid();
 
     public ResponseRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
@@ -17,10 +14,7 @@ public class ResponseRepositoryTests : DatabaseIntegrationTestBase
     public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
-        _repository = new ResponseRepository(
-            DbContext,
-            new TestUserActionIdAccessor(_userActionId)
-        );
+        _repository = new ResponseRepository(DbContext);
     }
 
     [Fact]
@@ -82,7 +76,6 @@ public class ResponseRepositoryTests : DatabaseIntegrationTestBase
         Assert.Contains(responses, r => r.SubmissionId == submission.Id);
         Assert.Contains(responses, r => r.QuestionId == question.Id);
         Assert.Contains(responses, r => r.AnswerId == answer.Id);
-        Assert.Contains(responses, r => r.UserActionId == _userActionId);
     }
 
     [Fact]
@@ -160,10 +153,5 @@ public class ResponseRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(2, responses.Count);
         Assert.Contains(responses, r => r.QuestionId == firstQuestion.Id);
         Assert.Contains(responses, r => r.QuestionId == secondQuestion.Id);
-    }
-
-    private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider
-    {
-        public Guid GetUserActionId() => userActionId;
     }
 }

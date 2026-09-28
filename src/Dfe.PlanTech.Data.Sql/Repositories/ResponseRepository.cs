@@ -1,19 +1,12 @@
-using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class ResponseRepository(
-    PlanTechDbContext dbContext,
-    IUserActionIdProvider userActionIdProvider
-) : IResponseRepository
+public class ResponseRepository(PlanTechDbContext dbContext) : IResponseRepository
 {
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-
-    private readonly IUserActionIdProvider _userActionIdProvider =
-        userActionIdProvider ?? throw new ArgumentNullException(nameof(userActionIdProvider));
 
     public async Task<int> SubmitResponseAsync(
         int userId,
@@ -23,8 +16,7 @@ public class ResponseRepository(
         int answerId
     )
     {
-        var userActionId = _userActionIdProvider.GetUserActionId();
-
+        // UserActionId is stamped for every IUserActionEntity by PlanTechDbContext.SaveChangesAsync.
         var responseEntity = new ResponseEntity
         {
             UserId = userId,
@@ -33,11 +25,11 @@ public class ResponseRepository(
             QuestionId = questionId,
             AnswerId = answerId,
             DateCreated = DateTime.UtcNow,
-            UserActionId = userActionId,
         };
 
         await _db.Responses.AddAsync(responseEntity);
         await _db.SaveChangesAsync();
+
         return responseEntity.Id;
     }
 }

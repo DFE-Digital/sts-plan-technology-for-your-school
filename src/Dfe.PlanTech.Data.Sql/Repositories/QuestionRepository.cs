@@ -9,22 +9,6 @@ public class QuestionRepository(PlanTechDbContext dbContext) : IQuestionReposito
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-    public async Task<List<QuestionEntity>> GetQuestionsByContenfulRef(
-        IEnumerable<string> sectionQuestionRefs
-    )
-    {
-        var entities = await _db
-            .Questions.Where(question => sectionQuestionRefs.Contains(question.ContentfulRef))
-            .ToListAsync();
-
-        return entities
-            .GroupBy(q => q.ContentfulRef)
-            .Select(group => group.OrderByDescending(q => q.DateCreated).FirstOrDefault())
-            .Where(q => q != null)
-            .Cast<QuestionEntity>()
-            .ToList();
-    }
-
     public async Task<int> GetOrCreateQuestionIdAsync(
         string questionContentfulId,
         string questionText

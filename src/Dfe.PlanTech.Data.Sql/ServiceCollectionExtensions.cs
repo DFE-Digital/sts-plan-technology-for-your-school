@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
+            .AddScoped<ITransactionManager, TransactionManager>()
             .AddScoped<IUserActionRepository, UserActionRepository>()
             .AddScoped<IUserContentViewRepository, UserContentViewRepository>()
             .AddScoped<IUserRepository, UserRepository>()
