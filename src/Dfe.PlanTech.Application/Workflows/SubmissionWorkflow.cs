@@ -145,7 +145,7 @@ public class SubmissionWorkflow(
             );
         }
 
-        var recommendations = await _recommendationRepository.UpsertRecommendations(
+        var recommendations = await _recommendationRepository.UpsertRecommendationsAsync(
             recommendationDtos
         );
 

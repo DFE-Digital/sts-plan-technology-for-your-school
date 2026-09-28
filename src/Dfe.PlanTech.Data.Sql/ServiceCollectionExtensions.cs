@@ -41,18 +41,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
-            .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
-            .AddScoped<
-                IEstablishmentRecommendationHistoryRepository,
-                EstablishmentRecommendationHistoryRepository
-            >()
             .AddScoped<IAnswerRepository, AnswerRepository>()
+            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
             .AddScoped<
                 IEstablishmentRecommendationHistoryRepository,
                 EstablishmentRecommendationHistoryRepository
             >()
-            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<IGiasRepository, GiasRepository>()
             .AddScoped<IQuestionRepository, QuestionRepository>()
             .AddScoped<IRecommendationRepository, RecommendationRepository>()

@@ -9,7 +9,7 @@ public interface IRecommendationRepository
         IEnumerable<string> recommendationContentfulReferences
     );
 
-    Task<List<RecommendationEntity>> UpsertRecommendations(
+    Task<List<RecommendationEntity>> UpsertRecommendationsAsync(
         IEnumerable<SqlRecommendationDto> recommendationDtos
     );
 }

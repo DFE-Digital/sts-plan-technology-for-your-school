@@ -506,7 +506,7 @@ public class SubmissionWorkflowTests
             .Returns(submission);
 
         _recommendationRepository
-            .UpsertRecommendations(Arg.Any<List<SqlRecommendationDto>>())
+            .UpsertRecommendationsAsync(Arg.Any<List<SqlRecommendationDto>>())
             .Returns([]);
     }
 
@@ -527,7 +527,7 @@ public class SubmissionWorkflowTests
 
         await _recommendationRepository
             .Received(1)
-            .UpsertRecommendations(Arg.Any<List<SqlRecommendationDto>>());
+            .UpsertRecommendationsAsync(Arg.Any<List<SqlRecommendationDto>>());
     }
 
     [Fact]
@@ -685,7 +685,7 @@ public class SubmissionWorkflowTests
         // Assert
         await _recommendationRepository
             .Received(1)
-            .UpsertRecommendations(
+            .UpsertRecommendationsAsync(
                 Arg.Is<List<SqlRecommendationDto>>(re =>
                     re.First().ContentfulSysId == coreRecommendation.Id
                     && re.First().RecommendationText == coreRecommendation.Header

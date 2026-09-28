@@ -23,7 +23,7 @@ public class RecommendationRepository(PlanTechDbContext dbContext) : IRecommenda
             .ToListAsync();
     }
 
-    public async Task<List<RecommendationEntity>> UpsertRecommendations(
+    public async Task<List<RecommendationEntity>> UpsertRecommendationsAsync(
         IEnumerable<SqlRecommendationDto> recommendationDtos
     )
     {
@@ -50,7 +50,6 @@ public class RecommendationRepository(PlanTechDbContext dbContext) : IRecommenda
             r => r.ContentfulSysId,
             r => r
         );
-        var recommendationsWithNoChanges = new List<RecommendationEntity>();
 
         foreach (var existingRecommendation in existingRecommendations)
         {
@@ -73,10 +72,6 @@ public class RecommendationRepository(PlanTechDbContext dbContext) : IRecommenda
             {
                 recommendationEntitiesToInsert.Add(recommendationEntity);
             }
-            else
-            {
-                recommendationsWithNoChanges.Add(recommendationEntity);
-            }
         }
 
         _db.AddRange(recommendationEntitiesToInsert);
@@ -84,6 +79,8 @@ public class RecommendationRepository(PlanTechDbContext dbContext) : IRecommenda
 
         return await _db
             .Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef))
+            .GroupBy(r => r.ContentfulRef)
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First())
             .ToListAsync();
     }
 }
