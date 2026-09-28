@@ -16,10 +16,15 @@ public class RecommendationRepository(PlanTechDbContext dbContext) : IRecommenda
         IEnumerable<string> recommendationContentfulReferences
     )
     {
+        // Recommendations are versioned by inserting a new row per text change, so return only the
+        // latest row per reference. Callers resolve a single recommendation via FirstOrDefault(),
+        // which would otherwise pick an arbitrary version.
         return await _db
             .Recommendations.Where(r =>
                 recommendationContentfulReferences.Contains(r.ContentfulRef)
             )
+            .GroupBy(r => r.ContentfulRef)
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First())
             .ToListAsync();
     }
 

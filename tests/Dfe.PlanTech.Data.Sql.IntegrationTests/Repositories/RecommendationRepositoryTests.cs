@@ -298,4 +298,95 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         Assert.Contains(persisted, r => r.RecommendationText == "Original text");
         Assert.Contains(persisted, r => r.RecommendationText == "Revised text");
     }
+
+    [Fact]
+    public async Task UpsertRecommendationsAsync_WhenMultipleVersionsExist_ThenReturnsOnlyTheLatestPerReference()
+    {
+        // Arrange - Two version rows already exist for one reference. The upsert must return a
+        // single entity per reference, otherwise a history row is created per stale version.
+        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+        DbContext.Questions.Add(question);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var supersededVersion = new RecommendationEntity
+        {
+            RecommendationText = "Superseded text",
+            ContentfulRef = "rec-multi",
+            QuestionId = question.Id,
+            DateCreated = DateTime.UtcNow.AddDays(-2),
+        };
+
+        var latestVersion = new RecommendationEntity
+        {
+            RecommendationText = "Latest text",
+            ContentfulRef = "rec-multi",
+            QuestionId = question.Id,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        DbContext.Recommendations.AddRange(supersededVersion, latestVersion);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Text matches the latest version, so no further row should be inserted
+        var dto = new SqlRecommendationDto
+        {
+            ContentfulSysId = "rec-multi",
+            RecommendationText = "Latest text",
+            QuestionId = question.Id,
+            QuestionContentfulRef = question.ContentfulRef,
+        };
+
+        // Act
+        var result = await _repository.UpsertRecommendationsAsync([dto]);
+
+        // Assert
+        var returned = Assert.Single(result);
+        Assert.Equal("rec-multi", returned.ContentfulRef);
+        Assert.Equal("Latest text", returned.RecommendationText);
+
+        var persisted = await DbContext
+            .Recommendations.Where(r => r.ContentfulRef == "rec-multi")
+            .ToListAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(2, persisted.Count);
+    }
+
+    [Fact]
+    public async Task GetRecommendationsByContentfulReferencesAsync_WhenMultipleVersionsExist_ThenReturnsOnlyTheLatestPerReference()
+    {
+        // Arrange - Callers resolve a single recommendation with FirstOrDefault(), so returning
+        // every version row would let them attach history to a superseded recommendation.
+        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+        DbContext.Questions.Add(question);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var supersededVersion = new RecommendationEntity
+        {
+            RecommendationText = "Superseded text",
+            ContentfulRef = "rec-versions",
+            QuestionId = question.Id,
+            DateCreated = DateTime.UtcNow.AddDays(-3),
+        };
+
+        var latestVersion = new RecommendationEntity
+        {
+            RecommendationText = "Latest text",
+            ContentfulRef = "rec-versions",
+            QuestionId = question.Id,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        DbContext.Recommendations.AddRange(supersededVersion, latestVersion);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Act
+        var result = await _repository.GetRecommendationsByContentfulReferencesAsync([
+            "rec-versions",
+        ]);
+
+        // Assert
+        var returned = Assert.Single(result);
+        Assert.Equal("rec-versions", returned.ContentfulRef);
+        Assert.Equal("Latest text", returned.RecommendationText);
+        Assert.Equal(latestVersion.Id, returned.Id);
+    }
 }
