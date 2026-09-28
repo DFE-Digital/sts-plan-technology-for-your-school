@@ -29,14 +29,10 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
  * As you'll note in SubmitResponse below, the parameters are sent in that order.
  */
 
-public class StoredProcedureRepository : IStoredProcedureRepository
+public class StoredProcedureRepository(PlanTechDbContext dbContext) : IStoredProcedureRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public StoredProcedureRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<FirstActivityForEstablishmentRecommendationEntity?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
@@ -74,7 +70,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         return results[0];
     }
 
-    // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
     public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
         string sectionIds,
         int establishmentId
@@ -127,6 +122,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
+                    CreatedUserActionId = currentSubmission?.CreatedUserActionId,
+                    CompletedUserActionId = lastCompleteSubmission?.CompletedUserActionId,
                 };
             })
             .ToList();
