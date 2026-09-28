@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
+    <ProjectReference Include="..\..\src\Dfe.PlanTech.Data.Sql\Dfe.PlanTech.Data.Sql.csproj" />
   </ItemGroup>
 
 </Project>

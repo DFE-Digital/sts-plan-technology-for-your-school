@@ -81,15 +81,15 @@ public class RecommendationWorkflow(
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null,
-        int? responseId = null
+        int? matEstablishmentId = null
     )
     {
         // Get the recommendation by ContentfulRef to get its ID
         var recommendations =
-            await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
-                new[] { recommendationContentfulReference }
-            );
+            await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([
+                recommendationContentfulReference,
+            ]);
+
         var recommendation =
             recommendations.FirstOrDefault()
             ?? throw new InvalidOperationException(
@@ -103,12 +103,11 @@ public class RecommendationWorkflow(
         );
         var previousStatus = currentStatus?.NewStatus;
 
-        await establishmentRecommendationHistoryRepository.CreateRecommendationHistoryAsync(
+        await establishmentRecommendationHistoryRepository.UpdateRecommendationStatusAsync(
             establishmentId,
             recommendation.Id,
             userId,
             matEstablishmentId,
-            responseId,
             previousStatus,
             newStatus,
             noteText ?? string.Empty

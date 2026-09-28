@@ -527,19 +527,18 @@ public class RecommendationWorkflowTests
             establishmentId,
             userId,
             newStatus,
-            noteText,
-            matEstablishmentId
+            noteText: noteText,
+            matEstablishmentId: matEstablishmentId
         );
 
         // Assert - Verify correct status transition: current status becomes previous status
         await _establishmentRecommendationHistoryRepository
             .Received(1)
-            .CreateRecommendationHistoryAsync(
+            .UpdateRecommendationStatusAsync(
                 establishmentId,
                 1,
                 userId,
                 matEstablishmentId,
-                null,
                 RecommendationStatus.InProgress, // Should use current status as previous
                 newStatus,
                 noteText
@@ -590,13 +589,12 @@ public class RecommendationWorkflowTests
         // Assert - Verify initial history entry has null previous status and converts null noteText
         await _establishmentRecommendationHistoryRepository
             .Received(1)
-            .CreateRecommendationHistoryAsync(
+            .UpdateRecommendationStatusAsync(
                 establishmentId,
                 1,
                 userId,
                 null,
                 null,
-                null, // Should be null for initial entry
                 newStatus,
                 string.Empty // Should convert null noteText to empty string
             );
@@ -672,17 +670,16 @@ public class RecommendationWorkflowTests
             establishmentId,
             userId,
             newStatus,
-            null // Explicitly null noteText
+            noteText: null // Explicitly null noteText
         );
 
         // Assert - Verify that a null noteText is converted to empty string (database has non-nulllable column)
         await _establishmentRecommendationHistoryRepository
             .Received(1)
-            .CreateRecommendationHistoryAsync(
+            .UpdateRecommendationStatusAsync(
                 Arg.Any<int>(),
                 Arg.Any<int>(),
                 Arg.Any<int>(),
-                Arg.Any<int?>(),
                 Arg.Any<int?>(),
                 Arg.Any<RecommendationStatus?>(),
                 Arg.Any<RecommendationStatus>(),

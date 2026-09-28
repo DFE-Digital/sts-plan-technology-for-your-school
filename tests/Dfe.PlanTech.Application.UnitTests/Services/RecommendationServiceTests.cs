@@ -272,8 +272,8 @@ public class RecommendationServiceTests
             establishmentId,
             userId,
             newStatus,
-            noteText,
-            matEstablishmentId
+            noteText: noteText,
+            matEstablishmentId: matEstablishmentId
         );
 
         // Assert
@@ -284,8 +284,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                noteText,
-                matEstablishmentId
+                noteText: noteText,
+                matEstablishmentId: matEstablishmentId
             );
     }
 
@@ -316,8 +316,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                null,
-                null
+                noteText: null,
+                matEstablishmentId: null
             );
     }
 
@@ -329,6 +329,7 @@ public class RecommendationServiceTests
         var establishmentId = 111;
         var userId = 222;
         var newStatus = RecommendationStatus.InProgress;
+
         var expectedException = new InvalidOperationException("Recommendation not found");
 
         _recommendationWorkflow
@@ -337,8 +338,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                null,
-                null
+                noteText: null,
+                matEstablishmentId: null
             )
             .ThrowsAsync(expectedException);
 
@@ -362,8 +363,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                null,
-                null
+                noteText: null,
+                matEstablishmentId: null
             );
     }
 
@@ -385,7 +386,7 @@ public class RecommendationServiceTests
             establishmentId,
             userId,
             newStatus,
-            emptyNoteText
+            noteText: emptyNoteText
         );
 
         // Assert - Confirms empty string is passed to workflow (not null)
@@ -396,8 +397,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                emptyNoteText,
-                null
+                noteText: emptyNoteText,
+                matEstablishmentId: null
             );
     }
 
