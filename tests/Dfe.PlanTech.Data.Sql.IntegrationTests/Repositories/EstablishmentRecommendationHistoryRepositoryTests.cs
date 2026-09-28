@@ -1373,19 +1373,4 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     }
 
     #endregion
-
-    private Task<int> SetIdentityInsert(string table, string status)
-    {
-        List<string> acceptedStatusValues = ["ON", "OFF"];
-        if (!acceptedStatusValues.Contains(status))
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(status),
-                $"{nameof(status)} must be 'ON' or 'OFF'"
-            );
-        }
-
-        var sql = $"SET IDENTITY_INSERT [dbo].[{table}] {status}";
-        return DbContext.Database.ExecuteSqlRawAsync(sql, TestContext.Current.CancellationToken);
-    }
 }

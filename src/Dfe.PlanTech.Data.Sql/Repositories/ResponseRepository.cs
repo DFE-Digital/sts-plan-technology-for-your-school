@@ -37,6 +37,7 @@ public class ResponseRepository(
         };
 
         await _db.Responses.AddAsync(responseEntity);
+        await _db.SaveChangesAsync();
         return responseEntity.Id;
     }
 }
