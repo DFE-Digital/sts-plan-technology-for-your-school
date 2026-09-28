@@ -36,7 +36,7 @@ public class ReviewAnswersController(
 
         try
         {
-            var errorMessage = TempData["ErrorMessage"]?.ToString();
+            var errorMessage = TempData[StatePassingMechanismConstants.ErrorMessage]?.ToString();
             return await _reviewAnswersViewBuilder.RouteToCheckAnswers(
                 this,
                 categorySlug,
@@ -61,7 +61,7 @@ public class ReviewAnswersController(
 
         try
         {
-            var errorMessage = TempData["ErrorMessage"]?.ToString();
+            var errorMessage = TempData[StatePassingMechanismConstants.ErrorMessage]?.ToString();
             return await _reviewAnswersViewBuilder.RouteToViewAnswers(
                 this,
                 categorySlug,
@@ -91,7 +91,7 @@ public class ReviewAnswersController(
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionName);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
 
-        TempData["SectionName"] = sectionName;
+        TempData[StatePassingMechanismConstants.SectionName] = sectionName;
 
         return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(
             this,
@@ -103,7 +103,10 @@ public class ReviewAnswersController(
     }
 
     [HttpGet("school/{categorySlug}/{sectionSlug}/self-assessment/summary")]
-    public async Task<IActionResult> GetSchoolSelfAssessmentSummary(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> GetSchoolSelfAssessmentSummary(
+        string categorySlug,
+        string sectionSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
@@ -116,7 +119,10 @@ public class ReviewAnswersController(
     }
 
     [HttpGet("trust/{categorySlug}/{sectionSlug}/self-assessment/summary")]
-    public async Task<IActionResult> GetTrustSelfAssessmentSummary(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> GetTrustSelfAssessmentSummary(
+        string categorySlug,
+        string sectionSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
