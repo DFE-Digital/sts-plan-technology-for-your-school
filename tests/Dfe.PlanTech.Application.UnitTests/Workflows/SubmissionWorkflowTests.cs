@@ -339,6 +339,32 @@ public class SubmissionWorkflowTests
         );
     }
 
+    [Fact]
+    public async Task SubmitAnswerAsync_Updates_Submission_Dates_After_Submitting_Response()
+    {
+        var sut = CreateServiceUnderTest();
+        var userActionId = Guid.NewGuid();
+
+        var submitAnswer = new SubmitAnswerModel
+        {
+            SectionId = "SEC001",
+            SectionName = "Section 1",
+            Question = new IdWithTextModel { Id = "Q1", Text = "Question 1" },
+            ChosenAnswer = new IdWithTextModel { Id = "A1", Text = "Answer 1" },
+        };
+
+        _questionRepository.GetOrCreateQuestionIdAsync("Q1", "Question 1").Returns(11);
+        _answerRepository.GetOrCreateAnswerIdAsync("A1", "Answer 1").Returns(22);
+        _submissionRepository.SelectOrInsertSubmissionAsync("SEC001", "Section 1", 2).Returns(33);
+        _responseRepository.SubmitResponseAsync(1, 3, 33, 11, 22).Returns(44);
+        _userActionIdProvider.GetUserActionId().Returns(userActionId);
+
+        var responseId = await sut.SubmitAnswerAsync(1, 2, 3, submitAnswer);
+
+        Assert.Equal(44, responseId);
+        await _submissionRepository.Received(1).UpdateSubmissionDatesAsync(33, userActionId);
+    }
+
     // ---------- GetSectionStatusesAsync ----------
     [Fact]
     public async Task GetSectionStatuses_Joins_Ids_And_Maps_Dtos()
@@ -597,10 +623,6 @@ public class SubmissionWorkflowTests
             Questions = [sectionQuestionEntry1, sectionQuestionEntry2],
         };
 
-        _questionRepository
-            .GetQuestionsByContenfulRef(Arg.Any<IEnumerable<string>>())
-            .Returns([answeredQuestion1, answeredQuestion2]);
-
         _submissionRepository
             .GetSubmissionByIdWithResponsesAsync(submission.Id)
             .Returns(submission);
@@ -665,10 +687,6 @@ public class SubmissionWorkflowTests
             Questions = [sectionQuestion],
         };
 
-        _questionRepository
-            .GetQuestionsByContenfulRef(Arg.Any<IEnumerable<string>>())
-            .Returns([question]);
-
         _submissionRepository
             .GetSubmissionByIdWithResponsesAsync(submission.Id)
             .Returns(submission);
@@ -693,6 +711,45 @@ public class SubmissionWorkflowTests
                     && re.First().QuestionContentfulRef == question.ContentfulRef
                 )
             );
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync_ThrowsWhenTwoCoreRecommendationsShareAQuestion()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var submission = EntityBuilders.BuildEmptySubmission();
+
+        var coreRecommendation1 = EntryBuilders.BuildRecommendationChunk("R1", "Q001");
+        var coreRecommendation2 = EntryBuilders.BuildRecommendationChunk("R2", "Q001");
+
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation1, coreRecommendation2],
+            Questions = [new QuestionnaireQuestionEntry { Sys = new("Q001") }],
+        };
+
+        _submissionRepository
+            .GetSubmissionByIdWithResponsesAsync(submission.Id)
+            .Returns(submission);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+                1,
+                null,
+                submission.Id,
+                99,
+                section
+            )
+        );
+
+        // Assert
+        Assert.Equal(
+            "Expected at most one core recommendation per question, but found more than one for "
+                + "question reference(s): Q001",
+            exception.Message
+        );
     }
 
     [Fact]

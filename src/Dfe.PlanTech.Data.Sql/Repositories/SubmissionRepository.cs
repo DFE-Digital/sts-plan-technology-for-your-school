@@ -387,8 +387,6 @@ public class SubmissionRepository(
                     .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
                     .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
             );
-
-        await _db.SaveChangesAsync();
     }
 
     public async Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
