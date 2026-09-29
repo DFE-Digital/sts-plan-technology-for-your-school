@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
+using Dfe.PlanTech.UnitTests.Shared.Builders;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
@@ -849,8 +850,433 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
 
     #region CreateRecommendationHistoryAsync Tests
 
+
     [Fact]
-    public async Task CreateRecommendationHistoryAsync_WhenGivenValidParameters_ThenCreatesHistoryEntry()
+    public async Task CreateRecommendationHistoriesAsync_CreatesRecommendationHistories_WithCorrectStatuses()
+    {
+        // Arrange
+        var user = EntityBuilders.BuildUser(101);
+        await DbContext.Users.AddAsync(user, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("user", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("user", "OFF");
+
+        var establishment = EntityBuilders.BuildEstablishment(201);
+        var matEstablishment = EntityBuilders.BuildEstablishment(202);
+        await DbContext.Establishments.AddRangeAsync(
+            [establishment, matEstablishment],
+            TestContext.Current.CancellationToken
+        );
+
+        await SetIdentityInsert("establishment", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("establishment", "OFF");
+
+        var questions = new List<QuestionEntity>
+        {
+            EntityBuilders.BuildQuestion(301),
+            EntityBuilders.BuildQuestion(302),
+            EntityBuilders.BuildQuestion(303),
+        };
+        await DbContext.Questions.AddRangeAsync(questions, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("question", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("question", "OFF");
+
+        var recommendations = new List<RecommendationEntity>
+        {
+            EntityBuilders.BuildRecommendation(701, "REC1", 301),
+            EntityBuilders.BuildRecommendation(702, "REC2", 302),
+            EntityBuilders.BuildRecommendation(703, "REC3", 303),
+        };
+        await DbContext.Recommendations.AddRangeAsync(
+            recommendations,
+            TestContext.Current.CancellationToken
+        );
+
+        await SetIdentityInsert("recommendation", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("recommendation", "OFF");
+
+        var recommendationIds = recommendations
+            .OrderBy(r => r.ContentfulRef)
+            .Select(r => r.Id)
+            .ToList();
+
+        var recommendationStatuses = new Dictionary<string, RecommendationStatus>()
+        {
+            { "REC1", RecommendationStatus.Complete },
+            { "REC2", RecommendationStatus.InProgress },
+            { "REC3", RecommendationStatus.NotStarted },
+        };
+
+        var submission = EntityBuilders.BuildSubmission(1, establishment, "SEC1");
+        await DbContext.Submissions.AddAsync(submission, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("submission", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("submission", "OFF");
+
+        var answers = new List<AnswerEntity>
+        {
+            EntityBuilders.BuildAnswer(1),
+            EntityBuilders.BuildAnswer(2),
+            EntityBuilders.BuildAnswer(3),
+        };
+        await DbContext.Answers.AddRangeAsync(answers, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("answer", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("answer", "OFF");
+
+        var responses = new List<ResponseEntity>()
+        {
+            EntityBuilders.BuildResponse(
+                601,
+                DateTime.UtcNow.AddMinutes(-5),
+                user,
+                submission,
+                questions[0],
+                answers[0]
+            ),
+            EntityBuilders.BuildResponse(
+                602,
+                DateTime.UtcNow.AddMinutes(-3),
+                user,
+                submission,
+                questions[1],
+                answers[1]
+            ),
+            EntityBuilders.BuildResponse(
+                603,
+                DateTime.UtcNow.AddMinutes(-1),
+                user,
+                submission,
+                questions[2],
+                answers[2]
+            ),
+        };
+        await DbContext.Responses.AddRangeAsync(responses, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("response", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("response", "OFF");
+
+        var responseIds = responses.OrderBy(r => r.QuestionId).Select(r => r.Id).ToList();
+
+        var recommendationRefsToResponseIds = new Dictionary<string, int>
+        {
+            { "REC1", responseIds[0] },
+            { "REC2", responseIds[1] },
+            { "REC3", responseIds[2] },
+        };
+
+        // Act
+        await _repository.CreateRecommendationHistoriesAsync(
+            establishment.Id,
+            matEstablishment.Id,
+            user.Id,
+            recommendations,
+            recommendationRefsToResponseIds,
+            recommendationStatuses
+        );
+
+        // Assert
+        var createdHistories = await DbContext
+            .EstablishmentRecommendationHistories.Where(h =>
+                h.EstablishmentId == establishment.Id
+                && h.MatEstablishmentId == matEstablishment.Id
+                && recommendationIds.Contains(h.RecommendationId)
+                && responseIds.Contains(h.ResponseId ?? 0)
+            )
+            .OrderBy(h => h.RecommendationId)
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.NotNull(createdHistories);
+        Assert.Equal(3, createdHistories.Count);
+
+        for (var i = 0; i < 3; i++)
+        {
+            var history = createdHistories[i];
+            var expectedNewStatus = i switch
+            {
+                0 => RecommendationStatus.Complete,
+                1 => RecommendationStatus.InProgress,
+                2 => RecommendationStatus.NotStarted,
+                _ => throw new ArgumentOutOfRangeException("i cannot be outside the above range"),
+            };
+
+            Assert.Equal(establishment.Id, history.EstablishmentId);
+            Assert.Equal(matEstablishment.Id, history.MatEstablishmentId);
+            Assert.Equal(user.Id, history.UserId);
+            Assert.Equal(recommendationIds[i], history.RecommendationId);
+            Assert.Equal(responseIds[i], history.ResponseId);
+            Assert.Null(history.PreviousStatus);
+            Assert.Equal(expectedNewStatus, history.NewStatus);
+        }
+    }
+
+    [Fact]
+    public async Task CreateRecommendationHistoriesAsync_When_PreviousStatusesExist_CreatesRecommendationHistories_WithCorrectPreviousStatuses()
+    {
+        // Arrange
+        var user = EntityBuilders.BuildUser(101);
+        await DbContext.Users.AddAsync(user, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("user", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("user", "OFF");
+
+        var establishment = EntityBuilders.BuildEstablishment(201);
+        var matEstablishment = EntityBuilders.BuildEstablishment(202);
+        await DbContext.Establishments.AddRangeAsync(
+            [establishment, matEstablishment],
+            TestContext.Current.CancellationToken
+        );
+
+        await SetIdentityInsert("establishment", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("establishment", "OFF");
+
+        var questions = new List<QuestionEntity>
+        {
+            EntityBuilders.BuildQuestion(301),
+            EntityBuilders.BuildQuestion(302),
+            EntityBuilders.BuildQuestion(303),
+        };
+        await DbContext.Questions.AddRangeAsync(questions, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("question", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("question", "OFF");
+
+        var recommendations = new List<RecommendationEntity>
+        {
+            EntityBuilders.BuildRecommendation(701, "REC1", 301),
+            EntityBuilders.BuildRecommendation(702, "REC2", 302),
+            EntityBuilders.BuildRecommendation(703, "REC3", 303),
+        };
+        await DbContext.Recommendations.AddRangeAsync(
+            recommendations,
+            TestContext.Current.CancellationToken
+        );
+
+        await SetIdentityInsert("recommendation", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("recommendation", "OFF");
+
+        var recommendationIds = recommendations
+            .OrderBy(r => r.ContentfulRef)
+            .Select(r => r.Id)
+            .ToList();
+
+        // Add some previous histories
+        var recommendationStatuses1 = new Dictionary<string, RecommendationStatus>()
+        {
+            { "REC1", RecommendationStatus.Complete },
+            { "REC2", RecommendationStatus.InProgress },
+            { "REC3", RecommendationStatus.NotStarted },
+        };
+
+        var submission1 = EntityBuilders.BuildSubmission(1, establishment, "SEC1");
+        await DbContext.Submissions.AddAsync(submission1, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("submission", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("submission", "OFF");
+
+        var answers = new List<AnswerEntity>
+        {
+            EntityBuilders.BuildAnswer(801),
+            EntityBuilders.BuildAnswer(802),
+            EntityBuilders.BuildAnswer(803),
+        };
+        await DbContext.Answers.AddRangeAsync(answers, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("answer", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("answer", "OFF");
+
+        var responses1 = new List<ResponseEntity>()
+        {
+            EntityBuilders.BuildResponse(
+                601,
+                DateTime.UtcNow.AddMinutes(-5),
+                user,
+                submission1,
+                questions[0],
+                answers[0]
+            ),
+            EntityBuilders.BuildResponse(
+                602,
+                DateTime.UtcNow.AddMinutes(-3),
+                user,
+                submission1,
+                questions[1],
+                answers[1]
+            ),
+            EntityBuilders.BuildResponse(
+                603,
+                DateTime.UtcNow.AddMinutes(-1),
+                user,
+                submission1,
+                questions[2],
+                answers[2]
+            ),
+        };
+        await DbContext.Responses.AddRangeAsync(responses1, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("response", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("response", "OFF");
+
+        var responseIds1 = responses1.OrderBy(r => r.QuestionId).Select(r => r.Id).ToList();
+
+        var recommendationRefsToResponseIds1 = new Dictionary<string, int>
+        {
+            { "REC1", responseIds1[0] },
+            { "REC2", responseIds1[1] },
+            { "REC3", responseIds1[2] },
+        };
+
+        var histories1 = recommendations.Select(
+            recommendation => new EstablishmentRecommendationHistoryEntity
+            {
+                EstablishmentId = establishment.Id,
+                MatEstablishmentId = matEstablishment.Id,
+                RecommendationId = recommendation.Id,
+                ResponseId = recommendationRefsToResponseIds1[recommendation.ContentfulRef],
+                UserId = user.Id,
+                PreviousStatus = recommendationStatuses1.TryGetValue(
+                    recommendation.ContentfulRef,
+                    out var previousStatus
+                )
+                    ? previousStatus
+                    : null,
+                NewStatus = recommendationStatuses1[recommendation.ContentfulRef],
+            }
+        );
+
+        await DbContext.EstablishmentRecommendationHistories.AddRangeAsync(
+            histories1,
+            TestContext.Current.CancellationToken
+        );
+
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Add the next submission's entries
+        var recommendationStatuses2 = new Dictionary<string, RecommendationStatus>()
+        {
+            { "REC1", RecommendationStatus.NotStarted },
+            { "REC2", RecommendationStatus.Complete },
+            { "REC3", RecommendationStatus.InProgress },
+        };
+
+        var submission2 = EntityBuilders.BuildSubmission(2, establishment, "SEC1");
+        await DbContext.Submissions.AddAsync(submission2, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("submission", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("submission", "OFF");
+
+        var responses2 = new List<ResponseEntity>()
+        {
+            EntityBuilders.BuildResponse(
+                604,
+                DateTime.UtcNow.AddMinutes(-5),
+                user,
+                submission2,
+                questions[0],
+                answers[0]
+            ),
+            EntityBuilders.BuildResponse(
+                605,
+                DateTime.UtcNow.AddMinutes(-3),
+                user,
+                submission2,
+                questions[1],
+                answers[1]
+            ),
+            EntityBuilders.BuildResponse(
+                606,
+                DateTime.UtcNow.AddMinutes(-1),
+                user,
+                submission2,
+                questions[2],
+                answers[2]
+            ),
+        };
+        await DbContext.Responses.AddRangeAsync(responses2, TestContext.Current.CancellationToken);
+
+        await SetIdentityInsert("response", "ON");
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await SetIdentityInsert("response", "OFF");
+
+        var responseIds2 = responses2.OrderBy(r => r.QuestionId).Select(r => r.Id).ToList();
+
+        var recommendationRefsToResponseIds2 = new Dictionary<string, int>
+        {
+            { "REC1", responseIds2[0] },
+            { "REC2", responseIds2[1] },
+            { "REC3", responseIds2[2] },
+        };
+
+        // Act
+        await _repository.CreateRecommendationHistoriesAsync(
+            establishment.Id,
+            matEstablishment.Id,
+            user.Id,
+            recommendations,
+            recommendationRefsToResponseIds2,
+            recommendationStatuses2
+        );
+
+        // Assert
+        var createdHistories = await DbContext
+            .EstablishmentRecommendationHistories.Where(h =>
+                h.EstablishmentId == establishment.Id
+                && h.MatEstablishmentId == matEstablishment.Id
+                && recommendationIds.Contains(h.RecommendationId)
+                && responseIds2.Contains(h.ResponseId ?? 0)
+            )
+            .OrderBy(h => h.RecommendationId)
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.NotNull(createdHistories);
+        Assert.Equal(3, createdHistories.Count);
+
+        for (var i = 0; i < 3; i++)
+        {
+            var history = createdHistories[i];
+            var expectedPreviousStatus = i switch
+            {
+                0 => RecommendationStatus.Complete,
+                1 => RecommendationStatus.InProgress,
+                2 => RecommendationStatus.NotStarted,
+                _ => throw new ArgumentOutOfRangeException("i cannot be outside the above range"),
+            };
+            var expectedNewStatus = i switch
+            {
+                0 => RecommendationStatus.NotStarted,
+                1 => RecommendationStatus.Complete,
+                2 => RecommendationStatus.InProgress,
+                _ => throw new ArgumentOutOfRangeException("i cannot be outside the above range"),
+            };
+
+            Assert.Equal(establishment.Id, history.EstablishmentId);
+            Assert.Equal(matEstablishment.Id, history.MatEstablishmentId);
+            Assert.Equal(user.Id, history.UserId);
+            Assert.Equal(recommendationIds[i], history.RecommendationId);
+            Assert.Equal(responseIds2[i], history.ResponseId);
+            Assert.Equal(expectedPreviousStatus, history.PreviousStatus);
+            Assert.Equal(expectedNewStatus, history.NewStatus);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_UpdatesHistory()
     {
         // Arrange - Create establishment, user, and recommendation to use in history creation
         var establishment = new EstablishmentEntity
@@ -860,10 +1286,29 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var submission = new SubmissionEntity
+        {
+            EstablishmentId = establishment.Id,
+            SectionId = "SECTION001",
+            SectionName = "Test Section",
+            DateCreated = DateTime.Now,
+            DateLastUpdated = DateTime.Now,
+            Deleted = false,
+            Status = SubmissionStatus.CompleteReviewed,
+            UserActionId = Guid.NewGuid(),
+            CreatedUserActionId = Guid.NewGuid(),
+            LastUpdatedUserActionId = Guid.NewGuid(),
+            CompletedUserActionId = Guid.NewGuid(),
+        };
+        DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
@@ -872,18 +1317,29 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             ContentfulRef = "rec-001",
             QuestionId = question.Id,
         };
+        var response = new ResponseEntity
+        {
+            UserId = user.Id,
+            SubmissionId = submission.Id,
+            QuestionId = question.Id,
+            AnswerId = answer.Id,
+            DateCreated = DateTime.Now,
+            DateLastUpdated = DateTime.Now,
+            UserEstablishmentId = establishment.Id,
+            UserActionId = Guid.NewGuid(),
+        };
         DbContext.Recommendations.Add(recommendation);
+        DbContext.Responses.Add(response);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var initialCount = await CountEntitiesAsync<EstablishmentRecommendationHistoryEntity>();
         var beforeCreate = DateTime.UtcNow;
 
         // Act
-        await _repository.CreateRecommendationHistoryAsync(
+        await _repository.UpdateRecommendationStatusAsync(
             establishment.Id,
             recommendation.Id,
             user.Id,
-            null,
             null,
             RecommendationStatus.InProgress,
             RecommendationStatus.Complete,
@@ -912,6 +1368,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         Assert.Equal(RecommendationStatus.InProgress, createdHistory.PreviousStatus);
         Assert.Equal(RecommendationStatus.Complete, createdHistory.NewStatus);
         Assert.Equal("Recommendation completed successfully", createdHistory.NoteText);
+        // A manual status change has no originating response, so responseId stays null
+        Assert.Null(createdHistory.ResponseId);
         Assert.True(createdHistory.DateCreated >= beforeCreate);
         Assert.True(createdHistory.DateCreated <= afterCreate);
     }

@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 
 public interface ISubmissionService
 {
-    Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+    Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
         int establishmentId,
         int? matEstablishmentId,
         int submissionId,

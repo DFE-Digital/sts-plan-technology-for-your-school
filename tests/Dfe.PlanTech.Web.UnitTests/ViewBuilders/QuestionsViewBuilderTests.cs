@@ -375,8 +375,8 @@ public class QuestionsViewBuilderTests
         // Assert
         await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(987, "S99");
 
-        Assert.True(controller.TempData.ContainsKey("SubtopicError"));
-        var msg = controller.TempData["SubtopicError"] as string;
+        Assert.True(controller.TempData.ContainsKey(StatePassingMechanismConstants.SubtopicError));
+        var msg = controller.TempData[StatePassingMechanismConstants.SubtopicError] as string;
         Assert.Contains("<a href=\"https://example.org/contact\"", msg);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);

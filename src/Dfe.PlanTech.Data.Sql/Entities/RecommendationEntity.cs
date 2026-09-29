@@ -38,4 +38,16 @@ public class RecommendationEntity : IUserActionEntity
             UserActionId = UserActionId,
         };
     }
+
+    public static RecommendationEntity BuildEntity(SqlRecommendationDto recommendationDto)
+    {
+        return new RecommendationEntity
+        {
+            ContentfulRef = recommendationDto.ContentfulSysId,
+            RecommendationText = recommendationDto.RecommendationText,
+            QuestionId = recommendationDto.QuestionId,
+            QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
+            Archived = recommendationDto.Archived,
+        };
+    }
 }

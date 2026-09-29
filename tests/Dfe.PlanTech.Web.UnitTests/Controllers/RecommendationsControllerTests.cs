@@ -135,7 +135,7 @@ public class RecommendationsControllerTests
         var inputModel = new ShareByEmailInputViewModel
         {
             EmailAddresses = new List<string> { "test@test.com", "hello@hello.com" },
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             UserMessage = "Hello",
         };
 
