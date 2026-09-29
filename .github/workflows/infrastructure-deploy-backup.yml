@@ -42,11 +42,11 @@ jobs:
       - name: Prepare derived variables
         shell: bash
         run: |
-          TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf"
-          TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-          TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
+          TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf"
+          TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"
+          TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tfstate"
           TF_SA="${TF_SA_FULL//-/}"
-          B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup"
           B_SA="${B_RG//-/}"
 
           echo "TF_RG=$TF_RG" >> "$GITHUB_ENV"
@@ -90,7 +90,7 @@ jobs:
 
           terraform apply -auto-approve -input=false -lock-timeout=20m \
             -var="subscription_id=${{ secrets.az_subscription_id }}" \
-            -var="project_name=${{ secrets.DFE_PROJECT_NAME }}" \
+            -var="project_name=${{ vars.DFE_PROJECT_NAME }}" \
             -var="github_actions_principal_id=$ASSIGNEE_OBJECT_ID" \
             -var="environment=${{ secrets.AZ_ENVIRONMENT }}" \
             -var="az_tag_environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}" \
