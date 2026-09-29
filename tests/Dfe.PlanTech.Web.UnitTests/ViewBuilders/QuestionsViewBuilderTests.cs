@@ -25,7 +25,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 public class QuestionsViewBuilderTests
 {
     // Collaborators
-    private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
+    private readonly ILogger<QuestionsViewBuilder> _logger = Substitute.For<
+        ILogger<QuestionsViewBuilder>
+    >();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
