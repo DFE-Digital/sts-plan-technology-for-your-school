@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -18,7 +17,7 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<QuestionsViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
@@ -577,11 +576,10 @@ public class QuestionsViewBuilder(
             return activeEstablishmentId;
         }
 
-        var selectedEstablishmentId = _matEstablishmentProvider
-            .GetSelectedEstablishmentIdsFromSession()
-            .FirstOrDefault();
+        var selectedEstablishmentIds =
+            _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
 
-        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
+        return selectedEstablishmentIds.Any() ? selectedEstablishmentIds[0] : activeEstablishmentId;
     }
 
     private async Task<string> BuildErrorMessage()

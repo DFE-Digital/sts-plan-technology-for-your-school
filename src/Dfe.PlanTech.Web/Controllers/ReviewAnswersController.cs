@@ -103,31 +103,29 @@ public class ReviewAnswersController(
     }
 
     [HttpGet("school/{categorySlug}/{sectionSlug}/self-assessment/summary")]
-    public async Task<IActionResult> GetSchoolSelfAssessmentSummary(
+    public Task<IActionResult> GetSchoolSelfAssessmentSummary(
         string categorySlug,
         string sectionSlug
     )
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
-
-        return await _selfAssessmentSummaryViewBuilder.RouteToSelfAssessmentSummary(
-            this,
-            categorySlug,
-            sectionSlug
-        );
+        return GetSelfAssessmentSummary(categorySlug, sectionSlug);
     }
 
     [HttpGet("trust/{categorySlug}/{sectionSlug}/self-assessment/summary")]
-    public async Task<IActionResult> GetTrustSelfAssessmentSummary(
+    public Task<IActionResult> GetTrustSelfAssessmentSummary(
         string categorySlug,
         string sectionSlug
     )
     {
+        return GetSelfAssessmentSummary(categorySlug, sectionSlug);
+    }
+
+    private Task<IActionResult> GetSelfAssessmentSummary(string categorySlug, string sectionSlug)
+    {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _selfAssessmentSummaryViewBuilder.RouteToSelfAssessmentSummary(
+        return _selfAssessmentSummaryViewBuilder.RouteToSelfAssessmentSummary(
             this,
             categorySlug,
             sectionSlug
