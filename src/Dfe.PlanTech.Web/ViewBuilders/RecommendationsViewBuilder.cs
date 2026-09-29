@@ -207,57 +207,26 @@ public class RecommendationsViewBuilder(
 
         var matEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
-
-        var establishmentUrns = establishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        var establishments =
-            (await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns))
-            .ToList();
-
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
-        var completedSubmissions =
-            establishmentIds.Length != 0
-                ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
-                : [];
-
-        var completedEstablishmentIds = completedSubmissions
-            .Where(submission =>
-                submission.SectionId == section.Id
-                && establishmentIds.Contains(submission.EstablishmentId)
-            )
-            .Select(submission => submission.EstablishmentId)
-            .Distinct()
-            .ToHashSet();
+        var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(
+            matEstablishmentId,
+            section.Id
+            );
 
         var schools = new List<MatRecommendationSchoolViewModel>();
 
-        foreach (
-            var establishment in establishments.Where(e =>
-                completedEstablishmentIds.Contains(e.Id)
-            )
-        )
+        foreach (var submission in schoolSubmissions)
         {
             var history =
                 await _recommendationService.GetLatestRecommendationHistoryAsync(
-                    establishment.Id,
+                    submission.EstablishmentId,
                     currentRecommendationChunk.Id
                 );
 
             schools.Add(
                 new MatRecommendationSchoolViewModel
                 {
-                    EstablishmentId = establishment.Id,
-                    SchoolName = establishment.OrgName,
+                    EstablishmentId = submission.EstablishmentId,
+                    SchoolName = submission.EstablishmentName,
                     Status = history?.NewStatus ?? RecommendationStatus.NotStarted,
                     LastUpdated = history?.DateCreated,
                 }

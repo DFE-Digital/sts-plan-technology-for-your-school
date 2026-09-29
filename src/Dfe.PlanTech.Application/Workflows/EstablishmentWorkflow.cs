@@ -81,12 +81,16 @@ public class EstablishmentWorkflow(
         return establishments.Select(e => e.AsDto());
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
+    public async Task<SqlEstablishmentDto?> GetEstablishmentByIdAsync(int id)
     {
-        var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(
-            establishmentId
-        );
-        return links.Select(l => l.AsDto()).ToList();
+        var establishmentEntity = await _establishmentRepository.GetEstablishmentByIdAsync(id);
+
+        if (establishmentEntity is null)
+        {
+            throw new KeyNotFoundException($"Establishment with id {id} not found");
+        }
+
+        return establishmentEntity.AsDto();
     }
 
     public Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)

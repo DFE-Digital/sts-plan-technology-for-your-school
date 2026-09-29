@@ -221,37 +221,12 @@ public class CategoryLandingViewComponentViewBuilder(
         try
         {
             var matEstablishmentId = GetUserOrganisationIdOrThrowException();
-
-            var establishmentLinks =
-                await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
-
-            var establishmentUrns = establishmentLinks
-                .Select(e => e.Urn)
-                .Where(urn => !string.IsNullOrWhiteSpace(urn))
-                .Distinct()
-                .ToArray();
-
-            var establishments =
-                await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns)
-                ?? [];
-
-            var establishmentIds = establishments
-                .Select(e => e.Id)
-                .Distinct()
-                .ToArray();
-
-            var completedSubmissions =
-                establishmentIds.Length != 0
-                    ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
-                    : [];
-
-            var completedCountBySectionId = completedSubmissions
-                .Where(s => establishmentIds.Contains(s.EstablishmentId))
-                .GroupBy(s => s.SectionId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(s => s.EstablishmentId).Distinct().Count()
-                );
+            // Get the completed submissions for the MAT.
+            var group = await _groupService.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(matEstablishmentId);
+            var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).OfType<int>().ToList() ?? [];
+            var totalSchools = matEstablishmentIds?.Count() ?? 0;
+            var completedCountBySectionId = totalSchools > 0 ?
+                await _groupService.GetGroupCompletedSubmissionCountBySection(matEstablishmentIds) : new Dictionary<string, int>();
 
             var categoryLandingSections = category.Sections
                 .Select(section =>
@@ -273,8 +248,8 @@ public class CategoryLandingViewComponentViewBuilder(
                     )
                     {
                         HasSubmittedAssessments = hasSubmittedAssessments,
-                        HasOutstandingAssessments = completedCount < establishmentIds.Length,
-                        OutstandingAssessmentCount = establishmentIds.Length - completedCount,
+                        HasOutstandingAssessments = completedCount < totalSchools,
+                        OutstandingAssessmentCount = totalSchools - completedCount,
                     };
                 })
                 .ToList();

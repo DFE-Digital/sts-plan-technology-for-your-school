@@ -9,7 +9,7 @@ public interface IEstablishmentWorkflow
     Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     );
-    Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId);
+    Task<SqlEstablishmentDto?> GetEstablishmentByIdAsync(int establishmentId);
     Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
     Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         string establishmentUrn,

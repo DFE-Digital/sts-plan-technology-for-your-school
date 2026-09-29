@@ -693,13 +693,15 @@ public class SubmissionRepository(
 
     public async Task<List<SubmissionEntity>> GetLatestEstablishmentsSubmissionsByEstablishmentAndSectionAsync(
         IEnumerable<int> establishmentIds,
-        SubmissionStatus status = SubmissionStatus.CompleteReviewed)
+        SubmissionStatus status = SubmissionStatus.CompleteReviewed,
+        string? sectionId = null
+        )
     {
         var establishmentIdList = establishmentIds
             .Distinct()
             .ToList();
 
-        return await _db.Submissions
+        var query = _db.Submissions
             .Include(s => s.Establishment)
             .Where(s =>
                 establishmentIdList.Contains(s.EstablishmentId)
@@ -719,20 +721,33 @@ public class SubmissionRepository(
                             && s2.Id > s.Id
                         )
                     )
-                ))
+                ));
+        if (!string.IsNullOrEmpty(sectionId))
+        {
+            query = query.Where(s => s.SectionId == sectionId);
+        }
+
+        return await query
             .OrderBy(s => s.EstablishmentId)
             .ThenBy(s => s.SectionName)
             .ToListAsync();
     }
 
-    public async Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<string> urns, SubmissionStatus status = SubmissionStatus.CompleteReviewed)
+    public async Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<string> urns, SubmissionStatus status = SubmissionStatus.CompleteReviewed, string? sectionId = null)
     {
-        return await _db.Submissions
+        var query = _db.Submissions
             .Where(s =>
                 urns.Contains(s.Establishment.EstablishmentRef)
                 && s.Status == status
                 && !s.Deleted
-                && s.DateCompleted != null)
+                && s.DateCompleted != null);
+
+        if (!string.IsNullOrEmpty(sectionId))
+        {
+            query = query.Where(s => s.SectionId == sectionId);
+        }
+
+        return await query
             .GroupBy(s => s.SectionId)
             .ToDictionaryAsync(
                 group => group.Key,
@@ -740,14 +755,21 @@ public class SubmissionRepository(
             );
     }
 
-    public async Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<int> dboSchoolIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed)
+    public async Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<int> dboSchoolIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed, string? sectionId = null)
     {
-        return await _db.Submissions
+        var query = _db.Submissions
             .Where(s =>
                 dboSchoolIds.Contains(s.EstablishmentId)
                 && s.Status == status
                 && !s.Deleted
-                && s.DateCompleted != null)
+                && s.DateCompleted != null);
+
+        if (!string.IsNullOrEmpty(sectionId))
+        {
+            query = query.Where(s => s.SectionId == sectionId);
+        }
+
+        return await query
             .GroupBy(s => s.SectionId)
             .ToDictionaryAsync(
                 group => group.Key,

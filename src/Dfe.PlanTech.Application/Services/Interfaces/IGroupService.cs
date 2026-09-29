@@ -6,11 +6,10 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 
 public interface IGroupService
 {
-    Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds);
+    Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(IEnumerable<int> establishmentIds);
     Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(int dboGroupId, string sectionId);
     Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(int dboGroupId);
     Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(IEnumerable<int> dboSchoolIds);
-    Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(IEnumerable<string> urns);
     Task<GroupEstablishmentDTO?> GetGroupWithEstablishmentsFromGIASAndCreateInDbo(int groupEstId);
     Task<GroupEstablishmentDTO?> GetGroupHomePageModel(int groupEstId);
     Task<bool> IsSchoolWithinGroup(int groupId, string urn);

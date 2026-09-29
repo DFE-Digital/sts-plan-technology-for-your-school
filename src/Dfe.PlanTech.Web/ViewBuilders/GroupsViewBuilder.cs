@@ -185,7 +185,7 @@ public class GroupsViewBuilder(
         var group = await _groupService.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(establishmentId);
         var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).OfType<int>().ToList() ?? [];
         var totalSchools = matEstablishmentIds?.Count() ?? 0;
-        var completedCountBySectionId = matEstablishmentIds != null && matEstablishmentIds.Any() ?
+        var completedCountBySectionId = totalSchools > 0 ?
             await _groupService.GetGroupCompletedSubmissionCountBySection(matEstablishmentIds) : new Dictionary<string, int>();
 
         var viewModel = new GroupSelectAssessmentViewModel()

@@ -92,28 +92,11 @@ public class CategorySectionViewComponentViewBuilder(
     )
     {
         var matEstablishmentId = GetUserOrganisationIdOrThrowException();
-
-        var establishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
-
-        var establishmentUrns = establishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        var establishments =
-            await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns) ?? [];
-
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
-        var completedSubmissions =
-            establishmentIds.Length != 0
-                ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
-                : [];
+        // Get the completed submissions for the MAT.
+        var group = await _groupService.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(matEstablishmentId);
+        var matEstablishmentIds = group?.BasicEstablishments.Select(e => e.DboId).OfType<int>().ToList() ?? [];
+        var completedSubmissions = matEstablishmentIds.Count > 0 ?
+            await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds) : new List<SqlSubmissionDto>();
 
         var categorySectionIds = category.Sections
             .Select(section => section.Id)
@@ -121,7 +104,7 @@ public class CategorySectionViewComponentViewBuilder(
 
         var completedSectionCount = completedSubmissions
             .Where(submission =>
-                establishmentIds.Contains(submission.EstablishmentId)
+                matEstablishmentIds.Contains(submission.EstablishmentId)
                 && categorySectionIds.Contains(submission.SectionId)
             )
             .Select(submission => submission.SectionId)

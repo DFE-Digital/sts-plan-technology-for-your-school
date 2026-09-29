@@ -53,9 +53,10 @@ public interface ISubmissionRepository
     /// </summary>
     /// <param name="establishmentIds"></param>
     /// <param name="status"></param>
+    /// <param name="sectionId"></param>
     /// <returns></returns>
     Task<List<SubmissionEntity>> GetLatestEstablishmentsSubmissionsByEstablishmentAndSectionAsync(
-        IEnumerable<int> establishmentIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed
+        IEnumerable<int> establishmentIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed, string? sectionId = null
     );
 
     /// <summary>
@@ -63,16 +64,18 @@ public interface ISubmissionRepository
     /// </summary>
     /// <param name="urns">List of establishment refs to include</param>
     /// <param name="status"></param>
+    /// <param name="sectionId"></param>
     /// <returns>Dictionary<string, int></returns>
-    Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<string> urns, SubmissionStatus status = SubmissionStatus.CompleteReviewed);
+    Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<string> urns, SubmissionStatus status = SubmissionStatus.CompleteReviewed, string? sectionId = null);
 
     /// <summary>
     /// Optional status filter, Count of submissions per SECTION across ALL schools passed in (using dboEstId list of schools)
     /// </summary>
     /// <param name="dboSchoolIds">List of establishment ids to include</param>
     /// <param name="status"></param>
+    /// <param name="sectionId"></param>
     /// <returns></returns>
-    Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<int> dboSchoolIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed);
+    Task<Dictionary<string, int>> GetSubmissionsCountBySectionAsync(IEnumerable<int> dboSchoolIds, SubmissionStatus status = SubmissionStatus.CompleteReviewed, string? sectionId = null);
 
     /// <summary>
     /// Filter by section; latest per school

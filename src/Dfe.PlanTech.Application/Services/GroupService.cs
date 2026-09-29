@@ -21,7 +21,7 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     private readonly IGiasRepository _giasRepository =
     giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
 
-    public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds)
+    public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(IEnumerable<int> establishmentIds)
     {
         var submissions = await _groupWorkflow.GetGroupSubmissionsBySections(establishmentIds, SubmissionStatus.CompleteReviewed);
         return submissions;
@@ -35,23 +35,7 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     /// <returns></returns>
     public async Task<Dictionary<string,int>> GetGroupCompletedSubmissionCountBySection(int dboGroupId)
     {
-        //1. get linked urns vias gias
-        var groupUid = await GetGroupUIDAsync(dboGroupId);
-        var urns = await _giasRepository.GetLinkedURNSForGroupAsync(groupUid) ?? [];
-        var urnStrs = urns.Select(u => u.ToString());
-        //2.get the submissions counts
-        return await _groupWorkflow.GetGroupSubmissionsCountBySectionsFromUrns(urnStrs, SubmissionStatus.CompleteReviewed);
-    }
-
-    /// <summary>
-    /// Get the total count of submissions per section id across the whole group using est URN strings
-    /// </summary>
-    /// <param name="dboGroupId"></param>
-    /// <param name="statuses"></param>
-    /// <returns></returns>
-    public async Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(IEnumerable<string> urns)
-    {
-        return await _groupWorkflow.GetGroupSubmissionsCountBySectionsFromUrns(urns, SubmissionStatus.CompleteReviewed);
+        return await _groupWorkflow.GetGroupSubmissionsCountBySections(dboGroupId, SubmissionStatus.CompleteReviewed);
     }
 
     public async Task<Dictionary<string, int>> GetGroupCompletedSubmissionCountBySection(IEnumerable<int> dboSchoolIds)
@@ -65,42 +49,14 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
         return group?.BasicEstablishments.Count != 0 ? await _groupWorkflow.GetGroupSubmissionInformationForSection(group!.BasicEstablishments, sectionId) : new List<SubmissionInformationModel>();
     }
 
-    private async Task<int> GetGroupUIDAsync(int dboGroupId)
-    {
-        var dboGroup = await _groupWorkflow.GetGroupFromDboEstablishmentAsync(dboGroupId);
-        var groupUid = 0;
-        int.TryParse(dboGroup?.GroupUid, out groupUid);
-        return groupUid;
-    }
-
     public async Task<GroupEstablishmentDTO?> GetGroupWithEstablishmentsFromGIASAndCreateInDbo(int dboGroupId)
     {
-        var groupUid = await GetGroupUIDAsync(dboGroupId);
-        var groupDTO = await _giasRepository.GetGiasGroupByGroupUIDAsync(groupUid);
-        if (groupDTO != null)
-        {
-            foreach (var e in groupDTO.BasicEstablishments)
-            {
-                if (!e.DboId.HasValue)
-                {
-                    var est =
-                        await _establishmentService.GetOrCreateEstablishmentAsync(
-                            e.Urn,
-                            e.Name);
-                    e.DboId = est.Id;
-                }
-
-            }
-        }
-        return groupDTO;
+        return await _groupWorkflow.GetGroupWithEstablishmentsFromGIASAndCreateInDbo(dboGroupId);
     }
 
     public async Task<GroupEstablishmentDTO?> GetGroupHomePageModel(int dboGroupId)
     {
-        var groupDTO = await GetGroupWithEstablishmentsFromGIASAndCreateInDbo(dboGroupId);
-        var recHistories = await _recommendationWorkflow.GetRecommendationInProgressOrCompletedRecommendationsCount(groupDTO?.BasicEstablishments.Select(e => e.Urn) ?? []);
-        groupDTO?.BasicEstablishments.ForEach(e => e.InProgressOrCompletedRecommendationsCount = recHistories[e.Urn]);
-        return groupDTO;
+        return await _groupWorkflow.GetGroupHomePageModel(dboGroupId);
     }
 
     /// <summary>
@@ -111,8 +67,7 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     /// <returns></returns>
     public async Task<bool> IsSchoolWithinGroup(int dboGroupId, string urn)
     {
-        var groupUid = await GetGroupUIDAsync(dboGroupId);
-        return await _giasRepository.IsSchoolWithinGroup(groupUid, urn);
+        return await _groupWorkflow.IsSchoolWithinGroup(dboGroupId, urn);
     }
 
     /// <summary>
@@ -123,8 +78,7 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     /// <returns></returns>
     public async Task<bool> IsSchoolWithinGroup(int dboGroupId, IEnumerable<string> urns)
     {
-        var groupUid = await GetGroupUIDAsync(dboGroupId);
-        return await _giasRepository.IsSchoolWithinGroup(groupUid, urns);
+        return await _groupWorkflow.IsSchoolWithinGroup(dboGroupId, urns);
     }
 
     /// <summary>
@@ -135,7 +89,6 @@ public class GroupService(IGroupWorkflow groupWorkflow, IGiasRepository giasRepo
     /// <returns></returns>
     public async Task<bool> AreAllSchoolsWithinGroup(int dboGroupId, IEnumerable<string> urns)
     {
-        var groupUid = await GetGroupUIDAsync(dboGroupId);
-        return await _giasRepository.AreAllSchoolsWithinGroup(groupUid, urns);
+        return await _groupWorkflow.AreAllSchoolsWithinGroup(dboGroupId, urns);
     }
 }
