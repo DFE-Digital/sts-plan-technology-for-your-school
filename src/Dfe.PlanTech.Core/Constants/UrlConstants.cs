@@ -14,6 +14,7 @@ public static class UrlConstants
     public const string OrgErrorPage = "/dsi-error-not-associated-organisation";
     public const string RecommendationsPage = "/recommendations";
     public const string SelectASchoolPage = "/groups/select-a-school";
+    public const string GroupStandards = "/groups/standards";
     public const string ServerError = "/server-error";
 
     #endregion Routes

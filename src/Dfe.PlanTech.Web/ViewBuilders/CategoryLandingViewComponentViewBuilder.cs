@@ -213,37 +213,21 @@ public class CategoryLandingViewComponentViewBuilder(
     }
 
     private async Task<CategoryLandingViewComponentViewModel> BuildMatViewModelAsync(
-    QuestionnaireCategoryEntry category,
-    string slug,
-    string? sectionName
+        QuestionnaireCategoryEntry category,
+        string slug,
+        string? sectionName
     )
     {
         try
         {
-            var matEstablishmentId = GetUserOrganisationIdOrThrowException();
+            var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-            var establishmentLinks =
-                await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+            var groupContext =
+                await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
-            var establishmentUrns = establishmentLinks
-                .Select(e => e.Urn)
-                .Where(urn => !string.IsNullOrWhiteSpace(urn))
-                .Distinct()
-                .ToArray();
-
-            var establishments =
-                await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns)
-                ?? [];
-
-            var establishmentIds = establishments
-                .Select(e => e.Id)
-                .Distinct()
-                .ToArray();
-
-            var completedSubmissions =
-                establishmentIds.Length != 0
-                    ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
-                    : [];
+            var establishments = groupContext.Establishments;
+            var establishmentIds = groupContext.EstablishmentIds;
+            var completedSubmissions = groupContext.CompletedSubmissions;
 
             var completedCountBySectionId = completedSubmissions
                 .Where(s => establishmentIds.Contains(s.EstablishmentId))

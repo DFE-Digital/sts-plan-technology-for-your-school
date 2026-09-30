@@ -1044,19 +1044,41 @@ public class CategoryLandingViewComponentViewBuilderTests
             ]);
 
         var groupService = Substitute.For<IGroupService>();
+
         groupService
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
-            )
-            .Returns([]);
+            .GetGroupEstablishmentContextAsync(5001)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 101 },
+                new SqlEstablishmentDto { Id = 102 },
+                    ],
+                    EstablishmentIds = [101, 102],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                {
+                    Id = 1,
+                    EstablishmentId = 101,
+                    SectionId = "S1",
+                },
+                new SqlSubmissionDto
+                {
+                    Id = 2,
+                    EstablishmentId = 102,
+                    SectionId = "S1",
+                },
+                    ],
+                }
+            );
 
         var submission = Substitute.For<ISubmissionService>();
 
         var sut = CreateSut(
-            submission: submission,
-            establishment: establishment,
-            groupService: groupService,
-            currentUser: currentUser
+          groupService: groupService,
+          currentUser: currentUser
         );
 
         var vm = await sut.BuildViewModelAsync(
@@ -1068,12 +1090,11 @@ public class CategoryLandingViewComponentViewBuilderTests
         );
 
         var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
-        Assert.False(secVm.HasSubmittedAssessments);
-        Assert.True(secVm.HasOutstandingAssessments);
-        Assert.Equal(2, secVm.OutstandingAssessmentCount);
-        Assert.Null(secVm.Recommendations);
-        Assert.Equal(0, vm.CompletedSectionsCount);
+        Assert.True(secVm.HasSubmittedAssessments);
+        Assert.False(secVm.HasOutstandingAssessments);
+        Assert.Equal(0, secVm.OutstandingAssessmentCount);
+        Assert.NotNull(secVm.Recommendations);
+        Assert.Equal(1, vm.CompletedSectionsCount);
 
         await submission
             .DidNotReceive()
@@ -1090,54 +1111,44 @@ public class CategoryLandingViewComponentViewBuilderTests
         section.CoreRecommendations =
         [
             new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("rec-1"),
-                Header = "Recommendation 1",
-                Slug = "recommendation-1",
-            },
-        ];
+        {
+            Sys = new SystemDetails("rec-1"),
+            Header = "Recommendation 1",
+            Slug = "recommendation-1",
+        },
+    ];
+
         var category = MakeCategory(section);
 
         var currentUser = Substitute.For<ICurrentUserProvider>();
         currentUser.UserOrganisationId.Returns(5001);
 
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
-            .GetEstablishmentLinks(5001)
-            .Returns(
-            [
-                new SqlEstablishmentLinkDto { Urn = "100001" },
-                new SqlEstablishmentLinkDto { Urn = "100002" },
-            ]);
-        establishment
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<IEnumerable<string>>(urns =>
-                    urns.SequenceEqual(new[] { "100001", "100002" })
-                )
-            )
-            .Returns(
-            [
-                new SqlEstablishmentDto { Id = 101 },
-                new SqlEstablishmentDto { Id = 102 },
-            ]);
-
         var groupService = Substitute.For<IGroupService>();
+
         groupService
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
-            )
+            .GetGroupEstablishmentContextAsync(5001)
             .Returns(
-            [
-                new SqlSubmissionDto
+                new GroupEstablishmentModel
                 {
-                    Id = 1,
-                    EstablishmentId = 101,
-                    SectionId = "S1",
-                },
-            ]);
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 101 },
+                    new SqlEstablishmentDto { Id = 102 },
+                    ],
+                    EstablishmentIds = [101, 102],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        Id = 1,
+                        EstablishmentId = 101,
+                        SectionId = "S1",
+                    },
+                    ],
+                }
+            );
 
         var sut = CreateSut(
-            establishment: establishment,
             groupService: groupService,
             currentUser: currentUser
         );
@@ -1151,6 +1162,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         );
 
         var secVm = Assert.Single(vm.CategoryLandingSections);
+
         Assert.True(secVm.HasSubmittedAssessments);
         Assert.True(secVm.HasOutstandingAssessments);
         Assert.Equal(1, secVm.OutstandingAssessmentCount);
@@ -1168,60 +1180,50 @@ public class CategoryLandingViewComponentViewBuilderTests
         section.CoreRecommendations =
         [
             new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("rec-1"),
-                Header = "Recommendation 1",
-                Slug = "recommendation-1",
-            },
-        ];
+        {
+            Sys = new SystemDetails("rec-1"),
+            Header = "Recommendation 1",
+            Slug = "recommendation-1",
+        },
+    ];
+
         var category = MakeCategory(section);
 
         var currentUser = Substitute.For<ICurrentUserProvider>();
         currentUser.UserOrganisationId.Returns(5001);
 
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
-            .GetEstablishmentLinks(5001)
-            .Returns(
-            [
-                new SqlEstablishmentLinkDto { Urn = "100001" },
-                new SqlEstablishmentLinkDto { Urn = "100002" },
-            ]);
-        establishment
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<IEnumerable<string>>(urns =>
-                    urns.SequenceEqual(new[] { "100001", "100002" })
-                )
-            )
-            .Returns(
-            [
-                new SqlEstablishmentDto { Id = 101 },
-                new SqlEstablishmentDto { Id = 102 },
-            ]);
-
         var groupService = Substitute.For<IGroupService>();
+
         groupService
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
-            )
+            .GetGroupEstablishmentContextAsync(5001)
             .Returns(
-            [
-                new SqlSubmissionDto
+                new GroupEstablishmentModel
                 {
-                    Id = 1,
-                    EstablishmentId = 101,
-                    SectionId = "S1",
-                },
-                new SqlSubmissionDto
-                {
-                    Id = 2,
-                    EstablishmentId = 102,
-                    SectionId = "S1",
-                },
-            ]);
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 101 },
+                    new SqlEstablishmentDto { Id = 102 },
+                    ],
+                    EstablishmentIds = [101, 102],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        Id = 1,
+                        EstablishmentId = 101,
+                        SectionId = "S1",
+                    },
+                    new SqlSubmissionDto
+                    {
+                        Id = 2,
+                        EstablishmentId = 102,
+                        SectionId = "S1",
+                    },
+                    ],
+                }
+            );
 
         var sut = CreateSut(
-            establishment: establishment,
             groupService: groupService,
             currentUser: currentUser
         );
@@ -1235,6 +1237,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         );
 
         var secVm = Assert.Single(vm.CategoryLandingSections);
+
         Assert.True(secVm.HasSubmittedAssessments);
         Assert.False(secVm.HasOutstandingAssessments);
         Assert.Equal(0, secVm.OutstandingAssessmentCount);

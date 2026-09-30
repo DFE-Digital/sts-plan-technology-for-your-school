@@ -64,14 +64,14 @@ public class RecommendationsViewBuilder(
                 sectionSlug,
                 chunkSlug
             ),
-
-            _ => await RouteToSchoolSingleRecommendation(
+            CategoryLandingContext.School => await RouteToSchoolSingleRecommendation(
                 controller,
                 categorySlug,
                 sectionSlug,
                 chunkSlug,
                 useChecklist
             ),
+            _ => throw new ArgumentOutOfRangeException(nameof(context), context, null),
         };
     }
 
@@ -205,30 +205,14 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
-        var matEstablishmentId = GetUserOrganisationIdOrThrowException();
+        var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+        var groupContext =
+            await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
-        var establishmentUrns = establishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        var establishments =
-            (await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns))
-            .ToList();
-
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
-        var completedSubmissions =
-            establishmentIds.Length != 0
-                ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
-                : [];
+        var establishments = groupContext.Establishments;
+        var establishmentIds = groupContext.EstablishmentIds;
+        var completedSubmissions = groupContext.CompletedSubmissions;
 
         var completedEstablishmentIds = completedSubmissions
             .Where(submission =>

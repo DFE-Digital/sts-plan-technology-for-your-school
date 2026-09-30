@@ -1483,34 +1483,34 @@ public class RecommendationsViewBuilderTests
         _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
-        _establishmentService
-            .GetEstablishmentLinks(999)
-            .Returns(
-                [
-                    new SqlEstablishmentLinkDto { Urn = "100001" },
-                    new SqlEstablishmentLinkDto { Urn = "100002" },
-                ]
-            );
-
-        _establishmentService
-            .GetEstablishmentsByReferencesAsync(Arg.Any<IEnumerable<string>>())
-            .Returns(
-                [
-                    new SqlEstablishmentDto { Id = 101, OrgName = "School One" },
-                    new SqlEstablishmentDto { Id = 102, OrgName = "School Two" },
-                ]
-            );
-
         _groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .GetGroupEstablishmentContextAsync(999)
             .Returns(
-                [
-                    new SqlSubmissionDto
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                    {
+                        Id = 101,
+                        OrgName = "School One"
+                    },
+                    new SqlEstablishmentDto
+                    {
+                        Id = 102,
+                        OrgName = "School Two"
+                    },
+                    ],
+                    EstablishmentIds = [101, 102],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
                     {
                         EstablishmentId = 101,
                         SectionId = "S1",
                     },
-                ]
+                    ],
+                }
             );
 
         _recommendationService
@@ -1536,6 +1536,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("SingleRecommendation", view.ViewName);
 
         var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
         Assert.True(vm.IsMat);
         Assert.Single(vm.Schools);
         Assert.Equal(101, vm.Schools[0].EstablishmentId);
@@ -1567,24 +1568,29 @@ public class RecommendationsViewBuilderTests
         _contentfulService.GetCategoryHeaderTextBySlugAsync("cat-a").Returns("Networking");
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
-        _establishmentService
-            .GetEstablishmentLinks(999)
-            .Returns([new SqlEstablishmentLinkDto { Urn = "100001" }]);
-
-        _establishmentService
-            .GetEstablishmentsByReferencesAsync(Arg.Any<IEnumerable<string>>())
-            .Returns([new SqlEstablishmentDto { Id = 101, OrgName = "School One" }]);
-
         _groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .GetGroupEstablishmentContextAsync(999)
             .Returns(
-                [
-                    new SqlSubmissionDto
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                    {
+                        Id = 101,
+                        OrgName = "School One"
+                    }
+                    ],
+                    EstablishmentIds = [101],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
                     {
                         EstablishmentId = 101,
                         SectionId = "S1",
                     },
-                ]
+                    ],
+                }
             );
 
         _recommendationService
@@ -1604,6 +1610,7 @@ public class RecommendationsViewBuilderTests
         var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
 
         var school = Assert.Single(vm.Schools);
+
         Assert.Equal(RecommendationStatus.NotStarted, school.Status);
         Assert.Null(school.LastUpdated);
     }

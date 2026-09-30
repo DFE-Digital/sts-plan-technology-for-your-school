@@ -91,29 +91,13 @@ public class CategorySectionViewComponentViewBuilder(
         QuestionnaireCategoryEntry category
     )
     {
-        var matEstablishmentId = GetUserOrganisationIdOrThrowException();
+        var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+        var groupContext =
+            await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
-        var establishmentUrns = establishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        var establishments =
-            await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns) ?? [];
-
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
-        var completedSubmissions =
-            establishmentIds.Length != 0
-                ? await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? []
-                : [];
+        var establishmentIds = groupContext.EstablishmentIds;
+        var completedSubmissions = groupContext.CompletedSubmissions;
 
         var categorySectionIds = category.Sections
             .Select(section => section.Id)

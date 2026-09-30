@@ -127,4 +127,54 @@ public class GroupServiceTests
         // Assert
         Assert.Equal("groupWorkflow", exception.ParamName);
     }
+
+    [Fact]
+    public async Task GetGroupEstablishmentContextAsync_Calls_Workflow_And_Returns_Result()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+
+        var groupEstablishmentId = 100;
+
+        var expected = new GroupEstablishmentModel
+        {
+            Establishments =
+            [
+                new SqlEstablishmentDto
+            {
+                Id = 1,
+                OrgName = "School One"
+            },
+            new SqlEstablishmentDto
+            {
+                Id = 2,
+                OrgName = "School Two"
+            }
+            ],
+            EstablishmentIds = [1, 2],
+            CompletedSubmissions =
+            [
+                new SqlSubmissionDto
+            {
+                Id = 100,
+                EstablishmentId = 1,
+                SectionId = "section-1"
+            }
+            ]
+        };
+
+        _groupWorkflow
+            .GetGroupEstablishmentContextAsync(groupEstablishmentId)
+            .Returns(expected);
+
+        // Act
+        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+
+        // Assert
+        Assert.Same(expected, result);
+
+        await _groupWorkflow
+            .Received(1)
+            .GetGroupEstablishmentContextAsync(groupEstablishmentId);
+    }
 }

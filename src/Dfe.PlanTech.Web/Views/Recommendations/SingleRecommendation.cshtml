@@ -28,7 +28,7 @@
 
     @if (Model.IsMat)
     {
-        <govuk-back-link id="nonjs-back-button-link" href="@($"/trust/{Model.CategorySlug}")" class="noprint js-only">
+        <govuk-back-link id="nonjs-back-button-link" href="@($"/groups/{Model.CategorySlug}")" class="noprint js-only">
             Back to @Model.CategoryName.ToLower()
         </govuk-back-link>
     }

@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -211,51 +212,38 @@ public class CategorySectionViewComponentViewBuilderTests
             landingSlug: "networks-landing"
         );
 
-        var establishmentService = Substitute.For<IEstablishmentService>();
         var groupService = Substitute.For<IGroupService>();
 
-        establishmentService
-            .GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Urn = "URN-1" },
-                    new() { Urn = "URN-2" },
-                }
-            );
-
-        establishmentService
-            .GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
-            .Returns(
-                new List<SqlEstablishmentDto>
-                {
-                    new() { Id = 10 },
-                    new() { Id = 20 },
-                }
-            );
-
         groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .GetGroupEstablishmentContextAsync(100)
             .Returns(
-                new List<SqlSubmissionDto>
+                new GroupEstablishmentModel
                 {
-                    new()
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 10 },
+                    new SqlEstablishmentDto { Id = 20 },
+                    ],
+                    EstablishmentIds = [10, 20],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
                     {
                         Id = 1,
                         EstablishmentId = 10,
                         SectionId = "S1",
                     },
-                    new()
+                    new SqlSubmissionDto
                     {
                         Id = 2,
                         EstablishmentId = 20,
                         SectionId = "S1",
                     },
+                    ],
                 }
             );
 
         var sut = CreateSut(
-            establishmentService: establishmentService,
             groupService: groupService
         );
 
@@ -271,25 +259,9 @@ public class CategorySectionViewComponentViewBuilderTests
         Assert.Equal(CategoryLandingContext.MAT, vm.Context);
         Assert.True(vm.IsMat);
 
-        await establishmentService
-            .Received(1)
-            .GetEstablishmentLinks(100);
-
-        await establishmentService
-            .Received(1)
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<string[]>(urns =>
-                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
-                )
-            );
-
         await groupService
             .Received(1)
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids =>
-                    ids.SequenceEqual(new[] { 10, 20 })
-                )
-            );
+            .GetGroupEstablishmentContextAsync(100);
     }
 
     [Fact]
@@ -299,35 +271,24 @@ public class CategorySectionViewComponentViewBuilderTests
         var sectionB = MakeSection("S2", "Section 2", "s2");
         var category = MakeCategory(new[] { sectionA, sectionB });
 
-        var establishmentService = Substitute.For<IEstablishmentService>();
         var groupService = Substitute.For<IGroupService>();
 
-        establishmentService
-            .GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Urn = "URN-1" },
-                    new() { Urn = "URN-2" },
-                }
-            );
-
-        establishmentService
-            .GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
-            .Returns(
-                new List<SqlEstablishmentDto>
-                {
-                    new() { Id = 10 },
-                    new() { Id = 20 },
-                }
-            );
-
         groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
-            .Returns(new List<SqlSubmissionDto>());
+            .GetGroupEstablishmentContextAsync(100)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 10 },
+                    new SqlEstablishmentDto { Id = 20 },
+                    ],
+                    EstablishmentIds = [10, 20],
+                    CompletedSubmissions = [],
+                }
+            );
 
         var sut = CreateSut(
-            establishmentService: establishmentService,
             groupService: groupService
         );
 
@@ -349,43 +310,31 @@ public class CategorySectionViewComponentViewBuilderTests
         var sectionB = MakeSection("S2", "Section 2", "s2");
         var category = MakeCategory(new[] { sectionA, sectionB });
 
-        var establishmentService = Substitute.For<IEstablishmentService>();
         var groupService = Substitute.For<IGroupService>();
 
-        establishmentService
-            .GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Urn = "URN-1" },
-                }
-            );
-
-        establishmentService
-            .GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
-            .Returns(
-                new List<SqlEstablishmentDto>
-                {
-                    new() { Id = 10 },
-                }
-            );
-
         groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .GetGroupEstablishmentContextAsync(100)
             .Returns(
-                new List<SqlSubmissionDto>
+                new GroupEstablishmentModel
                 {
-                    new()
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 10 },
+                    ],
+                    EstablishmentIds = [10],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
                     {
                         Id = 1,
                         EstablishmentId = 10,
                         SectionId = "OTHER-SECTION",
                     },
+                    ],
                 }
             );
 
         var sut = CreateSut(
-            establishmentService: establishmentService,
             groupService: groupService
         );
 

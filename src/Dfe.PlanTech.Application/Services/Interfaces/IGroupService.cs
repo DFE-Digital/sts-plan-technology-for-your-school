@@ -7,4 +7,5 @@ public interface IGroupService
 {
     Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds);
     Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId);
+    Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId);
 }

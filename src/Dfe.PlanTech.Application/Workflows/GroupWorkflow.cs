@@ -100,4 +100,40 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         return results;
 
     }
+
+    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+    int groupEstablishmentId
+    )
+    {
+        var establishmentLinks =
+            await _establishmentService.GetEstablishmentLinks(groupEstablishmentId) ?? [];
+
+        var establishmentUrns = establishmentLinks
+            .Select(e => e.Urn)
+            .Where(urn => !string.IsNullOrWhiteSpace(urn))
+            .Distinct()
+            .ToArray();
+
+        var establishments =
+            await _establishmentService.GetEstablishmentsByReferencesAsync(establishmentUrns) ?? [];
+
+        var establishmentList = establishments.ToList();
+
+        var establishmentIds = establishmentList
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
+        var completedSubmissions =
+            establishmentIds.Length != 0
+                ? await GetGroupCompletedSubmissions(establishmentIds)
+                : [];
+
+        return new GroupEstablishmentModel
+        {
+            Establishments = establishmentList,
+            EstablishmentIds = establishmentIds,
+            CompletedSubmissions = completedSubmissions,
+        };
+    }
 }

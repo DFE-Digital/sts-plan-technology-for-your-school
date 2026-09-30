@@ -52,6 +52,152 @@ public class GroupWorkflowTests
     }
 
     [Fact]
+    public async Task GetGroupEstablishmentContextAsync_ReturnsEstablishmentsIdsAndCompletedSubmissions()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var groupEstablishmentId = 100;
+
+        _establishmentService
+            .GetEstablishmentLinks(groupEstablishmentId)
+            .Returns(
+            [
+                new SqlEstablishmentLinkDto { Urn = "URN-1" },
+            new SqlEstablishmentLinkDto { Urn = "URN-2" }
+            ]);
+
+        _establishmentService
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<string[]>(urns =>
+                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
+                )
+            )
+            .Returns(
+            [
+                new SqlEstablishmentDto
+            {
+                Id = 1,
+                OrgName = "School One"
+            },
+            new SqlEstablishmentDto
+            {
+                Id = 2,
+                OrgName = "School Two"
+            }
+            ]);
+
+        _submissionRepository
+            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 1, 2 }))
+            )
+            .Returns(
+            [
+                BuildSubmission(
+                id: 100,
+                establishmentId: 1,
+                sectionId: "SEC-1"
+            )
+            ]);
+
+        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+
+        Assert.Equal(2, result.Establishments.Count);
+        Assert.Equal(new[] { 1, 2 }, result.EstablishmentIds);
+
+        var submission = Assert.Single(result.CompletedSubmissions);
+
+        Assert.Equal(100, submission.Id);
+        Assert.Equal(1, submission.EstablishmentId);
+        Assert.Equal("SEC-1", submission.SectionId);
+    }
+
+    [Fact]
+    public async Task GetGroupEstablishmentContextAsync_IgnoresBlankAndDuplicateUrnsAndDuplicateEstablishmentIds()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var groupEstablishmentId = 100;
+
+        _establishmentService
+            .GetEstablishmentLinks(groupEstablishmentId)
+            .Returns(
+            [
+                new SqlEstablishmentLinkDto { Urn = "URN-1" },
+            new SqlEstablishmentLinkDto { Urn = "URN-2" },
+            new SqlEstablishmentLinkDto { Urn = "URN-2" },
+            new SqlEstablishmentLinkDto { Urn = "" },
+            new SqlEstablishmentLinkDto { Urn = " " }
+            ]);
+
+        _establishmentService
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<string[]>(urns =>
+                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
+                )
+            )
+            .Returns(
+            [
+                new SqlEstablishmentDto { Id = 1 },
+            new SqlEstablishmentDto { Id = 2 },
+            new SqlEstablishmentDto { Id = 1 }
+            ]);
+
+        _submissionRepository
+            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 1, 2 }))
+            )
+            .Returns([]);
+
+        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+
+        Assert.Equal(new[] { 1, 2 }, result.EstablishmentIds);
+
+        await _establishmentService
+            .Received(1)
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<string[]>(urns =>
+                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
+                )
+            );
+
+        await _submissionRepository
+            .Received(1)
+            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 1, 2 }))
+            );
+    }
+
+    [Fact]
+    public async Task GetGroupEstablishmentContextAsync_WhenNoEstablishments_ReturnsEmptyContextWithoutRetrievingSubmissions()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var groupEstablishmentId = 100;
+
+        _establishmentService
+            .GetEstablishmentLinks(groupEstablishmentId)
+            .Returns([]);
+
+        _establishmentService
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Any<string[]>()
+            )
+            .Returns([]);
+
+        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+
+        Assert.Empty(result.Establishments);
+        Assert.Empty(result.EstablishmentIds);
+        Assert.Empty(result.CompletedSubmissions);
+
+        await _submissionRepository
+            .DidNotReceive()
+            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+                Arg.Any<int[]>()
+            );
+    }
+
+    [Fact]
     public async Task GetGroupCompletedSubmissions_CallsRepository()
     {
         var sut = CreateServiceUnderTest();
