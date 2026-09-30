@@ -18,7 +18,6 @@ public class CategorySectionViewComponentViewBuilderTests
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
         ICurrentUserProvider? currentUser = null,
-        IEstablishmentService? establishmentService = null,
         IGroupService? groupService = null,
         ILogger<BaseViewBuilder>? logger = null
     )
@@ -26,7 +25,6 @@ public class CategorySectionViewComponentViewBuilderTests
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUserProvider>();
-        establishmentService ??= Substitute.For<IEstablishmentService>();
         groupService ??= Substitute.For<IGroupService>();
         currentUser.GetActiveEstablishmentIdAsync().Returns(1234);
         currentUser.UserOrganisationId.Returns(100);
@@ -37,7 +35,6 @@ public class CategorySectionViewComponentViewBuilderTests
             contentful,
             currentUser,
             submission,
-            establishmentService,
             groupService
         );
     }

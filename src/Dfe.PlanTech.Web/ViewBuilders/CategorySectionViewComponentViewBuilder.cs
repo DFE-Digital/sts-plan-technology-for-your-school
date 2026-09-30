@@ -13,7 +13,6 @@ public class CategorySectionViewComponentViewBuilder(
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     ISubmissionService submissionService,
-    IEstablishmentService establishmentService,
     IGroupService groupService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
@@ -21,8 +20,6 @@ public class CategorySectionViewComponentViewBuilder(
 {
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly IGroupService _groupService =
         groupService ?? throw new ArgumentNullException(nameof(groupService));
 

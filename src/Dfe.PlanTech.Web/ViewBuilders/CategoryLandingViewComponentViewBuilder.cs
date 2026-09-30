@@ -225,7 +225,6 @@ public class CategoryLandingViewComponentViewBuilder(
             var groupContext =
                 await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
-            var establishments = groupContext.Establishments;
             var establishmentIds = groupContext.EstablishmentIds;
             var completedSubmissions = groupContext.CompletedSubmissions;
 
