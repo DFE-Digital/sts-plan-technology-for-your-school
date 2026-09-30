@@ -14,12 +14,15 @@ public class GroupWorkflowTests
 {
     private readonly ISubmissionRepository _submissionRepository =
         Substitute.For<ISubmissionRepository>();
+
     private readonly IEstablishmentService _establishmentService =
         Substitute.For<IEstablishmentService>();
+
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
 
-    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository, _establishmentService, _recommendationHistoryRepository);
+    private GroupWorkflow CreateServiceUnderTest() =>
+        new(_submissionRepository, _establishmentService, _recommendationHistoryRepository);
 
     private static EstablishmentEntity BuildEstablishment(int id = 1)
     {
@@ -286,8 +289,10 @@ public class GroupWorkflowTests
             ),
         };
 
-        submissions[0].Establishment = new EstablishmentEntity { Id = 1, EstablishmentRef = "testRef1", OrgName = "Test 1" };
-        submissions[1].Establishment = new EstablishmentEntity { Id = 2, EstablishmentRef = "testRef2", OrgName = "Test 2" };
+        submissions[0].Establishment = new EstablishmentEntity
+            { Id = 1, EstablishmentRef = "testRef1", OrgName = "Test 1" };
+        submissions[1].Establishment = new EstablishmentEntity
+            { Id = 2, EstablishmentRef = "testRef2", OrgName = "Test 2" };
 
         _submissionRepository
             .GetLatestSubmissionPerEstablishmentForSectionAsync(
@@ -381,7 +386,8 @@ public class GroupWorkflowTests
             ),
         };
 
-        submissions[0].Establishment = new EstablishmentEntity { Id = 2, EstablishmentRef = "testRef2", OrgName = "testName2" };
+        submissions[0].Establishment = new EstablishmentEntity
+            { Id = 2, EstablishmentRef = "testRef2", OrgName = "testName2" };
 
         _submissionRepository
             .GetLatestSubmissionPerEstablishmentForSectionAsync(
@@ -475,10 +481,14 @@ public class GroupWorkflowTests
                 status: SubmissionStatus.CompleteReviewed)
         };
 
-        submissions[0].Establishment = new EstablishmentEntity { Id = 1, EstablishmentRef = "testRef1", OrgName = "Test 1" }; ;
+        submissions[0].Establishment = new EstablishmentEntity
+            { Id = 1, EstablishmentRef = "testRef1", OrgName = "Test 1" };
+        ;
         submissions[0].DateCreated = new DateTime(2025, 1, 1);
         submissions[0].DateLastUpdated = new DateTime(2025, 2, 1);
-        submissions[1].Establishment = new EstablishmentEntity { Id = 2, EstablishmentRef = "testRef2", OrgName = "Test 2" }; ;
+        submissions[1].Establishment = new EstablishmentEntity
+            { Id = 2, EstablishmentRef = "testRef2", OrgName = "Test 2" };
+        ;
         submissions[1].DateCreated = new DateTime(2025, 3, 1);
         submissions[1].DateLastUpdated = new DateTime(2025, 4, 1);
         submissions[1].DateCompleted = new DateTime(2025, 5, 1);
@@ -523,7 +533,8 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_SubmissionRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!, _establishmentService, _recommendationHistoryRepository));
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new GroupWorkflow(null!, _establishmentService, _recommendationHistoryRepository));
 
         Assert.Equal("submissionRepository", exception.ParamName);
     }
@@ -531,7 +542,8 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_EstablishmentService_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!, _recommendationHistoryRepository));
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new GroupWorkflow(_submissionRepository, null!, _recommendationHistoryRepository));
 
         Assert.Equal("establishmentService", exception.ParamName);
     }
@@ -539,8 +551,92 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_RecommendationHistoryRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, _establishmentService, null!));
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new GroupWorkflow(_submissionRepository, _establishmentService, null!));
 
         Assert.Equal("recommendationHistoryRepository", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId_CallsRepository()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var establishmentId = 1;
+        var recommendationId = 100;
+
+        _recommendationHistoryRepository
+            .GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+                establishmentId,
+                recommendationId
+            )
+            .Returns(new List<(
+                EstablishmentEntity Establishment,
+                EstablishmentRecommendationHistoryEntity? History)>());
+
+        await sut.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+            establishmentId,
+            recommendationId
+        );
+
+        await _recommendationHistoryRepository
+            .Received(1)
+            .GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+                establishmentId,
+                recommendationId
+            );
+    }
+
+    [Fact]
+    public async Task GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId_ReturnsRepositoryResult()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var establishmentId = 1;
+        var recommendationId = 100;
+
+        var expected = new List<(
+            EstablishmentEntity Establishment,
+            EstablishmentRecommendationHistoryEntity? History)>
+        {
+            (
+                new EstablishmentEntity
+                {
+                    Id = 1,
+                    EstablishmentRef = "testRef1",
+                    OrgName = "Test 1"
+                },
+                new EstablishmentRecommendationHistoryEntity
+                {
+                    Id = 10,
+                    EstablishmentId = 1,
+                    RecommendationId = recommendationId
+                }
+            ),
+            (
+                new EstablishmentEntity
+                {
+                    Id = 2,
+                    EstablishmentRef = "testRef2",
+                    OrgName = "Test 2"
+                },
+                null
+            )
+        };
+
+        _recommendationHistoryRepository
+            .GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+                establishmentId,
+                recommendationId
+            )
+            .Returns(expected);
+
+        var result =
+            await sut.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+                establishmentId,
+                recommendationId
+            );
+
+        Assert.Same(expected, result);
     }
 }

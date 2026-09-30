@@ -22,7 +22,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGroupsViewBuilder _viewBuilder;
         private readonly ICurrentUserProvider _currentUser;
         private readonly GroupsController _controller;
-        private readonly IGroupSelectSchoolsToAssessValidator _validator;
+        private readonly IGroupSelectSchoolsToAssessValidator _groupSelectSchoolsToAssessValidator;
+        private readonly IGroupSelectSchoolsToUpdateStatusValidator _groupSelectSchoolsToUpdateStatusValidator;
+
         private readonly TestSession _session;
 
         public GroupsControllerTests()
@@ -30,7 +32,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _logger = Substitute.For<ILogger<GroupsController>>();
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
             _currentUser = Substitute.For<ICurrentUserProvider>();
-            _validator = Substitute.For<IGroupSelectSchoolsToAssessValidator>();
+            _groupSelectSchoolsToAssessValidator = Substitute.For<IGroupSelectSchoolsToAssessValidator>();
+            _groupSelectSchoolsToUpdateStatusValidator = Substitute.For<IGroupSelectSchoolsToUpdateStatusValidator>();
+
             _session = new TestSession();
 
             var httpContext = new DefaultHttpContext
@@ -42,7 +46,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _logger,
                 _currentUser,
                 _viewBuilder,
-                _validator
+                _groupSelectSchoolsToAssessValidator,
+                _groupSelectSchoolsToUpdateStatusValidator
             )
             {
                 ControllerContext = new ControllerContext
@@ -57,7 +62,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullCurrentUser_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, null!, _viewBuilder, _validator)
+                new GroupsController(_logger, null!, _viewBuilder, _groupSelectSchoolsToAssessValidator,
+                    _groupSelectSchoolsToUpdateStatusValidator)
             );
 
             Assert.Equal("currentUser", ex.ParamName);
@@ -67,7 +73,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, null!, _validator)
+                new GroupsController(_logger, _currentUser, null!, _groupSelectSchoolsToAssessValidator,
+                    _groupSelectSchoolsToUpdateStatusValidator)
             );
 
             Assert.Equal("groupsViewBuilder", ex.ParamName);
@@ -77,10 +84,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullValidator_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, _viewBuilder, null!)
+                new GroupsController(_logger, _currentUser, _viewBuilder, null!,
+                    _groupSelectSchoolsToUpdateStatusValidator)
             );
 
-            Assert.Equal("validator", ex.ParamName);
+            Assert.Equal("groupSelectSchoolsToAssessValidator", ex.ParamName);
         }
 
         [Fact]
@@ -308,7 +316,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 sectionSlug
             );
 
-            await _validator
+            await _groupSelectSchoolsToAssessValidator
                 .Received(1)
                 .ValidateSelectionAsync(
                     model,
@@ -377,7 +385,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
-            _validator
+            _groupSelectSchoolsToAssessValidator
                 .When(x =>
                     x.ValidateSelectionAsync(
                         Arg.Any<GroupsSelectSchoolsToAssessViewModel>(),
@@ -520,6 +528,217 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 );
 
             Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public void Constructor_WithNullUpdateStatusValidator_ThrowsArgumentNullException()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+                new GroupsController(
+                    _logger,
+                    _currentUser,
+                    _viewBuilder,
+                    _groupSelectSchoolsToAssessValidator,
+                    null!
+                )
+            );
+
+            Assert.Equal("groupSelectSchoolsToUpdateStatusValidator", ex.ParamName);
+        }
+
+        [Fact]
+        public async Task GetSelectSchoolsToUpdateViewModelAsync_CallsViewBuilderAndReturnsResult()
+        {
+            var sectionSlug = "some-section";
+            var recommendationSlug = "some-recommendation";
+
+            _viewBuilder
+                .RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                    _controller,
+                    sectionSlug,
+                    recommendationSlug
+                )
+                .Returns(new OkResult());
+
+            var result =
+                await _controller.GetSelectSchoolsToUpdateView(
+                    sectionSlug,
+                    recommendationSlug
+                );
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                    _controller,
+                    sectionSlug,
+                    recommendationSlug
+                );
+
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToUpdateStatus_ThrowsArgumentNullException_NoSectionSlug()
+        {
+            var model = new GroupsSelectSchoolsToUpdateStatusViewModel
+            {
+                SelectedSchoolsRefs =
+                [
+                    "000001",
+                    "000002"
+                ]
+            };
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.SubmitSelectedSchoolsToUpdateStatus(
+                    model,
+                    null!,
+                    "recommendation"
+                )
+            );
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToUpdateStatus_ThrowsArgumentNullException_NoRecommendationSlug()
+        {
+            var model = new GroupsSelectSchoolsToUpdateStatusViewModel
+            {
+                SelectedSchoolsRefs =
+                [
+                    "000001",
+                    "000002"
+                ]
+            };
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.SubmitSelectedSchoolsToUpdateStatus(
+                    model,
+                    "section",
+                    null!
+                )
+            );
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToUpdateStatus_CallsValidator()
+        {
+            var categorySlug = "category";
+            var sectionSlug = "section";
+            var recommendationSlug = "recommendation";
+
+            var model = new GroupsSelectSchoolsToUpdateStatusViewModel
+            {
+                SelectedSchoolsRefs =
+                [
+                    "000001",
+                    "000002"
+                ]
+            };
+
+            _controller.RouteData.Values["categorySlug"] = categorySlug;
+
+            await _controller.SubmitSelectedSchoolsToUpdateStatus(
+                model,
+                sectionSlug,
+                recommendationSlug
+            );
+
+            await _groupSelectSchoolsToUpdateStatusValidator
+                .Received(1)
+                .ValidateSelectionAsync(
+                    model,
+                    Arg.Any<ModelStateDictionary>()
+                );
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToUpdateStatus_CallsViewBuilderGetMethod_WhenInvalidInput()
+        {
+            var categorySlug = "category";
+            var sectionSlug = "section";
+            var recommendationSlug = "recommendation";
+
+            var model = new GroupsSelectSchoolsToUpdateStatusViewModel
+            {
+                SelectedSchoolsRefs =
+                [
+                    "000001",
+                    "000002",
+                    "all"
+                ]
+            };
+
+            _controller.RouteData.Values["categorySlug"] = categorySlug;
+
+            _groupSelectSchoolsToUpdateStatusValidator
+                .When(x =>
+                    x.ValidateSelectionAsync(
+                        Arg.Any<GroupsSelectSchoolsToUpdateStatusViewModel>(),
+                        Arg.Any<ModelStateDictionary>()
+                    )
+                )
+                .Do(callInfo =>
+                {
+                    var modelState =
+                        callInfo.Arg<ModelStateDictionary>();
+
+                    modelState.AddModelError(
+                        "SelectedSchoolsRefs",
+                        "Error"
+                    );
+                });
+
+            await _controller.SubmitSelectedSchoolsToUpdateStatus(
+                model,
+                sectionSlug,
+                recommendationSlug
+            );
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                    _controller,
+                    sectionSlug,
+                    recommendationSlug,
+                    model
+                );
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToUpdateStatus_WhenValidInputReturnsOk()
+        {
+            var categorySlug = "category";
+            var sectionSlug = "section";
+            var recommendationSlug = "recommendation";
+
+            var viewModel = new GroupsSelectSchoolsToUpdateStatusViewModel
+            {
+                SelectedSchoolsRefs =
+                [
+                    "00001",
+                    "00002"
+                ]
+            };
+
+            _controller.RouteData.Values["categorySlug"] = categorySlug;
+
+            var result =
+                await _controller.SubmitSelectedSchoolsToUpdateStatus(
+                    viewModel,
+                    sectionSlug,
+                    recommendationSlug
+                );
+
+            Assert.IsType<OkResult>(result);
+
+            await _viewBuilder
+                .DidNotReceive()
+                .RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                    _controller,
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    Arg.Any<GroupsSelectSchoolsToUpdateStatusViewModel>()
+                );
         }
 
         private sealed class TestSession : ISession

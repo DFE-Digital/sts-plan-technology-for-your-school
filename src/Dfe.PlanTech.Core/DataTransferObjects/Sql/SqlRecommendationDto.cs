@@ -7,7 +7,7 @@ public class SqlRecommendationDto : ISqlDto
     public string? RecommendationText { get; init; } = null!;
     public DateTime DateCreated { get; init; } = DateTime.UtcNow;
     public int QuestionId { get; init; }
-    public SqlQuestionDto Question { get; init; } = null!;
+    public SqlQuestionDto? Question { get; init; } = null!;
     public bool Archived { get; init; } = false;
     public string? QuestionContentfulRef { get; init; }
     public Guid? UserActionId { get; set; }

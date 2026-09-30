@@ -69,4 +69,12 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             recommendationContentfulReference
         );
     }
+
+    public async Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences)
+    {
+        return await recommendationWorkflow.GetRecommendationsByContentfulReferencesAsync(
+            recommendationContentfulReferences
+        );
+    }
 }

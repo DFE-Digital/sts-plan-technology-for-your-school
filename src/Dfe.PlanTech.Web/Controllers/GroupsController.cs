@@ -12,26 +12,32 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
+    public const string GetSelectASchoolToUpdateStatusAction = "GetSelectASchoolToUpdateStatusView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
+    public const string SubmitSchoolsUpdateStatusSelectionAction = "SubmitSelectedSchoolsToUpdateStatus";
 
     private readonly ICurrentUserProvider _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
-    private readonly IGroupSelectSchoolsToAssessValidator _validator;
+    private readonly IGroupSelectSchoolsToAssessValidator _groupSelectSchoolsToAssessValidator;
+    private readonly IGroupSelectSchoolsToUpdateStatusValidator _groupSelectSchoolsToUpdateStatusValidator;
 
     public GroupsController(
         ILogger<GroupsController> logger,
         ICurrentUserProvider currentUser,
         IGroupsViewBuilder groupsViewBuilder,
-        IGroupSelectSchoolsToAssessValidator validator
+        IGroupSelectSchoolsToAssessValidator groupSelectSchoolsToAssessValidator,
+        IGroupSelectSchoolsToUpdateStatusValidator groupSelectSchoolsToUpdateStatusValidator
     )
         : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder =
             groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
-        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        _groupSelectSchoolsToAssessValidator = groupSelectSchoolsToAssessValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToAssessValidator));
+        _groupSelectSchoolsToUpdateStatusValidator = groupSelectSchoolsToUpdateStatusValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToUpdateStatusValidator));
+
     }
 
     [HttpGet(
@@ -76,6 +82,22 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
+        Name = GetSelectASchoolToUpdateStatusAction
+    )]
+    public async Task<IActionResult> GetSelectSchoolsToUpdateView(string sectionSlug, string recommendationSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+
+        return await _groupsViewBuilder.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+            this,
+            sectionSlug,
+            recommendationSlug
+        );
+    }
+
     [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
     public async Task<IActionResult> SelectSchoolAndRedirect(
         string schoolUrn,
@@ -115,7 +137,7 @@ public class GroupsController : BaseController<GroupsController>
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        await _validator.ValidateSelectionAsync(viewModel, ModelState);
+        await _groupSelectSchoolsToAssessValidator.ValidateSelectionAsync(viewModel, ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -133,6 +155,36 @@ public class GroupsController : BaseController<GroupsController>
         );
 
         return result;
+    }
+
+    [HttpPost(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
+        Name = SubmitSchoolsUpdateStatusSelectionAction
+    )]
+    public async Task<IActionResult> SubmitSelectedSchoolsToUpdateStatus(
+        GroupsSelectSchoolsToUpdateStatusViewModel viewModel,
+        string sectionSlug,
+        string recommendationSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+
+        await _groupSelectSchoolsToUpdateStatusValidator.ValidateSelectionAsync(viewModel, ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            return await _groupsViewBuilder.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                this,
+                sectionSlug,
+                recommendationSlug,
+                viewModel
+            );
+        }
+
+        //todo - handle path to select status page (different ticket).
+
+        return Ok();
     }
 
     [HttpGet(

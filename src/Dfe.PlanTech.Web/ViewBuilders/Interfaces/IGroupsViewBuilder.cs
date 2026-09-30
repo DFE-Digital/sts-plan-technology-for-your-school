@@ -16,6 +16,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string sectionSlug,
             GroupsSelectSchoolsToAssessViewModel? viewModel = null
         );
+
         Task<IActionResult> SubmitSelectedSchoolsToAssessAndRedirect(
             Controller controller,
             string sectionSlug,
@@ -26,6 +27,13 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string categorySlug,
             string sectionSlug,
             string schoolUrn
+        );
+
+        Task<IActionResult> RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+            Controller controller,
+            string sectionSlug,
+            string recommendationSlug,
+            GroupsSelectSchoolsToUpdateStatusViewModel? viewModel = null
         );
     }
 }

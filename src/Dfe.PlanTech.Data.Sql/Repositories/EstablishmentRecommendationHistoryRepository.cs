@@ -98,6 +98,8 @@ public class EstablishmentRecommendationHistoryRepository
 
                 where activeEstablishment.Id == establishmentId
 
+                orderby establishment.OrgName
+
                 select new
                 {
                     Establishment = establishment,
