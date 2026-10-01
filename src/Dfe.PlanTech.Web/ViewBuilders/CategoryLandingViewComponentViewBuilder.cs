@@ -62,14 +62,14 @@ public class CategoryLandingViewComponentViewBuilder(
                 slug,
                 sectionName
             ),
-
-            _ => await BuildSchoolViewModelAsync(
+            CategoryLandingContext.School => await BuildSchoolViewModelAsync(
                 category,
                 slug,
                 sectionName,
                 sortOrder,
                 print
             ),
+            _ => throw new ArgumentOutOfRangeException(nameof(context), context, null),
         };
     }
 

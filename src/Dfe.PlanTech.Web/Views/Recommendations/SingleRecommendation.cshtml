@@ -28,13 +28,13 @@
 
     @if (Model.IsMat)
     {
-        <govuk-back-link id="nonjs-back-button-link" href="@($"/groups/{Model.CategorySlug}")" class="noprint js-only">
+        <govuk-back-link id="mat-back-button-link" href="@($"/groups/{Model.CategorySlug}")" class="noprint js-only">
             Back to @Model.CategoryName.ToLower()
         </govuk-back-link>
     }
     else
     {
-        <govuk-back-link id="nonjs-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
+        <govuk-back-link id="school-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
             Back to @Model.CategoryName.ToLower()
         </govuk-back-link>
     }

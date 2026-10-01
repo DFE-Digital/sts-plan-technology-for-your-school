@@ -37,7 +37,8 @@ public class CategorySectionViewComponentViewBuilder(
         return context switch
         {
             CategoryLandingContext.MAT => await BuildMatViewModelAsync(category),
-            _ => await BuildSchoolViewModelAsync(category),
+            CategoryLandingContext.School => await BuildSchoolViewModelAsync(category),
+            _ => throw new ArgumentOutOfRangeException(nameof(context), context, null),
         };
     }
 

@@ -8,13 +8,13 @@
 
     @if (Model.Context == CategoryLandingContext.MAT)
     {
-        <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.GroupStandards" class="noprint js-only">
+        <govuk-back-link id="mat-back-button-link" href="@UrlConstants.GroupStandards" class="noprint js-only">
             Back to standards
         </govuk-back-link>
     }
     else
     {
-        <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint js-only">
+        <govuk-back-link id="school-back-button-link" href="@UrlConstants.HomePage" class="noprint js-only">
             Back to home
         </govuk-back-link>
     }

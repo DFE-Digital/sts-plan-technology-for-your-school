@@ -18,8 +18,10 @@ public class GroupWorkflowTests
         Substitute.For<IEstablishmentService>();
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
+    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
+        Substitute.For<IEstablishmentGroupRepository>();
 
-    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository, _establishmentService, _recommendationHistoryRepository);
+    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository, _establishmentService, _recommendationHistoryRepository, _establishmentGroupRepository);
 
     private static EstablishmentEntity BuildEstablishment(int id = 1)
     {
@@ -58,28 +60,16 @@ public class GroupWorkflowTests
 
         var groupEstablishmentId = 100;
 
-        _establishmentService
-            .GetEstablishmentLinks(groupEstablishmentId)
+        _establishmentGroupRepository
+            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId)
             .Returns(
             [
-                new SqlEstablishmentLinkDto { Urn = "URN-1" },
-            new SqlEstablishmentLinkDto { Urn = "URN-2" }
-            ]);
-
-        _establishmentService
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<string[]>(urns =>
-                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
-                )
-            )
-            .Returns(
-            [
-                new SqlEstablishmentDto
+                new EstablishmentEntity
             {
                 Id = 1,
                 OrgName = "School One"
             },
-            new SqlEstablishmentDto
+            new EstablishmentEntity
             {
                 Id = 2,
                 OrgName = "School Two"
@@ -109,37 +99,26 @@ public class GroupWorkflowTests
         Assert.Equal(100, submission.Id);
         Assert.Equal(1, submission.EstablishmentId);
         Assert.Equal("SEC-1", submission.SectionId);
+
+        await _establishmentGroupRepository
+            .Received(1)
+            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
     }
 
     [Fact]
-    public async Task GetGroupEstablishmentContextAsync_IgnoresBlankAndDuplicateUrnsAndDuplicateEstablishmentIds()
+    public async Task GetGroupEstablishmentContextAsync_UsesDistinctEstablishmentIds()
     {
         var sut = CreateServiceUnderTest();
 
         var groupEstablishmentId = 100;
 
-        _establishmentService
-            .GetEstablishmentLinks(groupEstablishmentId)
+        _establishmentGroupRepository
+            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId)
             .Returns(
             [
-                new SqlEstablishmentLinkDto { Urn = "URN-1" },
-            new SqlEstablishmentLinkDto { Urn = "URN-2" },
-            new SqlEstablishmentLinkDto { Urn = "URN-2" },
-            new SqlEstablishmentLinkDto { Urn = "" },
-            new SqlEstablishmentLinkDto { Urn = " " }
-            ]);
-
-        _establishmentService
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<string[]>(urns =>
-                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
-                )
-            )
-            .Returns(
-            [
-                new SqlEstablishmentDto { Id = 1 },
-            new SqlEstablishmentDto { Id = 2 },
-            new SqlEstablishmentDto { Id = 1 }
+                new EstablishmentEntity { Id = 1 },
+            new EstablishmentEntity { Id = 2 },
+            new EstablishmentEntity { Id = 1 }
             ]);
 
         _submissionRepository
@@ -151,14 +130,6 @@ public class GroupWorkflowTests
         var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
         Assert.Equal(new[] { 1, 2 }, result.EstablishmentIds);
-
-        await _establishmentService
-            .Received(1)
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<string[]>(urns =>
-                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
-                )
-            );
 
         await _submissionRepository
             .Received(1)
@@ -174,14 +145,8 @@ public class GroupWorkflowTests
 
         var groupEstablishmentId = 100;
 
-        _establishmentService
-            .GetEstablishmentLinks(groupEstablishmentId)
-            .Returns([]);
-
-        _establishmentService
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Any<string[]>()
-            )
+        _establishmentGroupRepository
+            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId)
             .Returns([]);
 
         var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
@@ -669,7 +634,7 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_SubmissionRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!, _establishmentService, _recommendationHistoryRepository));
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!, _establishmentService, _recommendationHistoryRepository, _establishmentGroupRepository));
 
         Assert.Equal("submissionRepository", exception.ParamName);
     }
@@ -677,7 +642,7 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_EstablishmentService_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!, _recommendationHistoryRepository));
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!, _recommendationHistoryRepository, _establishmentGroupRepository));
 
         Assert.Equal("establishmentService", exception.ParamName);
     }
@@ -685,8 +650,16 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_RecommendationHistoryRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, _establishmentService, null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, _establishmentService, null!, _establishmentGroupRepository));
 
         Assert.Equal("recommendationHistoryRepository", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Throws_ArgumentNullException_When_EstablishmentGroupRepository_Is_Null()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, _establishmentService, _recommendationHistoryRepository, null!));
+
+        Assert.Equal("establishmentGroupRepository", exception.ParamName);
     }
 }
