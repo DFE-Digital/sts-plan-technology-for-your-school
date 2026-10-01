@@ -181,7 +181,7 @@ public class GroupsViewBuilder(
         var dbRecommendation =
             await _recommendationService.GetRecommendationsByContentfulReferencesAsync([recommendationChunk.Id]);
 
-        var recommendation = dbRecommendation.ToList().OrderByDescending(r => r.Id).FirstOrDefault() ?? throw new ArgumentException("Could not find recommendation");
+        var recommendation = dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault() ?? throw new ArgumentException("Could not find recommendation");
 
         var latestEstRecHistory = await _groupService.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(establishmentId, recommendation.Id);
 
@@ -202,8 +202,7 @@ public class GroupsViewBuilder(
         viewModel ??= new GroupsSelectSchoolsToUpdateStatusViewModel();
 
         viewModel.Section = section;
-        viewModel.EstablishmentsRecommendation =
-            establishmentsRecommendations ?? [];
+        viewModel.EstablishmentsRecommendation = establishmentsRecommendations;
         viewModel.CategorySlug = categorySlug;
         viewModel.RecommendationChunk = recommendationChunk;
 

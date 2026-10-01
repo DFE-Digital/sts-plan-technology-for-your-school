@@ -16,7 +16,7 @@ public class GroupSelectSchoolsToUpdateStatusValidator(IMicrocopyProvider microc
     {
         var selectedSchools = model.SelectedSchoolsRefs ?? [];
 
-        if (!selectedSchools.Any())
+        if (selectedSchools.Count == 0)
         {
             var noSelectionError = await microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusNoSelectionError);
 
