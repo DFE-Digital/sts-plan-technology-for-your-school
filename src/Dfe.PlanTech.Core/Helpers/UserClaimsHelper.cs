@@ -44,13 +44,9 @@ public static class UserClaimsHelper
     {
         ArgumentNullException.ThrowIfNull(claims);
 
-        var satOrganisationJson = claims
-            .FirstOrDefault(c => c.Type == ClaimConstants.SINGLE_ACADEMY_ORGANISATION)
+        var organisationJson = claims
+            .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)
             ?.Value;
-
-        var organisationJson =
-            satOrganisationJson
-            ?? claims.FirstOrDefault(c => c.Type == ClaimConstants.Organisation)?.Value;
 
         if (organisationJson == null)
         {
