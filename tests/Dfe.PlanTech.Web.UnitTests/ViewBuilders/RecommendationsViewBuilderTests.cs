@@ -33,8 +33,6 @@ public class RecommendationsViewBuilderTests
         Substitute.For<IRecommendationService>();
     private readonly IMicrocopyProvider _microcopyProvider = Substitute.For<IMicrocopyProvider>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
-    private readonly IEstablishmentService _establishmentService =
-        Substitute.For<IEstablishmentService>();
     private readonly IGroupService _groupService = Substitute.For<IGroupService>();
 
     // ---- Options
@@ -51,7 +49,6 @@ public class RecommendationsViewBuilderTests
             _recommendationService,
             _submissions,
             _microcopyProvider,
-            _establishmentService,
             _groupService
         );
 

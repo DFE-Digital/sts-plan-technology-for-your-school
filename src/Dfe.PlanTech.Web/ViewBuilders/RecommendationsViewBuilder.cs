@@ -26,7 +26,6 @@ public class RecommendationsViewBuilder(
     IRecommendationService recommendationService,
     ISubmissionService submissionService,
     IMicrocopyProvider microcopyProvider,
-    IEstablishmentService establishmentService,
     IGroupService groupService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
@@ -38,8 +37,6 @@ public class RecommendationsViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IMicrocopyProvider _microcopyProvider =
         microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly IGroupService _groupService =
         groupService ?? throw new ArgumentNullException(nameof(groupService));
 
