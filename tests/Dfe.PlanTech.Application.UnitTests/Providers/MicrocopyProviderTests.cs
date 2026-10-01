@@ -11,7 +11,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Providers;
 public class MicrocopyProviderTests
 {
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
-    private readonly ILogger<MicrocopyProvider> _logger = Substitute.For<ILogger<MicrocopyProvider>>();
+    private readonly ILogger<MicrocopyProvider> _logger = Substitute.For<
+        ILogger<MicrocopyProvider>
+    >();
 
     private MicrocopyProvider CreateServiceUnderTest() => new(_logger, _contentful);
 
@@ -20,7 +22,7 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var entry = new MicrocopyEntry { Key = "Key 1", Value = "Value 1" };
-        _contentful.GetMicrocopyEntriesAsync().Returns(new List<MicrocopyEntry> { entry });
+        _contentful.GetMicrocopyEntriesAsync().Returns([entry]);
 
         var sut = CreateServiceUnderTest();
 
@@ -40,8 +42,7 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var noMicrocopyEntries = new List<MicrocopyEntry>();
-        _contentful.GetMicrocopyEntriesAsync()
-            .Returns(noMicrocopyEntries);
+        _contentful.GetMicrocopyEntriesAsync().Returns(noMicrocopyEntries);
 
         var sut = CreateServiceUnderTest();
 
@@ -61,8 +62,7 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var entry = new MicrocopyEntry { Key = "Key 2", Value = "Value 2" };
-        _contentful.GetMicrocopyEntriesAsync()
-            .Returns(new List<MicrocopyEntry>{ entry });
+        _contentful.GetMicrocopyEntriesAsync().Returns(new List<MicrocopyEntry> { entry });
 
         var sut = CreateServiceUnderTest();
 
@@ -74,7 +74,10 @@ public class MicrocopyProviderTests
 
         var logMessage = _logger.ReceivedLogMessages().FirstOrDefault();
         Assert.NotNull(logMessage);
-        Assert.Equal("Cannot find fallback text for microcopy with key 'Key 2'", logMessage.Message);
+        Assert.Equal(
+            "Cannot find fallback text for microcopy with key 'Key 2'",
+            logMessage.Message
+        );
     }
 
     [Fact]
@@ -82,13 +85,14 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var noMicrocopyEntries = new List<MicrocopyEntry>();
-        _contentful.GetMicrocopyEntriesAsync()
-            .Returns(noMicrocopyEntries);
+        _contentful.GetMicrocopyEntriesAsync().Returns(noMicrocopyEntries);
 
         var sut = CreateServiceUnderTest();
 
         // Act
-        var result = await sut.GetTextByKeyAsync(ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted);
+        var result = await sut.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted
+        );
 
         // Assert
         Assert.Equal("Go to standard", result);
@@ -99,8 +103,7 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var entry = new MicrocopyEntry { Key = "Key 4", Value = "Value 4" };
-        _contentful.GetMicrocopyEntriesAsync()
-            .Returns(new List<MicrocopyEntry> { entry });
+        _contentful.GetMicrocopyEntriesAsync().Returns(new List<MicrocopyEntry> { entry });
 
         var sut = CreateServiceUnderTest();
 
