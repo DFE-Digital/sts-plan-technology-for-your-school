@@ -226,7 +226,7 @@ public class PagesViewBuilder(
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData["SectionName"] as string,
+            SectionName = controller.TempData[StatePassingMechanismConstants.SectionName] as string,
             SortOrder = controller.Request.Query["sort"],
             HasBanner = category.HasBanner,
             AfterContentContent = category.AfterContentContent,
@@ -289,7 +289,7 @@ public class PagesViewBuilder(
         }
 
         return relatedActions
-            .Where(x => !string.IsNullOrWhiteSpace(x?.Title) && !string.IsNullOrWhiteSpace(x?.Url))
+            .Where(x => !string.IsNullOrWhiteSpace(x.Title) && !string.IsNullOrWhiteSpace(x.Url))
             .Select(x => new RelatedActionViewModel { Text = x.Title!, Url = x.Url! })
             .ToList();
     }
