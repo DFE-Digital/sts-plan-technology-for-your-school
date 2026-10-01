@@ -1023,26 +1023,6 @@ public class CategoryLandingViewComponentViewBuilderTests
         var currentUser = Substitute.For<ICurrentUserProvider>();
         currentUser.UserOrganisationId.Returns(5001);
 
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
-            .GetEstablishmentLinks(5001)
-            .Returns(
-            [
-                new SqlEstablishmentLinkDto { Urn = "100001" },
-                new SqlEstablishmentLinkDto { Urn = "100002" },
-            ]);
-        establishment
-            .GetEstablishmentsByReferencesAsync(
-                Arg.Is<IEnumerable<string>>(urns =>
-                    urns.SequenceEqual(new[] { "100001", "100002" })
-                )
-            )
-            .Returns(
-            [
-                new SqlEstablishmentDto { Id = 101 },
-                new SqlEstablishmentDto { Id = 102 },
-            ]);
-
         var groupService = Substitute.For<IGroupService>();
 
         groupService
@@ -1254,15 +1234,12 @@ public class CategoryLandingViewComponentViewBuilderTests
         var currentUser = Substitute.For<ICurrentUserProvider>();
         currentUser.UserOrganisationId.Returns(5001);
 
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
-            .GetEstablishmentLinks(5001)
+        var groupService = Substitute.For<IGroupService>();
+        groupService
+            .GetGroupEstablishmentContextAsync(5001)
             .Throws(new Exception("boom"));
 
-        var groupService = Substitute.For<IGroupService>();
-
         var sut = CreateSut(
-            establishment: establishment,
             groupService: groupService,
             currentUser: currentUser
         );

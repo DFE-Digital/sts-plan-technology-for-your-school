@@ -62,7 +62,7 @@ public class EstablishmentGroupRepositoryTests
             }
         );
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new EstablishmentGroupRepository(db);
 
@@ -146,7 +146,7 @@ public class EstablishmentGroupRepositoryTests
             }
         );
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new EstablishmentGroupRepository(db);
 
@@ -181,7 +181,7 @@ public class EstablishmentGroupRepositoryTests
             }
         );
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new EstablishmentGroupRepository(db);
 
