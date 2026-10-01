@@ -238,7 +238,7 @@ public class RecommendationsViewBuilder(
                 new MatRecommendationSchoolViewModel
                 {
                     EstablishmentId = establishment.Id,
-                    SchoolName = establishment.OrgName,
+                    SchoolName = establishment?.OrgName ?? string.Empty,
                     Status = history?.NewStatus ?? RecommendationStatus.NotStarted,
                     LastUpdated = history?.DateCreated,
                 }
