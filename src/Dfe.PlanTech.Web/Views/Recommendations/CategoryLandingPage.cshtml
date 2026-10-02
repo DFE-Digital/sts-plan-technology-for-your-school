@@ -2,9 +2,22 @@
 @model CategoryLandingPageViewModel
 
 @section NavButton {
-    <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
-        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageBackLink)
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
+        Home
     </govuk-back-link>
+
+    @if (Model.Context == CategoryLandingContext.MAT)
+    {
+        <govuk-back-link id="mat-back-button-link" href="@UrlConstants.GroupStandards" class="noprint js-only">
+            Back to standards
+        </govuk-back-link>
+    }
+    else
+    {
+        <govuk-back-link id="school-back-button-link" href="@UrlConstants.HomePage" class="noprint js-only">
+            Back to home
+        </govuk-back-link>
+    }
 }
 
 @section RelatedActions {
@@ -37,6 +50,7 @@
     slug = Model.Slug,
     sectionName = Model.SectionName,
     sortOrder = Model.SortOrder,
+    Context = Model.Context
 })
 
 @section AfterContent {

@@ -30,4 +30,11 @@ public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
         var results = await _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(establishmentId, recommendationId);
         return results;
     }
+
+    public Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+    int groupEstablishmentId
+    )
+    {
+        return _groupWorkflow.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+    }
 }

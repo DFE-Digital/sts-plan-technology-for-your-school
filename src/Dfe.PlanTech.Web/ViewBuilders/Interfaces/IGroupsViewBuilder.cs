@@ -35,5 +35,6 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string recommendationSlug,
             GroupsSelectSchoolsToUpdateStatusViewModel? viewModel = null
         );
+        Task<IActionResult> RouteToMatStandardsListAsync(Controller controller);
     }
 }

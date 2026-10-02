@@ -17,18 +17,22 @@ public class GroupsController : BaseController<GroupsController>
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
     public const string SubmitSchoolsUpdateStatusSelectionAction = "SubmitSelectedSchoolsToUpdateStatus";
+    public const string GetMatStandardsListAction = "GetMatStandardsList";
+    public const string GetMatRecommendationsLandingAction = "GetMatRecommendationsLanding";
 
     private readonly ICurrentUserProvider _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
     private readonly IGroupSelectSchoolsToAssessValidator _groupSelectSchoolsToAssessValidator;
     private readonly IGroupSelectSchoolsToUpdateStatusValidator _groupSelectSchoolsToUpdateStatusValidator;
+    private readonly IPagesViewBuilder _pagesViewBuilder;
 
     public GroupsController(
         ILogger<GroupsController> logger,
         ICurrentUserProvider currentUser,
         IGroupsViewBuilder groupsViewBuilder,
         IGroupSelectSchoolsToAssessValidator groupSelectSchoolsToAssessValidator,
-        IGroupSelectSchoolsToUpdateStatusValidator groupSelectSchoolsToUpdateStatusValidator
+        IGroupSelectSchoolsToUpdateStatusValidator groupSelectSchoolsToUpdateStatusValidator,
+        IPagesViewBuilder pagesViewBuilder
     )
         : base(logger)
     {
@@ -38,6 +42,8 @@ public class GroupsController : BaseController<GroupsController>
         _groupSelectSchoolsToAssessValidator = groupSelectSchoolsToAssessValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToAssessValidator));
         _groupSelectSchoolsToUpdateStatusValidator = groupSelectSchoolsToUpdateStatusValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToUpdateStatusValidator));
 
+        _pagesViewBuilder =
+            pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
     }
 
     [HttpGet(
@@ -66,6 +72,15 @@ public class GroupsController : BaseController<GroupsController>
         HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
 
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/standards",
+        Name = GetMatStandardsListAction
+    )]
+    public async Task<IActionResult> GetMatStandardsList()
+    {
+        return await _groupsViewBuilder.RouteToMatStandardsListAsync(this);
     }
 
     [HttpGet(
@@ -216,5 +231,19 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
 
         return Redirect(UrlConstants.HomePage);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}",
+        Name = GetMatRecommendationsLandingAction
+    )]
+    public async Task<IActionResult> GetMatRecommendationsLanding(string categorySlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToMatCategoryLandingPageAsync(
+            this,
+            categorySlug
+        );
     }
 }

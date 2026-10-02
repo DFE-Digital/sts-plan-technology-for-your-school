@@ -11,4 +11,5 @@ public interface IGroupService
 
     Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>>
         GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId);
+    Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId);
 }
