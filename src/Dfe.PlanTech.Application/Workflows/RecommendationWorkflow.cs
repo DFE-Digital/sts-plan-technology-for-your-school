@@ -128,4 +128,11 @@ public class RecommendationWorkflow(
 
         return firstActivity?.AsDto();
     }
+
+    public async Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(IEnumerable<string> recommendationContentfulReferences)
+    {
+        var recommendations =
+            await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences);
+        return recommendations.Select(r => r.AsDto());
+    }
 }

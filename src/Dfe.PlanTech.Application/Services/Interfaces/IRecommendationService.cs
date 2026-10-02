@@ -32,4 +32,7 @@ public interface IRecommendationService
         int establishmentId,
         string recommendationContentfulReference
     );
+
+    Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences);
 }

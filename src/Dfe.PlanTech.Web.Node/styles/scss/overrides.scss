@@ -292,3 +292,20 @@ ul.landing-page-list > li {
 .app-auth-action__link:active {
   color: hsla(0, 0%, 100%, 0.99);
 }
+
+#select-statuses-table {
+  .update {
+    white-space: nowrap;
+  }
+  .govuk-table__cell {
+    vertical-align: middle;
+  }
+  .govuk-table__header.status,
+  .govuk-table__cell.status 
+  {
+    text-align: right;
+  }
+  .schools {
+    width: 100%;
+  }
+}

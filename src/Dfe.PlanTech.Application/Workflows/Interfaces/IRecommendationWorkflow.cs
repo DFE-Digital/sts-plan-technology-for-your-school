@@ -32,4 +32,8 @@ public interface IRecommendationWorkflow
         int establishmentId,
         string recommendationContentfulReference
     );
+
+    Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences
+    );
 }

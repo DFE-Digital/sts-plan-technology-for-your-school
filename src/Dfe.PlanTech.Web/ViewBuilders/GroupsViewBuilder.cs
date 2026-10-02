@@ -25,7 +25,8 @@ public class GroupsViewBuilder(
     ICurrentUserProvider currentUser,
     IEstablishmentService establishmentService,
     IGroupService groupService,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IRecommendationService recommendationService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -37,6 +38,9 @@ public class GroupsViewBuilder(
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
+    private readonly IRecommendationService _recommendationService =
+        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
 
@@ -46,6 +50,8 @@ public class GroupsViewBuilder(
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
     private const string SelectSchoolsToAssessViewName = "GroupSelectSchoolsToAssess";
+    private const string SelectSchoolsToUpdateStatusViewName = "GroupsSelectSchoolsToUpdateStatus";
+
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
@@ -146,6 +152,65 @@ public class GroupsViewBuilder(
             default:
                 return controller.RedirectToHomePage();
         }
+    }
+
+    public async Task<IActionResult> RouteToSelectSchoolsToUpdateStatusViewModelAsync(Controller controller, string sectionSlug, string recommendationSlug,
+        GroupsSelectSchoolsToUpdateStatusViewModel? viewModel = null)
+    {
+        CurrentUser.ClearSelectedGroupSchool();
+        controller.HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+
+        //Get the MAT ID
+        var establishmentId = GetUserOrganisationIdOrThrowException();
+
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var recommendationChunk =
+            section.CoreRecommendations.FirstOrDefault(r =>
+                r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+            )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find recommendation for slug {recommendationSlug}"
+            );
+
+        var dbRecommendation =
+            await _recommendationService.GetRecommendationsByContentfulReferencesAsync([recommendationChunk.Id]);
+
+        var recommendation = dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault() ?? throw new ArgumentException("Could not find recommendation");
+
+        var latestEstRecHistory = await _groupService.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(establishmentId, recommendation.Id);
+
+        var latestEstRecHistoryWithRecs = latestEstRecHistory.Where(d => d.recommendationHistory is not null).ToList();
+
+        var establishmentsRecommendations = latestEstRecHistoryWithRecs.Select(d => new EstablishmentRecommendationInfoModel()
+        {
+            EstablishmentId = d.establishment.Id,
+            EstablishmentName = d.establishment.OrgName ?? string.Empty,
+            EstablishmentRef = d.establishment.EstablishmentRef,
+            SectionId = section.Id,
+            EstablishmentRecommendationHistoryId = d.recommendationHistory!.Id,
+            DateLastUpdated = DateTimeHelper.FormattedDateShort(d.recommendationHistory.DateCreated),
+            Status = d.recommendationHistory.NewStatus ?? RecommendationStatus.NotStarted,
+
+        }).ToList();
+
+        viewModel ??= new GroupsSelectSchoolsToUpdateStatusViewModel();
+
+        viewModel.Section = section;
+        viewModel.EstablishmentsRecommendation = establishmentsRecommendations;
+        viewModel.CategorySlug = categorySlug;
+        viewModel.RecommendationChunk = recommendationChunk;
+
+        viewModel.ErrorMessages = controller
+            .ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage))
+            .ToArray();
+
+        return controller.View(SelectSchoolsToUpdateStatusViewName, viewModel);
     }
 
     public async Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(

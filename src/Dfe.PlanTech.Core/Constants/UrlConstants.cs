@@ -28,6 +28,8 @@ public static class UrlConstants
     public const string GroupSelfAssessmentSelectionSlug = "select-a-self-assessment";
     public const string GroupsSlug = "groups";
     public const string GroupsSelectSchoolsToAssessSlug = "select-schools";
+    public const string GroupsSelectSchoolsToUpdateStatusSlug = "select-schools-to-update-status";
+
 
     public const string Home = "home";
 

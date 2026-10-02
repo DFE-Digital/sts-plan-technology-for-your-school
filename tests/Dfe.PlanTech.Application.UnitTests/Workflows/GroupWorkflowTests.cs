@@ -18,8 +18,10 @@ public class GroupWorkflowTests
 
     private readonly ISubmissionRepository _submissionRepository =
         Substitute.For<ISubmissionRepository>();
+
     private readonly IEstablishmentService _establishmentService =
         Substitute.For<IEstablishmentService>();
+
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
     private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
@@ -490,7 +492,6 @@ public class GroupWorkflowTests
     public async Task GetGroupSubmissionInformationForSection_ReturnsNotStartedWhereNoSubmissionExistsForSchool()
     {
         var sut = CreateServiceUnderTest();
-
         var sectionId = "sec2";
 
         var establishmentLink1 = new SqlEstablishmentLinkDto()
@@ -517,7 +518,6 @@ public class GroupWorkflowTests
             EstablishmentRef = "testRef1",
             OrgName = "testName1"
         };
-
         var establishment2 = new SqlEstablishmentDto()
         {
             Id = 2,

@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using NSubstitute;
 using System.Threading.Tasks;
+using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
 
@@ -176,5 +177,63 @@ public class GroupServiceTests
         await _groupWorkflow
             .Received(1)
             .GetGroupEstablishmentContextAsync(groupEstablishmentId);
+    }
+
+    [Fact]
+    public async Task GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId_Calls_Workflow_And_Returns_Result()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var establishmentId = 1;
+        var recommendationId = 100;
+
+        var expected = new List<(
+            EstablishmentEntity establishment,
+            EstablishmentRecommendationHistoryEntity? recommendationHistory)>
+        {
+            (
+                new EstablishmentEntity
+                {
+                    Id = 1,
+                    OrgName = "Establishment One"
+                },
+                new EstablishmentRecommendationHistoryEntity
+                {
+                    Id = 10,
+                    EstablishmentId = 1,
+                    RecommendationId = recommendationId
+                }
+            ),
+            (
+                new EstablishmentEntity
+                {
+                    Id = 2,
+                    OrgName = "Establishment Two"
+                },
+                null
+            )
+        };
+
+        _groupWorkflow
+            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+                establishmentId,
+                recommendationId
+            )
+            .Returns(expected);
+
+        var result =
+            await sut.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+                establishmentId,
+                recommendationId
+            );
+
+        Assert.Same(expected, result);
+
+        await _groupWorkflow
+            .Received(1)
+            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+                establishmentId,
+                recommendationId
+            );
     }
 }

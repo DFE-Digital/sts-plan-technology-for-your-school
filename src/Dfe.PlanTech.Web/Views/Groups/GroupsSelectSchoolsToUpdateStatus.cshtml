@@ -1,0 +1,111 @@
+@inject IMicrocopyProvider Microcopy
+@model GroupsSelectSchoolsToUpdateStatusViewModel
+
+@{
+    ViewData[StatePassingMechanismConstants.Title] = "Select schools to update";
+    var categorySlug = Model.CategorySlug;
+    var sectionSlug = Model.Section?.InterstitialPage.Slug;
+    var recommendationSlug = Model.RecommendationChunk?.Slug;
+    var sectionName = Model.Section?.Name ?? "";
+    var backLinkHref = $"/home";
+
+    var hasErrors = Model.ErrorMessages?.Any() == true;
+}
+
+@section NavButton {
+    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.HomePage"
+                     class="noprint non-js-only govuk-back-link">
+        Home
+    </govuk-back-link>
+    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusBackLink)
+    </govuk-back-link>
+}
+
+@if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
+{
+    <div class="govuk-error-summary" data-module="govuk-error-summary">
+        <div role="alert">
+            <h2 class="govuk-error-summary__title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">
+                    @foreach (var error in Model.ErrorMessages)
+                    {
+                        <li>
+                            <a href="#">@error</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+<form asp-controller="Groups" asp-action="SubmitSelectedSchoolsToUpdateStatus" asp-route-categorySlug="@categorySlug"
+      asp-route-sectionSlug="@sectionSlug" asp-route-recommendationSlug="@recommendationSlug" method="post" novalidate>
+    <div class="govuk-form-group @(hasErrors ? "govuk-form-group--error" : "")">
+        <fieldset class="govuk-fieldset"
+                  aria-describedby="select-schools-update-status-hint  @(hasErrors ? "select-schools-update-status-error" : "")">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <span class="govuk-caption-xl">@Model.RecommendationChunk?.HeaderText</span>
+                <h1 class="govuk-fieldset-heading">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusHeader)
+                </h1>
+            </legend>
+            <div>
+                <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusHelpText)</p>
+            </div>
+            @if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
+            {
+                foreach (var error in Model.ErrorMessages)
+                {
+                    <p id="select-schools-update-status-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>@error
+                    </p>
+                }
+            }
+            <table class="govuk-table" data-module="moj-multi-select" data-id-prefix="select-statuses-"
+                   id="select-statuses-table">
+                <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header" scope="col" id="select-statuses-select-all"></th>
+                    <th class="govuk-table__header schools" scope="col">Schools</th>
+                    <th class="govuk-table__header update" scope="col">Last updated</th>
+                    <th class="govuk-table__header status" scope="col">Status</th>
+                </tr>
+                </thead>
+                <tbody class="govuk-table__body" id="group-status-table-body">
+
+                @foreach (var establishment in Model.EstablishmentsRecommendation!)
+                {
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">
+                            <div class="govuk-checkboxes__item govuk-checkboxes--small moj-multi-select__checkbox">
+                                <input type="checkbox" class="govuk-checkboxes__input"
+                                       id="schools-@establishment.EstablishmentRef" name="SelectedSchoolsRefs"
+                                       value="@establishment.EstablishmentRef">
+                                <label class="govuk-label govuk-checkboxes__label"
+                                       for="schools-@establishment.EstablishmentRef">
+                                    <span class="govuk-visually-hidden">Select @establishment.EstablishmentName</span>
+                                </label>
+                            </div>
+                        </td>
+                        <td class="govuk-table__cell schools">@establishment.EstablishmentName</td>
+                        <td class="govuk-table__cell update">@establishment.DateLastUpdated</td>
+                        <td class="govuk-table__cell status">
+                            <strong
+                                class="govuk-tag @establishment.Status.GetCssClass()">@establishment.Status.GetDisplayName()</strong>
+                        </td>
+
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </fieldset>
+        <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusPreContinueButtonText)</p>
+    </div>
+    <govuk-button type="submit" prevent-double-click="true">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusContinue)
+    </govuk-button>
+</form>

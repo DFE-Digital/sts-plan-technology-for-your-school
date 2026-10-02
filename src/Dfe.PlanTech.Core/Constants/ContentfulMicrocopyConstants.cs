@@ -69,7 +69,7 @@ public static class ContentfulMicrocopyConstants
     public const string PhaseBannerText = "phaseBannerText";
     public const string PhaseBannerLink = "phaseBannerLink";
     public const string PhaseBannerLinkText = "phaseBannerLinkText";
-    
+
     public const string SchoolSummarySuccessBody = "schoolSummarySuccessBody";
     public const string SchoolSummaryHeader = "summaryHeader";
     public const string SchoolSummaryRecLink = "schoolSummaryRecLink";
@@ -94,6 +94,13 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectSchoolsToAssessContinue = "msmSelectSchoolContinue";
     public const string GroupsSelectSchoolsToAssessNoSelectionError = "msmErrorNoSelection";
     public const string GroupsSelectSchoolsToAssessConflictError = "msmErrorConflictingSelection";
+
+    public const string GroupsSelectSchoolsToUpdateStatusHeader = "mssSelectHeader";
+    public const string GroupsSelectSchoolsToUpdateStatusBackLink = "mssSelectBack";
+    public const string GroupsSelectSchoolsToUpdateStatusHelpText = "mssSelectHelpText";
+    public const string GroupsSelectSchoolsToUpdateStatusContinue = "mssSelectSchoolContinue";
+    public const string GroupsSelectSchoolsToUpdateStatusPreContinueButtonText = "mssSelectSchoolPreContinueButtonText";
+    public const string GroupsSelectSchoolsToUpdateStatusNoSelectionError = "mssErrorNoSelection";
 
     public const string GroupsSelectSelfAssessmentBackLink = "msmSelectAssessmentBackLink";
 
@@ -158,6 +165,13 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
 
     private const string GroupsSelectSelfAssessmentBackLinkFallback = "Back to home";
+
+    private const string GroupsSelectSchoolsToUpdateStatusBackLinkFallback = "Back";
+    private const string GroupsSelectSchoolsToUpdateStatusHeaderFallback = "Which schools do you want to update the status of?";
+    private const string GroupsSelectSchoolsToUpdateStatusHelpTextFallback = "You can update the recommendation status for schools that have completed the roles and responsibilities self-assessment. Select one, more or all schools.";
+    private const string GroupsSelectSchoolsToUpdateStatusPreContinueButtonTextFallback = "Anyone who uses the service for your school will be able to see status updates.";
+    private const string GroupsSelectSchoolsToUpdateStatusContinueFallback = "Continue";
+    private const string GroupsSelectSchoolsToUpdateStatusNoSelectionErrorFallback = "Select one, more or all schools";
 
     private const string GroupsSelectViewRecommendationsFallback = "View recommendations and track progress";
 
@@ -266,6 +280,12 @@ public static class ContentfulMicrocopyConstants
         { MatLandingPageTopicOutstanding, MatLandingPageTopicOutstandingFallback },
         { MatLandingPageTopicOutstandingCount, MatLandingPageTopicOutstandingCountFallback },
         { MatLandingPageTopicSubmitLink, MatLandingPageTopicSubmitLinkFallback },
+        { GroupsSelectSchoolsToUpdateStatusHeader, GroupsSelectSchoolsToUpdateStatusHeaderFallback },
+        { GroupsSelectSchoolsToUpdateStatusHelpText, GroupsSelectSchoolsToUpdateStatusHelpTextFallback },
+        { GroupsSelectSchoolsToUpdateStatusBackLink, GroupsSelectSchoolsToUpdateStatusBackLinkFallback },
+        { GroupsSelectSchoolsToUpdateStatusContinue, GroupsSelectSchoolsToUpdateStatusContinueFallback },
+        { GroupsSelectSchoolsToUpdateStatusPreContinueButtonText, GroupsSelectSchoolsToUpdateStatusPreContinueButtonTextFallback },
+        { GroupsSelectSchoolsToUpdateStatusNoSelectionError, GroupsSelectSchoolsToUpdateStatusNoSelectionErrorFallback }
     };
 
     internal static class VariableNames
