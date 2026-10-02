@@ -21,4 +21,11 @@ public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
         var submissions = await _groupWorkflow.GetGroupSubmissionInformationForSection(establishmentLinks, sectionId);
         return submissions;
     }
+
+    public Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+    int groupEstablishmentId
+    )
+    {
+        return _groupWorkflow.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+    }
 }

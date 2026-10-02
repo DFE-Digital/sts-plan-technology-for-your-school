@@ -425,6 +425,97 @@ public class GroupsViewBuilderTests
         Assert.False(vm.ShowSelectSelfAssessmentToSubmit);
     }
 
+    [Fact]
+    public async Task RouteToMatStandardsListAsync_Builds_View_With_Expected_Model()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        var session = Substitute.For<ISession>();
+
+        var categoryOne = new QuestionnaireCategoryEntry
+        {
+            Sys = new SystemDetails("cat-1"),
+            Header = new ComponentHeaderEntry { Text = "Category One" },
+            Sections = [MakeSection("SEC-1")],
+        };
+        var categoryTwo = new QuestionnaireCategoryEntry
+        {
+            Sys = new SystemDetails("cat-2"),
+            Header = new ComponentHeaderEntry { Text = "Category Two" },
+            Sections = [MakeSection("SEC-2")],
+        };
+
+        contentful
+            .GetAllCategoriesAsync()
+            .Returns(new List<QuestionnaireCategoryEntry> { categoryOne, categoryTwo });
+
+        contentful
+            .GetPageBySlugAsync("home")
+            .Returns(
+                new PageEntry
+                {
+                    Content = new List<ContentfulEntry> { categoryTwo },
+                }
+            );
+
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    Session = session,
+                },
+            },
+        };
+
+        var action = await sut.RouteToMatStandardsListAsync(controller);
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal("MatStandardsList", view.ViewName);
+
+        var vm = Assert.IsType<MatStandardsListViewModel>(view.Model);
+        Assert.Equal("Test Academy Trust", vm.GroupName);
+        Assert.Equal(new[] { categoryTwo, categoryOne }, vm.Categories);
+
+        currentUser.Received(1).ClearSelectedGroupSchool();
+        session.Received(1).Remove(SessionConstants.SelectedEstablishmentsKey);
+    }
+
+    [Fact]
+    public async Task RouteToMatStandardsListAsync_Throws_When_No_Categories_Found()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var session = Substitute.For<ISession>();
+
+        contentful
+            .GetAllCategoriesAsync()
+            .Returns(new List<QuestionnaireCategoryEntry>());
+
+        contentful
+            .GetPageBySlugAsync("home")
+            .Returns(new PageEntry { Content = new List<ContentfulEntry>() });
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    Session = session,
+                },
+            },
+        };
+
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToMatStandardsListAsync(controller)
+        );
+
+        Assert.Equal("No categories found on MAT standards list page.", exception.Message);
+    }
+
     // --- RecordGroupSelectionAsync -----------------------------------------
 
     [Fact]

@@ -9,12 +9,14 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository) : IGroupWorkflow
+public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository, IEstablishmentGroupRepository establishmentGroupRepository) : IGroupWorkflow
 {
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
+        establishmentGroupRepository ?? throw new ArgumentNullException(nameof(establishmentGroupRepository));
 
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository = recommendationHistoryRepository ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
 
@@ -99,5 +101,33 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
 
         return results;
 
+    }
+
+    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+        int groupEstablishmentId
+    )
+    {
+        var establishments =
+            await _establishmentGroupRepository
+                .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
+
+        var establishmentIds = establishments
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
+        var completedSubmissions =
+            establishmentIds.Length != 0
+                ? await GetGroupCompletedSubmissions(establishmentIds)
+                : [];
+
+        return new GroupEstablishmentModel
+        {
+            Establishments = establishments
+                .Select(e => e.AsDto())
+                .ToList(),
+            EstablishmentIds = establishmentIds,
+            CompletedSubmissions = completedSubmissions,
+        };
     }
 }

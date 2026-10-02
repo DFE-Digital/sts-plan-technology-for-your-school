@@ -1,4 +1,5 @@
 @using Dfe.PlanTech.Application.Providers.Interfaces
+@using Dfe.PlanTech.Web.Controllers
 @inject IMicrocopyProvider Microcopy
 @model GroupsSelectorViewModel
 
@@ -31,9 +32,9 @@
 
 <hr class="govuk-section-break govuk-section-break--l">
 
-@if (Model.ShowSelectSelfAssessmentToSubmit)
-{
-    <div class="dfe-grid-container govuk-!-margin-bottom-8">  
+<div class="dfe-grid-container govuk-!-margin-bottom-8">
+    @if (Model.ShowSelectSelfAssessmentToSubmit)
+    {
         <div class="dfe-card">
             <div class="dfe-card-container">
                 <h3 class="govuk-heading-m">
@@ -44,8 +45,19 @@
                 </h3>
             </div>
         </div>
+    }
+
+    <div class="dfe-card">
+        <div class="dfe-card-container">
+            <h3 class="govuk-heading-m">
+                <a asp-route="@GroupsController.GetMatStandardsListAction"
+                   class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectViewRecommendations)
+                </a>
+            </h3>
+        </div>
     </div>
-}
+</div>
 
 <h2 class="govuk-heading-l">
     View recommendations and track progress
@@ -111,5 +123,5 @@
 <hr class="govuk-section-break govuk-section-break--m" />
 
 <p class="govuk-body">
-    @Html.Raw(await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectContactUs,contactLink))
+    @Html.Raw(await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectContactUs, contactLink))
 </p>

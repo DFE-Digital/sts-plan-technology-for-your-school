@@ -215,4 +215,105 @@ public class RecommendationsControllerTests
             )
         );
     }
+
+    [Fact]
+    public async Task GetMatSingleRecommendation_CallsViewBuilderAndReturnsResult()
+    {
+        var categorySlug = "cat";
+        var sectionSlug = "sec";
+        var chunkSlug = "chunk";
+
+        _viewBuilder
+            .RouteToSingleRecommendation(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                false,
+                CategoryLandingContext.MAT
+            )
+            .Returns(new OkResult());
+
+        var result = await _controller.GetMatSingleRecommendation(
+            categorySlug,
+            sectionSlug,
+            chunkSlug
+        );
+
+        await _viewBuilder
+            .Received(1)
+            .RouteToSingleRecommendation(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                false,
+                CategoryLandingContext.MAT
+            );
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Theory]
+    [InlineData(null, "sec", "chunk")]
+    [InlineData("cat", null, "chunk")]
+    [InlineData("cat", "sec", null)]
+    public async Task GetMatSingleRecommendation_WithNullValues_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _controller.GetMatSingleRecommendation(
+                categorySlug!,
+                sectionSlug!,
+                chunkSlug!
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToSingleRecommendation(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData("", "sec", "chunk")]
+    [InlineData(" ", "sec", "chunk")]
+    [InlineData("cat", "", "chunk")]
+    [InlineData("cat", " ", "chunk")]
+    [InlineData("cat", "sec", "")]
+    [InlineData("cat", "sec", " ")]
+    public async Task GetMatSingleRecommendation_WithEmptyValues_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _controller.GetMatSingleRecommendation(
+                categorySlug,
+                sectionSlug,
+                chunkSlug
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToSingleRecommendation(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
 }

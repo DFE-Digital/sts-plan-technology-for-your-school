@@ -547,4 +547,47 @@ public class GroupsViewBuilder(
 
         return completedSchoolSections < totalRequiredSchoolSections;
     }
+
+    public async Task<IActionResult> RouteToMatStandardsListAsync(
+      Controller controller
+  )
+    {
+        CurrentUser.ClearSelectedGroupSchool();
+
+        controller.HttpContext.Session.Remove(
+            SessionConstants.SelectedEstablishmentsKey
+        );
+
+        var allCategories = await ContentfulService.GetAllCategoriesAsync() ?? [];
+
+        var homePage = await ContentfulService.GetPageBySlugAsync("home");
+
+        var orderedCategories = (homePage?.Content ?? [])
+            .OfType<QuestionnaireCategoryEntry>()
+            .ToList();
+
+        var categories = orderedCategories
+            .Concat(
+                allCategories.ExceptBy(
+                    orderedCategories.Select(x => x.Sys?.Id),
+                    x => x.Sys?.Id
+                )
+            )
+            .ToList();
+
+        if (categories.Count == 0)
+        {
+            throw new ContentfulDataUnavailableException(
+                "No categories found on MAT standards list page."
+            );
+        }
+
+        var viewModel = new MatStandardsListViewModel
+        {
+            GroupName = CurrentUser.UserOrganisationName ?? "Your organisation",
+            Categories = categories,
+        };
+
+        return controller.View("MatStandardsList", viewModel);
+    }
 }

@@ -15,15 +15,19 @@ public class GroupsController : BaseController<GroupsController>
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
+    public const string GetMatStandardsListAction = "GetMatStandardsList";
+    public const string GetMatRecommendationsLandingAction = "GetMatRecommendationsLanding";
 
     private readonly ICurrentUserProvider _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
+    private readonly IPagesViewBuilder _pagesViewBuilder;
     private readonly IGroupSelectSchoolsToAssessValidator _validator;
 
     public GroupsController(
         ILogger<GroupsController> logger,
         ICurrentUserProvider currentUser,
         IGroupsViewBuilder groupsViewBuilder,
+        IPagesViewBuilder pagesViewBuilder,
         IGroupSelectSchoolsToAssessValidator validator
     )
         : base(logger)
@@ -31,6 +35,8 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder =
             groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
+        _pagesViewBuilder =
+            pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
         _validator = validator ?? throw new ArgumentNullException(nameof(validator));
     }
 
@@ -60,6 +66,15 @@ public class GroupsController : BaseController<GroupsController>
         HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
 
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/standards",
+        Name = GetMatStandardsListAction
+    )]
+    public async Task<IActionResult> GetMatStandardsList()
+    {
+        return await _groupsViewBuilder.RouteToMatStandardsListAsync(this);
     }
 
     [HttpGet(
@@ -164,5 +179,19 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
 
         return Redirect(UrlConstants.HomePage);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}",
+        Name = GetMatRecommendationsLandingAction
+    )]
+    public async Task<IActionResult> GetMatRecommendationsLanding(string categorySlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToMatCategoryLandingPageAsync(
+            this,
+            categorySlug
+        );
     }
 }
