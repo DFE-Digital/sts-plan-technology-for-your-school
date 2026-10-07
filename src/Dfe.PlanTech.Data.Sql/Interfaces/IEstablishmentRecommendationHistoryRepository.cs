@@ -38,4 +38,14 @@ public interface IEstablishmentRecommendationHistoryRepository
         GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
             int establishmentId,
             int recommendationId);
+
+    Task<List<EstablishmentRecommendationHistoryEntity>>
+        GetLatestRecommendationHistoriesAsync(
+            IEnumerable<int> establishmentIds,
+            int recommendationId
+        );
+
+    Task CreateRecommendationHistoriesAsync(
+        IEnumerable<EstablishmentRecommendationHistoryEntity> histories
+    );
 }

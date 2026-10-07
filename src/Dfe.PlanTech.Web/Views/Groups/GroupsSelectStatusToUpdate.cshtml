@@ -1,0 +1,110 @@
+@inject IMicrocopyProvider Microcopy
+@model GroupsSelectStatusToUpdateViewModel
+@{
+    Layout = "_Layout";
+
+    var recommendation = Model.CurrentChunk;
+    var categorySlug = Model.CategorySlug;
+    var sectionSlug = Model.SectionSlug;
+    var backLinkHref = $"/groups/{categorySlug}/{sectionSlug}/{recommendation.Slug}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}";
+    var schoolCount = @Model.SelectedSchoolsRefs!.Count();
+    var schoolLabel = schoolCount == 1 ? "school" : "schools";
+}
+
+@section NavButton {
+    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
+        Home
+    </govuk-back-link>
+    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
+        Back
+    </govuk-back-link>
+
+        <details class="govuk-details govuk-!-margin-top-n6" closed>
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text">
+                    You are updating the recommendation status for
+                    @schoolCount
+                    @schoolLabel
+                </span>
+            </summary>
+
+            <div class="govuk-details__text">
+                @foreach (var schoolName in Model.SelectedSchoolNames)
+                {
+                    <p class="govuk-body govuk-!-margin-bottom-0">
+                        @schoolName
+                    </p>
+                }
+            </div>
+        </details>
+}
+
+<form asp-controller="Groups" asp-action="UpdateSelectedSchoolsStatus" asp-route-categorySlug="@categorySlug"
+      asp-route-sectionSlug="@sectionSlug" asp-route-recommendationSlug="@recommendation.Slug" method="post" novalidate>
+
+                <div class="recommendation-piece-content">
+                    <span class="govuk-caption-l">
+                        @Model.CurrentChunk.HeaderText
+                    </span>
+                </div>
+                <govuk-radios name="SelectedStatus">
+                    <govuk-radios-fieldset>
+                        <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
+                            <h1 class="govuk-fieldset__heading govuk-!-margin-bottom-5 govuk-heading-xl">
+                                Have your schools completed this recommendation?
+                            </h1>
+
+                        </govuk-radios-fieldset-legend>
+                        @if (!string.IsNullOrEmpty(Model.StatusErrorMessage))
+                        {
+                            <govuk-radios-error-message>
+                                @Model.StatusErrorMessage
+                            </govuk-radios-error-message>
+                        }
+
+                        @foreach (var option in Model.StatusOptions)
+                        {
+                            <govuk-radios-item value="@option.Key.ToString()"
+                                               checked="@(Model.SelectedStatusKey == option.Key)">
+                                @option.Value
+                            </govuk-radios-item>
+                        }
+                    </govuk-radios-fieldset>
+                </govuk-radios>
+
+                <govuk-textarea name="Notes" rows="5">
+                    <govuk-textarea-label class="govuk-label--s">
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel)
+                    </govuk-textarea-label>
+
+                    <govuk-textarea-hint>
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentHint)
+                    </govuk-textarea-hint>
+                </govuk-textarea>
+
+                <p>
+                    You're updating the recommendation status for @schoolCount @schoolLabel:
+                </p>
+
+                <ul class="govuk-list govuk-list--bullet">
+                    @foreach (var school in Model.SelectedSchoolNames)
+                    {
+                        <li>@school</li>
+                    }
+                </ul>
+
+                @if (Model.SelectedSchoolsRefs != null)
+                {
+                    foreach (var schoolRef in Model.SelectedSchoolsRefs)
+                    {
+                        <input type="hidden"
+                               name="SelectedSchoolsRefs"
+                               value="@schoolRef"/>
+                    }
+                }
+
+                <govuk-button type="submit" prevent-double-click="true">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusButton)
+                </govuk-button>
+            </form>
+
