@@ -53,20 +53,6 @@ public static class ServiceCollectionExtensions
             .AddScoped<IUserWorkflow, UserWorkflow>();
     }
 
-    public static IServiceCollection AddDfeSignInOrganisationProvider(
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
-    {
-        var config = GetDfeSignInConfig(configuration);
-        services.AddHttpClient<IDsiOrganisationProvider, DsiOrganisationProvider>(client =>
-        {
-            client.BaseAddress = new Uri(config.ApiUrl);
-        });
-
-        return services;
-    }
-
     public static IServiceCollection SetupRichTextRenderers(this IServiceCollection services)
     {
         var contentRendererType = typeof(BaseRichTextContentPartRenderer);

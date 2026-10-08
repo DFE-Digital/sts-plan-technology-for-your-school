@@ -128,16 +128,23 @@ public class CurrentUserProvider : ICurrentUserProvider
 
     public string? UserOrganisationCategoryName => Organisation?.Category?.Name;
 
-    public bool UserOrganisationIsGroup =>
-        Organisation != null
-        && DsiConstants.SelectASchoolOrganisationCategoryIds.Contains(
-            Organisation.Category?.Id ?? string.Empty
-        );
+    public bool UserOrganisationSelectsSchools =>
+        Organisation?.Category?.Id != null
+        && DsiConstants.SelectASchoolOrganisationCategoryIds.Contains(Organisation.Category.Id);
 
     public bool IsAuthenticated => GetIsAuthenticated();
 
+    public bool IsGroup =>
+        Organisation?.Category?.Id != null
+        && DsiConstants.GroupOrganisationCategoryIds.Contains(Organisation.Category.Id);
+
     public bool IsMat =>
-        Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
+        Organisation?.Category?.Id != null
+        && Organisation.Category.Id.Equals(DsiConstants.MatOrganisationCategoryId);
+
+    public bool IsSatOrSSat =>
+        Organisation?.Category?.Id != null
+        && DsiConstants.SatOrganisationCategoryIds.Contains(Organisation.Category.Id);
 
     private EstablishmentModel? Organisation =>
         _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
@@ -235,7 +242,7 @@ public class CurrentUserProvider : ICurrentUserProvider
         }
 
         // Early return if user is not a group user - they shouldn't have a selected school cookie
-        if (!UserOrganisationIsGroup)
+        if (!IsGroup)
         {
             // Non-group users should not have a selected school cookie - clear it if present
             if (httpContext?.Request.Cookies.ContainsKey(CookieConstants.SelectedSchool) == true)
