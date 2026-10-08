@@ -36,4 +36,14 @@ public interface IRecommendationWorkflow
     Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
         IEnumerable<string> recommendationContentfulReferences
     );
+
+    Task UpdateEstablishmentsRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        IEnumerable<int> establishmentIds,
+        int userId,
+        RecommendationStatus newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null,
+        int? responseId = null
+    );
 }

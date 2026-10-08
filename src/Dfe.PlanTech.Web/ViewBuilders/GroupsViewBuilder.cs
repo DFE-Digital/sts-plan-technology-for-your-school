@@ -15,6 +15,9 @@ using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Data;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using EnumExtensions = Dfe.PlanTech.Core.Extensions.EnumExtensions;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -26,7 +29,8 @@ public class GroupsViewBuilder(
     IEstablishmentService establishmentService,
     IGroupService groupService,
     ISubmissionService submissionService,
-    IRecommendationService recommendationService
+    IRecommendationService recommendationService,
+    IMicrocopyProvider microcopyProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -44,6 +48,9 @@ public class GroupsViewBuilder(
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
 
+    private readonly IMicrocopyProvider _microcopyProvider =
+        microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
+
     private readonly ILogger<BaseViewBuilder> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -51,6 +58,7 @@ public class GroupsViewBuilder(
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
     private const string SelectSchoolsToAssessViewName = "GroupSelectSchoolsToAssess";
     private const string SelectSchoolsToUpdateStatusViewName = "GroupsSelectSchoolsToUpdateStatus";
+    private const string SelectStatusToUpdateViewName = "GroupsSelectStatusToUpdate";
 
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
@@ -211,6 +219,96 @@ public class GroupsViewBuilder(
             .ToArray();
 
         return controller.View(SelectSchoolsToUpdateStatusViewName, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToSelectStatusToUpdateViewModelAsync(Controller controller, string sectionSlug, string recommendationSlug, GroupsSelectStatusToUpdateViewModel? viewModel = null)
+    {
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
+
+        if (viewModel?.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
+        {
+            return await RouteToSelectSchoolsToUpdateStatusViewModelAsync(controller, sectionSlug, recommendationSlug, new GroupsSelectSchoolsToUpdateStatusViewModel());
+        }
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var recommendationChunk =
+            section.CoreRecommendations.FirstOrDefault(r =>
+                r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+            )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find recommendation for slug {recommendationSlug}"
+            );
+
+        var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(viewModel.SelectedSchoolsRefs.ToArray());
+
+        var userEstablishmentId = GetUserOrganisationIdOrThrowException();
+
+        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(
+            userEstablishmentId
+        );
+
+        if (establishmentLinks == null || establishmentLinks.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"Could not find linked establishments for group ID: {userEstablishmentId}"
+            );
+        }
+
+        var selectedSchoolIds = new List<int>();
+
+        foreach (var schoolRef in viewModel.SelectedSchoolsRefs)
+        {
+            var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
+            if (isGroupSchool)
+            {
+                var school = await _establishmentService.GetEstablishmentByReferenceAsync(
+                    schoolRef
+                );
+
+                if (school != null)
+                {
+                    var latestSubmissionForRef =
+                        await _submissionService.GetLatestSubmissionResponsesModel(
+                            school.Id,
+                            section,
+                            (SubmissionStatus?)null
+                        );
+
+                    if (
+                        latestSubmissionForRef != null
+                        && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                    )
+                    {
+                        await _submissionService.SetSubmissionInaccessibleAsync(
+                            school.Id,
+                            section.Id
+                        );
+                    }
+
+                    selectedSchoolIds.Add(school.Id);
+                }
+            }
+        }
+
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedSchoolIds
+        );
+
+        viewModel.StatusOptions = Enum.GetValues<RecommendationStatus>()
+            .ToDictionary<RecommendationStatus, RecommendationStatus, string>(key => key,
+                key => EnumExtensions.GetDisplayName(key));
+        viewModel.CurrentChunk = recommendationChunk;
+        viewModel.Section = section;
+        viewModel.SectionSlug = sectionSlug;
+        viewModel.CategorySlug = categorySlug;
+        viewModel.SelectedSchoolNames = schools.Select(s => s.OrgName).ToList();
+
+        return controller.View(SelectStatusToUpdateViewName, viewModel);
     }
 
     public async Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(
@@ -654,5 +752,60 @@ public class GroupsViewBuilder(
         };
 
         return controller.View("MatStandardsList", viewModel);
+    }
+
+    public async Task<IActionResult> UpdateSchoolsRecommendationStatusAsync(Controller controller, string sectionSlug,
+        string recommendationSlug, GroupRecommendationInputViewModel viewModel)
+    {
+        var categorySlug =
+            controller.RouteData.Values["categorySlug"]?.ToString()
+            ?? throw new InvalidDataException("Missing category slug");
+
+        var userId = CurrentUser.UserId!.Value;
+        var matEstablishmentId = GetUserOrganisationIdOrThrowException();
+        var newStatus = viewModel.SelectedStatus.ToRecommendationStatus();
+        if (newStatus is null)
+        {
+            throw new ArgumentException("Invalid status selected.");
+        }
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var recommendationChunk =
+            section.CoreRecommendations.FirstOrDefault(r =>
+                r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+            )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find recommendation for slug {recommendationSlug}"
+            );
+
+        var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(viewModel.SelectedSchoolsRefs.ToArray());
+
+        var schoolEstablishmentDtos = schools.ToList();
+        var schoolsCount = schoolEstablishmentDtos.Count();
+
+        await _recommendationService.UpdateEstablishmentsRecommendationStatusAsync(recommendationChunk.Id, schoolEstablishmentDtos.Select(s => s.Id).ToArray(), userId, newStatus.Value, viewModel.Notes, matEstablishmentId);
+
+        var dynamicValues = new Dictionary<string, string>()
+        {
+            ["schoolCount"] = schoolsCount.ToString()
+        };
+
+        var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsUpdateStatusSuccessPanelText, dynamicValues);
+
+        microcopySuccessBodyText = schoolsCount == 1
+            ? microcopySuccessBodyText.Replace("schools", "schools")
+            : microcopySuccessBodyText;
+
+        controller.TempData["StatusUpdateSuccessTitle"] =
+            microcopySuccessBodyText;
+
+        return controller.RedirectToGetMatSingleRecommendation(categorySlug,
+            sectionSlug,
+            recommendationSlug
+        );
     }
 }
