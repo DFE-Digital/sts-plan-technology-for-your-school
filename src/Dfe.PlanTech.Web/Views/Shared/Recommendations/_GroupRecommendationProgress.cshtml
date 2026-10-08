@@ -1,0 +1,47 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
+@model SingleRecommendationViewModel
+
+<h2 class="govuk-heading-l">
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressHeading)
+</h2>
+
+<p class="govuk-body">
+    You can view and update the recommendation status for schools that have completed the @Model.Section.Name.ToLower() self-assessment.
+</p>
+
+<div class="dfe-table-scroll">
+    <table class="govuk-table">
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressSchoolHeading)
+                </th>
+                <th scope="col" class="govuk-table__header">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressLastUpdatedHeading)
+                </th>
+                <th scope="col" class="govuk-table__header">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressStatusHeading)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+            @foreach (var school in Model.Schools)
+            {
+                <tr class="govuk-table__row">
+                    <td class="govuk-table__cell">
+                        @school.SchoolName
+                    </td>
+                    <td class="govuk-table__cell">
+                        @school.LastUpdatedFormatted
+                    </td>
+                    <td class="govuk-table__cell">
+                        <strong class="govuk-tag @school.StatusTagClass">
+                            @school.StatusText
+                        </strong>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

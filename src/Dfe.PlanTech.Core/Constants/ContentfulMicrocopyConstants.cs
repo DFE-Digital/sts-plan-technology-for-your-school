@@ -110,6 +110,11 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectStatusContinue = "mssSelectStatusContinue";
     public const string GroupsSelectStatusPreContinueButtonText = "mssSelectStatusPreContinueButtonText";
 
+    public const string GroupRecommendationProgressHeading = "group-recommendation-progress-heading";
+    public const string GroupRecommendationProgressSchoolHeading = "group-recommendation-progress-school-heading";
+    public const string GroupRecommendationProgressLastUpdatedHeading = "group-recommendation-progress-last-updated-heading";
+    public const string GroupRecommendationProgressStatusHeading = "group-recommendation-progress-status-heading";
+
     public const string GroupsSelectSelfAssessmentBackLink = "msmSelectAssessmentBackLink";
 
     public const string GroupsSelectViewRecommendations = "groupsSelectViewRecommendations";
@@ -191,6 +196,11 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectStatusContinueFallback = "Save";
 
     private const string GroupsSelectViewRecommendationsFallback = "View recommendations and track progress";
+
+    private const string GroupRecommendationProgressHeadingFallback = "Your schools' progress";
+    private const string GroupRecommendationProgressSchoolHeadingFallback = "School";
+    private const string GroupRecommendationProgressLastUpdatedHeadingFallback = "Last updated";
+    private const string GroupRecommendationProgressStatusHeadingFallback = "Status";
 
     public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
     public const string SchoolSummaryHeaderFallback = "What to do next";
@@ -281,6 +291,10 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectSchoolsToAssessNoSelectionError, GroupsSelectSchoolsToAssessNoSelectionErrorFallback },
         { GroupsSelectSchoolsToAssessConflictError, GroupsSelectSchoolsToAssessConflictErrorFallback },
         { GroupsSelectViewRecommendations, GroupsSelectViewRecommendationsFallback },
+        { GroupRecommendationProgressHeading, GroupRecommendationProgressHeadingFallback },
+        { GroupRecommendationProgressSchoolHeading, GroupRecommendationProgressSchoolHeadingFallback },
+        { GroupRecommendationProgressLastUpdatedHeading, GroupRecommendationProgressLastUpdatedHeadingFallback },
+        { GroupRecommendationProgressStatusHeading, GroupRecommendationProgressStatusHeadingFallback },
         { SchoolSummarySuccessBody, SchoolSummarySuccessBodyFallback },
         { SchoolSummaryHeader, SchoolSummaryHeaderFallback },
         { SchoolSummaryRecLink, SchoolSummaryRecLinkFallback },
