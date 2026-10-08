@@ -23,6 +23,14 @@ public class ContentfulServiceTests
         return (contentfulService, contentfulWorkflow);
     }
 
+    private static QuestionnaireCategoryEntry CreateCategory(string heading)
+    {
+        return new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry { Text = heading },
+        };
+    }
+
     [Fact]
     public async Task GetAllSections_Delegates_And_Returns()
     {
@@ -55,19 +63,6 @@ public class ContentfulServiceTests
         await contentfulWorkflow.Received(1).GetAllCategoriesAsync();
     }
 
-    [Fact]
-    public async Task GetCategoryHeaderTextBySlug_Delegates_And_Returns()
-    {
-        var (contentfulService, contentfulWorkflow) = Build();
-        const string slug = "testSlug";
-        contentfulWorkflow.GetCategoryHeaderTextBySlugAsync(slug).Returns("Header");
-
-        var result = await contentfulService.GetCategoryHeaderTextBySlugAsync(slug);
-
-        Assert.Equal("Header", result);
-        await contentfulWorkflow.Received(1).GetCategoryHeaderTextBySlugAsync(slug);
-    }
-
     [Theory]
     [InlineData(null)]
     [InlineData(2)]
@@ -92,12 +87,12 @@ public class ContentfulServiceTests
         const string id = "N1";
         var expected = new NavigationLinkEntry { Sys = new SystemDetails(id) };
 
-        contentfulWorkflow.GetEntryById<NavigationLinkEntry>(id).Returns(expected);
+        contentfulWorkflow.GetEntryByIdAsync<NavigationLinkEntry>(id).Returns(expected);
 
         var result = await contentfulService.GetLinkByIdAsync(id);
 
         Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetEntryById<NavigationLinkEntry>(id);
+        await contentfulWorkflow.Received(1).GetEntryByIdAsync<NavigationLinkEntry>(id);
     }
 
     [Fact]
@@ -107,12 +102,12 @@ public class ContentfulServiceTests
         const string id = "N1";
         var expected = new List<NavigationLinkEntry> { new() { Sys = new SystemDetails(id) } };
 
-        contentfulWorkflow.GetEntries<NavigationLinkEntry>().Returns(expected);
+        contentfulWorkflow.GetEntriesAsync<NavigationLinkEntry>().Returns(expected);
 
         var result = await contentfulService.GetNavigationLinksAsync();
 
         Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetEntries<NavigationLinkEntry>();
+        await contentfulWorkflow.Received(1).GetEntriesAsync<NavigationLinkEntry>();
     }
 
     [Fact]
@@ -122,12 +117,12 @@ public class ContentfulServiceTests
         const string id = "M1";
         var expected = new List<MicrocopyEntry> { new() { Sys = new SystemDetails(id) } };
 
-        contentfulWorkflow.GetEntries<MicrocopyEntry>().Returns(expected);
+        contentfulWorkflow.GetEntriesAsync<MicrocopyEntry>().Returns(expected);
 
         var result = await contentfulService.GetMicrocopyEntriesAsync();
 
         Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetEntries<MicrocopyEntry>();
+        await contentfulWorkflow.Received(1).GetEntriesAsync<MicrocopyEntry>();
     }
 
     [Fact]
@@ -137,12 +132,12 @@ public class ContentfulServiceTests
         const string id = "P1";
         var expected = new PageEntry { Sys = new SystemDetails(id) };
 
-        contentfulWorkflow.GetEntryById<PageEntry>(id).Returns(expected);
+        contentfulWorkflow.GetEntryByIdAsync<PageEntry>(id).Returns(expected);
 
         var result = await contentfulService.GetPageByIdAsync(id);
 
         Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetEntryById<PageEntry>(id);
+        await contentfulWorkflow.Received(1).GetEntryByIdAsync<PageEntry>(id);
     }
 
     [Fact]
@@ -167,12 +162,12 @@ public class ContentfulServiceTests
         const string id = "Q1";
         var expected = new QuestionnaireQuestionEntry { Sys = new SystemDetails(id) };
 
-        contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry>(id).Returns(expected);
+        contentfulWorkflow.GetEntryByIdAsync<QuestionnaireQuestionEntry>(id).Returns(expected);
 
         var result = await contentfulService.GetQuestionByIdAsync(id);
 
         Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetEntryById<QuestionnaireQuestionEntry>(id);
+        await contentfulWorkflow.Received(1).GetEntryByIdAsync<QuestionnaireQuestionEntry>(id);
     }
 
     [Theory]
@@ -190,5 +185,52 @@ public class ContentfulServiceTests
 
         Assert.Same(expected, result);
         await contentfulWorkflow.Received(1).GetSectionBySlugAsync(slug, include);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    public async Task GetPaginatedRecommendationEntries_Forwards_Page(int page)
+    {
+        var (contentfulService, contentfulWorkflow) = Build();
+        var expected = new List<RecommendationChunkEntry>();
+
+        contentfulWorkflow.GetPaginatedRecommendationEntriesAsync(page).Returns(expected);
+
+        var result = await contentfulService.GetPaginatedRecommendationEntriesAsync(page);
+
+        Assert.Same(expected, result);
+        await contentfulWorkflow.Received(1).GetPaginatedRecommendationEntriesAsync(page);
+    }
+
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(3, 15)]
+    public async Task GetRecommendationChunkCount_Forwards_Page(int page, int expected)
+    {
+        var (contentfulService, contentfulWorkflow) = Build();
+
+        contentfulWorkflow.GetRecommendationChunkCountAsync().Returns(expected);
+
+        var result = await contentfulService.GetRecommendationChunkCountAsync(page);
+
+        Assert.Equal(expected, result);
+        await contentfulWorkflow.Received(1).GetRecommendationChunkCountAsync();
+    }
+
+    [Theory]
+    [InlineData("1234")]
+    [InlineData("2345")]
+    public async Task GetTextBodyById_Uses_Generic_GetEntryById(string id)
+    {
+        var (contentfulService, contentfulWorkflow) = Build();
+        var expected = new ComponentTextBodyEntry();
+
+        contentfulWorkflow.GetEntryByIdAsync<ComponentTextBodyEntry>(id).Returns(expected);
+
+        var result = await contentfulService.GetTextBodyByIdAsync(id);
+
+        Assert.Same(expected, result);
+        await contentfulWorkflow.Received(1).GetEntryByIdAsync<ComponentTextBodyEntry>(id);
     }
 }

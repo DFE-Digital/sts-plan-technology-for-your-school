@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Providers;
@@ -69,15 +68,16 @@ public static class ServiceCollectionExtensions
                 }
             );
 
-        return services
+        services
             .AddSingleton<ApiKeyAuthorisationFilter>()
             .AddSingleton<IAuthorizationHandler, SignedRequestAuthorisationPolicy>()
             .AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>()
-            .AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>()
-            .AddSingleton<
-                IAuthorizationMiddlewareResultHandler,
-                UserAuthorisationMiddlewareResultHandler
-            >();
+            .AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>();
+
+        return services.AddSingleton<
+            IAuthorizationMiddlewareResultHandler,
+            UserAuthorisationMiddlewareResultHandler
+        >();
     }
 
     public static IServiceCollection AddCaching(this IServiceCollection services)

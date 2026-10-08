@@ -39,4 +39,11 @@ def get_logger(name: str) -> Logger:
 
 
 def read_dataframe(path: Path):
-    return read_csv(path, encoding=ENCODING, dtype=str, low_memory=False)
+    return read_csv(
+        path,
+        dtype=str,
+        encoding=ENCODING,
+        keep_default_na=False,
+        na_values=[""],
+        low_memory=False,
+    )

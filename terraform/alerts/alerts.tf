@@ -10,7 +10,7 @@ resource "azurerm_monitor_activity_log_alert" "this" {
   scopes              = [local.resource_group_scope]
   enabled             = var.enabled
   tags                = local.tags
-  
+
 
   action {
     action_group_id = data.azurerm_monitor_action_group.existing.id
@@ -20,22 +20,22 @@ resource "azurerm_monitor_activity_log_alert" "this" {
     category       = each.value.category
     operation_name = each.value.operation_name
     statuses       = each.value.statuses
-    level               = each.value.level
+    level          = each.value.level
   }
 }
 
 resource "azurerm_monitor_metric_alert" "this" {
   for_each = var.metric_alerts
 
-  name                = each.value.name
-  description         = each.value.description
-  resource_group_name = var.resource_group_name
-  target_resource_location            = var.azure_location
-  enabled             = var.enabled
-  tags                = local.tags
-  severity            = each.value.severity
-  scopes = ["${local.resource_group_scope}${local.scope_insights}"]
-  window_size = each.value.dynamic_criteria == null ? "PT15M" : "PT5M"
+  name                     = each.value.name
+  description              = each.value.description
+  resource_group_name      = var.resource_group_name
+  target_resource_location = var.azure_location
+  enabled                  = var.enabled
+  tags                     = local.tags
+  severity                 = each.value.severity
+  scopes                   = ["${local.resource_group_scope}${local.scope_insights}"]
+  window_size              = each.value.dynamic_criteria == null ? "PT15M" : "PT5M"
 
   action {
     action_group_id = data.azurerm_monitor_action_group.existing.id
@@ -77,5 +77,36 @@ resource "azurerm_monitor_metric_alert" "this" {
       ignore_data_before       = dynamic_criteria.value.ignore_data_before != "" ? dynamic_criteria.value.ignore_data_before : null
       skip_metric_validation   = dynamic_criteria.value.skip_metric_validation
     }
+  }
+}
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "this" {
+  for_each = var.enabled ? var.scheduled_query_alerts : {}
+
+  name                = each.value.name
+  description         = each.value.description
+  resource_group_name = var.resource_group_name
+  location            = var.azure_location
+  tags                = local.tags
+
+  evaluation_frequency = each.value.evaluation_frequency
+  window_duration      = each.value.window_duration
+  scopes               = length(each.value.scopes) > 0 ? each.value.scopes : [local.key_vault_log_analytics_workspace_id]
+  severity             = each.value.severity
+
+  criteria {
+    query                   = replace(each.value.query, "__EXPIRY_DAYS__", tostring(var.key_vault_expiry_alert_days))
+    time_aggregation_method = each.value.time_aggregation_method
+    threshold               = each.value.threshold
+    operator                = each.value.operator
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = each.value.minimum_failing_periods_to_trigger_alert
+      number_of_evaluation_periods             = each.value.number_of_evaluation_periods
+    }
+  }
+
+  action {
+    action_groups = [data.azurerm_monitor_action_group.existing.id]
   }
 }

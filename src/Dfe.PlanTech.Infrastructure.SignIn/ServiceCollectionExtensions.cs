@@ -94,7 +94,9 @@ public static class ServiceCollectionExtensions
         {
             OnUserInformationReceived = (UserInformationReceivedContext context) =>
             {
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<IDfeSignIn>>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<
+                    ILogger<IDfeSignIn>
+                >();
                 return OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
             },
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,

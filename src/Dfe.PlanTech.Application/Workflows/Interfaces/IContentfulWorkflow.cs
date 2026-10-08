@@ -9,19 +9,17 @@ public interface IContentfulWorkflow
 
     Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null);
 
-    Task<string?> GetCategoryHeaderTextBySlugAsync(string slug);
-
-    Task<List<TEntry>> GetEntries<TEntry>()
+    Task<List<TEntry>> GetEntriesAsync<TEntry>()
         where TEntry : ContentfulEntry;
 
-    Task<TEntry> GetEntryById<TEntry>(string entryId)
+    Task<TEntry> GetEntryByIdAsync<TEntry>(string entryId)
         where TEntry : ContentfulEntry;
 
     Task<PageEntry> GetPageBySlugAsync(string slug);
 
     Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page);
 
-    Task<int> GetRecommendationChunkCountAsync(int page);
+    Task<int> GetRecommendationChunkCountAsync();
 
     Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(
         string sectionSlug,

@@ -95,7 +95,7 @@ echo "Commandline argument validation successful"
 echo "Creating Azure resources required for use with Terraform state"
 
 # Create resources required for TF State
-az group create --name $RESOURCE_GROUP_NAME --location $AZ_LOCATION --tags "${AZ_TAGS[@]}"
+az group create --name $RESOURCE_GROUP_NAME --location $AZ_LOCATION --tags "${AZ_TAGS[@]}" || true
 az storage account create --resource-group $RESOURCE_GROUP_NAME --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob --tags "${AZ_TAGS[@]}"
 az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME
 

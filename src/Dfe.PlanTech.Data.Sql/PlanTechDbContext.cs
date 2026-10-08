@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.Data.Sql;
 
 public class PlanTechDbContext : DbContext
 {
+    private readonly IUserActionIdProvider? _userActionIdProvider;
+
     public virtual DbSet<EstablishmentEntity> Establishments { get; set; } = null!;
     public virtual DbSet<EstablishmentGroupEntity> EstablishmentGroups { get; set; } = null!;
     public virtual DbSet<EstablishmentLinkEntity> EstablishmentLinks { get; set; } = null!;
@@ -25,7 +27,12 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<UserActionEntity> UserActions { get; set; } = null!;
     public virtual DbSet<UserContentViewEntity> UserContentViews { get; set; } = null!;
 
-    private readonly IUserActionIdProvider? _userActionIdProvider;
+    public virtual DbSet<GiasEstablishmentEntity> GiasEstablishments { get; set; } = null!;
+    public virtual DbSet<GiasEstablishmentGroupEntity> GiasEstablishmentGroups { get; set; } =
+        null!;
+    public virtual DbSet<GiasGroupMembershipEntity> GiasGroupMemberships { get; set; } = null!;
+    public virtual DbSet<GiasTypeOfEstablishmentEntity> GiasTypesOfEstablishment { get; set; } =
+        null!;
 
     public PlanTechDbContext() { }
 

@@ -5,7 +5,6 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 public interface IContentfulService
 {
     Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null);
-    Task<string?> GetCategoryHeaderTextBySlugAsync(string slug);
     Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync();
     Task<IEnumerable<QuestionnaireCategoryEntry>> GetAllCategoriesAsync();
     Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
@@ -17,5 +16,6 @@ public interface IContentfulService
     Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId);
     Task<int> GetRecommendationChunkCountAsync(int page);
     Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page);
+    public Task<List<RedirectEntry>> GetRedirectsAsync();
     Task<ComponentTextBodyEntry> GetTextBodyByIdAsync(string id);
 }

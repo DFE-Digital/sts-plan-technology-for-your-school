@@ -17,11 +17,6 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
         return _contentfulWorkflow.GetCategoryBySlugAsync(slug, includeLevel);
     }
 
-    public Task<string?> GetCategoryHeaderTextBySlugAsync(string slug)
-    {
-        return _contentfulWorkflow.GetCategoryHeaderTextBySlugAsync(slug);
-    }
-
     public Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync()
     {
         return _contentfulWorkflow.GetAllSectionsAsync();
@@ -42,22 +37,22 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
 
     public Task<NavigationLinkEntry> GetLinkByIdAsync(string contentId)
     {
-        return _contentfulWorkflow.GetEntryById<NavigationLinkEntry>(contentId);
+        return _contentfulWorkflow.GetEntryByIdAsync<NavigationLinkEntry>(contentId);
     }
 
     public Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
     {
-        return contentfulWorkflow.GetEntries<MicrocopyEntry>();
+        return contentfulWorkflow.GetEntriesAsync<MicrocopyEntry>();
     }
 
     public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()
     {
-        return contentfulWorkflow.GetEntries<NavigationLinkEntry>();
+        return contentfulWorkflow.GetEntriesAsync<NavigationLinkEntry>();
     }
 
     public Task<PageEntry> GetPageByIdAsync(string pageId)
     {
-        return _contentfulWorkflow.GetEntryById<PageEntry>(pageId);
+        return _contentfulWorkflow.GetEntryByIdAsync<PageEntry>(pageId);
     }
 
     public Task<PageEntry> GetPageBySlugAsync(string slug)
@@ -67,12 +62,7 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
 
     public Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId)
     {
-        return _contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry>(questionId);
-    }
-
-    public Task<int> GetRecommendationChunkCountAsync(int page)
-    {
-        return _contentfulWorkflow.GetRecommendationChunkCountAsync(page);
+        return _contentfulWorkflow.GetEntryByIdAsync<QuestionnaireQuestionEntry>(questionId);
     }
 
     public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(
@@ -82,8 +72,18 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
         return _contentfulWorkflow.GetPaginatedRecommendationEntriesAsync(page);
     }
 
+    public Task<int> GetRecommendationChunkCountAsync(int page)
+    {
+        return _contentfulWorkflow.GetRecommendationChunkCountAsync();
+    }
+
+    public Task<List<RedirectEntry>> GetRedirectsAsync()
+    {
+        return contentfulWorkflow.GetEntriesAsync<RedirectEntry>();
+    }
+
     public Task<ComponentTextBodyEntry> GetTextBodyByIdAsync(string id)
     {
-        return _contentfulWorkflow.GetEntryById<ComponentTextBodyEntry>(id);
+        return _contentfulWorkflow.GetEntryByIdAsync<ComponentTextBodyEntry>(id);
     }
 }
