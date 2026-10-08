@@ -792,7 +792,7 @@ public class GroupsViewBuilder(
             ["schoolCount"] = schoolsCount.ToString()
         };
 
-        var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync( ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader, dynamicValues);
+        var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsUpdateStatusSuccessPanelText, dynamicValues);
 
         microcopySuccessBodyText = schoolsCount == 1
             ? microcopySuccessBodyText.Replace("schools", "schools")
