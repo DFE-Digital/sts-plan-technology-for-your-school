@@ -29,7 +29,8 @@ public class GroupsViewBuilder(
     IEstablishmentService establishmentService,
     IGroupService groupService,
     ISubmissionService submissionService,
-    IRecommendationService recommendationService
+    IRecommendationService recommendationService,
+    IMicrocopyProvider microcopyProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -46,6 +47,9 @@ public class GroupsViewBuilder(
 
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+
+    private readonly IMicrocopyProvider _microcopyProvider =
+        microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
 
     private readonly ILogger<BaseViewBuilder> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
@@ -791,10 +795,24 @@ public class GroupsViewBuilder(
 
         var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(viewModel.SelectedSchoolsRefs.ToArray());
 
-        await _recommendationService.UpdateEstablishmentsRecommendationStatusAsync(recommendationChunk.Id, schools.Select(s => s.Id).ToArray(), userId, newStatus.Value, viewModel.Notes, matEstablishmentId);
+        var schoolEstablishmentDtos = schools.ToList();
+        var schoolsCount = schoolEstablishmentDtos.Count();
+
+        await _recommendationService.UpdateEstablishmentsRecommendationStatusAsync(recommendationChunk.Id, schoolEstablishmentDtos.Select(s => s.Id).ToArray(), userId, newStatus.Value, viewModel.Notes, matEstablishmentId);
+
+        var dynamicValues = new Dictionary<string, string>()
+        {
+            ["schoolCount"] = schoolsCount.ToString()
+        };
+
+        var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync( ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader, dynamicValues);
+
+        microcopySuccessBodyText = schoolsCount == 1
+            ? microcopySuccessBodyText.Replace("schools", "schools")
+            : microcopySuccessBodyText;
 
         controller.TempData["StatusUpdateSuccessTitle"] =
-            "SUCCESS MICROCOPY MESSAGE HERE";
+            microcopySuccessBodyText;
 
         return controller.RedirectToGetMatSingleRecommendation(categorySlug,
             sectionSlug,
