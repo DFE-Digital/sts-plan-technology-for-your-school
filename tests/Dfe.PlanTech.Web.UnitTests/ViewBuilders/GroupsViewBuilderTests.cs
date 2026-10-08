@@ -10,6 +10,7 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -1978,7 +1979,7 @@ public class GroupsViewBuilderTests
         Assert.Equal(new[] { 1 }, ids);
     }
 
- // --- RouteToSelectSchoolsToUpdateStatusViewModelAsync -----------------------
+    // --- RouteToSelectSchoolsToUpdateStatusViewModelAsync -----------------------
 
     [Fact]
     public void Ctor_Null_RecommendationService_Throws()
@@ -2770,4 +2771,140 @@ public class GroupsViewBuilderTests
         Assert.Equal(section, vm.Section);
         Assert.Equal(recommendationChunk, vm.RecommendationChunk);
     }
+
+    [Fact]
+    public async Task UpdateSchoolsRecommendationStatusAsync_WhenUpdateFails_ReturnsStatusViewWithError()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var recommendationService = Substitute.For<IRecommendationService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-one";
+        var sectionSlug = "section-one";
+        var recommendationSlug = "recommendation-one";
+
+        var recommendationChunk = new RecommendationChunkEntry
+        {
+            Sys = new SystemDetails("contentful-rec-1"),
+            Slug = recommendationSlug
+        };
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-1"),
+            CoreRecommendations =
+            [
+                recommendationChunk
+            ]
+        };
+
+        var schools = new List<SqlEstablishmentDto>
+        {
+            new()
+            {
+                Id = 1,
+                EstablishmentRef = "000001",
+                OrgName = "School One"
+            },
+            new()
+            {
+                Id = 2,
+                EstablishmentRef = "000002",
+                OrgName = "School Two"
+            }
+        };
+
+        currentUser.UserId.Returns(123);
+
+        contentful
+            .GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        est.GetEstablishmentsByReferencesAsync(
+                Arg.Any<string[]>()
+            )
+            .Returns(schools);
+
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "000001" },
+                    new() { Urn = "000002" }
+                }
+            );
+
+        est.GetEstablishmentByReferenceAsync("000001").Returns(schools[0]);
+        est.GetEstablishmentByReferenceAsync("000002").Returns(schools[1]);
+
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                (SubmissionStatus?)null
+            )
+            .Returns((SubmissionResponsesModel?)null);
+
+        recommendationService
+            .UpdateEstablishmentsRecommendationStatusAsync(
+                recommendationChunk.Id,
+                Arg.Any<IEnumerable<int>>(),
+                123,
+                RecommendationStatus.Complete,
+                "Test note",
+                100
+            )
+            .Returns(Task.FromException(new Exception("Database failure")));
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            submission: submission,
+            recommendation: recommendationService,
+            currentUser: currentUser
+        );
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        var viewModel = new GroupRecommendationInputViewModel
+        {
+            SelectedSchoolsRefs = ["000001", "000002"],
+            SelectedStatus = RecommendationStatus.Complete.ToString(),
+            Notes = "Test note"
+        };
+
+        var result = await sut.UpdateSchoolsRecommendationStatusAsync(
+            controller,
+            sectionSlug,
+            recommendationSlug,
+            viewModel
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("GroupsSelectStatusToUpdate", view.ViewName);
+
+        var model = Assert.IsType<GroupsSelectStatusToUpdateViewModel>(view.Model);
+        Assert.Equal(RecommendationStatus.Complete, model.SelectedStatusKey);
+        Assert.Equal(viewModel.SelectedSchoolsRefs, model.SelectedSchoolsRefs);
+        Assert.Equal(
+            "There was a problem updating the recommendation status. Try again.",
+            model.StatusErrorMessage
+        );
+    }
+
 }
