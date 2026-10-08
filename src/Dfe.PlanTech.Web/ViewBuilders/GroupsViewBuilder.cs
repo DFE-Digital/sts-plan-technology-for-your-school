@@ -226,7 +226,9 @@ public class GroupsViewBuilder(
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
 
         if (viewModel?.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
-            throw new InvalidDataException("No schools have been selected");
+        {
+            return await RouteToSelectSchoolsToUpdateStatusViewModelAsync(controller, sectionSlug, recommendationSlug, new GroupsSelectSchoolsToUpdateStatusViewModel());
+        }
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
