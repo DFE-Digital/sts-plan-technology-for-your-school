@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
@@ -50,10 +51,11 @@ public class RecommendationWorkflow(
         }
 
         var latestHistoryForRecommendation =
-            await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(
-                establishmentId,
-                recommendation.Id
-            );
+            await establishmentRecommendationHistoryRepository
+                .GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(
+                    establishmentId,
+                    recommendation.Id
+                );
 
         return latestHistoryForRecommendation.Select(lhfr => lhfr.AsDto());
     }
@@ -115,10 +117,85 @@ public class RecommendationWorkflow(
         );
     }
 
-    public async Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
-        int establishmentId,
-        string recommendationContentfulReference
+    public async Task UpdateEstablishmentsRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        IEnumerable<int> establishmentIds,
+        int userId,
+        RecommendationStatus newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null,
+        int? responseId = null
     )
+    {
+        var distinctEstablishmentIds = establishmentIds
+            .Distinct()
+            .ToArray();
+
+        if (distinctEstablishmentIds.Length == 0)
+        {
+            return;
+        }
+
+        // Get the recommendation once
+        var recommendations =
+            await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
+                [recommendationContentfulReference]
+            );
+
+        var recommendation =
+            recommendations.FirstOrDefault()
+            ?? throw new InvalidOperationException(
+                $"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found"
+            );
+
+        // Get the latest recommendation history for all establishments in one query
+        var latestHistories =
+            await establishmentRecommendationHistoryRepository
+                .GetLatestRecommendationHistoriesAsync(
+                    distinctEstablishmentIds,
+                    recommendation.Id
+                );
+
+        var latestHistoryByEstablishmentId = latestHistories
+            .ToDictionary(
+                history => history.EstablishmentId,
+                history => history
+            );
+
+        // Build one new history record per establishment
+        var histories = distinctEstablishmentIds
+            .Select(establishmentId =>
+            {
+                latestHistoryByEstablishmentId.TryGetValue(
+                    establishmentId,
+                    out var latestHistory
+                );
+
+                return new EstablishmentRecommendationHistoryEntity()
+                {
+                    EstablishmentId = establishmentId,
+                    RecommendationId = recommendation.Id,
+                    UserId = userId,
+                    MatEstablishmentId = matEstablishmentId,
+                    ResponseId = responseId,
+                    PreviousStatus = latestHistory?.NewStatus,
+                    NewStatus = newStatus,
+                    NoteText = noteText ?? string.Empty,
+                    DateCreated = DateTime.UtcNow
+                };
+            })
+            .ToList();
+
+        // AddRange + single SaveChanges
+        await establishmentRecommendationHistoryRepository
+            .CreateRecommendationHistoriesAsync(histories);
+    }
+
+    public async Task<SqlFirstActivityForEstablishmentRecommendationDto?>
+        GetFirstActivityForEstablishmentRecommendationAsync(
+            int establishmentId,
+            string recommendationContentfulReference
+        )
     {
         var firstActivity =
             await storedProcedureRepository.GetFirstActivityForEstablishmentRecommendationAsync(
@@ -129,10 +206,12 @@ public class RecommendationWorkflow(
         return firstActivity?.AsDto();
     }
 
-    public async Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(IEnumerable<string> recommendationContentfulReferences)
+    public async Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences)
     {
         var recommendations =
-            await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences);
+            await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
+                recommendationContentfulReferences);
         return recommendations.Select(r => r.AsDto());
     }
 }

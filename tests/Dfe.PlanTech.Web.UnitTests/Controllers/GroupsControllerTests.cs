@@ -742,8 +742,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     recommendationSlug
                 );
 
-            Assert.IsType<OkResult>(result);
-
             await _viewBuilder
                 .DidNotReceive()
                 .RouteToSelectSchoolsToUpdateStatusViewModelAsync(

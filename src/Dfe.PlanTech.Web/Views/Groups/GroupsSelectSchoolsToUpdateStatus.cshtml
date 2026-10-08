@@ -44,6 +44,7 @@
 }
 <form asp-controller="Groups" asp-action="SubmitSelectedSchoolsToUpdateStatus" asp-route-categorySlug="@categorySlug"
       asp-route-sectionSlug="@sectionSlug" asp-route-recommendationSlug="@recommendationSlug" method="post" novalidate>
+
     <div class="govuk-form-group @(hasErrors ? "govuk-form-group--error" : "")">
         <fieldset class="govuk-fieldset"
                   aria-describedby="select-schools-update-status-hint  @(hasErrors ? "select-schools-update-status-error" : "")">

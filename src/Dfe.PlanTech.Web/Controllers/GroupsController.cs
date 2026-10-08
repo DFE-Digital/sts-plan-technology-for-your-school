@@ -1,9 +1,11 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -13,10 +15,13 @@ public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
     public const string GetSelectASchoolToUpdateStatusAction = "GetSelectASchoolToUpdateStatusView";
+    public const string GetSelectStatusToUpdateAction = "GetSelectStatusToUpdateView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
     public const string SubmitSchoolsUpdateStatusSelectionAction = "SubmitSelectedSchoolsToUpdateStatus";
+    public const string UpdateSelectedSchoolStatusRoute = "UpdateSelectedSchoolsStatus";
+
     public const string GetMatStandardsListAction = "GetMatStandardsList";
     public const string GetMatRecommendationsLandingAction = "GetMatRecommendationsLanding";
 
@@ -113,6 +118,22 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectStatusToUpdateSlug}",
+        Name = GetSelectStatusToUpdateAction
+    )]
+    public async Task<IActionResult> GetSelectStatusView(string sectionSlug, string recommendationSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+
+        return await _groupsViewBuilder.RouteToSelectStatusToUpdateViewModelAsync(
+            this,
+            sectionSlug,
+            recommendationSlug
+        );
+    }
+
     [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
     public async Task<IActionResult> SelectSchoolAndRedirect(
         string schoolUrn,
@@ -197,10 +218,43 @@ public class GroupsController : BaseController<GroupsController>
             );
         }
 
-        //todo - handle path to select status page (different ticket).
+        var updateStatusVm = new GroupsSelectStatusToUpdateViewModel
+        {
+            SelectedStatusKey = RecommendationStatus.NotStarted, SelectedSchoolsRefs = viewModel.SelectedSchoolsRefs
+        };
 
-        return Ok();
+        return await _groupsViewBuilder.RouteToSelectStatusToUpdateViewModelAsync(this, sectionSlug, recommendationSlug, updateStatusVm);
+
     }
+
+    [HttpPost(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsUpdateSchoolsStatus}", Name = UpdateSelectedSchoolStatusRoute
+    )]
+    public async Task<IActionResult> UpdateSelectedSchoolsStatus(
+        [FromForm] GroupRecommendationInputViewModel inputViewModel,
+        string sectionSlug,
+        string recommendationSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+        if (!ModelState.IsValid)
+        {
+            return await _groupsViewBuilder.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                this,
+                sectionSlug,
+                recommendationSlug
+            );
+        }
+
+        return await _groupsViewBuilder.UpdateSchoolsRecommendationStatusAsync(
+            this,
+            sectionSlug,
+            recommendationSlug,
+            inputViewModel
+        );
+    }
+
 
     [HttpGet(
         $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"

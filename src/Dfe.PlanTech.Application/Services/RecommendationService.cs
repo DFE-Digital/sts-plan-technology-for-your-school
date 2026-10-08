@@ -77,4 +77,17 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             recommendationContentfulReferences
         );
     }
+
+    public Task UpdateEstablishmentsRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        IEnumerable<int> establishmentIds,
+        int userId,
+        RecommendationStatus newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null,
+        int? responseId = null
+    )
+    {
+        return recommendationWorkflow.UpdateEstablishmentsRecommendationStatusAsync(recommendationContentfulReference, establishmentIds, userId, newStatus, noteText, matEstablishmentId, responseId);
+    }
 }

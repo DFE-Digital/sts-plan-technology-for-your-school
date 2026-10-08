@@ -37,6 +37,7 @@ public class GroupsViewBuilderTests
         IGroupService? group = null,
         ISubmissionService? submission = null,
         IRecommendationService? recommendation = null,
+        IMicrocopyProvider? microcopyProvider = null,
         ICurrentUserProvider? currentUser = null,
         ILogger<GroupsViewBuilder>? logger = null
     )
@@ -47,6 +48,8 @@ public class GroupsViewBuilderTests
         group ??= Substitute.For<IGroupService>();
         submission ??= Substitute.For<ISubmissionService>();
         recommendation ??= Substitute.For<IRecommendationService>();
+        microcopyProvider ??= Substitute.For<IMicrocopyProvider>();
+
 
         currentUser ??= Substitute.For<ICurrentUserProvider>();
         logger ??= NullLogger<GroupsViewBuilder>.Instance;
@@ -77,7 +80,8 @@ public class GroupsViewBuilderTests
             est,
             group,
             submission,
-            recommendation
+            recommendation,
+            microcopyProvider
         );
     }
 
@@ -117,6 +121,7 @@ public class GroupsViewBuilderTests
         var current = Substitute.For<ICurrentUserProvider>();
         var submissionService = Substitute.For<ISubmissionService>();
         var recommendationService = Substitute.For<IRecommendationService>();
+        var microcopyProvider = Substitute.For<IMicrocopyProvider>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -127,7 +132,8 @@ public class GroupsViewBuilderTests
                 est,
                 group,
                 submissionService,
-                recommendationService
+                recommendationService,
+                microcopyProvider
             )
         );
     }
@@ -142,6 +148,7 @@ public class GroupsViewBuilderTests
         var group = Substitute.For<IGroupService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var recommendationService = Substitute.For<IRecommendationService>();
+        var microcopyProvider = Substitute.For<IMicrocopyProvider>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -152,7 +159,8 @@ public class GroupsViewBuilderTests
                 null!,
                 group,
                 submissionService,
-                recommendationService
+                recommendationService,
+                microcopyProvider
             )
         );
     }
@@ -1981,6 +1989,7 @@ public class GroupsViewBuilderTests
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
         var submissionService = Substitute.For<ISubmissionService>();
+        var microcopyProvider = Substitute.For<IMicrocopyProvider>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -1991,7 +2000,8 @@ public class GroupsViewBuilderTests
                 est,
                 group,
                 submissionService,
-                null!
+                null!,
+                microcopyProvider
             )
         );
     }

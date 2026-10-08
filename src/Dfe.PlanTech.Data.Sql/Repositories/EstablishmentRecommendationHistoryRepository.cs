@@ -119,4 +119,35 @@ public class EstablishmentRecommendationHistoryRepository
             .Select(x => (x.Establishment, x.History))
             .ToList();
     }
+
+    public async Task<List<EstablishmentRecommendationHistoryEntity>>
+        GetLatestRecommendationHistoriesAsync(
+            IEnumerable<int> establishmentIds,
+            int recommendationId
+        )
+    {
+        var ids = establishmentIds.ToArray();
+
+        return await _db.EstablishmentRecommendationHistories
+            .Where(history =>
+                ids.Contains(history.EstablishmentId) &&
+                history.RecommendationId == recommendationId
+            )
+            .GroupBy(history => history.EstablishmentId)
+            .Select(group => group
+                .OrderByDescending(history => history.DateCreated)
+                .ThenByDescending(history => history.Id)
+                .First()
+            )
+            .ToListAsync();
+    }
+
+    public async Task CreateRecommendationHistoriesAsync(
+        IEnumerable<EstablishmentRecommendationHistoryEntity> histories
+    )
+    {
+        _db.EstablishmentRecommendationHistories.AddRange(histories);
+
+        await _db.SaveChangesAsync();
+    }
 }
