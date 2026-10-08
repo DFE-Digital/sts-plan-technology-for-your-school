@@ -106,6 +106,7 @@ public static class ContentfulMicrocopyConstants
     public const string GroupRecommendationProgressSchoolHeading = "group-recommendation-progress-school-heading";
     public const string GroupRecommendationProgressLastUpdatedHeading = "group-recommendation-progress-last-updated-heading";
     public const string GroupRecommendationProgressStatusHeading = "group-recommendation-progress-status-heading";
+    public const string GroupRecommendationUpdateStatusLink = "group-recommendation-update-status-link";
 
     public const string GroupsSelectSelfAssessmentBackLink = "msmSelectAssessmentBackLink";
 
@@ -184,6 +185,7 @@ public static class ContentfulMicrocopyConstants
     private const string GroupRecommendationProgressSchoolHeadingFallback = "School";
     private const string GroupRecommendationProgressLastUpdatedHeadingFallback = "Last updated";
     private const string GroupRecommendationProgressStatusHeadingFallback = "Status";
+    private const string GroupRecommendationUpdateStatusLinkFallback = "Update recommendation status for one or more schools";
 
     public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
     public const string SchoolSummaryHeaderFallback = "What to do next";
@@ -278,6 +280,7 @@ public static class ContentfulMicrocopyConstants
         { GroupRecommendationProgressSchoolHeading, GroupRecommendationProgressSchoolHeadingFallback },
         { GroupRecommendationProgressLastUpdatedHeading, GroupRecommendationProgressLastUpdatedHeadingFallback },
         { GroupRecommendationProgressStatusHeading, GroupRecommendationProgressStatusHeadingFallback },
+        { GroupRecommendationUpdateStatusLink, GroupRecommendationUpdateStatusLinkFallback },
         { SchoolSummarySuccessBody, SchoolSummarySuccessBodyFallback },
         { SchoolSummaryHeader, SchoolSummaryHeaderFallback },
         { SchoolSummaryRecLink, SchoolSummaryRecLinkFallback },

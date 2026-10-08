@@ -2,13 +2,31 @@
 @inject IMicrocopyProvider Microcopy
 @model SingleRecommendationViewModel
 
-<h2 class="govuk-heading-l">
+@{
+    var schoolsRequiringSelfAssessment = Model.Schools.Count(s => s.RequiresSelfAssessment);
+}
+
+<h2 id="school-progress" class="govuk-heading-l">
     @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressHeading)
 </h2>
 
 <p class="govuk-body">
     You can view and update the recommendation status for schools that have completed the @Model.Section.Name.ToLower() self-assessment.
 </p>
+
+@if (schoolsRequiringSelfAssessment > 0)
+{
+    <p class="govuk-body">
+        Self-assessment required for @schoolsRequiringSelfAssessment @(schoolsRequiringSelfAssessment == 1 ? "school" : "schools").
+        <a class="govuk-link"
+           asp-controller="Questions"
+           asp-action="GetInterstitialPage"
+           asp-route-categorySlug="@Model.CategorySlug"
+           asp-route-sectionSlug="@Model.SectionSlug">
+            Submit self-assessment for roles and responsibilities
+        </a>
+    </p>
+}
 
 <div class="dfe-table-scroll">
     <table class="govuk-table">
@@ -32,16 +50,42 @@
                     <td class="govuk-table__cell">
                         @school.SchoolName
                     </td>
-                    <td class="govuk-table__cell">
-                        @school.LastUpdatedFormatted
-                    </td>
-                    <td class="govuk-table__cell">
-                        <strong class="govuk-tag @school.StatusTagClass">
-                            @school.StatusText
-                        </strong>
-                    </td>
+
+                    @if (school.RequiresSelfAssessment)
+                    {
+                        <td class="govuk-table__cell">
+                            -
+                        </td>
+                        <td class="govuk-table__cell">
+                            Self-assessment required
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="govuk-table__cell">
+                            @school.LastUpdatedFormatted
+                        </td>
+                        <td class="govuk-table__cell">
+                            <strong class="govuk-tag @school.StatusTagClass">
+                                @school.StatusText
+                            </strong>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+<a class="govuk-button"
+   role="button"
+   href="@Url.RouteUrl(
+        GroupsController.GetSelectASchoolToUpdateStatusAction,
+        new
+        {
+            categorySlug = Model.CategorySlug,
+            sectionSlug = Model.SectionSlug,
+            recommendationSlug = Model.CurrentChunk.Slug
+        })">
+    Update recommendation status
+</a>

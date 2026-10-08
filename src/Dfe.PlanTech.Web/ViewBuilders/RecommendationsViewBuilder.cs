@@ -220,27 +220,46 @@ public class RecommendationsViewBuilder(
             .Distinct()
             .ToHashSet();
 
+        if (completedEstablishmentIds.Count == 0)
+        {
+            return controller.RedirectToRoute(
+                GroupsController.GetSelectSchoolsToAssessAction,
+                new
+                {
+                    categorySlug,
+                    sectionSlug,
+                }
+            );
+        }
+
         var schools = new List<MatRecommendationSchoolViewModel>();
 
         foreach (
-            var establishment in establishments.Where(e =>
-                completedEstablishmentIds.Contains(e.Id)
-            )
+            var establishment in establishments
+                .OrderBy(e => e.OrgName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
         )
         {
+            var hasCompletedSelfAssessment =
+                completedEstablishmentIds.Contains(establishment.Id);
+
             var history =
-                await _recommendationService.GetLatestRecommendationHistoryAsync(
-                    establishment.Id,
-                    currentRecommendationChunk.Id
-                );
+                hasCompletedSelfAssessment
+                    ? await _recommendationService.GetLatestRecommendationHistoryAsync(
+                        establishment.Id,
+                        currentRecommendationChunk.Id
+                    )
+                    : null;
 
             schools.Add(
                 new MatRecommendationSchoolViewModel
                 {
                     EstablishmentId = establishment.Id,
                     SchoolName = establishment.OrgName ?? string.Empty,
-                    Status = history?.NewStatus ?? RecommendationStatus.NotStarted,
+                    Status = hasCompletedSelfAssessment
+                        ? history?.NewStatus ?? RecommendationStatus.NotStarted
+                        : null,
                     LastUpdated = history?.DateCreated,
+                    RequiresSelfAssessment = !hasCompletedSelfAssessment,
                 }
             );
         }
@@ -269,6 +288,7 @@ public class RecommendationsViewBuilder(
             NextChunk = nextRecommendationChunk,
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
+            SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key, key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,

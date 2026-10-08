@@ -1467,7 +1467,7 @@ public class RecommendationsViewBuilderTests
     }
 
     [Fact]
-    public async Task RouteToSingleRecommendation_Mat_Renders_CompletedSchools()
+    public async Task RouteToSingleRecommendation_Mat_Renders_AllSchools_In_Alphabetical_Order()
     {
         var sut = CreateServiceUnderTest();
         var ctl = CreateController();
@@ -1489,13 +1489,13 @@ public class RecommendationsViewBuilderTests
                     [
                         new SqlEstablishmentDto
                     {
-                        Id = 101,
-                        OrgName = "School One"
+                        Id = 102,
+                        OrgName = "School Two"
                     },
                     new SqlEstablishmentDto
                     {
-                        Id = 102,
-                        OrgName = "School Two"
+                        Id = 101,
+                        OrgName = "School One"
                     },
                     ],
                     EstablishmentIds = [101, 102],
@@ -1503,7 +1503,7 @@ public class RecommendationsViewBuilderTests
                     [
                         new SqlSubmissionDto
                     {
-                        EstablishmentId = 101,
+                        EstablishmentId = 102,
                         SectionId = "S1",
                     },
                     ],
@@ -1511,7 +1511,7 @@ public class RecommendationsViewBuilderTests
             );
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync(101, "C2")
+            .GetLatestRecommendationHistoryAsync(102, "C2")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {
@@ -1535,21 +1535,30 @@ public class RecommendationsViewBuilderTests
         var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
 
         Assert.True(vm.IsMat);
-        Assert.Single(vm.Schools);
+        Assert.Equal(2, vm.Schools.Count);
+
         Assert.Equal(101, vm.Schools[0].EstablishmentId);
         Assert.Equal("School One", vm.Schools[0].SchoolName);
-        Assert.Equal(RecommendationStatus.Complete, vm.Schools[0].Status);
-        Assert.Equal(new DateTime(2026, 9, 20), vm.Schools[0].LastUpdated);
+        Assert.True(vm.Schools[0].RequiresSelfAssessment);
+        Assert.Null(vm.Schools[0].Status);
+        Assert.Null(vm.Schools[0].LastUpdated);
+
+        Assert.Equal(102, vm.Schools[1].EstablishmentId);
+        Assert.Equal("School Two", vm.Schools[1].SchoolName);
+        Assert.False(vm.Schools[1].RequiresSelfAssessment);
+        Assert.Equal(RecommendationStatus.Complete, vm.Schools[1].Status);
+        Assert.Equal(new DateTime(2026, 9, 20), vm.Schools[1].LastUpdated);
+
         Assert.Equal("first-chunk-1", vm.PreviousChunk!.Slug);
         Assert.Equal("third-chunk-3", vm.NextChunk!.Slug);
 
         await _recommendationService
             .Received(1)
-            .GetLatestRecommendationHistoryAsync(101, "C2");
+            .GetLatestRecommendationHistoryAsync(102, "C2");
 
         await _recommendationService
             .DidNotReceive()
-            .GetLatestRecommendationHistoryAsync(102, "C2");
+            .GetLatestRecommendationHistoryAsync(101, "C2");
     }
 
     [Fact]
@@ -1608,8 +1617,68 @@ public class RecommendationsViewBuilderTests
 
         var school = Assert.Single(vm.Schools);
 
+        Assert.False(school.RequiresSelfAssessment);
         Assert.Equal(RecommendationStatus.NotStarted, school.Status);
         Assert.Null(school.LastUpdated);
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_Mat_NoCompletedSelfAssessments_Redirects_To_SelectSchools()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.UserOrganisationId.Returns(999);
+
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryHeaderTextBySlugAsync("cat-a").Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _groupService
+            .GetGroupEstablishmentContextAsync(999)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                    {
+                        Id = 101,
+                        OrgName = "School One"
+                    }
+                    ],
+                    EstablishmentIds = [101],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        EstablishmentId = 101,
+                        SectionId = "S2",
+                    },
+                    ],
+                }
+            );
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            "cat-a",
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false,
+            CategoryLandingContext.MAT
+        );
+
+        var redirect = Assert.IsType<RedirectToRouteResult>(result);
+
+        Assert.Equal(GroupsController.GetSelectSchoolsToAssessAction, redirect.RouteName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat-a", redirect.RouteValues["categorySlug"]);
+        Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
+
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationHistoryAsync(Arg.Any<int>(), Arg.Any<string>());
     }
 
     // ---------- Support ----------
