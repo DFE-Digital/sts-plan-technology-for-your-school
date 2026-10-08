@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels.Inputs;
 
-public class GroupRecommendationInputViewModel
+public class GroupRecommendationInputViewModel : IValidatableObject
 {
     public List<string> SelectedSchoolsRefs { get; set; } = [];
     public string? SelectedStatus { get; set; } = string.Empty;
