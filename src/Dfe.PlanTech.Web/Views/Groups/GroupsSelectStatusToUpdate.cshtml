@@ -7,7 +7,7 @@
     var categorySlug = Model.CategorySlug;
     var sectionSlug = Model.SectionSlug;
     var backLinkHref = $"/groups/{categorySlug}/{sectionSlug}/{recommendation.Slug}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}";
-    var schoolCount = @Model.SelectedSchoolsRefs!.Count();
+    var schoolCount = @Model.SelectedSchoolsRefs!.Count;
 
     var dynamicValues = new Dictionary<string, string>()
     {

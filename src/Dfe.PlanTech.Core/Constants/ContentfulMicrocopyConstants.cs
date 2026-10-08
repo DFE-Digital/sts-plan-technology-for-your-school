@@ -187,10 +187,8 @@ public static class ContentfulMicrocopyConstants
 
     private const string GroupsSelectStatusBackLinkFallback = "Back";
     private const string GroupsSelectStatusHeaderFallback = "Have your schools completed this recommendation?";
-    private const string GroupsSelectStatusHelpTextFallback = "You can update the recommendation status for schools that have completed the roles and responsibilities self-assessment. Select one, more or all schools.";
     private const string GroupsSelectStatusPreContinueButtonTextFallback = "You're updating the recommendation status for these schools:";
     private const string GroupsSelectStatusContinueFallback = "Save";
-    private const string GroupsSelectStatusNoSelectionErrorFallback = "Select one, more or all schools";
 
     private const string GroupsSelectViewRecommendationsFallback = "View recommendations and track progress";
 

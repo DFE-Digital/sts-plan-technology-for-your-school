@@ -223,12 +223,9 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToSelectStatusToUpdateViewModelAsync(Controller controller, string sectionSlug, string recommendationSlug, GroupsSelectStatusToUpdateViewModel? viewModel = null)
     {
-        //Get the MAT ID
-        var establishmentId = GetUserOrganisationIdOrThrowException();
-
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
 
-        if (viewModel.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
+        if (viewModel?.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
             throw new InvalidDataException("No schools have been selected");
 
         var section =
@@ -243,11 +240,6 @@ public class GroupsViewBuilder(
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find recommendation for slug {recommendationSlug}"
             );
-
-        var dbRecommendation =
-            await _recommendationService.GetRecommendationsByContentfulReferencesAsync([recommendationChunk.Id]);
-
-        var recommendation = dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault() ?? throw new ArgumentException("Could not find recommendation");
 
         var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(viewModel.SelectedSchoolsRefs.ToArray());
 
@@ -787,11 +779,6 @@ public class GroupsViewBuilder(
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find recommendation for slug {recommendationSlug}"
             );
-
-        var dbRecommendation =
-            await _recommendationService.GetRecommendationsByContentfulReferencesAsync([recommendationChunk.Id]);
-
-        var recommendation = dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault() ?? throw new ArgumentException("Could not find recommendation");
 
         var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(viewModel.SelectedSchoolsRefs.ToArray());
 
