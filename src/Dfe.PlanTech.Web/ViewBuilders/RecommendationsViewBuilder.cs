@@ -307,7 +307,9 @@ public class RecommendationsViewBuilder(
             userId,
             inputModel.SelectedStatusEnum!.Value,
             noteText: inputModel.Notes ?? defaultNoteText,
-            matEstablishmentId: CurrentUser.IsMat ? userOrganisationId : null
+            matEstablishmentId: CurrentUser.IsMat || CurrentUser.IsSatOrSSat
+                ? userOrganisationId
+                : null
         );
 
         // Set success message for the banner

@@ -1161,7 +1161,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert
-        Assert.True(sut.UserOrganisationIsGroup);
+        Assert.True(sut.UserOrganisationSelectsSchools);
     }
 
     // [Fact]
@@ -1216,7 +1216,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert
-        Assert.False(sut.UserOrganisationIsGroup);
+        Assert.False(sut.UserOrganisationSelectsSchools);
     }
 
     [Fact]
@@ -1226,7 +1226,7 @@ public class CurrentUserTests
         var (sut, _) = Build();
 
         // Act / Assert
-        Assert.False(sut.UserOrganisationIsGroup);
+        Assert.False(sut.UserOrganisationSelectsSchools);
     }
 
     // ---------- LoadSelectedSchool validation (security tests) ----------

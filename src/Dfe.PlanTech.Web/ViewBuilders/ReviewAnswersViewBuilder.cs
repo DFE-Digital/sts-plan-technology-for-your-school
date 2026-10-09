@@ -154,7 +154,7 @@ public class ReviewAnswersViewBuilder(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            if (CurrentUser.IsMat)
+            if (CurrentUser.IsMat || CurrentUser.IsSatOrSSat)
             {
                 var selectedEstablishmentIds =
                     _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();

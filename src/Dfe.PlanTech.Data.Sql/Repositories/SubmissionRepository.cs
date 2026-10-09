@@ -501,31 +501,25 @@ public class SubmissionRepository(
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissionsRaw = await _db
-            .Submissions.Where(s =>
-                !s.Deleted
-                && s.EstablishmentId == establishmentId
-                && sectionIdList.Contains(s.SectionId)
-            )
-            .ToListAsync();
+        var submissionsQuery = _db.Submissions.Where(s =>
+            !s.Deleted
+            && s.EstablishmentId == establishmentId
+            && sectionIdList.Contains(s.SectionId)
+        );
 
-        var currentSubmissions = currentSubmissionsRaw
-            .GroupBy(s => s.SectionId)
-            .Select(g => g.OrderByDescending(s => s.DateCreated).First());
-
-        var lastCompleteSubmissions = await _db
-            .Submissions.Where(s =>
-                !s.Deleted
-                && s.EstablishmentId == establishmentId
-                && sectionIdList.Contains(s.SectionId)
-                && (s.Status == SubmissionStatus.CompleteReviewed)
-            )
+        var submissions = await submissionsQuery
             .GroupBy(s => s.SectionId)
             .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
-        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
-        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+        var completedSubmissions = await submissionsQuery
+            .Where(s => s.Status == SubmissionStatus.CompleteReviewed)
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var sectionIdSubmissions = submissions.ToDictionary(s => s.SectionId, s => s);
+        var sectionIdCompletedSubmissions = completedSubmissions.ToDictionary(
             s => s.SectionId,
             s => s
         );
@@ -533,8 +527,11 @@ public class SubmissionRepository(
         var result = sectionIdList
             .Select(sectionId =>
             {
-                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
-                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+                sectionIdSubmissions.TryGetValue(sectionId, out var currentSubmission);
+                sectionIdCompletedSubmissions.TryGetValue(
+                    sectionId,
+                    out var lastCompleteSubmission
+                );
 
                 return new SectionStatusEntity
                 {
@@ -542,12 +539,10 @@ public class SubmissionRepository(
                     Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
                     DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
                     DateUpdated =
-                        currentSubmission?.DateLastUpdated
-                        ?? currentSubmission?.DateCreated
-                        ?? DateTime.UtcNow,
+                        currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
                     CreatedUserActionId = currentSubmission?.CreatedUserActionId,
+                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
                     CompletedUserActionId = lastCompleteSubmission?.CompletedUserActionId,
                 };
             })

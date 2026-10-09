@@ -28,7 +28,7 @@ public class NotifyWorkflowTests
 
         var model = new ShareByEmailModel { EmailAddresses = ["one@test.com", "two@test.com"] };
 
-        var personalisation = new Dictionary<string, object> { ["name of user"] = "Drew" };
+        var personalisation = new Dictionary<string, object> { ["name of user"] = "John" };
 
         const string correlationId = "corr-123";
         const string templateId = "template-123";
