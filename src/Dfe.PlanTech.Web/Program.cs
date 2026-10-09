@@ -78,11 +78,7 @@ builder
     .AddRepositories()
     .AddViewComponents();
 
-builder
-    .Services.AddApplicationProviders()
-    .AddApplicationServices()
-    .AddApplicationWorkflows()
-    .AddDfeSignInOrganisationProvider(builder.Configuration);
+builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
 
 builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environment);
 

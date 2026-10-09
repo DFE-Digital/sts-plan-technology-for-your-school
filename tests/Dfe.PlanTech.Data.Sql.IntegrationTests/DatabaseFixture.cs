@@ -1,4 +1,5 @@
 using DbUp;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.MsSql;
 
@@ -52,12 +53,17 @@ public class DatabaseFixture : IAsyncLifetime
     /// Creates a new DbContext with transaction isolation for tests.
     /// Each test should call this to get a fresh, isolated context.
     /// </summary>
-    public PlanTechDbContext CreateDbContext()
+    /// <summary>
+    /// Creates a context for a test. The user action id provider is opt-in and defaults to null,
+    /// matching the non-web hosts (such as SeedTestData) that construct the context without one.
+    /// Supply a provider when a test needs to assert that userActionId is stamped on save.
+    /// </summary>
+    public PlanTechDbContext CreateDbContext(IUserActionIdProvider? userActionIdProvider = null)
     {
         var options = new DbContextOptionsBuilder<PlanTechDbContext>()
             .UseSqlServer(ConnectionString)
             .Options;
-        return new PlanTechDbContext(options);
+        return new PlanTechDbContext(options, userActionIdProvider);
     }
 
     public async ValueTask DisposeAsync()
