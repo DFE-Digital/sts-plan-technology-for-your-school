@@ -420,7 +420,7 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var selectedEstablishmentIds = CurrentUser.IsMat
+        var selectedEstablishmentIds = CurrentUser.IsGroup
             ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().ToArray()
             : [];
 
@@ -494,7 +494,7 @@ public class QuestionsViewBuilder(
         }
 
         var routingEstablishmentId =
-            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+            CurrentUser.IsGroup && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds[0]
                 : activeEstablishmentId;
 
@@ -540,7 +540,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentIds =
-            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+            CurrentUser.IsGroup && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds
                 : [activeEstablishmentId];
 
