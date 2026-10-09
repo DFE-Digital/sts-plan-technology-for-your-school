@@ -21,12 +21,20 @@ public interface IEstablishmentRecommendationHistoryRepository
         int recommendationId
     );
 
-    Task CreateRecommendationHistoryAsync(
+    Task CreateRecommendationHistoriesAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int userId,
+        IEnumerable<RecommendationEntity> recommendations,
+        IDictionary<string, int> recommendationRefsToResponseIds,
+        IDictionary<string, RecommendationStatus> answerStatuses
+    );
+
+    Task UpdateRecommendationStatusAsync(
         int establishmentId,
         int recommendationId,
         int userId,
         int? matEstablishmentId,
-        int? responseId,
         RecommendationStatus? previousStatus,
         RecommendationStatus? newStatus,
         string noteText

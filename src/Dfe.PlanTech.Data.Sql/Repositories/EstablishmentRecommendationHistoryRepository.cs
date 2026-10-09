@@ -5,15 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class EstablishmentRecommendationHistoryRepository
+public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbContext)
     : IEstablishmentRecommendationHistoryRepository
 {
-    private PlanTechDbContext _db;
-
-    public EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<
         IEnumerable<EstablishmentRecommendationHistoryEntity>
@@ -52,12 +48,53 @@ public class EstablishmentRecommendationHistoryRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task CreateRecommendationHistoryAsync(
+    public async Task CreateRecommendationHistoriesAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int userId,
+        IEnumerable<RecommendationEntity> recommendations,
+        IDictionary<string, int> recommendationRefsToResponseIds,
+        IDictionary<string, RecommendationStatus> recommendationStatuses
+    )
+    {
+        var previousStatuses = await _db
+            .EstablishmentRecommendationHistories.Where(erh =>
+                erh.EstablishmentId == establishmentId
+                && erh.MatEstablishmentId == matEstablishmentId
+            )
+            .GroupBy(erh => erh.Recommendation.ContentfulRef, erh => erh)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus
+            );
+
+        var erhEntities = recommendations.Select(
+            recommendation => new EstablishmentRecommendationHistoryEntity
+            {
+                EstablishmentId = establishmentId,
+                MatEstablishmentId = matEstablishmentId,
+                RecommendationId = recommendation.Id,
+                ResponseId = recommendationRefsToResponseIds[recommendation.ContentfulRef],
+                UserId = userId,
+                PreviousStatus = previousStatuses.TryGetValue(
+                    recommendation.ContentfulRef,
+                    out var previousStatus
+                )
+                    ? previousStatus
+                    : null,
+                NewStatus = recommendationStatuses[recommendation.ContentfulRef],
+            }
+        );
+
+        await _db.EstablishmentRecommendationHistories.AddRangeAsync(erhEntities);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateRecommendationStatusAsync(
         int establishmentId,
         int recommendationId,
         int userId,
         int? matEstablishmentId,
-        int? responseId,
         RecommendationStatus? previousStatus,
         RecommendationStatus? newStatus,
         string noteText
@@ -69,7 +106,9 @@ public class EstablishmentRecommendationHistoryRepository
             RecommendationId = recommendationId,
             UserId = userId,
             MatEstablishmentId = matEstablishmentId,
-            ResponseId = responseId,
+            // Deliberately null: a manual status change is not driven by a self-assessment
+            // response, so there is no response to link it to.
+            ResponseId = null,
             PreviousStatus = previousStatus,
             NewStatus = newStatus,
             NoteText = noteText,

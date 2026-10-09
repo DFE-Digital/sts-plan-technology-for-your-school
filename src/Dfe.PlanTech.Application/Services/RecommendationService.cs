@@ -44,8 +44,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null,
-        int? responseId = null
+        int? matEstablishmentId = null
     )
     {
         return recommendationWorkflow.UpdateRecommendationStatusAsync(
@@ -54,8 +53,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             userId,
             newStatus,
             noteText,
-            matEstablishmentId,
-            responseId
+            matEstablishmentId
         );
     }
 
