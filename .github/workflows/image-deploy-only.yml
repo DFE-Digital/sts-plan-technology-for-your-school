@@ -66,7 +66,7 @@ jobs:
         id: set-vars
         shell: bash
         run: |
-          BASE_PREFIX="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}"
+          BASE_PREFIX="${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}"
 
           if [ "${{ env.IS_DR }}" = "true" ]; then
             BASE_PREFIX_FULL="${BASE_PREFIX}-dr"
