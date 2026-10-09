@@ -787,7 +787,33 @@ public class GroupsViewBuilder(
         var schoolEstablishmentDtos = schools.ToList();
         var schoolsCount = schoolEstablishmentDtos.Count();
 
-        await _recommendationService.UpdateEstablishmentsRecommendationStatusAsync(recommendationChunk.Id, schoolEstablishmentDtos.Select(s => s.Id).ToArray(), userId, newStatus.Value, viewModel.Notes, matEstablishmentId);
+        try
+        {
+            await _recommendationService.UpdateEstablishmentsRecommendationStatusAsync(
+                recommendationChunk.Id,
+                schoolEstablishmentDtos.Select(s => s.Id).ToArray(),
+                userId,
+                newStatus.Value,
+                viewModel.Notes,
+                matEstablishmentId
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update recommendation status for selected schools");
+
+            return await RouteToSelectStatusToUpdateViewModelAsync(
+                controller,
+                sectionSlug,
+                recommendationSlug,
+                new GroupsSelectStatusToUpdateViewModel
+                {
+                    SelectedStatusKey = newStatus.Value,
+                    SelectedSchoolsRefs = viewModel.SelectedSchoolsRefs,
+                    StatusErrorMessage = "There was a problem updating the recommendation status. Try again.",
+                }
+            );
+        }
 
         var dynamicValues = new Dictionary<string, string>()
         {

@@ -11,13 +11,14 @@ namespace Dfe.PlanTech.Web.ViewModels
     {
         public int EstablishmentId { get; init; }
         public string SchoolName { get; init; } = string.Empty;
-        public RecommendationStatus Status { get; init; }
+        public RecommendationStatus? Status { get; init; }
         public DateTime? LastUpdated { get; init; }
+        public bool RequiresSelfAssessment { get; init; }
 
-        public string StatusText => Status.GetDisplayName();
+        public string StatusText => Status?.GetDisplayName() ?? string.Empty;
 
         public string StatusTagClass =>
-            ((RecommendationStatus?)Status).GetCssClassOrDefault(
+            Status.GetCssClassOrDefault(
                 RecommendationConstants.DefaultTagClass
             );
 

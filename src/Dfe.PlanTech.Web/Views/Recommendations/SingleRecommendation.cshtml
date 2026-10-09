@@ -112,6 +112,14 @@
 
                 <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
+                <p class="govuk-body">
+                    <a class="govuk-link"
+                       href="#school-progress"
+                       data-module="anchor-scroll">
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationUpdateStatusLink)
+                    </a>
+                </p>
+
                 @foreach (var content in recommendation.Content)
                 {
                     <partial name="Components/PageComponentFactory" model="@content" />
