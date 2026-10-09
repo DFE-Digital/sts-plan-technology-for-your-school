@@ -568,7 +568,7 @@ public class QuestionsViewBuilderTests
 
         _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([101, 102, 103]);
 
-        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
         _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
@@ -619,7 +619,7 @@ public class QuestionsViewBuilderTests
 
         _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([]);
 
-        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
         _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
@@ -657,7 +657,7 @@ public class QuestionsViewBuilderTests
 
         _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([101, 102]);
 
-        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
         _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);

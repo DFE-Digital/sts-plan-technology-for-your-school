@@ -480,31 +480,19 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var older = new SubmissionEntity
+        var s1OldestCompleted = new SubmissionEntity
         {
             SectionId = "S1",
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.CompleteReviewed,
+            Status = SubmissionStatus.Inaccessible,
             DateCreated = DateTime.UtcNow.AddDays(-10),
             DateLastUpdated = DateTime.UtcNow.AddDays(-9),
             DateCompleted = DateTime.UtcNow.AddDays(-8),
             Deleted = false,
         };
 
-        var newerCurrent = new SubmissionEntity
-        {
-            SectionId = "S1",
-            SectionName = "Section 1",
-            EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow.AddDays(-2),
-            DateLastUpdated = DateTime.UtcNow.AddDays(-1),
-            DateCompleted = null,
-            Deleted = false,
-        };
-
-        var latestCompleteReviewed = new SubmissionEntity
+        var s1LatestCompleted = new SubmissionEntity
         {
             SectionId = "S1",
             SectionName = "Section 1",
@@ -516,7 +504,19 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             Deleted = false,
         };
 
-        var s2 = new SubmissionEntity
+        var s1NewerCurrent = new SubmissionEntity
+        {
+            SectionId = "S1",
+            SectionName = "Section 1",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.InProgress,
+            DateCreated = DateTime.UtcNow.AddDays(-2),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-1),
+            DateCompleted = null,
+            Deleted = false,
+        };
+
+        var s2Completed = new SubmissionEntity
         {
             SectionId = "S2",
             SectionName = "Section 2",
@@ -528,7 +528,12 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             Deleted = false,
         };
 
-        DbContext.Submissions.AddRange(older, newerCurrent, latestCompleteReviewed, s2);
+        DbContext.Submissions.AddRange(
+            s1OldestCompleted,
+            s2Completed,
+            s1LatestCompleted,
+            s1NewerCurrent
+        );
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await _repository.GetSectionStatusesAsync("S1,S2", establishment.Id);
@@ -540,14 +545,14 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var r2 = result.Single(r => r.SectionId == "S2");
 
         Assert.Equal(SubmissionStatus.InProgress, r1.Status);
-        Assert.Equal(newerCurrent.DateCreated, r1.DateCreated);
-        Assert.Equal(newerCurrent.DateLastUpdated, r1.DateUpdated);
-        Assert.Equal(latestCompleteReviewed.DateCompleted, r1.LastCompletionDate);
+        Assert.Equal(s1NewerCurrent.DateCreated, r1.DateCreated);
+        Assert.Equal(s1NewerCurrent.DateLastUpdated, r1.DateUpdated);
+        Assert.Equal(s1LatestCompleted.DateCompleted, r1.LastCompletionDate);
 
         Assert.Equal(SubmissionStatus.CompleteReviewed, r2.Status);
-        Assert.Equal(s2.DateCreated, r2.DateCreated);
-        Assert.Equal(s2.DateLastUpdated, r2.DateUpdated);
-        Assert.Equal(s2.DateCompleted, r2.LastCompletionDate);
+        Assert.Equal(s2Completed.DateCreated, r2.DateCreated);
+        Assert.Equal(s2Completed.DateLastUpdated, r2.DateUpdated);
+        Assert.Equal(s2Completed.DateCompleted, r2.LastCompletionDate);
     }
 
     [Fact]

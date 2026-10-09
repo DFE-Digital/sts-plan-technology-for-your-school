@@ -208,7 +208,7 @@ public class PagesViewBuilderTests
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.UserOrganisationIsGroup.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
 
@@ -243,7 +243,7 @@ public class PagesViewBuilderTests
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
-        currentUser.UserOrganisationIsGroup.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
