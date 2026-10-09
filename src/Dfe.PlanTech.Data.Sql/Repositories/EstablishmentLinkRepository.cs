@@ -6,14 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class EstablishmentLinkRepository : IEstablishmentLinkRepository
+public class EstablishmentLinkRepository(PlanTechDbContext dbContext) : IEstablishmentLinkRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public EstablishmentLinkRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public Task<List<EstablishmentLinkEntity>> GetGroupEstablishmentsByAsync(
         Expression<Func<EstablishmentEntity, bool>> predicate
