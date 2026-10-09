@@ -119,14 +119,16 @@ Then(
 Then(
   'I click the print all recommendations link in the related actions for {string}',
   async function (topic: string) {
-    const container = this.page.locator(
-      '.govuk-grid-column-one-third-from-desktop.govuk-float-right',
-    );
-    const printLink = container.locator('a', {
+    const relatedActions = this.page
+      .getByRole('heading', { name: 'Related actions', exact: true })
+      .locator('..');
+
+    const printAllLink = relatedActions.locator('a[href$="/print-all"]').filter({
       hasText: `Print your school's ${topic.toLowerCase()} recommendations`,
     });
-    await expect(printLink).toBeVisible();
-    await printLink.click();
+
+    await expect(printAllLink).toBeVisible();
+    await printAllLink.click();
   },
 );
 

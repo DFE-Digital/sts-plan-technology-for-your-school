@@ -139,7 +139,7 @@ public class BannerConditionsContextProviderTests
         _currentUser
             .OrganisationCategoryIdMatchesAny(
                 Arg.Is<IEnumerable<string>>(x =>
-                    x.SequenceEqual(DsiConstants.OrganisationEstablishmentCategoryIds)
+                    x.SequenceEqual(DsiConstants.EstablishmentOrganisationCategoryIds)
                 )
             )
             .Returns(isSchool);
@@ -147,7 +147,7 @@ public class BannerConditionsContextProviderTests
         _currentUser
             .OrganisationCategoryIdMatchesAny(
                 Arg.Is<IEnumerable<string>>(x =>
-                    x.SequenceEqual(DsiConstants.OrganisationGroupCategoryIds)
+                    x.SequenceEqual(DsiConstants.SelectASchoolOrganisationCategoryIds)
                 )
             )
             .Returns(isGroup);

@@ -26,19 +26,25 @@ public static class DsiConstants
     /// Organisation "establishments" are those that are schools,
     /// and we should not show the "select a school" page after login.
     /// </summary>
-    public static HashSet<string> OrganisationEstablishmentCategoryIds { get; } =
+    public static HashSet<string> EstablishmentOrganisationCategoryIds { get; } =
     [EstablishmentCategoryId];
+
+    /// <summary>
+    /// These are all the organisation types which access the service
+    /// and have schools within them.
+    /// </summary>
+    public static HashSet<string> GroupOrganisationCategoryIds { get; } =
+    [MatOrganisationCategoryId, SatOrganisationCategoryId, SSatOrganisationCategoryId];
 
     /// <summary>
     /// Organisation "groups" are those who have schools within them,
     /// and we should show the "select a school" page after login.
     /// </summary>
-    public static HashSet<string> OrganisationGroupCategoryIds { get; } =
-    [
-        MatOrganisationCategoryId,
-        //SatOrganisationCategoryId,
-        //SSatOrganisationCategoryId,
-    ];
+    public static HashSet<string> SelectASchoolOrganisationCategoryIds { get; } =
+    [MatOrganisationCategoryId];
+
+    public static HashSet<string> SatOrganisationCategoryIds { get; } =
+    [SatOrganisationCategoryId, SSatOrganisationCategoryId];
 
     // Establishment Type IDs, supplied from DSI 17-Oct-2025
     public const string CommunitySchoolEstablishmentTypeId = "01";

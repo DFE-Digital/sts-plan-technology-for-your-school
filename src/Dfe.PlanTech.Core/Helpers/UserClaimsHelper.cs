@@ -44,7 +44,7 @@ public static class UserClaimsHelper
     {
         ArgumentNullException.ThrowIfNull(claims);
 
-        string? organisationJson = claims
+        var organisationJson = claims
             .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)
             ?.Value;
 

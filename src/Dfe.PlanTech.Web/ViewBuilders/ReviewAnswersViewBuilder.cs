@@ -154,7 +154,7 @@ public class ReviewAnswersViewBuilder(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            if (CurrentUser.IsMat)
+            if (CurrentUser.IsMat || CurrentUser.IsSatOrSSat)
             {
                 var selectedEstablishmentIds =
                     _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
@@ -296,7 +296,7 @@ public class ReviewAnswersViewBuilder(
             ShowInProgressDisclaimer = isMatInProgressView,
             BackLinkHref = isMatInProgressView ? $"/school/{categorySlug}" : $"/{categorySlug}",
             BackButtonText = isMatInProgressView
-                ? $"Back to {section.Name.ToLower()}"
+                ? $"Back to {section.Name.ToLowerInvariant()}"
                 : "Back to recommendations",
         };
 
@@ -360,7 +360,6 @@ public class ReviewAnswersViewBuilder(
         var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(
             CurrentUser
         );
-
 
         var sectionId =
             routingData.QuestionnaireSection.Sys?.Id

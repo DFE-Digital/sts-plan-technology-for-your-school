@@ -1,24 +1,26 @@
-data "azurerm_cdn_frontdoor_endpoint" "app" {
-  name                = "${local.resource_prefix}-container-app-url"
-  profile_name        = "${local.resource_prefix}-cdnwaf"
-  resource_group_name = local.resource_prefix
-}
+#use data block if this tf runsin a separate tfstate/run to the waf files creating the cdn.
+#data "azurerm_cdn_frontdoor_endpoint" "app" {
+#  name                = "${local.resource_prefix}-container-app-url"
+#  profile_name        = "${local.resource_prefix}-cdnwaf"
+#  resource_group_name = local.resource_prefix
+#}
 
-resource "null_resource" "upsert_contentful_webhook" {
-  triggers = {
-    api_key_change         = azurerm_key_vault_secret.api_key.value
-    url_change             = data.azurerm_cdn_frontdoor_endpoint.app.host_name
-    management_token       = var.contentful_management_token
-    contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
-    contentful_space       = azurerm_key_vault_secret.vault_secret_contentful_spaceid.value
-    webhook_url            = var.contentful_webhook_endpoint
-    should_upsert          = var.contentful_upsert_webhook == true ? timestamp() : var.contentful_upsert_webhook
-  }
-
-  provisioner "local-exec" {
-    command = local.contentful_webhook_shell_command
-  }
-}
+#this has been moved to the pipeline as it was using dummy contentful data at this point.
+#resource "null_resource" "upsert_contentful_webhook" {
+#  count = var.contentful_upsert_webhook ? 1 : 0
+#  triggers = {
+#    api_key_change         = azurerm_key_vault_secret.api_key.value
+#    url_change             = local.cdn_hostname
+#    management_token       = var.contentful_management_token
+#    contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
+#    contentful_space       = azurerm_key_vault_secret.vault_secret_contentful_spaceid.value
+#    webhook_url            = var.contentful_webhook_endpoint
+#    should_upsert          = var.contentful_upsert_webhook == true ? timestamp() : var.contentful_upsert_webhook
+#  }
+#  provisioner "local-exec" {
+#    command = local.contentful_webhook_shell_command
+#  }
+#}
 
 resource "azurerm_storage_account" "contentful_backup_storage" {
   name                            = replace("${local.resource_prefix}content", "-", "")
@@ -54,28 +56,30 @@ resource "azurerm_storage_account" "contentful_backup_storage" {
 resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminder" {
   type        = "Microsoft.Storage/storageAccounts@2023-01-01"
   resource_id = azurerm_storage_account.contentful_backup_storage.id
-  body = jsonencode({
+  body = {
     properties = {
       keyPolicy = {
         keyExpirationPeriodInDays = 90
       }
     }
-  })
+  }
 
   depends_on = [azurerm_storage_account.contentful_backup_storage]
 }
 
-resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
-  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
-  default_action     = "Deny"
-  bypass             = ["AzureServices"]
-  ip_rules           = []
-}
+#not needed as matches inline block. 
+#resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
+#  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
+#  default_action     = "Deny"
+#  bypass             = ["AzureServices"]
+#  ip_rules           = []
+#}
 
 resource "azurerm_role_assignment" "contentful_backup_storage_blob_contributor" {
   scope                = azurerm_storage_account.contentful_backup_storage.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = data.azurerm_client_config.current.object_id
+  principal_type       = "ServicePrincipal"
 }
 
 resource "azurerm_storage_container" "backups_container" {

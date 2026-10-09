@@ -36,9 +36,7 @@ public class UserAuthorisationMiddlewareResultHandler : IAuthorizationMiddleware
             return null;
         }
 
-        bool userMissingOrganisation = UserMissingOrganisation(authorisationFailure);
-
-        return userMissingOrganisation ? UrlConstants.OrgErrorPage : null;
+        return UserMissingOrganisation(authorisationFailure) ? UrlConstants.OrgErrorPage : null;
     }
 
     private static bool UserMissingOrganisation(AuthorizationFailure authorisationFailure) =>

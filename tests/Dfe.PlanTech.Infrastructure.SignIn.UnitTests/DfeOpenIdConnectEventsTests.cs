@@ -126,11 +126,13 @@ public partial class DfeOpenIdConnectEventsTests
         };
         var establishmentRepositorySubstitute = Substitute.For<IEstablishmentRepository>();
 
-        var userRepositorySubstitute = Substitute.For<IUserRepository>();
-        userRepositorySubstitute.CreateUserBySignInRefAsync(Arg.Any<string>()).Returns(user);
+        var giasRepositorySubstitute = Substitute.For<IGiasRepository>();
 
         var signInRepositorySubstitute = Substitute.For<ISignInRepository>();
         signInRepositorySubstitute.CreateSignInAsync(Arg.Any<int>()).Returns(signIn);
+
+        var userRepositorySubstitute = Substitute.For<IUserRepository>();
+        userRepositorySubstitute.CreateUserBySignInRefAsync(Arg.Any<string>()).Returns(user);
 
         var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(
             establishmentRepositorySubstitute,

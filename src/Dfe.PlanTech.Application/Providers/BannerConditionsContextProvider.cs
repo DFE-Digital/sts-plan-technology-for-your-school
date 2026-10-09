@@ -64,7 +64,7 @@ public class BannerConditionsContextProvider(
         if (
             banner.ShowToSchoolUsers == false
             && _currentUser.OrganisationCategoryIdMatchesAny(
-                DsiConstants.OrganisationEstablishmentCategoryIds
+                DsiConstants.EstablishmentOrganisationCategoryIds
             )
         )
         {
@@ -74,7 +74,7 @@ public class BannerConditionsContextProvider(
         if (
             banner.ShowToGroupUsers == false
             && _currentUser.OrganisationCategoryIdMatchesAny(
-                DsiConstants.OrganisationGroupCategoryIds
+                DsiConstants.SelectASchoolOrganisationCategoryIds
             )
         )
         {

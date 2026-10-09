@@ -7,8 +7,9 @@ public sealed class LogInvalidModelStateAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        var svc = context.HttpContext.RequestServices;
-        var logger = svc.GetService<ILogger<LogInvalidModelStateAttribute>>();
+        var logger = context.HttpContext.RequestServices.GetService<
+            ILogger<LogInvalidModelStateAttribute>
+        >();
 
         ArgumentNullException.ThrowIfNull(logger);
 

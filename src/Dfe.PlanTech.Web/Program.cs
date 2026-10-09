@@ -82,13 +82,11 @@ builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicati
 
 builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environment);
 
-builder.Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>();
-
-builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
-
-builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
-
-builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
+builder
+    .Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>()
+    .AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>()
+    .AddScoped<IUserActionTrackingService, UserActionTrackingService>()
+    .AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
 
 var app = builder.Build();
 
@@ -97,7 +95,7 @@ ContentComponentJsonExtensions.ValidateContentfulTypeMapping();
 app.UseRobotsTxtMiddleware();
 
 app.UseSecurityHeaders();
-app.UseMiddleware<HeadRequestMiddleware>();
+app.UseMiddleware<RequestMiddleware>();
 
 app.UseCookiePolicy(new CookiePolicyOptions { Secure = CookieSecurePolicy.Always });
 

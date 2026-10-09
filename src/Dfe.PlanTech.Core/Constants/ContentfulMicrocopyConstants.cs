@@ -66,6 +66,10 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectRecommendationCount = "matCount";
     public const string GroupsSelectContactUs = "matContact";
 
+    public const string PhaseBannerText = "phaseBannerText";
+    public const string PhaseBannerLink = "phaseBannerLink";
+    public const string PhaseBannerLinkText = "phaseBannerLinkText";
+    
     public const string SchoolSummarySuccessBody = "schoolSummarySuccessBody";
     public const string SchoolSummaryHeader = "summaryHeader";
     public const string SchoolSummaryRecLink = "schoolSummaryRecLink";

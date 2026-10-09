@@ -19,7 +19,7 @@ using StackExchange.Redis;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<RecommendationsViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     INotifyService notifyService,
@@ -50,11 +50,13 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var categoryHeaderText =
-            await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
-                $"Could not find category header text for slug {categorySlug}"
+                $"Could not find category for slug {categorySlug}"
             );
+        var categoryHeaderText = category.Header.Text;
+
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
@@ -117,8 +119,11 @@ public class RecommendationsViewBuilder(
             SelectedStatusKey =
                 currentRecommendationHistory?.NewStatus ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistory?.DateCreated,
-            SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
-            StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
+            SuccessMessageTitle =
+                controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle]
+                as string,
+            StatusErrorMessage =
+                controller.TempData[StatePassingMechanismConstants.StatusUpdateError] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key, key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
@@ -279,12 +284,6 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
-            establishmentId,
-            section,
-            status: SubmissionStatus.CompleteReviewed
-        );
-
         var dynamicValues =
             currentStatus?.NewStatus != inputModel.SelectedStatusEnum
                 ? new Dictionary<string, string>
@@ -307,12 +306,14 @@ public class RecommendationsViewBuilder(
             establishmentId,
             userId,
             inputModel.SelectedStatusEnum!.Value,
-            inputModel.Notes ?? defaultNoteText,
-            CurrentUser.IsMat ? userOrganisationId : null
+            noteText: inputModel.Notes ?? defaultNoteText,
+            matEstablishmentId: CurrentUser.IsMat || CurrentUser.IsSatOrSSat
+                ? userOrganisationId
+                : null
         );
 
         // Set success message for the banner
-        controller.TempData["StatusUpdateSuccessTitle"] =
+        controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle] =
             await _microcopyProvider.GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
                 dynamicValues

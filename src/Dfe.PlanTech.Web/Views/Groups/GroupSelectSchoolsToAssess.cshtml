@@ -17,7 +17,7 @@
         Home
     </govuk-back-link>
     <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
-        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessBackLink, new Dictionary<string, string>{["topic"] = sectionName.ToLower() })
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessBackLink, new Dictionary<string, string>{["topic"] = sectionName.ToLowerInvariant() })
     </govuk-back-link>
 }
 

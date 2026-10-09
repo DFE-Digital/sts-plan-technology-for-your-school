@@ -6,8 +6,11 @@ using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Rendering;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Application;
@@ -32,8 +35,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationProviders(this IServiceCollection services)
     {
         return services
+            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>()
             .AddScoped<IMicrocopyProvider, MicrocopyProvider>()
-            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>();
+            .AddScoped<IRedirectProvider, RedirectProvider>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
@@ -67,6 +71,13 @@ public static class ServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    private static DfeSignInConfiguration GetDfeSignInConfig(IConfiguration configuration)
+    {
+        var config = new DfeSignInConfiguration();
+        configuration.GetRequiredSection(ConfigurationConstants.DfeSignIn).Bind(config);
+        return config;
     }
 
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType) =>

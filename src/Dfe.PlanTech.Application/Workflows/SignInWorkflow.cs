@@ -20,11 +20,12 @@ public class SignInWorkflow(
 
     public virtual async Task<SqlSignInDto> RecordSignIn(
         string dfeSignInRef,
-        EstablishmentModel establishmentModel
+        EstablishmentModel dsiOrganisation
     )
     {
         var user = await GetOrCreateUserAsync(dfeSignInRef);
-        var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
+
+        var establishment = await GetOrCreateEstablishmentAsync(dsiOrganisation);
         var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
 
         return signIn.AsDto();
