@@ -4,14 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class SignInRepository : ISignInRepository
+public class SignInRepository(PlanTechDbContext dbContext) : ISignInRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public SignInRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<SignInEntity> CreateSignInAsync(int userId, int? establishmentId = null)
     {
