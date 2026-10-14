@@ -1852,7 +1852,13 @@ public class GroupsViewBuilderTests
         var group = Substitute.For<IGroupService>();
 
         var section = MakeSection("SEC-1");
-        var category = MakeCategory(section);
+        var category = new QuestionnaireCategoryEntry
+        {
+            Sys = new SystemDetails("cat-1"),
+            Header = new ComponentHeaderEntry { Text = "Header" },
+            LandingPage = new PageEntry { Slug = "category-landing" },
+            Sections = [section],
+        };
 
         contentful
             .GetAllCategoriesAsync()
@@ -1874,7 +1880,7 @@ public class GroupsViewBuilderTests
         var categoryVm = Assert.Single(vm.Categories);
         var sectionVm = Assert.Single(categoryVm.Sections);
 
-        Assert.Equal("header", sectionVm.CategorySlug);
+        Assert.Equal("category-landing", sectionVm.CategorySlug);
         Assert.Equal("sec-sec-1", sectionVm.SectionSlug);
     }
 

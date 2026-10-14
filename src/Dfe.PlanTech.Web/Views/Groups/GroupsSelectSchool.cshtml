@@ -12,6 +12,14 @@
     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 }
 
+@{
+    ViewData["UseOrganisationContextHeader"] = true;
+}
+
+@section OrganisationContext {
+    <partial name="_OrganisationContext" model="Model.GroupName" />
+}
+
 <partial name="Components/PageComponentFactory" model="@Model.Title" />
 
 @if (Model.Content != null)
