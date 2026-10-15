@@ -125,6 +125,7 @@ public static class ContentfulMicrocopyConstants
     public const string MatLandingPageTopicOutstanding = "matLandingTopicOutstanding";
     public const string MatLandingPageTopicOutstandingCount = "matLandingTopicOutstandingCount";
     public const string MatLandingPageTopicSubmitLink = "matLandingTopicSubmitLink";
+    public const string MatLandingPageTopicStartLink = "matLandingTopicStartLink";
 
     // Fallback text
     private const string EmptyFallback = "";
@@ -220,6 +221,7 @@ public static class ContentfulMicrocopyConstants
     private const string MatLandingPageTopicOutstandingFallback = "Self-assessment required for all schools.";
     private const string MatLandingPageTopicOutstandingCountFallback = "Self-assessment required for {{schoolCount}} schools.";
     private const string MatLandingPageTopicSubmitLinkFallback = "Submit self-assessment for {{topic}}";
+    private const string MatLandingPageTopicStartLinkFallback = "Start self-assessment for {{topic}}";
 
 
 
@@ -314,6 +316,7 @@ public static class ContentfulMicrocopyConstants
         { MatLandingPageTopicOutstanding, MatLandingPageTopicOutstandingFallback },
         { MatLandingPageTopicOutstandingCount, MatLandingPageTopicOutstandingCountFallback },
         { MatLandingPageTopicSubmitLink, MatLandingPageTopicSubmitLinkFallback },
+        { MatLandingPageTopicStartLink, MatLandingPageTopicStartLinkFallback },
         { GroupsSelectSchoolsToUpdateStatusHeader, GroupsSelectSchoolsToUpdateStatusHeaderFallback },
         { GroupsSelectSchoolsToUpdateStatusHelpText, GroupsSelectSchoolsToUpdateStatusHelpTextFallback },
         { GroupsSelectSchoolsToUpdateStatusBackLink, GroupsSelectSchoolsToUpdateStatusBackLinkFallback },
@@ -398,6 +401,7 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectSchoolsToAssessSchoolHint, [VariableNames.DateUpdated] },
         { MatLandingPageTopicOutstandingCount, [VariableNames.SchoolCount] },
         { MatLandingPageTopicSubmitLink, [VariableNames.Topic] },
+        { MatLandingPageTopicStartLink, [VariableNames.Topic] },
         { GroupsUpdateStatusSelectedSchoolsText, [VariableNames.SchoolCount] },
         { GroupsSelectStatusPreContinueButtonText, [VariableNames.SchoolCount] },
         { GroupsUpdateStatusSuccessPanelText, [VariableNames.SchoolCount] }

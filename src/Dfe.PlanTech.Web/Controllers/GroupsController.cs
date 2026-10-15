@@ -156,9 +156,8 @@ public class GroupsController : BaseController<GroupsController>
         var selectedEstablishmentIdsAfterClear = HttpContext.Session.GetSelectedEstablishmentIds();
 
         return RedirectToAction(
-            nameof(PagesController.GetByRoute),
-            nameof(PagesController).GetControllerNameSlug(),
-            new { route = categorySlug }
+            nameof(GetMatRecommendationsLanding),
+            new { categorySlug }
         );
     }
 

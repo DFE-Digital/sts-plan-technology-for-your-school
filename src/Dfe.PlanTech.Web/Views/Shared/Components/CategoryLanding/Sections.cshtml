@@ -49,19 +49,21 @@
                 };
             }
 
-            <a class="govuk-link"
-               href="@Url.RouteUrl(
-                   GroupsController.GetSelectSchoolsToAssessAction,
-                   new
-                   {
-                       categorySlug = Model.CategorySlug,
-                       sectionSlug = topic.Slug
-                   })">
-                @await Microcopy.GetTextByKeyAsync(
-                    ContentfulMicrocopyConstants.MatLandingPageTopicSubmitLink,
-                    topicValues
+                <a class="govuk-link"
+                   href="@Url.RouteUrl(
+                          GroupsController.GetSelectSchoolsToAssessAction,
+                          new
+                          {
+                              categorySlug = Model.CategorySlug,
+                              sectionSlug = topic.Slug
+                          })">
+                              @await Microcopy.GetTextByKeyAsync(
+                            !topic.HasSubmittedAssessments
+                            ? ContentfulMicrocopyConstants.MatLandingPageTopicStartLink
+                            : ContentfulMicrocopyConstants.MatLandingPageTopicSubmitLink,
+                topicValues
                 )
-            </a>
+                </a>
         </p>
     }
 

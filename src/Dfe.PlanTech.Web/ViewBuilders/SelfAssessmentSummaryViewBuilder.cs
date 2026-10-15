@@ -112,7 +112,9 @@ public class SelfAssessmentSummaryViewBuilder(
 
                 SchoolName = CurrentUser.IsMat ? submission.Establishment!.OrgName : null,
 
-                Href = $"/{recommendationCategorySlug}",
+                Href = CurrentUser.IsMat
+                    ? $"/groups/{recommendationCategorySlug}"
+                    : $"/{recommendationCategorySlug}",
             };
         }
     }

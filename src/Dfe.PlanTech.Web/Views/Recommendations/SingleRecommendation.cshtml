@@ -1,5 +1,6 @@
 @using Dfe.PlanTech.Application.Providers.Interfaces
 @inject IMicrocopyProvider Microcopy
+@inject ICurrentUserProvider CurrentUser
 @model SingleRecommendationViewModel
 
 @{
@@ -19,24 +20,66 @@
     var recommendation = Model.CurrentChunk;
     var categorySlug = Model.CategorySlug;
     var sectionSlug = Model.SectionSlug;
-}
 
-@section NavButton {
-    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
-        Home
-    </govuk-back-link>
-
-    @if (Model.IsMat)
+    var breadcrumbs = new List<BreadcrumbItemViewModel>
     {
-        <govuk-back-link id="mat-back-button-link" href="@($"/groups/{Model.CategorySlug}")" class="noprint js-only">
-            Back to @Model.CategoryName.ToLower()
-        </govuk-back-link>
+        new()
+        {
+            Text = "Home",
+            Href = UrlConstants.HomePage
+        }
+    };
+
+    if (Model.IsMat)
+    {
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = "Select a standard",
+            Href = UrlConstants.GroupStandards
+        });
+
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = Model.CategoryName,
+            Href = $"/groups/{Model.CategorySlug}"
+        });
+    }
+    else if (CurrentUser.IsMat &&
+             !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName))
+    {
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = CurrentUser.GroupSelectedSchoolName,
+            Href = UrlConstants.HomePage
+        });
+
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = Model.CategoryName,
+            Href = $"/{Model.CategorySlug}"
+        });
     }
     else
     {
-        <govuk-back-link id="school-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
-            Back to @Model.CategoryName.ToLower()
-        </govuk-back-link>
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = Model.CategoryName,
+            Href = $"/{Model.CategorySlug}"
+        });
+    }
+
+    ViewData["UseOrganisationContextHeader"] = Model.IsMat;
+}
+
+@section Breadcrumbs {
+    <partial name="_Breadcrumbs" model="breadcrumbs" />
+}
+
+@section OrganisationContext {
+    @if (Model.IsMat &&
+             !string.IsNullOrWhiteSpace(CurrentUser.UserOrganisationName))
+    {
+        <partial name="_OrganisationContext" model="CurrentUser.UserOrganisationName" />
     }
 }
 
@@ -333,8 +376,7 @@
                     ? $"/trust/{categorySlug}/{sectionSlug}/recommendations/{Model.NextChunk.Slug}"
                     : $"/{categorySlug}/{sectionSlug}/recommendations/{Model.NextChunk.Slug}";
 
-                    <govuk-pagination-next href="@nextHref"
-                                           label-text="@Model.NextChunk.LinkText" />
+                    <govuk-pagination-next href="@nextHref" label-text="@Model.NextChunk.LinkText" />
                 }
             </govuk-pagination>
         </div>
