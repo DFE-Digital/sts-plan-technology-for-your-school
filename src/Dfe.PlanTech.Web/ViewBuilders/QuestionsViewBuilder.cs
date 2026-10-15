@@ -165,8 +165,14 @@ public class QuestionsViewBuilder(
                 .ToList();
         }
 
+        var category =
+        await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        ?? throw new ContentfulDataUnavailableException(
+            $"Could not find category for slug {categorySlug}"
+        );
+
         var categoryName =
-            await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
+            category.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category header text for slug {categorySlug}"
             );

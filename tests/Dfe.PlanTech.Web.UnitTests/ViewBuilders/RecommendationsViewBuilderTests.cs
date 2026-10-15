@@ -1530,9 +1530,10 @@ public class RecommendationsViewBuilderTests
         _currentUser.UserOrganisationId.Returns(999);
 
         var categorySlug = "cat-a";
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", "sec-1", "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _groupService
@@ -1624,9 +1625,10 @@ public class RecommendationsViewBuilderTests
 
         _currentUser.UserOrganisationId.Returns(999);
 
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", "sec-1", "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync("cat-a").Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync("cat-a").Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _groupService
@@ -1685,9 +1687,10 @@ public class RecommendationsViewBuilderTests
 
         _currentUser.UserOrganisationId.Returns(999);
 
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", "sec-1", "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync("cat-a").Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync("cat-a").Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _groupService

@@ -25,18 +25,13 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 public class QuestionsViewBuilderTests
 {
     // Collaborators
-    private readonly ILogger<QuestionsViewBuilder> _logger = Substitute.For<
-        ILogger<QuestionsViewBuilder>
-    >();
+    private readonly ILogger<QuestionsViewBuilder> _logger = Substitute.For<ILogger<QuestionsViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
-    private readonly IEstablishmentService _establishmentSvc =
-        Substitute.For<IEstablishmentService>();
-    private readonly ICurrentUserProvider _currentUserProvider =
-        Substitute.For<ICurrentUserProvider>();
-    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
-        Substitute.For<IMatEstablishmentProvider>();
+    private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
+    private readonly ICurrentUserProvider _currentUserProvider = Substitute.For<ICurrentUserProvider>();
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = Substitute.For<IMatEstablishmentProvider>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
@@ -62,8 +57,23 @@ public class QuestionsViewBuilderTests
             .Returns(Array.Empty<int>());
 
         _matEstablishmentProvider
-            .GetSelectedSchoolNamesAsync(Arg.Any<ICurrentUserProvider>())
-            .Returns(Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>()));
+            .GetSelectedSchoolNamesAsync(
+                Arg.Any<ICurrentUserProvider>()
+            )
+            .Returns(
+                Task.FromResult<IReadOnlyList<string>>(
+                    Array.Empty<string>()
+                )
+            );
+
+        _contentful
+            .GetCategoryBySlugAsync(Arg.Any<string>())
+            .Returns(
+                new QuestionnaireCategoryEntry
+                {
+                    Header = new ComponentHeaderEntry { Text = "Category name" },
+                }
+            );
     }
 
     private QuestionsViewBuilder CreateServiceUnderTest() =>
@@ -83,7 +93,10 @@ public class QuestionsViewBuilderTests
     private static Controller MakeControllerWithTempData()
     {
         var controller = new DummyController();
-        var httpContext = new DefaultHttpContext { Session = new TestSession() };
+        var httpContext = new DefaultHttpContext
+        {
+            Session = new TestSession()
+        };
 
         controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
@@ -196,47 +209,75 @@ public class QuestionsViewBuilderTests
     [Fact]
     public async Task RouteByQuestionId_WhenMatUserHasSelectedSchools_PopulatesMatSchoolDetails()
     {
-        _contentfulOptions = new ContentfulOptionsConfiguration { UsePreviewApi = true };
+        _contentfulOptions = new ContentfulOptionsConfiguration
+        {
+            UsePreviewApi = true,
+        };
 
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
         _currentUserProvider.IsMat.Returns(true);
 
-        IReadOnlyList<string> selectedSchoolNames = ["School One", "School Three"];
+        IReadOnlyList<string> selectedSchoolNames =
+        [
+            "School One",
+        "School Three",
+    ];
 
-        _matEstablishmentProvider.IsBulkAssessment().Returns(true);
+        _matEstablishmentProvider
+            .IsBulkAssessment()
+            .Returns(true);
 
         _matEstablishmentProvider
             .GetSelectedSchoolNamesAsync(_currentUserProvider)
             .Returns(Task.FromResult(selectedSchoolNames));
 
-        var question = MakeQuestion("Q1", "q-1", "Question text");
+        var question = MakeQuestion(
+            "Q1",
+            "q-1",
+            "Question text"
+        );
 
-        _contentful.GetQuestionByIdAsync("Q1").Returns(question);
+        _contentful
+            .GetQuestionByIdAsync("Q1")
+            .Returns(question);
 
-        var result = await sut.RouteByQuestionId(controller, "Q1");
+        var result = await sut.RouteByQuestionId(
+            controller,
+            "Q1"
+        );
 
         var view = Assert.IsType<ViewResult>(result);
 
         Assert.Equal("Question", view.ViewName);
 
-        var model = Assert.IsType<QuestionViewModel>(view.Model);
+        var model = Assert.IsType<QuestionViewModel>(
+            view.Model
+        );
 
         Assert.True(model.IsMatBulkAssessment);
         Assert.Equal(2, model.SelectedSchoolCount);
 
-        Assert.Equal(selectedSchoolNames, model.SelectedSchoolNames);
+        Assert.Equal(
+            selectedSchoolNames,
+            model.SelectedSchoolNames
+        );
 
         await _matEstablishmentProvider
             .Received(1)
-            .GetSelectedSchoolNamesAsync(_currentUserProvider);
+            .GetSelectedSchoolNamesAsync(
+                _currentUserProvider
+            );
     }
 
     [Fact]
     public async Task RouteByQuestionId_WhenNoSelectedSchools_DoesNotShowMatSchoolDetails()
     {
-        _contentfulOptions = new ContentfulOptionsConfiguration { UsePreviewApi = true };
+        _contentfulOptions = new ContentfulOptionsConfiguration
+        {
+            UsePreviewApi = true,
+        };
 
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
@@ -245,19 +286,36 @@ public class QuestionsViewBuilderTests
 
         _matEstablishmentProvider
             .GetSelectedSchoolNamesAsync(_currentUserProvider)
-            .Returns(Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>()));
+            .Returns(
+                Task.FromResult<IReadOnlyList<string>>(
+                    Array.Empty<string>()
+                )
+            );
 
-        _matEstablishmentProvider.IsBulkAssessment().Returns(false);
+        _matEstablishmentProvider
+            .IsBulkAssessment()
+            .Returns(false);
 
-        var question = MakeQuestion("Q1", "q-1", "Question text");
+        var question = MakeQuestion(
+            "Q1",
+            "q-1",
+            "Question text"
+        );
 
-        _contentful.GetQuestionByIdAsync("Q1").Returns(question);
+        _contentful
+            .GetQuestionByIdAsync("Q1")
+            .Returns(question);
 
-        var result = await sut.RouteByQuestionId(controller, "Q1");
+        var result = await sut.RouteByQuestionId(
+            controller,
+            "Q1"
+        );
 
         var view = Assert.IsType<ViewResult>(result);
 
-        var model = Assert.IsType<QuestionViewModel>(view.Model);
+        var model = Assert.IsType<QuestionViewModel>(
+            view.Model
+        );
 
         Assert.False(model.IsMatBulkAssessment);
         Assert.Equal(0, model.SelectedSchoolCount);
@@ -552,14 +610,11 @@ public class QuestionsViewBuilderTests
         };
 
         _submissionSvc.SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
-        _questionSvc
-            .GetNextUnansweredQuestion(22, section)
-            .Returns((QuestionnaireQuestionEntry?)null);
+        _questionSvc.GetNextUnansweredQuestion(22, section).Returns((QuestionnaireQuestionEntry?)null);
 
         await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>());
     }
 
@@ -569,8 +624,11 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([101, 102, 103]);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102, 103]);
 
+        _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
@@ -595,23 +653,18 @@ public class QuestionsViewBuilderTests
 
         await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 101, 999, Arg.Any<SubmitAnswerModel>());
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 102, 999, Arg.Any<SubmitAnswerModel>());
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 103, 999, Arg.Any<SubmitAnswerModel>());
 
         await _questionSvc.Received(1).GetNextUnansweredQuestion(101, section);
 
-        await _submissionSvc
-            .DidNotReceive()
-            .SubmitAnswerAsync(11, 999, 999, Arg.Any<SubmitAnswerModel>());
+        await _submissionSvc.DidNotReceive().SubmitAnswerAsync(11, 999, 999, Arg.Any<SubmitAnswerModel>());
     }
 
     [Fact]
@@ -620,8 +673,11 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([]);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
 
+        _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
@@ -639,15 +695,24 @@ public class QuestionsViewBuilderTests
             ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
         };
 
-        var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 999, 999, Arg.Any<SubmitAnswerModel>());
 
-        await _questionSvc.Received(1).GetNextUnansweredQuestion(999, section);
+        await _questionSvc.Received(1)
+            .GetNextUnansweredQuestion(999, section);
 
-        _matEstablishmentProvider.Received(1).GetSelectedEstablishmentIdsFromSession();
+        _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedEstablishmentIdsFromSession();
 
         Assert.IsType<RedirectToActionResult>(result);
     }
@@ -658,8 +723,11 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([101, 102]);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102]);
 
+        _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
@@ -682,7 +750,14 @@ public class QuestionsViewBuilderTests
             .GetNextUnansweredQuestion(101, section)
             .Returns((QuestionnaireQuestionEntry?)null);
 
-        var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
 
@@ -690,15 +765,14 @@ public class QuestionsViewBuilderTests
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 101, 999, Arg.Any<SubmitAnswerModel>());
 
-        await _submissionSvc
-            .Received(1)
+        await _submissionSvc.Received(1)
             .SubmitAnswerAsync(11, 102, 999, Arg.Any<SubmitAnswerModel>());
 
-        await _questionSvc.Received(1).GetNextUnansweredQuestion(101, section);
+        await _questionSvc.Received(1)
+            .GetNextUnansweredQuestion(101, section);
     }
 
     [Fact]
@@ -723,13 +797,25 @@ public class QuestionsViewBuilderTests
             ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
         };
 
-        _submissionSvc.SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
+        _submissionSvc
+            .SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>())
+            .Returns(1);
 
-        _questionSvc.GetNextUnansweredQuestion(22, section).Returns(q2);
+        _questionSvc
+            .GetNextUnansweredQuestion(22, section)
+            .Returns(q2);
 
-        var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
-        await _questionSvc.Received(1).GetNextUnansweredQuestion(22, section);
+        await _questionSvc.Received(1)
+            .GetNextUnansweredQuestion(22, section);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
@@ -818,33 +904,59 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUserProvider
+            .GetActiveEstablishmentIdAsync()
+            .Returns(123);
 
-        var section = MakeSection("S1", "sec-1", "Section 1");
+        var section = MakeSection(
+            "S1",
+            "sec-1",
+            "Section 1"
+        );
 
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
 
         var submission = new SubmissionResponsesModel(
             1,
-            [new QuestionWithAnswerModel { QuestionSysId = "Q1" }]
+            [
+                new QuestionWithAnswerModel
+            {
+                QuestionSysId = "Q1"
+            }
+            ]
         )
         {
-            Status = SubmissionStatus.Obsolete,
+            Status = SubmissionStatus.Obsolete
         };
 
         _submissionSvc
-            .GetLatestSubmissionResponsesModel(123, section, (SubmissionStatus?)null)
+            .GetLatestSubmissionResponsesModel(
+                123,
+                section,
+                (SubmissionStatus?)null
+            )
             .Returns(submission);
 
         // Act
-        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "cat", "sec-1");
+        var result = await sut.RouteToContinueSelfAssessmentPage(
+            controller,
+            "cat",
+            "sec-1"
+        );
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
 
-        Assert.Equal("RestartObsoleteAssessment", view.ViewName);
+        Assert.Equal(
+            "RestartObsoleteAssessment",
+            view.ViewName
+        );
 
-        var model = Assert.IsType<RestartObsoleteAssessmentViewModel>(view.Model);
+        var model = Assert.IsType<RestartObsoleteAssessmentViewModel>(
+            view.Model
+        );
 
         Assert.Equal("Section 1", model.TopicName);
         Assert.Equal("cat", model.CategorySlug);
@@ -866,28 +978,36 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         var responses = new List<QuestionWithAnswerModel>
+    {
+        new()
         {
-            new()
-            {
-                QuestionSysId = "Q1",
-                AnswerSysId = "A1",
-                QuestionText = "Question 1",
-                AnswerText = "Answer 1",
-            },
-        };
+            QuestionSysId = "Q1",
+            AnswerSysId = "A1",
+            QuestionText = "Question 1",
+            AnswerText = "Answer 1"
+        }
+    };
 
         var submission = new SubmissionResponsesModel(1, responses)
         {
             Status = SubmissionStatus.InProgress,
             DateCreated = new DateTime(2026, 1, 1),
-            DateLastUpdated = new DateTime(2026, 1, 2),
+            DateLastUpdated = new DateTime(2026, 1, 2)
         };
 
         _submissionSvc
-            .GetLatestSubmissionResponsesModel(123, section, (SubmissionStatus?)null)
+            .GetLatestSubmissionResponsesModel(
+                123,
+                section,
+                (SubmissionStatus?)null
+            )
             .Returns(submission);
 
-        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "cat", "sec-1");
+        var result = await sut.RouteToContinueSelfAssessmentPage(
+            controller,
+            "cat",
+            "sec-1"
+        );
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("ContinueSelfAssessment", view.ViewName);
@@ -929,7 +1049,13 @@ public class QuestionsViewBuilderTests
             .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
             .Returns(routingData);
 
-        var result = await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null);
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", view.ViewName);
@@ -955,12 +1081,12 @@ public class QuestionsViewBuilderTests
             1,
             [
                 new QuestionWithAnswerModel
-                {
-                    QuestionSysId = "Q1",
-                    AnswerSysId = "A1",
-                    QuestionText = "Q1",
-                    AnswerText = "Answer 1",
-                },
+            {
+                QuestionSysId = "Q1",
+                AnswerSysId = "A1",
+                QuestionText = "Q1",
+                AnswerText = "Answer 1"
+            }
             ]
         );
 
@@ -975,7 +1101,13 @@ public class QuestionsViewBuilderTests
             .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
             .Returns(routingData);
 
-        var result = await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null);
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<QuestionViewModel>(view.Model);
@@ -1008,7 +1140,13 @@ public class QuestionsViewBuilderTests
             .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
             .Returns(routingData);
 
-        var result = await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null);
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
@@ -1040,7 +1178,13 @@ public class QuestionsViewBuilderTests
             .Returns(routingData);
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null)
+            sut.RouteBySlugAndQuestionAsync(
+                controller,
+                "cat",
+                "sec-1",
+                "q-1",
+                null
+            )
         );
 
         Assert.Contains("No responses were found for section", exception.Message);
@@ -1064,12 +1208,12 @@ public class QuestionsViewBuilderTests
             1,
             [
                 new QuestionWithAnswerModel
-                {
-                    QuestionSysId = "Q999",
-                    AnswerSysId = "A999",
-                    QuestionText = "Different question",
-                    AnswerText = "Answer",
-                },
+            {
+                QuestionSysId = "Q999",
+                AnswerSysId = "A999",
+                QuestionText = "Different question",
+                AnswerText = "Answer"
+            }
             ]
         );
 
@@ -1091,7 +1235,13 @@ public class QuestionsViewBuilderTests
             .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
             .Returns(firstRoutingData, secondRoutingData);
 
-        var result = await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null);
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", view.ViewName);
@@ -1117,12 +1267,12 @@ public class QuestionsViewBuilderTests
             1,
             [
                 new QuestionWithAnswerModel
-                {
-                    QuestionSysId = "Q999",
-                    AnswerSysId = "A999",
-                    QuestionText = "Different question",
-                    AnswerText = "Answer",
-                },
+            {
+                QuestionSysId = "Q999",
+                AnswerSysId = "A999",
+                QuestionText = "Different question",
+                AnswerText = "Answer"
+            }
             ]
         );
 
@@ -1137,7 +1287,13 @@ public class QuestionsViewBuilderTests
             .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
             .Returns(routingData);
 
-        var result = await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null);
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
 
@@ -1160,8 +1316,14 @@ public class QuestionsViewBuilderTests
         var question = MakeQuestion("Q1", "q-1", "Q1");
         question.Answers =
         [
-            new QuestionnaireAnswerEntry { NextQuestion = nestedNextQuestion },
-            new QuestionnaireAnswerEntry { NextQuestion = null },
+            new QuestionnaireAnswerEntry
+        {
+            NextQuestion = nestedNextQuestion
+        },
+        new QuestionnaireAnswerEntry
+        {
+            NextQuestion = null
+        }
         ];
 
         var section = MakeSection("S1", "sec-1", "Section 1", question);
@@ -1170,18 +1332,25 @@ public class QuestionsViewBuilderTests
 
         _submissionSvc
             .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
-            .Returns(
-                new SubmissionRoutingDataModel(
-                    nextQuestion: question,
-                    questionnaireSection: section,
-                    submission: null,
-                    status: SubmissionStatus.InProgress
-                )
-            );
+            .Returns(new SubmissionRoutingDataModel(
+                nextQuestion: question,
+                questionnaireSection: section,
+                submission: null,
+                status: SubmissionStatus.InProgress
+            ));
 
-        await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", "check-answers");
+        await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            "check-answers"
+        );
 
-        Assert.Equal("check-answers", controller.ViewData[StatePassingMechanismConstants.ReturnTo]);
+        Assert.Equal(
+            "check-answers",
+            controller.ViewData[StatePassingMechanismConstants.ReturnTo]
+        );
 
         Assert.Empty(nestedNextQuestion.Answers);
     }
@@ -1194,15 +1363,30 @@ public class QuestionsViewBuilderTests
 
         _currentUserProvider.IsMat.Returns(true);
 
-        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
+        _currentUserProvider
+            .GetActiveEstablishmentIdAsync()
+            .Returns(999);
 
-        _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([101, 102]);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102]);
 
-        var question = MakeQuestion("Q1", "q-1", "Question 1");
+        var question = MakeQuestion(
+            "Q1",
+            "q-1",
+            "Question 1"
+        );
 
-        var section = MakeSection("S1", "sec-1", "Section 1", question);
+        var section = MakeSection(
+            "S1",
+            "sec-1",
+            "Section 1",
+            question
+        );
 
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
 
         var routingData = new SubmissionRoutingDataModel(
             nextQuestion: question,
@@ -1212,21 +1396,39 @@ public class QuestionsViewBuilderTests
         );
 
         _submissionSvc
-            .GetSubmissionRoutingDataAsync(101, section, SubmissionStatus.InProgress)
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
             .Returns(routingData);
 
-        var result = await sut.RouteBySlugAndQuestionAsync(controller, "cat", "sec-1", "q-1", null);
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.IsType<QuestionViewModel>(view.Model);
 
         await _submissionSvc
             .Received(1)
-            .GetSubmissionRoutingDataAsync(101, section, SubmissionStatus.InProgress);
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            );
 
         await _submissionSvc
             .DidNotReceive()
-            .GetSubmissionRoutingDataAsync(999, section, SubmissionStatus.InProgress);
+            .GetSubmissionRoutingDataAsync(
+                999,
+                section,
+                SubmissionStatus.InProgress
+            );
     }
 
     // ---------- RestartSelfAssessment ----------
@@ -1336,7 +1538,10 @@ public class QuestionsViewBuilderTests
                 section,
                 Arg.Is<IEnumerable<SubmissionStatus>>(s => s.Contains(SubmissionStatus.InProgress))
             )
-            .Returns(new SubmissionResponsesModel(1, []) { Status = SubmissionStatus.InProgress });
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.InProgress
+            });
 
         var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
 
@@ -1349,6 +1554,7 @@ public class QuestionsViewBuilderTests
         Assert.Equal(SubmissionStatus.InProgress, model.TrustSchoolAssessments[0].Status);
         Assert.Contains("schoolUrn=900006", model.TrustSchoolAssessments[0].ViewAnswersHref);
     }
+
 
     [Fact]
     public async Task RouteToInterstitialPage_WhenMatSchoolHasCompleteNotReviewedSubmission_AddsViewAnswersLink()
@@ -1399,12 +1605,10 @@ public class QuestionsViewBuilderTests
                 section,
                 Arg.Any<IEnumerable<SubmissionStatus>>()
             )
-            .Returns(
-                new SubmissionResponsesModel(1, [])
-                {
-                    Status = SubmissionStatus.CompleteNotReviewed,
-                }
-            );
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.CompleteNotReviewed
+            });
 
         var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
 
@@ -1465,9 +1669,10 @@ public class QuestionsViewBuilderTests
                 section,
                 Arg.Any<IEnumerable<SubmissionStatus>>()
             )
-            .Returns(
-                new SubmissionResponsesModel(1, []) { Status = SubmissionStatus.CompleteReviewed }
-            );
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.CompleteReviewed
+            });
 
         var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
 
@@ -1522,8 +1727,7 @@ public class QuestionsViewBuilderTests
         Assert.Equal(SubmissionStatus.NotStarted, model.TrustSchoolAssessments[0].Status);
         Assert.Null(model.TrustSchoolAssessments[0].ViewAnswersHref);
 
-        await _submissionSvc
-            .DidNotReceive()
+        await _submissionSvc.DidNotReceive()
             .GetLatestSubmissionResponsesModel(
                 Arg.Any<int>(),
                 Arg.Any<QuestionnaireSectionEntry>(),
@@ -1680,9 +1884,15 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc.GetEstablishmentLinksWithRecommendationCounts(999).Returns([]);
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([]);
 
-        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+        var result = await sut.RouteToInterstitialPage(
+            controller,
+            "category-slug",
+            "section-slug"
+        );
 
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<PageViewModel>(view.Model);
@@ -1708,8 +1918,7 @@ public class QuestionsViewBuilderTests
 
         public void Clear() => _store.Clear();
 
-        public Task CommitAsync(CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

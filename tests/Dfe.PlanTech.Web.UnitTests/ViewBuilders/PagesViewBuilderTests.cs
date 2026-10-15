@@ -789,7 +789,7 @@ public class PagesViewBuilderTests
         var currentUser = Substitute.For<ICurrentUserProvider>();
         currentUser.IsMat.Returns(true);
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.UserOrganisationIsGroup.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
         currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
 
         var sut = CreateServiceUnderTest(currentUser: currentUser, useCurrentUserDefaults: false);

@@ -87,6 +87,12 @@ public class RecommendationsViewBuilder(
                 $"Could not find category for slug {categorySlug}"
             );
 
+        var categoryHeaderText =
+            category.Header?.Text
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category header text for slug {categorySlug}"
+            );
+
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
@@ -185,8 +191,14 @@ public class RecommendationsViewBuilder(
         string chunkSlug
     )
     {
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
+
         var categoryHeaderText =
-            await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
+            category.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category header text for slug {categorySlug}"
             );
