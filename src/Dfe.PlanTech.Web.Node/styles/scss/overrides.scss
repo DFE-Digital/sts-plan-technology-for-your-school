@@ -309,3 +309,24 @@ ul.landing-page-list > li {
     width: 100%;
   }
 }
+
+.organisation-context-header {
+  background: #eaf2f5;
+  box-shadow: 0 0 0 100vmax #eaf2f5;
+  clip-path: inset(0 -100vmax);
+  padding-bottom: 16px;
+}
+
+.organisation-context-header .govuk-breadcrumbs {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.organisation-context-header .school-ident-name {
+  margin-bottom: 0;
+}
+
+h1.govuk-heading-l.school-ident-name {
+    padding-top: 32px !important;
+    margin-bottom: 16px;
+}

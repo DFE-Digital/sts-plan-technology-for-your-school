@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Data;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using EnumExtensions = Dfe.PlanTech.Core.Extensions.EnumExtensions;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -391,7 +390,7 @@ public class GroupsViewBuilder(
                             return new GroupSelectAssessmentSectionViewModel()
                             {
                                 SectionName = ccs.Name,
-                                CategorySlug = c.Header?.Text?.Slugify(),
+                                CategorySlug = c.LandingPage?.Slug,
                                 SectionSlug = ccs.InterstitialPage.Slug,
                                 UncompletedGroupSubmissions = uncompletedCount,
                             };

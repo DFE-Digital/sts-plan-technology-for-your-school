@@ -1,6 +1,28 @@
 @using Dfe.PlanTech.Core.Enums
 @model MatStandardsListViewModel
 
+@section Breadcrumbs
+{
+    <partial name="_Breadcrumbs"
+        model='new List<BreadcrumbItemViewModel>
+        {
+            new()
+            {
+                Text = "Home",
+                Href = UrlConstants.HomePage
+            }
+        }'
+    />
+}
+
+@{
+    ViewData["UseOrganisationContextHeader"] = true;
+}
+
+@section OrganisationContext {
+    <partial name="_OrganisationContext" model="Model.GroupName" />
+}
+
 <h1 class="govuk-heading-xl">Plan technology for your school</h1>
 
 <p class="govuk-body">
@@ -20,7 +42,6 @@
         {
             category,
             context = CategoryLandingContext.MAT
-        }
-        )
-        }
+        })
+     }
 </div>
