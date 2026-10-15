@@ -58,7 +58,7 @@ jobs:
           if [ "$IS_DR" = "true" ]; then
             DFE_PROJECT_NAME="pt-dr"
           else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+            DFE_PROJECT_NAME="${{ vars.DFE_PROJECT_NAME }}"
           fi
 
           RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
