@@ -1,25 +1,103 @@
 @using Dfe.PlanTech.Application.Providers.Interfaces
 @inject IMicrocopyProvider Microcopy
+@inject ICurrentUserProvider CurrentUser
 @model PageViewModel
 
-@section NavButton {
-    @if (Model.Page.DisplayBackButton)
+@{
+    var isTopicStartPage = !string.IsNullOrWhiteSpace(Model.CategorySlug);
+
+    var isSelectedSchoolHomePage =
+        CurrentUser.IsMat &&
+        !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName) &&
+        Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
+
+    var useBreadcrumbs = isTopicStartPage || isSelectedSchoolHomePage;
+
+    ViewData["UseBreadcrumbs"] = useBreadcrumbs;
+    ViewData["UseOrganisationContextHeader"] = isTopicStartPage && Model.ShowTrustSchoolAssessmentTable;
+
+    var breadcrumbs = new List<BreadcrumbItemViewModel>
+    {
+        new()
+        {
+            Text = "Home",
+            Href = CurrentUser.IsMat
+                ? UrlConstants.SelectASchoolPage
+                : UrlConstants.HomePage
+        }
+    };
+
+    if (isTopicStartPage)
     {
         if (Model.ShowTrustSchoolAssessmentTable)
         {
-            <govuk-back-link href="/groups/@UrlConstants.GroupSelfAssessmentSelectionSlug">
-                Back to select a self-assessment
-            </govuk-back-link>
+            breadcrumbs.Add(new BreadcrumbItemViewModel
+            {
+                Text = "Select self-assessment",
+                Href = $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
+            });
         }
         else
         {
-            await Html.RenderPartialAsync("BackButton", Model);
+            if (CurrentUser.IsMat &&
+                !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName))
+            {
+                breadcrumbs.Add(new BreadcrumbItemViewModel
+                {
+                    Text = CurrentUser.GroupSelectedSchoolName,
+                    Href = UrlConstants.HomePage
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(Model.CategoryName))
+            {
+                breadcrumbs.Add(new BreadcrumbItemViewModel
+                {
+                    Text = Model.CategoryName,
+                    Href = $"/{Model.CategorySlug}"
+                });
+            }
         }
     }
+}
 
-    @if (Model.Page.DisplayHomeButton)
+@section Breadcrumbs {
+    @if (useBreadcrumbs)
     {
-        await Html.RenderPartialAsync("HomeButton", Model);
+        <partial name="_Breadcrumbs" model="breadcrumbs" />
+    }
+}
+
+@section OrganisationContext {
+    @if (isTopicStartPage &&
+             Model.ShowTrustSchoolAssessmentTable &&
+             !string.IsNullOrWhiteSpace(CurrentUser.UserOrganisationName))
+    {
+        <partial name="_OrganisationContext" model="CurrentUser.UserOrganisationName" />
+    }
+}
+
+@section NavButton {
+    @if (!useBreadcrumbs)
+    {
+        @if (Model.Page.DisplayBackButton)
+        {
+            if (Model.ShowTrustSchoolAssessmentTable)
+            {
+                <govuk-back-link href="/groups/@UrlConstants.GroupSelfAssessmentSelectionSlug">
+                    Back to select a self-assessment
+                </govuk-back-link>
+            }
+            else
+            {
+                await Html.RenderPartialAsync("BackButton", Model);
+            }
+        }
+
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
     }
 }
 
@@ -28,7 +106,7 @@
     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 }
 
-@if (Model.Page.DisplayOrganisationName)
+@if (Model.Page.DisplayOrganisationName && !isTopicStartPage)
 {
     <span class="govuk-caption-xl">
         @Model.ActiveEstablishmentName
@@ -97,8 +175,8 @@
             </h2>
 
             @foreach (var action in Model.Page.RelatedActions.Where(x =>
-                                !string.IsNullOrWhiteSpace(x.Title) &&
-                                !string.IsNullOrWhiteSpace(x.Url)))
+                    !string.IsNullOrWhiteSpace(x.Title) &&
+                    !string.IsNullOrWhiteSpace(x.Url)))
             {
                 <p class="govuk-body-s">
                     <a class="govuk-link" href="@action.Url">

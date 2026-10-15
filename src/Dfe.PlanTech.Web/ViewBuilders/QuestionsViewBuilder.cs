@@ -165,9 +165,23 @@ public class QuestionsViewBuilder(
                 .ToList();
         }
 
+        var category =
+        await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        ?? throw new ContentfulDataUnavailableException(
+            $"Could not find category for slug {categorySlug}"
+        );
+
+        var categoryName =
+            category.Header?.Text
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category header text for slug {categorySlug}"
+            );
+
         var viewModel = new PageViewModel(interstitialPage)
         {
             ShowTrustSchoolAssessmentTable = isMatWithoutSelectedSchool,
+            CategoryName = categoryName,
+            CategorySlug = categorySlug,
         };
 
         var section =

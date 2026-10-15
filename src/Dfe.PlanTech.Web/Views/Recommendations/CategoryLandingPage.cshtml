@@ -1,10 +1,50 @@
-@inject IMicrocopyProvider Microcopy
+@inject ICurrentUserProvider CurrentUser
 @model CategoryLandingPageViewModel
 
-@section NavButton {
-    <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
-        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageBackLink)
-    </govuk-back-link>
+@{
+    var breadcrumbs = new List<BreadcrumbItemViewModel>
+    {
+        new()
+        {
+            Text = "Home",
+            Href = CurrentUser.IsMat
+                ? UrlConstants.SelectASchoolPage
+                : UrlConstants.HomePage
+        }
+    };
+
+    if (Model.Context == CategoryLandingContext.MAT)
+    {
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = "Select a standard",
+            Href = UrlConstants.GroupStandards
+        });
+    }
+    else if (CurrentUser.IsMat &&
+             !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName))
+    {
+        breadcrumbs.Add(new BreadcrumbItemViewModel
+        {
+            Text = CurrentUser.GroupSelectedSchoolName,
+            Href = UrlConstants.HomePage
+        });
+    }
+
+    ViewData["UseOrganisationContextHeader"] =
+        Model.Context == CategoryLandingContext.MAT;
+}
+
+@section Breadcrumbs {
+    <partial name="_Breadcrumbs" model="breadcrumbs" />
+}
+
+@section OrganisationContext {
+    @if (Model.Context == CategoryLandingContext.MAT &&
+             !string.IsNullOrWhiteSpace(CurrentUser.UserOrganisationName))
+    {
+        <partial name="_OrganisationContext" model="CurrentUser.UserOrganisationName" />
+    }
 }
 
 @section RelatedActions {
@@ -33,10 +73,11 @@
 }
 
 @await Component.InvokeAsync("CategoryLanding", new {
-    category = Model.Category,
+category = Model.Category,
     slug = Model.Slug,
     sectionName = Model.SectionName,
     sortOrder = Model.SortOrder,
+    Context = Model.Context
 })
 
 @section AfterContent {

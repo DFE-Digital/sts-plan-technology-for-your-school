@@ -115,7 +115,22 @@ public static class PageRedirecter
                 chunkSlug,
             }
         );
-
+    public static RedirectToActionResult RedirectToGetMatSingleRecommendation(
+        this Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    ) =>
+        controller.RedirectToAction(
+            nameof(RecommendationsController.GetMatSingleRecommendation),
+            nameof(RecommendationsController).GetControllerNameSlug(),
+            new
+            {
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+            }
+        );
     public static RedirectToActionResult RedirectToNotifyError(this Controller controller) =>
         controller.RedirectToAction(
             nameof(PagesController.NotifyError),

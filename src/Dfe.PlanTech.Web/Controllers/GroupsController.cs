@@ -1,9 +1,11 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -12,26 +14,41 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
+    public const string GetSelectASchoolToUpdateStatusAction = "GetSelectASchoolToUpdateStatusView";
+    public const string GetSelectStatusToUpdateAction = "GetSelectStatusToUpdateView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
+    public const string SubmitSchoolsUpdateStatusSelectionAction = "SubmitSelectedSchoolsToUpdateStatus";
+    public const string UpdateSelectedSchoolStatusRoute = "UpdateSelectedSchoolsStatus";
+
+    public const string GetMatStandardsListAction = "GetMatStandardsList";
+    public const string GetMatRecommendationsLandingAction = "GetMatRecommendationsLanding";
 
     private readonly ICurrentUserProvider _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
-    private readonly IGroupSelectSchoolsToAssessValidator _validator;
+    private readonly IGroupSelectSchoolsToAssessValidator _groupSelectSchoolsToAssessValidator;
+    private readonly IGroupSelectSchoolsToUpdateStatusValidator _groupSelectSchoolsToUpdateStatusValidator;
+    private readonly IPagesViewBuilder _pagesViewBuilder;
 
     public GroupsController(
         ILogger<GroupsController> logger,
         ICurrentUserProvider currentUser,
         IGroupsViewBuilder groupsViewBuilder,
-        IGroupSelectSchoolsToAssessValidator validator
+        IGroupSelectSchoolsToAssessValidator groupSelectSchoolsToAssessValidator,
+        IGroupSelectSchoolsToUpdateStatusValidator groupSelectSchoolsToUpdateStatusValidator,
+        IPagesViewBuilder pagesViewBuilder
     )
         : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder =
             groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
-        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        _groupSelectSchoolsToAssessValidator = groupSelectSchoolsToAssessValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToAssessValidator));
+        _groupSelectSchoolsToUpdateStatusValidator = groupSelectSchoolsToUpdateStatusValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToUpdateStatusValidator));
+
+        _pagesViewBuilder =
+            pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
     }
 
     [HttpGet(
@@ -63,6 +80,15 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
+        $"{UrlConstants.GroupsSlug}/standards",
+        Name = GetMatStandardsListAction
+    )]
+    public async Task<IActionResult> GetMatStandardsList()
+    {
+        return await _groupsViewBuilder.RouteToMatStandardsListAsync(this);
+    }
+
+    [HttpGet(
         $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
         Name = GetSelectSchoolsToAssessAction
     )]
@@ -73,6 +99,38 @@ public class GroupsController : BaseController<GroupsController>
         return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(
             this,
             sectionSlug
+        );
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
+        Name = GetSelectASchoolToUpdateStatusAction
+    )]
+    public async Task<IActionResult> GetSelectSchoolsToUpdateView(string sectionSlug, string recommendationSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+
+        return await _groupsViewBuilder.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+            this,
+            sectionSlug,
+            recommendationSlug
+        );
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectStatusToUpdateSlug}",
+        Name = GetSelectStatusToUpdateAction
+    )]
+    public async Task<IActionResult> GetSelectStatusView(string sectionSlug, string recommendationSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+
+        return await _groupsViewBuilder.RouteToSelectStatusToUpdateViewModelAsync(
+            this,
+            sectionSlug,
+            recommendationSlug
         );
     }
 
@@ -98,9 +156,8 @@ public class GroupsController : BaseController<GroupsController>
         var selectedEstablishmentIdsAfterClear = HttpContext.Session.GetSelectedEstablishmentIds();
 
         return RedirectToAction(
-            nameof(PagesController.GetByRoute),
-            nameof(PagesController).GetControllerNameSlug(),
-            new { route = categorySlug }
+            nameof(GetMatRecommendationsLanding),
+            new { categorySlug }
         );
     }
 
@@ -115,7 +172,7 @@ public class GroupsController : BaseController<GroupsController>
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        await _validator.ValidateSelectionAsync(viewModel, ModelState);
+        await _groupSelectSchoolsToAssessValidator.ValidateSelectionAsync(viewModel, ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -134,6 +191,69 @@ public class GroupsController : BaseController<GroupsController>
 
         return result;
     }
+
+    [HttpPost(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
+        Name = SubmitSchoolsUpdateStatusSelectionAction
+    )]
+    public async Task<IActionResult> SubmitSelectedSchoolsToUpdateStatus(
+        GroupsSelectSchoolsToUpdateStatusViewModel viewModel,
+        string sectionSlug,
+        string recommendationSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+
+        await _groupSelectSchoolsToUpdateStatusValidator.ValidateSelectionAsync(viewModel, ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            return await _groupsViewBuilder.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                this,
+                sectionSlug,
+                recommendationSlug,
+                viewModel
+            );
+        }
+
+        var updateStatusVm = new GroupsSelectStatusToUpdateViewModel
+        {
+            SelectedStatusKey = RecommendationStatus.NotStarted, SelectedSchoolsRefs = viewModel.SelectedSchoolsRefs
+        };
+
+        return await _groupsViewBuilder.RouteToSelectStatusToUpdateViewModelAsync(this, sectionSlug, recommendationSlug, updateStatusVm);
+
+    }
+
+    [HttpPost(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsUpdateSchoolsStatus}", Name = UpdateSelectedSchoolStatusRoute
+    )]
+    public async Task<IActionResult> UpdateSelectedSchoolsStatus(
+        [FromForm] GroupRecommendationInputViewModel inputViewModel,
+        string sectionSlug,
+        string recommendationSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
+        if (!ModelState.IsValid)
+        {
+            return await _groupsViewBuilder.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                this,
+                sectionSlug,
+                recommendationSlug
+            );
+        }
+
+        return await _groupsViewBuilder.UpdateSchoolsRecommendationStatusAsync(
+            this,
+            sectionSlug,
+            recommendationSlug,
+            inputViewModel
+        );
+    }
+
 
     [HttpGet(
         $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
@@ -164,5 +284,19 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
 
         return Redirect(UrlConstants.HomePage);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}",
+        Name = GetMatRecommendationsLandingAction
+    )]
+    public async Task<IActionResult> GetMatRecommendationsLanding(string categorySlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToMatCategoryLandingPageAsync(
+            this,
+            categorySlug
+        );
     }
 }
