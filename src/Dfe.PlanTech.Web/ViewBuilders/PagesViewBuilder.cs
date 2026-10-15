@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -13,12 +14,11 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class PagesViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<PagesViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
@@ -57,7 +57,7 @@ public class PagesViewBuilder(
 
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
-            && CurrentUser.UserOrganisationIsGroup
+            && CurrentUser.UserOrganisationSelectsSchools
             && CurrentUser.GroupSelectedSchoolUrn is null
             && !isMatTopicStartPage;
 
@@ -68,7 +68,8 @@ public class PagesViewBuilder(
 
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         var hasSelectedASchool =
-            CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;
+            CurrentUser.UserOrganisationSelectsSchools
+            && CurrentUser.GroupSelectedSchoolUrn is not null;
 
         if (hasSelectedASchool)
         {
@@ -207,7 +208,7 @@ public class PagesViewBuilder(
         var returnToModel = new ActionViewModel(
             actionName: nameof(PagesController.GetByRoute),
             controllerName: nameof(PagesController),
-            linkText: $"Back to {category.Header.Text.ToLower()}",
+            linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
             routeValues: new Dictionary<string, string> { { "route", categorySlug } }
         );
 
@@ -222,24 +223,13 @@ public class PagesViewBuilder(
         CategoryLandingContext context = CategoryLandingContext.School
     )
     {
-        var relatedActionsViewModels =
-            relatedActions
-                ?.Where(x => x is not null)
-                .Select(x => new RelatedActionViewModel
-                {
-                    Text = x.Title ?? string.Empty,
-                    Url = x.Url ?? string.Empty,
-                })
-                .ToList()
-            ?? [];
-
         return new CategoryLandingPageViewModel
         {
             Slug = categorySlug,
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData["SectionName"] as string,
+            SectionName = controller.TempData[StatePassingMechanismConstants.SectionName] as string,
             SortOrder = controller.Request.Query["sort"],
             HasBanner = category.HasBanner,
             AfterContentContent = category.AfterContentContent,
@@ -328,13 +318,8 @@ public class PagesViewBuilder(
         }
 
         return relatedActions
-            .Where(x => x is not null)
-            .Select(x => new RelatedActionViewModel
-            {
-                Text = x.Title ?? string.Empty,
-                Url = x.Url ?? string.Empty,
-            })
-            .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Url))
+            .Where(x => !string.IsNullOrWhiteSpace(x.Title) && !string.IsNullOrWhiteSpace(x.Url))
+            .Select(x => new RelatedActionViewModel { Text = x.Title!, Url = x.Url! })
             .ToList();
     }
 }

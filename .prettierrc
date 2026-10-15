@@ -7,7 +7,12 @@
 
   "overrides": [
     {
-      "files": ["tsconfig.json", "tsconfig.*.json"],
+      "files": [
+        "tsconfig.json",
+        "tsconfig.*.json",
+        ".github/workflows/*.yml",
+        ".github/workflows/*.yaml"
+      ],
       "options": {
         "parser": "jsonc"
       }

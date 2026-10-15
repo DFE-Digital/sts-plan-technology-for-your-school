@@ -7,7 +7,7 @@
     {
         ["position"] = Model.CurrentChunkPosition.ToString(),
         ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
-        ["topic"] = Model.Section.Name.ToLower(),
+        ["topic"] = Model.Section.Name.ToLowerInvariant(),
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };

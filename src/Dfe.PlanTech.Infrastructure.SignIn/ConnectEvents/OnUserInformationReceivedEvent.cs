@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
@@ -59,23 +58,12 @@ public static class OnUserInformationReceivedEvent
 
         AddClaimsToPrincipal(context, signin);
 
-        EstablishmentModel? satSchoolOrganisation = null;
         if (
             dsiUserOrganisation.Category != null
             && DsiConstants.SatOrganisationCategoryIds.Contains(dsiUserOrganisation.Category.Id)
         )
         {
-            satSchoolOrganisation = await GetReplacementDsiOrganisationForSat(
-                context,
-                dsiUserOrganisation,
-                dsiUserReference
-            );
-
-            if (satSchoolOrganisation != null)
-            {
-                // Add the single academy establishment to the cookie
-                AddSingleAcademyOrganisationClaim(context, satSchoolOrganisation);
-            }
+            await SetSelectedSchoolIfSat(context, dsiUserOrganisation);
         }
     }
 
@@ -103,18 +91,19 @@ public static class OnUserInformationReceivedEvent
         principal.AddIdentity(claimsIdentity);
     }
 
-    private static async Task<EstablishmentModel?> GetReplacementDsiOrganisationForSat(
+    private static async Task SetSelectedSchoolIfSat(
         UserInformationReceivedContext context,
-        EstablishmentModel dsiOrganisation,
-        string dsiUserReference
+        EstablishmentModel dsiOrganisation
     )
     {
-        if (dsiOrganisation.Category?.Id is null)
+        var categoryId = dsiOrganisation.Category?.Id;
+
+        if (categoryId is null || !DsiConstants.SatOrganisationCategoryIds.Contains(categoryId))
         {
-            return dsiOrganisation;
+            return;
         }
 
-        // If the user is a (S)SAT, find the user's corresponding school.
+        // Now we know the user is from a (S)SAT, find the user's corresponding school.
         GiasEstablishmentEntity? school = null;
         if (int.TryParse(dsiOrganisation.Uid, out var satGroupUid))
         {
@@ -127,40 +116,15 @@ public static class OnUserInformationReceivedEvent
         // Throw if not found
         if (school is null)
         {
-            var organisationType = dsiOrganisation.Category.Id switch
-            {
-                DsiConstants.SatOrganisationCategoryId => "SAT",
-                DsiConstants.SSatOrganisationCategoryId => "SSAT",
-                _ => "unknown organisation type",
-            };
+            var orgType = categoryId == DsiConstants.SatOrganisationCategoryId ? "SAT" : "SSAT";
 
             throw new InvalidGiasDataException(
-                $"GIAS establishment not found for {organisationType} with group UID '{dsiOrganisation.Uid}'"
+                $"School not found for {orgType} with group UID '{dsiOrganisation.Uid}'"
             );
         }
 
-        var dsiOrganisationProvider =
-            context.HttpContext.RequestServices.GetRequiredService<IDsiOrganisationProvider>();
-
-        var replacementDsiOrganisation = await dsiOrganisationProvider.GetOrganisationForUserAsync(
-            dsiUserReference,
-            school.Urn.ToString()
-        );
-
-        return replacementDsiOrganisation;
-    }
-
-    private static void AddSingleAcademyOrganisationClaim(
-        UserInformationReceivedContext context,
-        EstablishmentModel updatedOrganisation
-    )
-    {
-        var principal = context.Principal!;
-        var newOrganisationJson = JsonSerializer.Serialize(updatedOrganisation);
-        ClaimsIdentity claimsIdentity = new([
-            new Claim(ClaimConstants.SINGLE_ACADEMY_ORGANISATION, newOrganisationJson),
-        ]);
-
-        principal.AddIdentity(claimsIdentity);
+        var currentUser =
+            context.HttpContext.RequestServices.GetRequiredService<ICurrentUserProvider>();
+        currentUser.SetGroupSelectedSchool(school.Urn.ToString(), school.EstablishmentName);
     }
 }

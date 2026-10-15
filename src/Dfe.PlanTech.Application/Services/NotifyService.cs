@@ -32,7 +32,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         {
             { "name of user", model.NameOfUser },
             { "school", establishmentName },
-            { "standard", categoryName.ToLower() },
+            { "standard", categoryName.ToLowerInvariant() },
             { "user message", userMessage },
             { "recommendation name", recommendationHeader },
             { "status", recommendationStatus.GetDisplayName() },
@@ -69,7 +69,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         {
             { "name of user", model.NameOfUser },
             { "school", establishmentName },
-            { "standard lowercase", categoryName.ToLower() },
+            { "standard lowercase", categoryName.ToLowerInvariant() },
             { "user message", userMessage },
             { "standard", categoryName },
             { "recommendations", standardMarkdown },
@@ -148,7 +148,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
     {
         var stringBuilder = new StringBuilder();
 
-        stringBuilder.AppendLine($"## Recommendations for {sectionName.ToLower()}");
+        stringBuilder.AppendLine($"## Recommendations for {sectionName.ToLowerInvariant()}");
         stringBuilder.AppendLine();
 
         if (sectionStatus?.LastCompletionDate is null)
@@ -159,7 +159,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         {
             var completionDate = sectionStatus.LastCompletionDate.Value.ToString("dd MMMM yyyy");
             stringBuilder.AppendLine(
-                $"The self-assessment for {sectionName.ToLower()} was completed on {completionDate}."
+                $"The self-assessment for {sectionName.ToLowerInvariant()} was completed on {completionDate}."
             );
             stringBuilder.AppendLine();
 

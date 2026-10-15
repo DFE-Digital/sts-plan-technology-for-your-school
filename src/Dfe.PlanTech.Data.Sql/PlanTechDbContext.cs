@@ -34,8 +34,6 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<GiasTypeOfEstablishmentEntity> GiasTypesOfEstablishment { get; set; } =
         null!;
 
-    public PlanTechDbContext() { }
-
     public PlanTechDbContext(
         DbContextOptions<PlanTechDbContext> options,
         IUserActionIdProvider? userActionIdProvider = null

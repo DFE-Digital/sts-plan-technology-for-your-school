@@ -42,7 +42,7 @@ public class RecommendationsViewBuilderTests
 
     private RecommendationsViewBuilder CreateServiceUnderTest() =>
         new RecommendationsViewBuilder(
-            NullLogger<BaseViewBuilder>.Instance,
+            NullLogger<RecommendationsViewBuilder>.Instance,
             _contentfulService,
             _currentUser,
             _notifyService,
@@ -132,7 +132,7 @@ public class RecommendationsViewBuilderTests
                 : new QuestionnaireQuestionEntry { Slug = nextQuestionSlug };
         var submission = new SubmissionResponsesModel(
             1,
-            answerSysIds.Select(id => new QuestionWithAnswerModel { AnswerSysId = id }).ToList()
+            [.. answerSysIds.Select(id => new QuestionWithAnswerModel { AnswerSysId = id })]
         )
         {
             DateCompleted = completed,
@@ -153,8 +153,9 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         var categorySlug = "cat-a";
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", "sec-1", "Section One");
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         // Submission has answers that match chunk ids "C1","C2","C3"
@@ -192,14 +193,6 @@ public class RecommendationsViewBuilderTests
         _recommendationService
             .GetRecommendationHistoryAsync("C2", 123)
             .Returns([recommendationHistory1, recommendationHistory2]);
-
-        var expectedDictionary = new Dictionary<
-            string,
-            IEnumerable<SqlEstablishmentRecommendationHistoryDto>
-        >
-        {
-            { "November activity", [recommendationHistory2, recommendationHistory1] },
-        };
 
         // Act (choose middle chunk to test prev/next both populated)
         var result = await sut.RouteToSingleRecommendation(
@@ -244,6 +237,61 @@ public class RecommendationsViewBuilderTests
     }
 
     [Fact]
+    public async Task RouteToSingleRecommendation_Throws_When_Category_Not_Found()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var section = CreateSection("S1", "sec-1");
+
+        _contentfulService
+            .GetCategoryBySlugAsync("missing-cat")
+            .Returns(default(QuestionnaireCategoryEntry?));
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c1);
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
+
+        // Act + Assert
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToSingleRecommendation(ctl, "missing-cat", "sec-1", "slug", false)
+        );
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_Throws_When_Section_Not_Found()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var category = CreateCategory("cat");
+        var section = CreateSection("S1", "sec-1");
+
+        _contentfulService.GetCategoryBySlugAsync("cat").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c1);
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
+
+        // Act + Assert
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToSingleRecommendation(ctl, "cat", "missing-sec", "slug", false)
+        );
+    }
+
+    [Fact]
     public async Task RouteToSingleRecommendation_Throws_When_Chunk_Not_Found()
     {
         // Arrange
@@ -251,9 +299,11 @@ public class RecommendationsViewBuilderTests
         var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var category = CreateCategory("Header");
         var section = CreateSection("S1", "sec-1");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync("cat").Returns("Header");
+        _contentfulService.GetCategoryBySlugAsync("cat").Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c1);
@@ -453,7 +503,7 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var categoryTitle = "Connectivity";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
 
         var sut = CreateServiceUnderTest();
         var ctl = CreateController();
@@ -518,7 +568,7 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var categoryTitle = "Connectivity";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
 
         var sut = CreateServiceUnderTest();
         var ctl = CreateController();
@@ -583,7 +633,7 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var categoryTitle = "Connectivity";
-        var categorySlug = categoryTitle.ToLower();
+        var categorySlug = categoryTitle.ToLowerInvariant();
         var sectionSlug = "sec-1";
 
         var sut = CreateServiceUnderTest();
@@ -1100,9 +1150,10 @@ public class RecommendationsViewBuilderTests
         _currentUser.UserId.Returns(123);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(establishmentId);
 
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", sectionSlug, "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
 
         var routing = CreateRouting(
@@ -1188,9 +1239,10 @@ public class RecommendationsViewBuilderTests
         _currentUser.UserId.Returns(userId);
         _currentUser.IsMat.Returns(false);
 
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", sectionSlug, "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
 
         var routing = CreateRouting(
@@ -1302,9 +1354,10 @@ public class RecommendationsViewBuilderTests
         _currentUser.IsMat.Returns(true);
         _currentUser.UserOrganisationId.Returns(555);
 
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", sectionSlug, "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
 
         var routing = CreateRouting(
@@ -1371,6 +1424,7 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         var categorySlug = "cat-a";
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", "sec-1", "Section One");
 
         var secondChunk = section.CoreRecommendations.First(c => c.Slug == "second-chunk-2");
@@ -1389,7 +1443,7 @@ public class RecommendationsViewBuilderTests
             }
         );
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _recommendationService
@@ -1433,9 +1487,10 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         var categorySlug = "cat-a";
+        var category = CreateCategory("Networking");
         var section = CreateSection("S1", "sec-1", "Section One");
 
-        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _recommendationService
