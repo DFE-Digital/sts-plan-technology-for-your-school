@@ -15,8 +15,10 @@ public class CategoryLandingSectionViewModel
     public CategoryLandingSectionRecommendationsViewModel? Recommendations { get; init; } = null!;
     public string ShortDescription { get; init; }
     public string? Slug { get; init; }
-
     public string? EstablishmentName { get; set; }
+    public bool HasSubmittedAssessments { get; init; }
+    public bool HasOutstandingAssessments { get; init; }
+    public int OutstandingAssessmentCount { get; init; }
 
     public CategoryLandingSectionViewModel(
         QuestionnaireSectionEntry section,

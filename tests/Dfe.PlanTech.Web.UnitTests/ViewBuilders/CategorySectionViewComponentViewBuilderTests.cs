@@ -2,6 +2,8 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,20 +18,24 @@ public class CategorySectionViewComponentViewBuilderTests
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
         ICurrentUserProvider? currentUser = null,
+        IGroupService? groupService = null,
         ILogger<BaseViewBuilder>? logger = null
     )
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUserProvider>();
+        groupService ??= Substitute.For<IGroupService>();
         currentUser.GetActiveEstablishmentIdAsync().Returns(1234);
+        currentUser.UserOrganisationId.Returns(100);
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
         return new CategorySectionViewComponentViewBuilder(
             logger,
             contentful,
             currentUser,
-            submission
+            submission,
+            groupService
         );
     }
 
@@ -101,6 +107,8 @@ public class CategorySectionViewComponentViewBuilderTests
         Assert.Equal(2, vm.TotalSectionCount);
         Assert.Equal(1, vm.CompletedSectionCount);
         Assert.Null(vm.ProgressRetrievalErrorMessage);
+        Assert.Equal(CategoryLandingContext.School, vm.Context);
+        Assert.False(vm.IsMat);
     }
 
     [Fact]
@@ -129,7 +137,7 @@ public class CategorySectionViewComponentViewBuilderTests
     public async Task BuildViewModelAsync_Description_Uses_First_Content_When_Present()
     {
         var sectionA = MakeSection("S1", "Section 1", "s1");
-        var content0 = new MissingComponentEntry(); // simple concrete IContentComponent is fine
+        var content0 = new MissingComponentEntry();
         var content1 = new MissingComponentEntry();
 
         var category = MakeCategory(
@@ -188,5 +196,150 @@ public class CategorySectionViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(category);
 
         Assert.Null(vm.CategorySlug);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_Mat_Populates_Counts_From_Group_Submissions()
+    {
+        var sectionA = MakeSection("S1", "Section 1", "s1");
+        var sectionB = MakeSection("S2", "Section 2", "s2");
+        var category = MakeCategory(
+            new[] { sectionA, sectionB },
+            headerText: "Networks",
+            landingSlug: "networks-landing"
+        );
+
+        var groupService = Substitute.For<IGroupService>();
+
+        groupService
+            .GetGroupEstablishmentContextAsync(100)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 10 },
+                    new SqlEstablishmentDto { Id = 20 },
+                    ],
+                    EstablishmentIds = [10, 20],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        Id = 1,
+                        EstablishmentId = 10,
+                        SectionId = "S1",
+                    },
+                    new SqlSubmissionDto
+                    {
+                        Id = 2,
+                        EstablishmentId = 20,
+                        SectionId = "S1",
+                    },
+                    ],
+                }
+            );
+
+        var sut = CreateSut(
+            groupService: groupService
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            CategoryLandingContext.MAT
+        );
+
+        Assert.Equal("Networks", vm.CategoryHeaderText);
+        Assert.Equal("networks-landing", vm.CategorySlug);
+        Assert.Equal(2, vm.TotalSectionCount);
+        Assert.Equal(1, vm.CompletedSectionCount);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        Assert.True(vm.IsMat);
+
+        await groupService
+            .Received(1)
+            .GetGroupEstablishmentContextAsync(100);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_Mat_With_No_Completed_Submissions_Has_Zero_Completed_Sections()
+    {
+        var sectionA = MakeSection("S1", "Section 1", "s1");
+        var sectionB = MakeSection("S2", "Section 2", "s2");
+        var category = MakeCategory(new[] { sectionA, sectionB });
+
+        var groupService = Substitute.For<IGroupService>();
+
+        groupService
+            .GetGroupEstablishmentContextAsync(100)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 10 },
+                    new SqlEstablishmentDto { Id = 20 },
+                    ],
+                    EstablishmentIds = [10, 20],
+                    CompletedSubmissions = [],
+                }
+            );
+
+        var sut = CreateSut(
+            groupService: groupService
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            CategoryLandingContext.MAT
+        );
+
+        Assert.Equal(0, vm.CompletedSectionCount);
+        Assert.Equal(2, vm.TotalSectionCount);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        Assert.True(vm.IsMat);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_Mat_Ignores_Submissions_Outside_Category()
+    {
+        var sectionA = MakeSection("S1", "Section 1", "s1");
+        var sectionB = MakeSection("S2", "Section 2", "s2");
+        var category = MakeCategory(new[] { sectionA, sectionB });
+
+        var groupService = Substitute.For<IGroupService>();
+
+        groupService
+            .GetGroupEstablishmentContextAsync(100)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto { Id = 10 },
+                    ],
+                    EstablishmentIds = [10],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        Id = 1,
+                        EstablishmentId = 10,
+                        SectionId = "OTHER-SECTION",
+                    },
+                    ],
+                }
+            );
+
+        var sut = CreateSut(
+            groupService: groupService
+        );
+
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            CategoryLandingContext.MAT
+        );
+
+        Assert.Equal(0, vm.CompletedSectionCount);
     }
 }

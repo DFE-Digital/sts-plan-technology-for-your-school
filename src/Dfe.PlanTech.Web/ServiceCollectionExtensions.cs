@@ -337,6 +337,10 @@ public static class ServiceCollectionExtensions
             IGroupSelectSchoolsToAssessValidator,
             GroupSelectSchoolsToAssessValidator
         >();
+        services.AddTransient<
+            IGroupSelectSchoolsToUpdateStatusValidator,
+            GroupSelectSchoolsToUpdateStatusValidator
+        >();
         services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();

@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<IAnswerRepository, AnswerRepository>()
             .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
+            .AddScoped<IEstablishmentGroupRepository, EstablishmentGroupRepository>()
             .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
             .AddScoped<
                 IEstablishmentRecommendationHistoryRepository,
@@ -56,9 +57,9 @@ public static class ServiceCollectionExtensions
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
             .AddScoped<ITransactionManager, TransactionManager>()
+            .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IUserActionRepository, UserActionRepository>()
             .AddScoped<IUserContentViewRepository, UserContentViewRepository>()
-            .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IUserSettingsRepository, UserSettingsRepository>();
     }
 }

@@ -4,16 +4,21 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService) : IGroupWorkflow
+public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository, IEstablishmentGroupRepository establishmentGroupRepository) : IGroupWorkflow
 {
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
+        establishmentGroupRepository ?? throw new ArgumentNullException(nameof(establishmentGroupRepository));
+
+    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository = recommendationHistoryRepository ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
 
     public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds)
     {
@@ -50,7 +55,7 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                     .FirstOrDefault(s => s.Establishment.EstablishmentRef == est.EstablishmentRef);
 
             if (submission == null)
-            {               
+            {
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
@@ -86,5 +91,43 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         }
 
         return groupSubmissionInfo;
+    }
+
+    public async Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>> GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId)
+    {
+        var results =
+            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(establishmentId,
+                recommendationId);
+
+        return results;
+
+    }
+
+    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+        int groupEstablishmentId
+    )
+    {
+        var establishments =
+            await _establishmentGroupRepository
+                .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
+
+        var establishmentIds = establishments
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
+        var completedSubmissions =
+            establishmentIds.Length != 0
+                ? await GetGroupCompletedSubmissions(establishmentIds)
+                : [];
+
+        return new GroupEstablishmentModel
+        {
+            Establishments = establishments
+                .Select(e => e.AsDto())
+                .ToList(),
+            EstablishmentIds = establishmentIds,
+            CompletedSubmissions = completedSubmissions,
+        };
     }
 }
