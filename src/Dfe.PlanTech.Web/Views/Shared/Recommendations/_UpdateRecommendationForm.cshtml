@@ -1,0 +1,58 @@
+@inject IMicrocopyProvider Microcopy
+@model UpdateRecommendationViewModel
+
+@{
+    var recommendation = Model.CurrentChunk;
+    var categorySlug = Model.CategorySlug;
+    var sectionSlug = Model.SectionSlug;
+}
+
+<form asp-controller="@nameof(RecommendationsController).Replace("Controller", "")"
+      asp-action="@nameof(RecommendationsController.UpdateRecommendationStatus)"
+      asp-route-categorySlug="@categorySlug"
+      asp-route-sectionSlug="@sectionSlug"
+      asp-route-chunkSlug="@recommendation.Slug">
+
+    <govuk-radios name="SelectedStatus">
+        <govuk-radios-fieldset>
+            <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
+                <h2 class="govuk-fieldset__heading">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion)
+                </h2>
+            </govuk-radios-fieldset-legend>
+
+            <govuk-radios-hint>
+                Select the current status of this recommendation.
+            </govuk-radios-hint>
+
+            @if (!string.IsNullOrEmpty(Model.StatusErrorMessage))
+            {
+                <govuk-radios-error-message>
+                    @Model.StatusErrorMessage
+                </govuk-radios-error-message>
+            }
+
+            @foreach (var option in Model.StatusOptions)
+            {
+                <govuk-radios-item value="@option.Key.ToString()" checked="@(Model.SelectedStatusKey == option.Key)">
+                    @option.Value
+                </govuk-radios-item>
+            }
+        </govuk-radios-fieldset>
+    </govuk-radios>
+
+    <govuk-textarea name="Notes" rows="5">
+        <govuk-textarea-label class="govuk-label--s">
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel)
+        </govuk-textarea-label>
+
+        <govuk-textarea-hint>
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentHint)
+        </govuk-textarea-hint>
+    </govuk-textarea>
+
+    <govuk-button type="submit" prevent-double-click="true">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusButton)
+    </govuk-button>
+
+</form>

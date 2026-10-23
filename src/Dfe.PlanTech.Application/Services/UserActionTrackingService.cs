@@ -47,8 +47,7 @@ public class UserActionTrackingService(
             httpContext.Items.TryGetValue(
                 UserActionIdConstants.RecordedHttpContextItemKey,
                 out var recorded
-            )
-            && recorded is true
+            ) && recorded is true
         )
         {
             logger.LogInformation(
@@ -60,10 +59,7 @@ public class UserActionTrackingService(
         }
 
         var userActionId =
-            httpContext.Items.TryGetValue(
-                UserActionIdConstants.HttpContextItemKey,
-                out var value
-            )
+            httpContext.Items.TryGetValue(UserActionIdConstants.HttpContextItemKey, out var value)
             && value is Guid existingUserActionId
                 ? existingUserActionId
                 : Guid.NewGuid();
@@ -76,17 +72,13 @@ public class UserActionTrackingService(
             SessionId = _currentUser.SessionId,
             UserId = userId.Value,
             EstablishmentId = await _currentUser.GetActiveEstablishmentIdAsync(),
-            MatEstablishmentId = _currentUser.IsMat
-                ? _currentUser.UserOrganisationId
-                : null,
+            MatEstablishmentId = _currentUser.IsGroup ? _currentUser.UserOrganisationId : null,
             RequestedUrl = requestedUrl,
         };
 
         await _userActionRepository.CreateAsync(userAction);
 
-        httpContext.Items[
-            UserActionIdConstants.RecordedHttpContextItemKey
-        ] = true;
+        httpContext.Items[UserActionIdConstants.RecordedHttpContextItemKey] = true;
     }
 
     public async Task<SqlUserActionDto?> GetAsync(Guid id)

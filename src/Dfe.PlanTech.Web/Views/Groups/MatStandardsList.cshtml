@@ -1,0 +1,47 @@
+@using Dfe.PlanTech.Core.Enums
+@model MatStandardsListViewModel
+
+@section Breadcrumbs
+{
+    <partial name="_Breadcrumbs"
+        model='new List<BreadcrumbItemViewModel>
+        {
+            new()
+            {
+                Text = "Home",
+                Href = UrlConstants.HomePage
+            }
+        }'
+    />
+}
+
+@{
+    ViewData["UseOrganisationContextHeader"] = true;
+}
+
+@section OrganisationContext {
+    <partial name="_OrganisationContext" model="Model.GroupName" />
+}
+
+<h1 class="govuk-heading-xl">Plan technology for your school</h1>
+
+<p class="govuk-body">
+    Submit self-assessments to get recommendations and track your progress towards meeting the core standards.
+</p>
+
+<h2 class="govuk-heading-l">
+    View recommendations and track progress
+</h2>
+
+<div class="dfe-grid-container">
+    @foreach (var category in Model.Categories)
+    {
+        @await Component.InvokeAsync(
+        "CategorySection",
+        new
+        {
+            category,
+            context = CategoryLandingContext.MAT
+        })
+     }
+</div>

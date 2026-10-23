@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.Controllers;
@@ -56,7 +57,7 @@ public class PagesViewBuilder(
 
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
-            && CurrentUser.UserOrganisationIsGroup
+            && CurrentUser.UserOrganisationSelectsSchools
             && CurrentUser.GroupSelectedSchoolUrn is null
             && !isMatTopicStartPage;
 
@@ -67,7 +68,8 @@ public class PagesViewBuilder(
 
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         var hasSelectedASchool =
-            CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;
+            CurrentUser.UserOrganisationSelectsSchools
+            && CurrentUser.GroupSelectedSchoolUrn is not null;
 
         if (hasSelectedASchool)
         {
@@ -217,7 +219,8 @@ public class PagesViewBuilder(
         Controller controller,
         QuestionnaireCategoryEntry category,
         string categorySlug,
-        List<RelatedActionEntry>? relatedActions = null
+        List<RelatedActionEntry>? relatedActions = null,
+        CategoryLandingContext context = CategoryLandingContext.School
     )
     {
         var relatedActionsViewModels =
@@ -242,6 +245,7 @@ public class PagesViewBuilder(
             HasBanner = category.HasBanner,
             AfterContentContent = category.AfterContentContent,
             RelatedActions = BuildRelatedActionsViewModels(relatedActions),
+            Context = context,
         };
     }
 
@@ -265,6 +269,31 @@ public class PagesViewBuilder(
         }
 
         return shareResultsViewModel;
+    }
+
+    public async Task<IActionResult> RouteToMatCategoryLandingPageAsync(
+        Controller controller,
+        string categorySlug
+    )
+    {
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
+
+        if (category is null)
+        {
+            return controller.RedirectToHomePage();
+        }
+
+        var page = await ContentfulService.GetPageBySlugAsync(categorySlug);
+
+        var landingPageViewModel = BuildLandingPageViewModel(
+            controller,
+            category,
+            categorySlug,
+            page?.RelatedActions,
+            CategoryLandingContext.MAT
+        );
+
+        return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 
     private async Task<IActionResult> RouteToLandingPageView(Controller controller, PageEntry page)

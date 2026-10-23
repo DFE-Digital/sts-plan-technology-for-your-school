@@ -114,7 +114,6 @@ Thirteen focused configuration classes bound from `appsettings.json`, covering:
 | `ErrorMessagesConfiguration` / `ErrorPagesConfiguration` | Error content |
 | `ContactOptionsConfiguration` | Contact link |
 | `SigningSecretConfiguration` | Data integrity signing |
-| `SupportedAssetTypesConfiguration` | Whitelisted file types for uploads |
 
 ### `Background/`
 

@@ -100,7 +100,7 @@ public class SignedRequestAuthorisationPolicy(
             signedHeaders
                 .ToString()
                 .Split(',')
-                .Select(header => header.ToLower() + ":" + request.Headers[header])
+                .Select(header => header.ToLowerInvariant() + ":" + request.Headers[header])
         );
 
         request.EnableBuffering();
