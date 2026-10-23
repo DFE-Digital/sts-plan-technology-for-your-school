@@ -9,7 +9,6 @@ public static class ConfigurationConstants
     public const string AutomatedTesting = "AutomatedTesting";
     public const string BackgroundTaskQueue = "BackgroundTaskQueue";
     public const string ContactUs = "ContactUs";
-    public const string CAndSSupportedAssetTypes = "cs:supportedAssetTypes";
     public const string Contentful = "Contentful";
     public const string ContentSecurityPolicy = "CSP";
     public const string Cookies = "Cookies";
