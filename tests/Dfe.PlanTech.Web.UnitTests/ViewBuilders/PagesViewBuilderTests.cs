@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
@@ -27,7 +28,7 @@ public class PagesViewBuilderTests
 
     // ---- Substitutes (collaborators)
 
-    private readonly ILogger<BaseViewBuilder> _logger = NullLogger<BaseViewBuilder>.Instance;
+    private readonly ILogger<PagesViewBuilder> _logger = NullLogger<PagesViewBuilder>.Instance;
     private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder =
         Substitute.For<ICategoryLandingViewComponentViewBuilder>();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
@@ -50,7 +51,7 @@ public class PagesViewBuilderTests
     private static TestController CreateController() => new TestController();
 
     private PagesViewBuilder CreateServiceUnderTest(
-        ILogger<BaseViewBuilder>? logger = null,
+        ILogger<PagesViewBuilder>? logger = null,
         IOptions<ContactOptionsConfiguration>? contact = null,
         IOptions<ErrorPagesConfiguration>? errors = null,
         ICategoryLandingViewComponentViewBuilder? viewBuilder = null,
@@ -63,7 +64,7 @@ public class PagesViewBuilderTests
         bool useCurrentUserDefaults = true
     )
     {
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+        logger ??= NullLogger<PagesViewBuilder>.Instance;
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
         viewBuilder ??= _viewBuilder;
@@ -116,7 +117,7 @@ public class PagesViewBuilderTests
         new QuestionnaireCategoryEntry
         {
             Header = new ComponentHeaderEntry { Text = header },
-            LandingPage = new PageEntry { Slug = header.ToLower() },
+            LandingPage = new PageEntry { Slug = header.ToLowerInvariant() },
             Sections = new List<QuestionnaireSectionEntry>(),
         };
 
@@ -152,7 +153,7 @@ public class PagesViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<PagesViewBuilder>.Instance,
                 null!,
                 errors,
                 contentful,
@@ -178,7 +179,7 @@ public class PagesViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<PagesViewBuilder>.Instance,
                 contact,
                 null!,
                 contentful,
@@ -208,7 +209,7 @@ public class PagesViewBuilderTests
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.UserOrganisationIsGroup.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
 
@@ -243,7 +244,7 @@ public class PagesViewBuilderTests
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
-        currentUser.UserOrganisationIsGroup.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
@@ -306,7 +307,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Returns_CategoryLanding_View()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         var category = CreateCategory(categoryTitle);
 
@@ -715,7 +716,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Populates_RelatedActions_From_Page()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         page.RelatedActions.Add(
             new RelatedActionEntry
@@ -753,7 +754,7 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_With_No_RelatedActions_Returns_Empty_RelatedActions()
     {
         var categoryTitle = "Networking";
-        var slug = categoryTitle.ToLower();
+        var slug = categoryTitle.ToLowerInvariant();
         var page = CreatePage(slug, isLanding: true);
         var category = CreateCategory(categoryTitle);
 
@@ -770,6 +771,101 @@ public class PagesViewBuilderTests
         Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
         var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
         Assert.Empty(vm.RelatedActions);
+    }
+
+    [Fact]
+    public async Task RouteBasedOnOrganisationType_When_MatTopicStartPage_And_NoSchoolSelected_ReturnsPageView()
+    {
+        var page = new PageEntry
+        {
+            Sys = new SystemDetails("pg-1"),
+            Slug = "vision-and-strategy",
+            IsLandingPage = false,
+            Title = new ComponentTitleEntry("My Page"),
+            InternalName = "Vision and strategy topic start",
+            RequiresAuthorisation = true,
+        };
+
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        currentUser.IsMat.Returns(true);
+        currentUser.IsAuthenticated.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
+        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+
+        var sut = CreateServiceUnderTest(currentUser: currentUser, useCurrentUserDefaults: false);
+        var controller = new TestController();
+
+        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal("Page", view.ViewName);
+        var vm = Assert.IsType<PageViewModel>(view.Model);
+        Assert.True(vm.ShowTrustSchoolAssessmentTable);
+    }
+
+    [Fact]
+    public async Task RouteToMatCategoryLandingPageAsync_When_CategoryNotFound_RedirectsToHomePage()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        contentful
+            .GetCategoryBySlugAsync("missing-category", 4)
+            .Returns((QuestionnaireCategoryEntry?)null);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+
+        var action = await sut.RouteToMatCategoryLandingPageAsync(
+            controller,
+            "missing-category"
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(action);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToMatCategoryLandingPageAsync_When_CategoryFound_ReturnsMatLandingPageWithRelatedActions()
+    {
+        var categorySlug = "leadership-governance-standard";
+        var category = CreateCategory("Leadership and governance");
+        var page = CreatePage(categorySlug);
+        page.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Share this list of recommendations",
+                Url = "/leadership-governance-standard/share",
+            }
+        );
+        page.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Print recommendations",
+                Url = "/leadership-governance-standard/print",
+            }
+        );
+
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetCategoryBySlugAsync(categorySlug, 4).Returns(category);
+        contentful.GetPageBySlugAsync(categorySlug).Returns(page);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+
+        var action = await sut.RouteToMatCategoryLandingPageAsync(
+            controller,
+            categorySlug
+        );
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        Assert.Equal(categorySlug, vm.Slug);
+        Assert.Equal(2, vm.RelatedActions.Count);
+        Assert.Equal("Share this list of recommendations", vm.RelatedActions[0].Text);
+        Assert.Equal("/leadership-governance-standard/share", vm.RelatedActions[0].Url);
+        Assert.Equal("Print recommendations", vm.RelatedActions[1].Text);
+        Assert.Equal("/leadership-governance-standard/print", vm.RelatedActions[1].Url);
     }
 
     // ---------- BuildNotFoundViewModel ----------

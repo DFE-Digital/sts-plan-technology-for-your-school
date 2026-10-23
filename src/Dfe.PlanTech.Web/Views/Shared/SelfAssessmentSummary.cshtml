@@ -9,7 +9,7 @@
     {
         ["topic"] = Model.SectionName,
         ["schoolCount"] = Model.CompletedSchoolCount.ToString() ?? "0",
-        ["category"] = Model.CategoryName.ToLower()
+        ["category"] = Model.CategoryName.ToLowerInvariant()
     };
 
     var schoolSuccessValues = new Dictionary<string, string>
@@ -57,6 +57,22 @@
         )
 </h2>
 
+
+@if (Model.IsMatSummary)
+{
+    <p class="govuk-body govuk-!-margin-bottom-4" ">
+        You have submitted the self-assessment for @Model.CompletedSchoolCount
+        @(Model.CompletedSchoolCount == 1 ? "school:" : "schools:")
+    </p>
+
+    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+        @foreach (var recommendation in Model.RecommendationLinks)
+            {
+                <li>@recommendation.SchoolName</li>
+            }
+    </ul>
+}
+
 <h3 class="govuk-heading-m">
     @await Microcopy.GetTextByKeyAsync(
         ContentfulMicrocopyConstants.SummaryRecHeader
@@ -70,54 +86,20 @@
         )
 </p>
 
-@if (Model.IsMatSummary)
+@if (Model.IsMatSummary && Model.RecommendationLinks.Any())
 {
-<p class="govuk-body govuk-!-margin-bottom-6">
-    @await Microcopy.GetTextByKeyAsync(
-        ContentfulMicrocopyConstants.MatSummaryRecLinkIntro,
-        dynamicValues
-        )
-</p>
-
-<ul class="govuk-list govuk-list--bullet">
-    @foreach (var recommendation in Model.RecommendationLinks)
-        {
-    <li>
-        <form asp-controller="Groups"
-              asp-action="SelectSchool"
-              method="post"
-              class="govuk-!-display-inline">
-
-            <input type="hidden"
-                   name="schoolUrn"
-                   value="@recommendation.SchoolUrn" />
-
-            <input type="hidden"
-                   name="schoolName"
-                   value="@recommendation.SchoolName" />
-
-            <input type="hidden"
-                   name="categorySlug"
-                   value="@recommendation.Href.TrimStart('/')" />
-
-            <a class="govuk-link govuk-!-display-inline-block govuk-!-margin-bottom-4"
-                   asp-controller="Groups"
-                   asp-action="SelectSchoolAndRedirect"
-                   asp-route-schoolUrn="@recommendation.SchoolUrn"
-                   asp-route-schoolName="@recommendation.SchoolName"
-                   asp-route-categorySlug="@recommendation.Href.TrimStart('/')">
-                @recommendation.LinkText
-            </a>
-        </form>
-    </li>
-        }
-</ul>
+    <p class="govuk-body govuk-!-margin-bottom-6">
+        <a class="govuk-link"
+           href="@Model.RecommendationLinks.First().Href">
+            View @Model.SectionName.ToLower() recommendations
+        </a>
+    </p>
 }
 else if (Model.RecommendationLinks.Any())
 {
     <p class="govuk-body">
         <a class="govuk-link"
-           href="@Model.RecommendationLinks.First().Href">
+           href="@Model.RecommendationLinks[0].Href">
             @await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.SchoolSummaryRecLink,
                 dynamicValues

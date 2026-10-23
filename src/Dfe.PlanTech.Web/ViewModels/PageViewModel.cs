@@ -13,6 +13,8 @@ public class PageViewModel
     public bool ShowTrustSchoolAssessmentTable { get; set; }
     public List<TrustSchoolAssessmentRowViewModel> TrustSchoolAssessments { get; set; } = [];
     public string? TrustSchoolAssessmentContinueHref { get; set; }
+    public string? CategoryName { get; set; }
+    public string? CategorySlug { get; set; }
 
     public PageViewModel(PageEntry page, bool displayBlueBanner = true)
     {

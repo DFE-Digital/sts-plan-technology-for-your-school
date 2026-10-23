@@ -9,6 +9,9 @@ on:
 
 jobs:
   update_dev:
+    permissions:
+      id-token: write
+      contents: read
     name: Update Dev environment
     uses: ./.github/workflows/update-gias-data-common.yml
     with:
@@ -17,6 +20,9 @@ jobs:
     secrets: inherit
 
   update_test:
+    permissions:
+      id-token: write
+      contents: read
     name: Update Test environment
     needs: update_dev
     uses: ./.github/workflows/update-gias-data-common.yml
@@ -26,6 +32,10 @@ jobs:
     secrets: inherit
 
   update_staging:
+    permissions:
+      id-token: write
+      contents: read
+
     name: Update Staging environment
     needs: update_test
     uses: ./.github/workflows/update-gias-data-common.yml
@@ -35,6 +45,10 @@ jobs:
     secrets: inherit
 
   update_production:
+    permissions:
+      id-token: write
+      contents: read
+
     name: Update Production environment
     needs: update_staging
     uses: ./.github/workflows/update-gias-data-common.yml

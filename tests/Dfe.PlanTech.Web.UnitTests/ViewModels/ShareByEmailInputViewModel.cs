@@ -10,7 +10,7 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["", "   "],
         };
 
@@ -42,7 +42,7 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["invalid-email"],
         };
 
@@ -58,7 +58,7 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["user@test"],
         };
 
@@ -74,7 +74,7 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["   user@test.com   ", "   "],
         };
 
@@ -90,7 +90,7 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["valid@test.com", "not-an-email", "another@test.com"],
         };
 
@@ -105,7 +105,7 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["user@test.com", "another@test.co.uk"],
             UserMessage = "Hello!",
         };
@@ -120,14 +120,14 @@ public class ShareByEmailInputViewModelTests
     {
         var sut = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["user@test.com", "another@test.com"],
             UserMessage = "Hello!",
         };
 
         var model = sut.ToModel();
 
-        Assert.Equal("Drew", model.NameOfUser);
+        Assert.Equal("John", model.NameOfUser);
         Assert.Equal(sut.EmailAddresses, model.EmailAddresses);
         Assert.Equal("Hello!", model.UserMessage);
     }

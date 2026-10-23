@@ -85,7 +85,8 @@ jobs:
       - name: Fetch data and update database
         run: uv run python main.py ${{ inputs.skip_gias_validation && '--skip-validation' || '' }}
         env:
-          CONNECTION_STRING_PLANTECH_GIAS_UPDATE: ${{ steps.get-connection-string.outputs.secret_value }}
+          CONNECTION_STRING_PLANTECH_GIAS_UPDATE:
+            ${{ steps.get-connection-string.outputs.secret_value }}
 
         ## Always run this step to ensure cleanup, even if previous steps fail
       - name: Remove IP from Key Vault

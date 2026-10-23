@@ -11,28 +11,22 @@ public class MatEstablishmentProvider(
 ) : IMatEstablishmentProvider
 {
     private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor
-        ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     private readonly IEstablishmentService _establishmentService =
-        establishmentService
-        ?? throw new ArgumentNullException(nameof(establishmentService));
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
 
     public bool IsBulkAssessment() => GetSelectedEstablishmentIdsFromSession().Count > 0;
 
     public IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession()
     {
         var session = _httpContextAccessor.HttpContext?.Session;
-
         if (session is null)
         {
             return [];
         }
 
-        return session
-            .GetSelectedEstablishmentIds()
-            .Distinct()
-            .ToArray();
+        return session.GetSelectedEstablishmentIds().Distinct().ToArray();
     }
 
     public async Task<IReadOnlyList<string>> GetSelectedSchoolNamesAsync(
@@ -46,14 +40,11 @@ public class MatEstablishmentProvider(
             return [];
         }
 
-        var selectedEstablishmentIds =
-            GetSelectedEstablishmentIdsFromSession();
+        var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession();
 
         if (selectedEstablishmentIds.Count == 0)
         {
-            return string.IsNullOrWhiteSpace(
-                currentUser.GroupSelectedSchoolName
-            )
+            return string.IsNullOrWhiteSpace(currentUser.GroupSelectedSchoolName)
                 ? []
                 : [currentUser.GroupSelectedSchoolName];
         }
@@ -62,15 +53,11 @@ public class MatEstablishmentProvider(
 
         foreach (var establishmentId in selectedEstablishmentIds)
         {
-            var establishment =
-                await _establishmentService.GetEstablishmentByIdAsync(
-                    establishmentId
-                );
+            var establishment = await _establishmentService.GetEstablishmentByIdAsync(
+                establishmentId
+            );
 
-            if (
-                establishment is not null
-                && !string.IsNullOrWhiteSpace(establishment.OrgName)
-            )
+            if (establishment is not null && !string.IsNullOrWhiteSpace(establishment.OrgName))
             {
                 schoolNames.Add(establishment.OrgName);
             }

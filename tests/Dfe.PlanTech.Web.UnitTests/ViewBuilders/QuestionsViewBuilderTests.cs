@@ -25,7 +25,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 public class QuestionsViewBuilderTests
 {
     // Collaborators
-    private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
+    private readonly ILogger<QuestionsViewBuilder> _logger = Substitute.For<ILogger<QuestionsViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
@@ -64,6 +64,15 @@ public class QuestionsViewBuilderTests
                 Task.FromResult<IReadOnlyList<string>>(
                     Array.Empty<string>()
                 )
+            );
+
+        _contentful
+            .GetCategoryBySlugAsync(Arg.Any<string>())
+            .Returns(
+                new QuestionnaireCategoryEntry
+                {
+                    Header = new ComponentHeaderEntry { Text = "Category name" },
+                }
             );
     }
 
@@ -338,7 +347,10 @@ public class QuestionsViewBuilderTests
         // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("~/Views/Pages/Page.cshtml", view.ViewName);
-        Assert.IsType<PageViewModel>(view.Model);
+
+        var model = Assert.IsType<PageViewModel>(view.Model);
+        Assert.Equal("Category name", model.CategoryName);
+        Assert.Equal("cat", model.CategorySlug);
     }
 
     // ---------- RouteToNextUnansweredQuestion ----------
@@ -617,6 +629,7 @@ public class QuestionsViewBuilderTests
             .Returns([101, 102, 103]);
 
         _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
         _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
@@ -665,6 +678,7 @@ public class QuestionsViewBuilderTests
             .Returns([]);
 
         _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
         _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
@@ -714,6 +728,7 @@ public class QuestionsViewBuilderTests
             .Returns([101, 102]);
 
         _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.IsGroup.Returns(true);
         _currentUserProvider.UserId.Returns(11);
         _currentUserProvider.UserOrganisationId.Returns(999);
         _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
@@ -1787,6 +1802,36 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUserProvider.IsMat.Returns(false);
+
+        var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial" };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.False(model.ShowTrustSchoolAssessmentTable);
+        Assert.Empty(model.TrustSchoolAssessments);
+    }
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatUserHasSelectedSchool_DoesNotShowTrustSchoolAssessmentTable()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.GroupSelectedSchoolUrn.Returns("900006");
 
         var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial" };
         var section = new QuestionnaireSectionEntry

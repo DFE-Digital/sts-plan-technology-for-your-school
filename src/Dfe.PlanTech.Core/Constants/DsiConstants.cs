@@ -30,6 +30,13 @@ public static class DsiConstants
     [EstablishmentCategoryId];
 
     /// <summary>
+    /// These are all the organisation types which access the service
+    /// and have schools within them.
+    /// </summary>
+    public static HashSet<string> GroupOrganisationCategoryIds { get; } =
+    [MatOrganisationCategoryId, SatOrganisationCategoryId, SSatOrganisationCategoryId];
+
+    /// <summary>
     /// Organisation "groups" are those who have schools within them,
     /// and we should show the "select a school" page after login.
     /// </summary>

@@ -37,9 +37,7 @@ public class PageModelAuthorisationPolicyTests
         _policy = new PageModelAuthorisationPolicy(_logger);
 
         _contentfulService = Substitute.For<IContentfulService>();
-
         _httpContext = Substitute.For<HttpContext>();
-
         _userActionTrackingService = Substitute.For<IUserActionTrackingService>();
 
         var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
@@ -49,11 +47,8 @@ public class PageModelAuthorisationPolicyTests
         var serviceProvider = Substitute.For<IServiceProvider>();
         var serviceScope = Substitute.For<IServiceScope>();
         serviceScope.ServiceProvider.Returns(serviceProvider);
-        serviceProvider.GetService(typeof(IContentfulService)).Returns(_contentfulService);
 
-        serviceProvider
-            .GetService(typeof(IUserActionTrackingService))
-            .Returns(_userActionTrackingService);
+        serviceProvider.GetService(typeof(IContentfulService)).Returns(_contentfulService);
 
         _httpContext
             .RequestServices.GetService(typeof(IUserActionTrackingService))

@@ -30,7 +30,7 @@ public class NotifyServiceTests
     {
         var sut = CreateSut();
 
-        var model = new ShareByEmailModel { NameOfUser = "Drew", UserMessage = null };
+        var model = new ShareByEmailModel { NameOfUser = "John", UserMessage = null };
 
         var textBody = new ComponentTextBodyEntry { RichText = CreateMinimalRichTextDocument() };
 
@@ -61,7 +61,7 @@ public class NotifyServiceTests
             .SendEmails(
                 model,
                 Arg.Is<Dictionary<string, object>>(d =>
-                    (string)d["name of user"] == "Drew"
+                    (string)d["name of user"] == "John"
                     && (string)d["school"] == "Test School"
                     && (string)d["standard"] == "digital leadership"
                     && (string)d["user message"] == string.Empty
@@ -79,7 +79,7 @@ public class NotifyServiceTests
     {
         var sut = CreateSut();
 
-        var model = new ShareByEmailModel { NameOfUser = "Drew", UserMessage = "Hello team" };
+        var model = new ShareByEmailModel { NameOfUser = "John", UserMessage = "Hello team" };
 
         var textBody = new ComponentTextBodyEntry { RichText = CreateMinimalRichTextDocument() };
 
@@ -93,7 +93,7 @@ public class NotifyServiceTests
         );
 
         var expectedMessage =
-            "Drew added a message:" + Environment.NewLine + Environment.NewLine + "^ Hello team";
+            "John added a message:" + Environment.NewLine + Environment.NewLine + "^ Hello team";
 
         _notifyWorkflow
             .Received(1)
@@ -114,7 +114,7 @@ public class NotifyServiceTests
 
         var model = new ShareByEmailModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             UserMessage = "Line one\r\nLine two\nLine three",
         };
 
@@ -131,7 +131,7 @@ public class NotifyServiceTests
 
         var expectedMessage = string.Join(
             Environment.NewLine,
-            ["Drew added a message:", string.Empty, "^ Line one", "^ Line two", "^ Line three"]
+            ["John added a message:", string.Empty, "^ Line one", "^ Line two", "^ Line three"]
         );
 
         _notifyWorkflow
@@ -151,7 +151,7 @@ public class NotifyServiceTests
     {
         var sut = CreateSut();
 
-        var model = new ShareByEmailModel { NameOfUser = "Drew", UserMessage = "   " };
+        var model = new ShareByEmailModel { NameOfUser = "John", UserMessage = "   " };
 
         var sections = new List<QuestionnaireSectionEntry>
         {
@@ -210,7 +210,7 @@ public class NotifyServiceTests
             .SendEmails(
                 model,
                 Arg.Is<Dictionary<string, object>>(d =>
-                    (string)d["name of user"] == "Drew"
+                    (string)d["name of user"] == "John"
                     && (string)d["school"] == "Test School"
                     && (string)d["standard lowercase"] == "digital standards"
                     && (string)d["user message"] == string.Empty
@@ -237,7 +237,7 @@ public class NotifyServiceTests
 
         var model = new ShareByEmailModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             UserMessage = "Please take a look",
         };
 
@@ -269,7 +269,7 @@ public class NotifyServiceTests
         );
 
         var expectedMessage =
-            "Drew added a message:"
+            "John added a message:"
             + Environment.NewLine
             + Environment.NewLine
             + "^ Please take a look";
@@ -291,7 +291,7 @@ public class NotifyServiceTests
     {
         var sut = CreateSut();
 
-        var model = new ShareByEmailModel { NameOfUser = "Drew" };
+        var model = new ShareByEmailModel { NameOfUser = "John" };
 
         var sections = new List<QuestionnaireSectionEntry>
         {
@@ -346,7 +346,7 @@ public class NotifyServiceTests
     {
         var sut = CreateSut();
 
-        var model = new ShareByEmailModel { NameOfUser = "Drew" };
+        var model = new ShareByEmailModel { NameOfUser = "John" };
 
         var sections = new List<QuestionnaireSectionEntry>
         {
@@ -395,7 +395,7 @@ public class NotifyServiceTests
     {
         var sut = CreateSut();
 
-        var model = new ShareByEmailModel { NameOfUser = "Drew" };
+        var model = new ShareByEmailModel { NameOfUser = "John" };
 
         var sections = new List<QuestionnaireSectionEntry>
         {

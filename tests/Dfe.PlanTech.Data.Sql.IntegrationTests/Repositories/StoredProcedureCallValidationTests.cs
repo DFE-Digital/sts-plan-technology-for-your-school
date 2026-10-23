@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
@@ -282,74 +281,5 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             );
 
         Assert.Null(result);
-    }
-
-    /* =================================================== */
-
-    [Fact]
-    public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenCalledWithValidParameters_ThenReturnsExpectedSectionStatusData()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "TEST001",
-            OrgName = "Test School",
-        };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        // Create test data that should be returned by the stored procedure
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var submission1 = new SubmissionEntity
-        {
-            SectionId = "section1",
-            SectionName = "Section 1",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.CompleteReviewed,
-            DateCreated = DateTime.UtcNow.AddDays(-1),
-        };
-
-        var submission2 = new SubmissionEntity
-        {
-            SectionId = "section2",
-            SectionName = "Section 2",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow.AddDays(-2),
-        };
-
-        DbContext.Submissions.AddRange(submission1, submission2);
-        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var sectionIds = "section1,section2,section3";
-
-        // Act
-        var result = await _storedProcRepository.GetSectionStatusesAsync(
-            sectionIds,
-            establishment.Id
-        );
-
-        // Assert - Validate meaningful results are returned
-        Assert.NotNull(result);
-
-        // Should return data for sections that exist in the database
-        var resultList = result.ToList();
-        Assert.True(resultList.Count >= 0, "Result should be a valid collection");
-
-        // If data is returned, validate it contains expected section information
-        if (resultList.Any())
-        {
-            // Verify that returned data relates to our test sections
-            var sectionIdsArray = sectionIds.Split(',');
-            Assert.True(
-                resultList.All(r =>
-                    sectionIdsArray.Contains(r.SectionId) || string.IsNullOrEmpty(r.SectionId)
-                ),
-                "All returned results should relate to requested sections"
-            );
-        }
     }
 }

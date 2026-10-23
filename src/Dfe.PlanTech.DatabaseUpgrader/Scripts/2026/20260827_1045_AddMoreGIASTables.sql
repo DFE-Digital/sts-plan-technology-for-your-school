@@ -106,42 +106,42 @@ GO
 -- --------------------------------------------------------
 
 ALTER TABLE gias.establishment
-ADD administrativeDistrictCode NVARCHAR(16) NOT NULL
+ADD administrativeDistrictCode NVARCHAR(16) NULL
     CONSTRAINT FK_giasEstablishment_administrativeDistrict
     FOREIGN KEY (administrativeDistrictCode) REFERENCES gias.administrativeDistrict (administrativeDistrictCode);
 
 ALTER TABLE gias.establishment
-ADD administrativeWardCode NVARCHAR(16) NOT NULL
+ADD administrativeWardCode NVARCHAR(16) NULL
     CONSTRAINT FK_giasEstablishment_administrativeWard
     FOREIGN KEY (administrativeWardCode) REFERENCES gias.administrativeWard (administrativeWardCode);
 
 ALTER TABLE gias.establishment
-ADD admissionsPolicyCode INT NOT NULL
+ADD admissionsPolicyCode INT NULL
     CONSTRAINT FK_giasEstablishment_admissionsPolicy
     FOREIGN KEY (admissionsPolicyCode) REFERENCES gias.admissionsPolicy (admissionsPolicyCode);
 
 ALTER TABLE gias.establishment
-ADD establishmentTypeGroupCode INT NOT NULL
+ADD establishmentTypeGroupCode INT NULL
     CONSTRAINT FK_giasEstablishment_establishmentTypeGroup
     FOREIGN KEY (establishmentTypeGroupCode) REFERENCES gias.establishmentTypeGroup (establishmentTypeGroupCode);
 
 ALTER TABLE gias.establishment
-ADD governmentOfficeRegionCode NVARCHAR(4) NOT NULL
+ADD governmentOfficeRegionCode NVARCHAR(4) NULL
     CONSTRAINT FK_giasEstablishment_governmentOfficeRegion
     FOREIGN KEY (governmentOfficeRegionCode) REFERENCES gias.governmentOfficeRegion (governmentOfficeRegionCode);
 
 ALTER TABLE gias.establishment
-ADD parliamentaryConstituencyCode NVARCHAR(16) NOT NULL
+ADD parliamentaryConstituencyCode NVARCHAR(16) NULL
     CONSTRAINT FK_giasEstablishment_parliamentaryConstituency
     FOREIGN KEY (parliamentaryConstituencyCode) REFERENCES gias.parliamentaryConstituency (parliamentaryConstituencyCode);
 
 ALTER TABLE gias.establishment
-ADD religiousCharacterCode INT NOT NULL
+ADD religiousCharacterCode INT NULL
     CONSTRAINT FK_giasEstablishment_religiousCharacter
     FOREIGN KEY (religiousCharacterCode) REFERENCES gias.religiousCharacter (religiousCharacterCode);
 
 ALTER TABLE gias.establishment
-ADD sixthFormStatusCode INT NOT NULL
+ADD sixthFormStatusCode INT NULL
     CONSTRAINT FK_giasEstablishment_sixthFormStatus
     FOREIGN KEY (sixthFormStatusCode) REFERENCES gias.sixthFormStatus (sixthFormStatusCode);
 
@@ -151,12 +151,12 @@ ADD trustCode INT NULL
     FOREIGN KEY (trustCode) REFERENCES gias.trust (trustCode);
 
 ALTER TABLE gias.establishment
-ADD trustSchoolFlagCode INT NOT NULL
+ADD trustSchoolFlagCode INT NULL
     CONSTRAINT FK_giasEstablishment_trustSchoolFlag
     FOREIGN KEY (trustSchoolFlagCode) REFERENCES gias.trustSchoolFlag (trustSchoolFlagCode);
 
 ALTER TABLE gias.establishment
-ADD urbanRuralCode NVARCHAR(8) NOT NULL
+ADD urbanRuralCode NVARCHAR(8) NULL
     CONSTRAINT FK_giasEstablishment_urbanRuralClassification
     FOREIGN KEY (urbanRuralCode) REFERENCES gias.urbanRuralClassification (urbanRuralCode);
 
@@ -182,13 +182,6 @@ ON gias.establishment (trustCode)
 WHERE trustCode IS NOT NULL;
 GO
 
--- Correction to column definition and addition of missing
--- index for typeOfEstablishmentCode
-ALTER TABLE gias.establishment
-ALTER COLUMN typeOfEstablishmentCode INT NOT NULL;
-GO
-
--- Working
 CREATE INDEX IX_giasEstablishment_typeOfEstablishment
 ON gias.establishment (typeOfEstablishmentCode)
 GO

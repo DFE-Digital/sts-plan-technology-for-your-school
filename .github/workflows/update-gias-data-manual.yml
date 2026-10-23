@@ -18,6 +18,9 @@ on:
 
 jobs:
   update_single_environment:
+    permissions:
+      id-token: write
+      contents: read
     name: Update ${{ inputs.environment }} environment
     uses: ./.github/workflows/update-gias-data-common.yml
     with:
