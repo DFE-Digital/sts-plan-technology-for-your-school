@@ -135,7 +135,7 @@ public class RecommendationsControllerTests
         var inputModel = new ShareByEmailInputViewModel
         {
             EmailAddresses = new List<string> { "test@test.com", "hello@hello.com" },
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             UserMessage = "Hello",
         };
 
@@ -265,11 +265,7 @@ public class RecommendationsControllerTests
     )
     {
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _controller.GetMatSingleRecommendation(
-                categorySlug!,
-                sectionSlug!,
-                chunkSlug!
-            )
+            _controller.GetMatSingleRecommendation(categorySlug!, sectionSlug!, chunkSlug!)
         );
 
         await _viewBuilder
@@ -298,11 +294,7 @@ public class RecommendationsControllerTests
     )
     {
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _controller.GetMatSingleRecommendation(
-                categorySlug,
-                sectionSlug,
-                chunkSlug
-            )
+            _controller.GetMatSingleRecommendation(categorySlug, sectionSlug, chunkSlug)
         );
 
         await _viewBuilder

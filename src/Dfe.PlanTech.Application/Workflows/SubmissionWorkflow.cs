@@ -3,15 +3,41 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : ISubmissionWorkflow
+public class SubmissionWorkflow(
+    IAnswerRepository answerRepository,
+    IEstablishmentRecommendationHistoryRepository establishmentRecommendationHistoryRepository,
+    IQuestionRepository questionRepository,
+    IRecommendationRepository recommendationRepository,
+    IResponseRepository responseRepository,
+    ISubmissionRepository submissionRepository,
+    ITransactionManager transactionManager,
+    IUserActionIdProvider userActionIdProvider
+) : ISubmissionWorkflow
 {
+    private readonly IAnswerRepository _answerRepository =
+        answerRepository ?? throw new ArgumentNullException(nameof(answerRepository));
+    private readonly IEstablishmentRecommendationHistoryRepository _establishmentRecommendationHistoryRepository =
+        establishmentRecommendationHistoryRepository
+        ?? throw new ArgumentNullException(nameof(establishmentRecommendationHistoryRepository));
+    private readonly IQuestionRepository _questionRepository =
+        questionRepository ?? throw new ArgumentNullException(nameof(questionRepository));
+    private readonly IRecommendationRepository _recommendationRepository =
+        recommendationRepository
+        ?? throw new ArgumentNullException(nameof(recommendationRepository));
+    private readonly IResponseRepository _responseRepository =
+        responseRepository ?? throw new ArgumentNullException(nameof(responseRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly ITransactionManager _transactionManager =
+        transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
+    private readonly IUserActionIdProvider _userActionIdProvider =
+        userActionIdProvider ?? throw new ArgumentNullException(nameof(userActionIdProvider));
 
     public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(
         int establishmentId,
@@ -30,7 +56,7 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
         return newSubmission.AsDto();
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+    public async Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
         int establishmentId,
         int? matEstablishmentId,
         int submissionId,
@@ -38,13 +64,152 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
         QuestionnaireSectionEntry section
     )
     {
-        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            establishmentId,
-            matEstablishmentId,
-            submissionId,
-            userId,
-            section
+        var submission = await _submissionRepository.GetSubmissionByIdWithResponsesAsync(
+            submissionId
         );
+        if (submission is null)
+        {
+            throw new InvalidOperationException(
+                $"Could not find submission with ID {submissionId} in database"
+            );
+        }
+
+        // A question is expected to have at most one core recommendation within a section. Guard
+        // explicitly so that a content model change surfaces as a diagnostic error rather than an
+        // opaque duplicate key exception from ToDictionary.
+        var coreRecommendations = section
+            .CoreRecommendations.Where(cr => cr.Question is not null)
+            .ToList();
+
+        var duplicatedQuestionRefs = coreRecommendations
+            .GroupBy(cr => cr.Question.Id)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToList();
+
+        if (duplicatedQuestionRefs.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Expected at most one core recommendation per question, but found more than one for "
+                    + $"question reference(s): {string.Join(", ", duplicatedQuestionRefs)}"
+            );
+        }
+
+        var questionRefsToRecommendations = coreRecommendations.ToDictionary(
+            cr => cr.Question.Id,
+            cr => cr
+        );
+
+        var responses = submission
+            .Responses.GroupBy(r => r.QuestionId)
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First())
+            .ToList();
+
+        // Ensure the responses' questions' Contentful references are the same as the ones in the Contentful Section
+        var sectionQuestionRefs = questionRefsToRecommendations.Keys;
+        var responseQuestionRefs = responses.Select(r => r.Question.ContentfulRef);
+        var questionRefsMissingFromSection = string.Join(
+            ", ",
+            responseQuestionRefs.Where(responseQuestionRef =>
+                !sectionQuestionRefs.Contains(responseQuestionRef)
+            )
+        );
+
+        if (questionRefsMissingFromSection.Length > 0)
+        {
+            throw new InvalidOperationException(
+                "Could not find a question in Contentful matching response "
+                    + $"question reference(s): {questionRefsMissingFromSection}"
+            );
+        }
+
+        var responseRecommendations = responses.ToDictionary(
+            r => r.Id,
+            r => questionRefsToRecommendations[r.Question.ContentfulRef]
+        );
+
+        // Two responses resolving to the same core recommendation would silently drop one of the
+        // response-to-recommendation links, so report it rather than throwing on a duplicate key.
+        var duplicatedRecommendationRefs = responses
+            .GroupBy(r => responseRecommendations[r.Id].Id)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToList();
+
+        if (duplicatedRecommendationRefs.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "Expected each response to resolve to a different core recommendation, but more "
+                    + "than one response resolved to recommendation reference(s): "
+                    + $"{string.Join(", ", duplicatedRecommendationRefs)}"
+            );
+        }
+
+        var recommendationRefsToResponseIds = responses.ToDictionary(
+            r => responseRecommendations[r.Id].Id,
+            r => r.Id
+        );
+
+        var recommendationDtos = new List<SqlRecommendationDto>();
+        var recommendationStatuses = new Dictionary<string, RecommendationStatus>();
+        foreach (var response in responses)
+        {
+            var coreRecommendation = responseRecommendations[response.Id];
+
+            if (
+                coreRecommendation.CompletingAnswers.Any(ca =>
+                    string.Equals(ca.Id, response.Answer.ContentfulRef)
+                )
+            )
+            {
+                recommendationStatuses.Add(coreRecommendation.Id, RecommendationStatus.Complete);
+            }
+            else if (
+                coreRecommendation.InProgressAnswers.Any(ca =>
+                    string.Equals(ca.Id, response.Answer.ContentfulRef)
+                )
+            )
+            {
+                recommendationStatuses.Add(coreRecommendation.Id, RecommendationStatus.InProgress);
+            }
+            else
+            {
+                recommendationStatuses.Add(coreRecommendation.Id, RecommendationStatus.NotStarted);
+            }
+
+            recommendationDtos.Add(
+                new SqlRecommendationDto
+                {
+                    ContentfulSysId = coreRecommendation.Id,
+                    RecommendationText = coreRecommendation.Header,
+                    QuestionId = response.QuestionId,
+                    QuestionContentfulRef = response.Question.ContentfulRef,
+                }
+            );
+        }
+
+        // These three writes must land together. Each repository saves independently, so without a
+        // transaction a failure part-way through can leave recommendations upserted and history
+        // rows written against a submission that was never marked reviewed.
+        await _transactionManager.ExecuteInTransactionAsync(async () =>
+        {
+            var recommendations = await _recommendationRepository.UpsertRecommendationsAsync(
+                recommendationDtos
+            );
+
+            await _establishmentRecommendationHistoryRepository.CreateRecommendationHistoriesAsync(
+                establishmentId,
+                matEstablishmentId,
+                userId,
+                recommendations,
+                recommendationRefsToResponseIds,
+                recommendationStatuses
+            );
+
+            await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+                submissionId
+            );
+        });
     }
 
     public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
@@ -109,8 +274,8 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
     }
 
     // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
-    // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
-    public async Task<int> SubmitAnswer(
+    // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route.
+    public async Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,
         int userEstablishmentId,
@@ -118,17 +283,65 @@ public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : IS
     )
     {
         if (answerModel is null)
-        {
             throw new InvalidDataException($"{nameof(answerModel)} is null");
-        }
 
-        var model = new AssessmentResponseModel(
-            userId,
-            activeEstablishmentId,
-            userEstablishmentId,
-            answerModel
+        if (string.IsNullOrWhiteSpace(answerModel.SectionId))
+            throw new InvalidDataException($"{nameof(answerModel.SectionId)} is empty");
+
+        if (string.IsNullOrWhiteSpace(answerModel.SectionName))
+            throw new InvalidDataException($"{nameof(answerModel.SectionName)} is empty");
+
+        if (answerModel.ChosenAnswer is null)
+            throw new InvalidDataException($"{nameof(answerModel.ChosenAnswer)} cannot be null");
+
+        if (string.IsNullOrWhiteSpace(answerModel.Question.Id))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.Question)}.{nameof(answerModel.Question.Id)} cannot be null"
+            );
+
+        if (string.IsNullOrWhiteSpace(answerModel.Question.Text))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.Question)}.{nameof(answerModel.Question.Text)} cannot be null"
+            );
+
+        if (string.IsNullOrWhiteSpace(answerModel.ChosenAnswer.Id))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.ChosenAnswer)}.{nameof(answerModel.ChosenAnswer.Id)} cannot be null"
+            );
+
+        if (string.IsNullOrWhiteSpace(answerModel.ChosenAnswer.Text))
+            throw new InvalidDataException(
+                $"{nameof(answerModel.ChosenAnswer)}.{nameof(answerModel.ChosenAnswer.Text)} cannot be null"
+            );
+
+        var questionId = await _questionRepository.GetOrCreateQuestionIdAsync(
+            answerModel.Question.Id,
+            answerModel.Question.Text
         );
-        var responseId = await _submissionRepository.SubmitResponse(model);
+
+        var answerId = await _answerRepository.GetOrCreateAnswerIdAsync(
+            answerModel.ChosenAnswer.Id,
+            answerModel.ChosenAnswer.Text
+        );
+
+        var submissionId = await _submissionRepository.SelectOrInsertSubmissionAsync(
+            answerModel.SectionId,
+            answerModel.SectionName,
+            activeEstablishmentId
+        );
+
+        var responseId = await _responseRepository.SubmitResponseAsync(
+            userId,
+            userEstablishmentId,
+            submissionId,
+            questionId,
+            answerId
+        );
+
+        await _submissionRepository.UpdateSubmissionDatesAsync(
+            submissionId,
+            _userActionIdProvider.GetUserActionId()
+        );
 
         return responseId;
     }

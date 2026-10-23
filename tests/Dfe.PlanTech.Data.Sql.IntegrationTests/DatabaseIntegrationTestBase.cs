@@ -41,6 +41,21 @@ public abstract class DatabaseIntegrationTestBase(DatabaseFixture fixture) : IAs
         GC.SuppressFinalize(this);
     }
 
+    protected Task<int> SetIdentityInsert(string table, string status)
+    {
+        List<string> acceptedStatusValues = ["ON", "OFF"];
+        if (!acceptedStatusValues.Contains(status))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(status),
+                $"{nameof(status)} must be 'ON' or 'OFF'"
+            );
+        }
+
+        var sql = $"SET IDENTITY_INSERT [dbo].[{table}] {status}";
+        return DbContext.Database.ExecuteSqlRawAsync(sql, TestContext.Current.CancellationToken);
+    }
+
     /// <summary>
     /// Helper method to count entities of a specific type within the current transaction.
     /// Useful for verifying CRUD operations without relying on specific ID values.

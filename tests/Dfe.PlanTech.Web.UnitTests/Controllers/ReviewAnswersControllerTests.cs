@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
@@ -22,12 +23,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IUserJourneyMissingContentExceptionHandler _exceptionHandler =
             Substitute.For<IUserJourneyMissingContentExceptionHandler>();
         private readonly ISelfAssessmentSummaryViewBuilder _selfAssessmentSummaryViewBuilder =
-        Substitute.For<ISelfAssessmentSummaryViewBuilder>();
+            Substitute.For<ISelfAssessmentSummaryViewBuilder>();
         private readonly ReviewAnswersController _controller;
 
         public ReviewAnswersControllerTests()
         {
-            _controller = new ReviewAnswersController(_logger, _exceptionHandler, _viewBuilder, _selfAssessmentSummaryViewBuilder);
+            _controller = new ReviewAnswersController(
+                _logger,
+                _exceptionHandler,
+                _viewBuilder,
+                _selfAssessmentSummaryViewBuilder
+            );
             var httpContext = new DefaultHttpContext();
             var tempDataProvider = Substitute.For<ITempDataProvider>();
             _controller.TempData = new TempDataDictionary(httpContext, tempDataProvider);
@@ -37,7 +43,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(_logger, _exceptionHandler, null!, _selfAssessmentSummaryViewBuilder)
+                new ReviewAnswersController(
+                    _logger,
+                    _exceptionHandler,
+                    null!,
+                    _selfAssessmentSummaryViewBuilder
+                )
             );
 
             Assert.Equal("reviewAnswersViewBuilder", ex.ParamName);
@@ -47,7 +58,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullExceptionHandler_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(_logger, null!, _viewBuilder, _selfAssessmentSummaryViewBuilder)
+                new ReviewAnswersController(
+                    _logger,
+                    null!,
+                    _viewBuilder,
+                    _selfAssessmentSummaryViewBuilder
+                )
             );
 
             Assert.Equal("userJourneyMissingContentExceptionHandler", ex.ParamName);
@@ -69,7 +85,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "cat";
             var sectionSlug = "sec";
 
-            _controller.TempData["ErrorMessage"] = "error";
+            _controller.TempData[StatePassingMechanismConstants.ErrorMessage] = "error";
             _viewBuilder
                 .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error")
                 .Returns(new OkResult());
@@ -139,7 +155,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     submissionId
                 );
             Assert.IsType<OkResult>(result);
-            Assert.Equal("Section A", _controller.TempData["SectionName"]);
+            Assert.Equal(
+                "Section A",
+                _controller.TempData[StatePassingMechanismConstants.SectionName]
+            );
         }
 
         [Fact]
@@ -179,7 +198,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "cat";
             var sectionSlug = "sec";
 
-            _controller.TempData["ErrorMessage"] = "error";
+            _controller.TempData[StatePassingMechanismConstants.ErrorMessage] = "error";
             _viewBuilder
                 .RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error")
                 .Returns(new OkResult());
@@ -224,7 +243,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetSchoolSelfAssessmentSummary(categorySlug, sectionSlug);
+            var result = await _controller.GetSchoolSelfAssessmentSummary(
+                categorySlug,
+                sectionSlug
+            );
 
             await _selfAssessmentSummaryViewBuilder
                 .Received(1)
