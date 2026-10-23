@@ -44,7 +44,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers.TaskList
             var classAttribute = output.Attributes["class"].Value.ToString();
 
             Assert.Contains(
-                $"app-task-list__tag govuk-tag govuk-tag--{colour.ToLower()}",
+                $"app-task-list__tag govuk-tag govuk-tag--{colour.ToLowerInvariant()}",
                 classAttribute
             );
             Assert.Equal("strong", output.TagName);

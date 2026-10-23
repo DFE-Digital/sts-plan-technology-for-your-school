@@ -35,8 +35,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationProviders(this IServiceCollection services)
     {
         return services
+            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>()
             .AddScoped<IMicrocopyProvider, MicrocopyProvider>()
-            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>();
+            .AddScoped<IRedirectProvider, RedirectProvider>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
@@ -50,20 +51,6 @@ public static class ServiceCollectionExtensions
             .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()
             .AddScoped<IGroupWorkflow, GroupWorkflow>()
             .AddScoped<IUserWorkflow, UserWorkflow>();
-    }
-
-    public static IServiceCollection AddDfeSignInOrganisationProvider(
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
-    {
-        var config = GetDfeSignInConfig(configuration);
-        services.AddHttpClient<IDsiOrganisationProvider, DsiOrganisationProvider>(client =>
-        {
-            client.BaseAddress = new Uri(config.ApiUrl);
-        });
-
-        return services;
     }
 
     public static IServiceCollection SetupRichTextRenderers(this IServiceCollection services)

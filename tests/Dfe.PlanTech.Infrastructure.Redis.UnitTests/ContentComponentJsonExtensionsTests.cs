@@ -29,7 +29,7 @@ public class ContentComponentJsonExtensionsTests
         Assert.NotNull(typeInfo);
         Assert.NotNull(typeInfo.PolymorphismOptions);
         Assert.Equal(
-            "$" + type.Name.ToLower(),
+            "$" + type.Name.ToLowerInvariant(),
             typeInfo.PolymorphismOptions.TypeDiscriminatorPropertyName
         );
         Assert.True(typeInfo.PolymorphismOptions.IgnoreUnrecognizedTypeDiscriminators);

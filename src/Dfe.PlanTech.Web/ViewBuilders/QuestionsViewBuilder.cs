@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -18,7 +17,7 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<QuestionsViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
@@ -166,9 +165,23 @@ public class QuestionsViewBuilder(
                 .ToList();
         }
 
+        var category =
+        await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        ?? throw new ContentfulDataUnavailableException(
+            $"Could not find category for slug {categorySlug}"
+        );
+
+        var categoryName =
+            category.Header?.Text
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category header text for slug {categorySlug}"
+            );
+
         var viewModel = new PageViewModel(interstitialPage)
         {
             ShowTrustSchoolAssessmentTable = isMatWithoutSelectedSchool,
+            CategoryName = categoryName,
+            CategorySlug = categorySlug,
         };
 
         var section =
@@ -238,7 +251,8 @@ public class QuestionsViewBuilder(
             // Remove the current invalid submission and redirect to self-assessment page
             await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
 
-            controller.TempData["SubtopicError"] = await BuildErrorMessage();
+            controller.TempData[StatePassingMechanismConstants.SubtopicError] =
+                await BuildErrorMessage();
             return controller.RedirectToAction(
                 nameof(PagesController.GetByRoute),
                 nameof(PagesController).GetControllerNameSlug(),
@@ -344,7 +358,7 @@ public class QuestionsViewBuilder(
         }
         ;
 
-        var establishment =await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+        var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {
@@ -420,7 +434,7 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var selectedEstablishmentIds = CurrentUser.IsMat
+        var selectedEstablishmentIds = CurrentUser.IsGroup
             ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().ToArray()
             : [];
 
@@ -494,7 +508,7 @@ public class QuestionsViewBuilder(
         }
 
         var routingEstablishmentId =
-            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+            CurrentUser.IsGroup && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds[0]
                 : activeEstablishmentId;
 
@@ -540,7 +554,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentIds =
-            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+            CurrentUser.IsGroup && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds
                 : [activeEstablishmentId];
 
@@ -576,11 +590,10 @@ public class QuestionsViewBuilder(
             return activeEstablishmentId;
         }
 
-        var selectedEstablishmentId = _matEstablishmentProvider
-            .GetSelectedEstablishmentIdsFromSession()
-            .FirstOrDefault();
+        var selectedEstablishmentIds =
+            _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
 
-        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
+        return selectedEstablishmentIds.Any() ? selectedEstablishmentIds[0] : activeEstablishmentId;
     }
 
     private async Task<string> BuildErrorMessage()

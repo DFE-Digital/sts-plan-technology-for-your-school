@@ -16,17 +16,9 @@ load_dotenv()
 logger = get_logger(__name__)
 
 
-def main(connection_string: str, skip_validation: bool = False):
-    if skip_validation:
-        logger.info(
-            "Starting GIAS data update process with validation checks disabled."
-        )
-        logger.info(
-            "GIAS data validation will be skipped - abnormal data patterns will not prevent database updates."
-        )
-    else:
-        logger.info("Starting GIAS data update process with validation checks enabled.")
-
+def main(
+    connection_string: str, skip_update: bool = False, skip_validation: bool = False
+):
     try:
         fetch_and_save_gias_data()
     except RuntimeError as e:
@@ -37,6 +29,23 @@ def main(connection_string: str, skip_validation: bool = False):
         )
         raise
 
+    if skip_update:
+        logger.info(
+            "\nSkipping database update step as per command line argument. "
+            "GIAS data has been downloaded and saved to disk."
+        )
+        return
+
+    if skip_validation:
+        logger.info(
+            "\nStarting GIAS data update process with validation checks disabled."
+        )
+        logger.info(
+            "GIAS data validation will be skipped - abnormal data patterns will not prevent database updates."
+        )
+    else:
+        logger.info("Starting GIAS data update process with validation checks enabled.")
+
     data = extract_gias_data()
     update_database(data, connection_string, skip_validation)
 
@@ -46,6 +55,11 @@ def main(connection_string: str, skip_validation: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Update GIAS establishment data in the database"
+    )
+    parser.add_argument(
+        "--skip-update",
+        action="store_true",
+        help="Skip database update step (data download only - doesn't modify the database)",
     )
     parser.add_argument(
         "--skip-validation",
@@ -73,4 +87,8 @@ if __name__ == "__main__":
             )
             exit(100)
 
-    main(connection_string=connection_string, skip_validation=args.skip_validation)
+    main(
+        connection_string=connection_string,
+        skip_update=args.skip_update,
+        skip_validation=args.skip_validation,
+    )
