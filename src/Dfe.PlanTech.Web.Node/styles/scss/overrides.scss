@@ -326,6 +326,11 @@ ul.landing-page-list > li {
   margin-bottom: 0;
 }
 
+.organisation-context-header:not(:has(.govuk-breadcrumbs)) h1.govuk-heading-l.school-ident-name {
+    padding-top: 77px !important;
+    transform: translateY(-32px);
+}
+
 h1.govuk-heading-l.school-ident-name {
     padding-top: 32px !important;
     margin-bottom: 16px;

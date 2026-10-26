@@ -822,7 +822,7 @@ public class GroupsViewBuilder(
         var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsUpdateStatusSuccessPanelText, dynamicValues);
 
         microcopySuccessBodyText = schoolsCount == 1
-            ? microcopySuccessBodyText.Replace("schools", "schools")
+            ? microcopySuccessBodyText.Replace("schools", "school")
             : microcopySuccessBodyText;
 
         controller.TempData["StatusUpdateSuccessTitle"] =
