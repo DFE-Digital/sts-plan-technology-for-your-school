@@ -347,6 +347,8 @@ public class PagesViewBuilder(
             CategoryLandingContext.MAT
         );
 
+        controller.ViewData[StatePassingMechanismConstants.Title] = category.Header.Text;
+
         return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 
