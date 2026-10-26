@@ -52,7 +52,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}",
+        $"{UrlConstants.TrustSlug}/{UrlConstants.GroupsSelectionPageSlug}",
         Name = GetSelectASchoolAction
     )]
     public async Task<IActionResult> GetSelectASchoolView()
@@ -65,7 +65,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
+        $"{UrlConstants.TrustSlug}/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
         Name = GetSelectASelfAssessmentAction
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
@@ -80,7 +80,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/standards",
+        $"{UrlConstants.TrustSlug}/standards",
         Name = GetMatStandardsListAction
     )]
     public async Task<IActionResult> GetMatStandardsList()
@@ -89,7 +89,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
         Name = GetSelectSchoolsToAssessAction
     )]
     public async Task<IActionResult> GetSelectSchoolsToAssessView(string sectionSlug)
@@ -103,7 +103,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
         Name = GetSelectASchoolToUpdateStatusAction
     )]
     public async Task<IActionResult> GetSelectSchoolsToUpdateView(string sectionSlug, string recommendationSlug)
@@ -119,7 +119,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectStatusToUpdateSlug}",
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectStatusToUpdateSlug}",
         Name = GetSelectStatusToUpdateAction
     )]
     public async Task<IActionResult> GetSelectStatusView(string sectionSlug, string recommendationSlug)
@@ -134,7 +134,7 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
-    [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
+    [HttpGet($"{UrlConstants.TrustSlug}/select-school-and-redirect")]
     public async Task<IActionResult> SelectSchoolAndRedirect(
         string schoolUrn,
         string schoolName,
@@ -162,7 +162,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpPost(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
         Name = SubmitSchoolsSelectionAction
     )]
     public async Task<IActionResult> SubmitSelectedSchoolsToAssess(
@@ -193,7 +193,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpPost(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
         Name = SubmitSchoolsUpdateStatusSelectionAction
     )]
     public async Task<IActionResult> SubmitSelectedSchoolsToUpdateStatus(
@@ -227,7 +227,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpPost(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsUpdateSchoolsStatus}", Name = UpdateSelectedSchoolStatusRoute
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsUpdateSchoolsStatus}", Name = UpdateSelectedSchoolStatusRoute
     )]
     public async Task<IActionResult> UpdateSelectedSchoolsStatus(
         [FromForm] GroupRecommendationInputViewModel inputViewModel,
@@ -276,7 +276,7 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
-    [HttpPost($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
+    [HttpPost($"{UrlConstants.TrustSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
     public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
     {
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
@@ -287,7 +287,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"{UrlConstants.GroupsSlug}/{{categorySlug}}",
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}",
         Name = GetMatRecommendationsLandingAction
     )]
     public async Task<IActionResult> GetMatRecommendationsLanding(string categorySlug)

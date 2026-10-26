@@ -21,13 +21,16 @@
         id="js-back-button-link"
         class="noprint js-only"
         href="@Url.RouteUrl(
-            nameof(RecommendationsController.GetSingleRecommendation),
-            new {
+            Model.IsMat
+                ? nameof(RecommendationsController.GetMatSingleRecommendation)
+                : nameof(RecommendationsController.GetSingleRecommendation),
+            new
+            {
                 categorySlug = Model.CategorySlug,
                 sectionSlug = Model.SectionSlug,
                 chunkSlug = string.IsNullOrEmpty(Model.OriginatingSlug)
-                            ? Model.Chunks.First().Slug
-                            : Model.OriginatingSlug
+                    ? Model.Chunks.First().Slug
+                    : Model.OriginatingSlug
             })">
         Back
     </govuk-back-link>

@@ -15,5 +15,6 @@ public class RecommendationsViewModel
     public string? OriginatingSlug { get; set; }
     public int? CurrentChunkCount { get; set; }
     public int? TotalChunks { get; set; }
+    public bool IsMat { get; init; }
     public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = [];
 }

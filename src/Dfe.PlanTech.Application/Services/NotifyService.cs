@@ -86,6 +86,63 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         );
     }
 
+    public List<NotifySendResult> SendMatStandardEmail(
+    ShareByEmailModel model,
+    List<QuestionnaireSectionEntry> sections,
+    string categoryName
+)
+    {
+        var userMessage = BuildUserMessage(model);
+        var standardMarkdown = BuildMatStandardMarkdown(sections);
+
+        var personalisation = new Dictionary<string, object>
+    {
+        { "name of user", model.NameOfUser },
+        { "standard lowercase", categoryName.ToLowerInvariant() },
+        { "user message", userMessage },
+        { "standard", categoryName },
+        { "recommendations", standardMarkdown },
+    };
+
+        var correlationId = Guid.NewGuid().ToString();
+
+        return _notifyWorkflow.SendEmails(
+            model,
+            personalisation,
+            correlationId,
+            NotifyConstants.ShareStandardTemplateId
+        );
+    }
+
+    public List<NotifySendResult> SendMatSingleRecommendationEmail(
+    ShareByEmailModel model,
+    ComponentTextBodyEntry textBody,
+    string recommendationHeader,
+    string categoryName
+)
+    {
+        var userMessage = BuildUserMessage(model);
+        var recommendationMarkdown = MarkdownRenderer.Render(textBody.RichText);
+
+        var personalisation = new Dictionary<string, object>
+    {
+        { "name of user", model.NameOfUser },
+        { "standard", categoryName.ToLowerInvariant() },
+        { "user message", userMessage },
+        { "recommendation name", recommendationHeader },
+        { "recommendation", recommendationMarkdown },
+    };
+
+        var correlationId = Guid.NewGuid().ToString();
+
+        return _notifyWorkflow.SendEmails(
+            model,
+            personalisation,
+            correlationId,
+            NotifyConstants.ShareSingleRecommendationTemplateId
+        );
+    }
+
     private static string BuildUserMessage(ShareByEmailModel model)
     {
         var userMessage = model.UserMessage ?? "";
@@ -105,6 +162,36 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         }
 
         return userMessage.Trim();
+    }
+
+    private static string BuildMatStandardMarkdown(
+        List<QuestionnaireSectionEntry> sections
+    )
+    {
+        var stringBuilder = new StringBuilder();
+
+        foreach (var section in sections)
+        {
+            stringBuilder.AppendLine(
+                $"## Recommendations for {section.Name.ToLowerInvariant()}"
+            );
+            stringBuilder.AppendLine();
+
+            var recommendations = section.CoreRecommendations.ToList();
+
+            for (var i = 0; i < recommendations.Count; i++)
+            {
+                var recommendation = recommendations[i];
+
+                stringBuilder.AppendLine(
+                    $"{i + 1}. {recommendation.HeaderText}"
+                );
+            }
+
+            stringBuilder.AppendLine();
+        }
+
+        return stringBuilder.ToString();
     }
 
     private static string BuildStandardMarkdown(

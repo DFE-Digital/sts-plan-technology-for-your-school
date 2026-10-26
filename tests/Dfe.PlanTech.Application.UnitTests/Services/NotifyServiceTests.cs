@@ -450,6 +450,120 @@ public class NotifyServiceTests
             );
     }
 
+
+    [Fact]
+    public void SendMatStandardEmail_WhenCalled_SendsExpectedPersonalisation()
+    {
+        var sut = CreateSut();
+
+        var model = new ShareByEmailModel { NameOfUser = "John", UserMessage = "   " };
+
+        var sections = new List<QuestionnaireSectionEntry>
+        {
+            new()
+            {
+                Sys = BuildSystemDetails("section-1"),
+                Name = "Digital technology registers",
+                CoreRecommendations =
+                [
+                    new RecommendationChunkEntry
+                    {
+                        Sys = BuildSystemDetails("rec-1"),
+                        Header = "Assign a digital lead",
+                    },
+                ],
+            },
+        };
+
+        var expectedResults = new List<NotifySendResult>();
+
+        _notifyWorkflow
+            .SendEmails(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<Dictionary<string, object>>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()
+            )
+            .Returns(expectedResults);
+
+        var result = sut.SendMatStandardEmail(
+            model,
+            sections,
+            "Digital Standards"
+        );
+
+        Assert.Same(expectedResults, result);
+
+        _notifyWorkflow
+            .Received(1)
+            .SendEmails(
+                model,
+                Arg.Is<Dictionary<string, object>>(d =>
+                    (string)d["name of user"] == "John"
+                    && (string)d["standard lowercase"] == "digital standards"
+                    && (string)d["user message"] == string.Empty
+                    && (string)d["standard"] == "Digital Standards"
+                    && ((string)d["recommendations"]).Contains(
+                        "## Recommendations for digital technology registers"
+                    )
+                    && ((string)d["recommendations"]).Contains(
+                        "1. Assign a digital lead"
+                    )
+                    && !((string)d["recommendations"]).Contains("self-assessment")
+                    && !d.ContainsKey("school")
+                ),
+                Arg.Any<string>(),
+                NotifyConstants.ShareStandardTemplateId
+            );
+    }
+
+    [Fact]
+    public void SendMatSingleRecommendationEmail_WhenCalled_SendsExpectedPersonalisation()
+    {
+        var sut = CreateSut();
+
+        var model = new ShareByEmailModel { NameOfUser = "John", UserMessage = null };
+
+        var textBody = new ComponentTextBodyEntry { RichText = CreateMinimalRichTextDocument() };
+
+        var expectedResults = new List<NotifySendResult>();
+
+        _notifyWorkflow
+            .SendEmails(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<Dictionary<string, object>>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()
+            )
+            .Returns(expectedResults);
+
+        var result = sut.SendMatSingleRecommendationEmail(
+            model,
+            textBody,
+            "Test Recommendation",
+            "Digital leadership"
+        );
+
+        Assert.Same(expectedResults, result);
+
+        _notifyWorkflow
+            .Received(1)
+            .SendEmails(
+                model,
+                Arg.Is<Dictionary<string, object>>(d =>
+                    (string)d["name of user"] == "John"
+                    && (string)d["standard"] == "digital leadership"
+                    && (string)d["user message"] == string.Empty
+                    && (string)d["recommendation name"] == "Test Recommendation"
+                    && d.ContainsKey("recommendation")
+                    && !d.ContainsKey("school")
+                    && !d.ContainsKey("status")
+                ),
+                Arg.Any<string>(),
+                NotifyConstants.ShareSingleRecommendationTemplateId
+            );
+    }
+
     private NotifyService CreateSut() => new(_notifyWorkflow);
 
     private static RichTextContentField CreateMinimalRichTextDocument()

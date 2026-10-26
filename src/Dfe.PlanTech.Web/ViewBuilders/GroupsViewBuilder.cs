@@ -307,6 +307,8 @@ public class GroupsViewBuilder(
         viewModel.CategorySlug = categorySlug;
         viewModel.SelectedSchoolNames = schools.Select(s => s.OrgName).ToList();
 
+        controller.ViewData[StatePassingMechanismConstants.Title] = "Select status for recommendation";
+
         return controller.View(SelectStatusToUpdateViewName, viewModel);
     }
 
@@ -750,6 +752,8 @@ public class GroupsViewBuilder(
             Categories = categories,
         };
 
+        controller.ViewData[StatePassingMechanismConstants.Title] = "Select a standard";
+
         return controller.View("MatStandardsList", viewModel);
     }
 
@@ -822,7 +826,7 @@ public class GroupsViewBuilder(
         var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsUpdateStatusSuccessPanelText, dynamicValues);
 
         microcopySuccessBodyText = schoolsCount == 1
-            ? microcopySuccessBodyText.Replace("schools", "schools")
+            ? microcopySuccessBodyText.Replace("schools", "school")
             : microcopySuccessBodyText;
 
         controller.TempData["StatusUpdateSuccessTitle"] =
