@@ -58,29 +58,25 @@
 
         @foreach (var action in Model.RelatedActions)
         {
+            // Temporarily hide MAT share action until dedicated GOV.UK Notify templates are available.
+            if (Model.Context == CategoryLandingContext.MAT &&
+                action.Url.Contains("share", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var actionText = action.Text;
             var actionUrl = action.Url;
 
-            if (Model.Context == CategoryLandingContext.MAT)
+            if (Model.Context == CategoryLandingContext.MAT &&
+                action.Url.Contains("print", StringComparison.OrdinalIgnoreCase))
             {
-                if (action.Url.Contains("print", StringComparison.OrdinalIgnoreCase))
-                {
-                    actionText = "Print this list of recommendations";
+                actionText = "Print this list of recommendations";
 
-                    actionUrl = Url.RouteUrl(
-                        nameof(PagesController.PrintMatStandard),
-                        new { categorySlug = Model.Slug }
-                    )!;
-                }
-                else if (action.Url.Contains("share", StringComparison.OrdinalIgnoreCase))
-                {
-                    actionText = "Share this list of recommendations";
-
-                    actionUrl = Url.RouteUrl(
-                        nameof(PagesController.ShareMatStandard),
-                        new { categorySlug = Model.Slug }
-                    )!;
-                }
+                actionUrl = Url.RouteUrl(
+                    nameof(PagesController.PrintMatStandard),
+                    new { categorySlug = Model.Slug }
+                )!;
             }
 
             <p class="govuk-body-s">
