@@ -44,7 +44,6 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             { "recommendation", recommendationMarkdown },
         };
 
-        // TODO: Use active correlation ID once implemented
         var correlationId = Guid.NewGuid().ToString();
 
         return _notifyWorkflow.SendEmails(
@@ -80,7 +79,6 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             { "recommendations", standardMarkdown },
         };
 
-        // TODO: Use active correlation ID once implemented
         var correlationId = Guid.NewGuid().ToString();
 
         return _notifyWorkflow.SendEmails(
