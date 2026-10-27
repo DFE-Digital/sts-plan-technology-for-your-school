@@ -708,6 +708,74 @@ public class RecommendationsViewBuilderTests
         Assert.Equal(expectedSlug, vm.OriginatingSlug);
     }
 
+
+    [Fact]
+    public async Task RouteToPrintSingle_Mat_ReturnsSingleRecommendationWithoutActiveEstablishment()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = CreateController();
+
+        var category = CreateCategory("Connectivity");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync("connectivity").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        var result = await sut.RouteToPrintSingle(
+            controller,
+            "connectivity",
+            "sec-1",
+            "second-chunk-2",
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("RecommendationsChecklist", view.ViewName);
+
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.True(vm.IsMat);
+        Assert.Single(vm.Chunks);
+        Assert.Equal("Second Chunk", vm.Chunks[0].Header);
+        Assert.Equal(2, vm.CurrentChunkCount);
+        Assert.Equal(3, vm.TotalChunks);
+        Assert.Equal("second-chunk-2", vm.OriginatingSlug);
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+    }
+
+    [Fact]
+    public async Task RouteToPrintAll_Mat_ReturnsAllRecommendationsWithoutActiveEstablishment()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = CreateController();
+
+        var category = CreateCategory("Connectivity");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync("connectivity").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        var result = await sut.RouteToPrintAll(
+            controller,
+            "connectivity",
+            "sec-1",
+            "second-chunk-2",
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("RecommendationsChecklist", view.ViewName);
+
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.True(vm.IsMat);
+        Assert.Equal(3, vm.Chunks.Count);
+        Assert.Null(vm.CurrentChunkCount);
+        Assert.Equal(3, vm.TotalChunks);
+        Assert.Equal("second-chunk-2", vm.OriginatingSlug);
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+    }
+
     // ---------- RouteToShareRecommendationAsync ----------
 
     [Fact]
@@ -745,6 +813,48 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Use MFA", model.Caption);
         Assert.Equal("Share a recommendation by email", model.Heading);
         Assert.Null(model.InputModel);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_Mat_WhenInputModelIsNull_ReturnsMatShareView()
+    {
+        var controller = CreateController();
+        var category = CreateCategory("category");
+        var section = CreateSection(
+            "section",
+            CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id")
+        );
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            null,
+            CategoryLandingContext.MAT
+        );
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Shared/Email/ShareByEmail.cshtml", viewResult.ViewName);
+
+        var model = Assert.IsType<ShareByEmailViewModel>(viewResult.Model);
+        Assert.Equal("Recommendations", model.PostController);
+        Assert.Equal(
+            nameof(RecommendationsController.ShareMatSingleRecommendation),
+            model.PostAction
+        );
+        Assert.Equal("category", model.CategorySlug);
+        Assert.Equal("section", model.SectionSlug);
+        Assert.Equal("chunk", model.ChunkSlug);
+        Assert.Equal("Use MFA", model.Caption);
+        Assert.Equal("Share a recommendation by email", model.Heading);
+        Assert.Null(model.InputModel);
+        Assert.True(model.IsMat);
     }
 
     [Fact]
@@ -869,12 +979,19 @@ public class RecommendationsViewBuilderTests
         var controller = CreateController();
         var inputModel = CreateInputModel();
 
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+
         var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
         var section = CreateSection("section", chunk);
         var category = CreateCategory("category");
 
         _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
         _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         _recommendationService
@@ -984,6 +1101,93 @@ public class RecommendationsViewBuilderTests
             "Cannot send an email without an active establishment name",
             exception.Message
         );
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_Mat_WhenNotifySendSucceeds_UsesMatShareFlow()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
+        _notifyService
+            .SendMatSingleRecommendationEmail(
+                Arg.Any<ShareByEmailModel>(),
+                textBody,
+                "Use MFA",
+                "category"
+            )
+            .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            inputModel,
+            CategoryLandingContext.MAT
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(
+            nameof(RecommendationsController.GetMatSingleRecommendation),
+            redirect.ActionName
+        );
+        Assert.Equal(
+            nameof(RecommendationsController).GetControllerNameSlug(),
+            redirect.ControllerName
+        );
+
+        var routeValues = Assert.IsType<IDictionary<string, object>>(
+            redirect.RouteValues!,
+            exactMatch: false
+        );
+        Assert.Equal("category", routeValues["categorySlug"]);
+        Assert.Equal("section", routeValues["sectionSlug"]);
+        Assert.Equal("chunk", routeValues["chunkSlug"]);
+
+        _notifyService
+            .Received(1)
+            .SendMatSingleRecommendationEmail(
+                Arg.Is<ShareByEmailModel>(m =>
+                    m.NameOfUser == inputModel.NameOfUser
+                    && m.EmailAddresses.SequenceEqual(inputModel.EmailAddresses)
+                    && m.UserMessage == inputModel.UserMessage
+                ),
+                textBody,
+                "Use MFA",
+                "category"
+            );
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+        await _currentUser.DidNotReceive().GetActiveEstablishmentNameAsync();
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationHistoryAsync(Arg.Any<int>(), Arg.Any<string>());
+
+        _notifyService
+            .DidNotReceive()
+            .SendSingleRecommendationEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<ComponentTextBodyEntry>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<RecommendationStatus>()
+            );
     }
 
     [Fact]

@@ -9,6 +9,11 @@
     var sectionName = Model.Section?.Name ?? "";
     var backLinkHref = $"/home";
 
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["topic"] = sectionName.ToLowerInvariant(),
+    };
+
     var hasErrors = Model.ErrorMessages?.Any() == true;
 }
 
@@ -55,7 +60,9 @@
                 </h1>
             </legend>
             <div>
-                <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusHelpText)</p>
+                <p>
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusHelpText, dynamicValues)
+                </p>
             </div>
             @if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
             {

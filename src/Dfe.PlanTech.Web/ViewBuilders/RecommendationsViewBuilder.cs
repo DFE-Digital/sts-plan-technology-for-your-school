@@ -422,6 +422,70 @@ public class RecommendationsViewBuilder(
         }
     }
 
+    private async Task<IActionResult> RouteToMatPrint(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string? singleChunkSlug,
+        string originatingSlug
+)
+    {
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+
+        var recommendationChunks = section.CoreRecommendations.ToList();
+
+        var selectedChunks = recommendationChunks
+            .Where(chunk =>
+                singleChunkSlug is null || chunk.Slug == singleChunkSlug
+            )
+            .Select(chunk => new RecommendationChunkViewModel
+            {
+                Header = chunk.HeaderText,
+                Slug = chunk.Slug,
+                Content = chunk.Content,
+            })
+            .ToList();
+
+        if (singleChunkSlug is not null && selectedChunks.Count == 0)
+        {
+            throw new ContentfulDataUnavailableException(
+                $"No recommendation chunk found with slug matching: {singleChunkSlug}"
+            );
+        }
+
+        var currentChunkIndex =
+            singleChunkSlug is null
+                ? -1
+                : recommendationChunks.FindIndex(chunk => chunk.Slug == singleChunkSlug);
+
+        var viewModel = new RecommendationsViewModel
+        {
+            CategoryName = category.Header.Text,
+            CategorySlug = categorySlug,
+            SectionName = section.Name,
+            SectionSlug = sectionSlug,
+            Chunks = selectedChunks,
+            CurrentChunkCount = currentChunkIndex >= 0
+                ? currentChunkIndex + 1
+                : null,
+            TotalChunks = recommendationChunks.Count,
+            OriginatingSlug = originatingSlug,
+            IsMat = true,
+        };
+
+        return controller.View(RecommendationsChecklistViewName, viewModel);
+    }
+
     public async Task<IActionResult> UpdateRecommendationStatusAsync(
         Controller controller,
         string categorySlug,
@@ -513,12 +577,24 @@ public class RecommendationsViewBuilder(
 
     [ExcludeFromCodeCoverage]
     public Task<IActionResult> RouteToPrintSingle(
-        Controller controller,
-        string categorySlug,
-        string sectionSlug,
-        string chunkSlug
-    )
+    Controller controller,
+    string categorySlug,
+    string sectionSlug,
+    string chunkSlug,
+    CategoryLandingContext context = CategoryLandingContext.School
+)
     {
+        if (context == CategoryLandingContext.MAT)
+        {
+            return RouteToMatPrint(
+                controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                chunkSlug
+            );
+        }
+
         return RouteBySectionAndRecommendation(
             controller,
             categorySlug,
@@ -531,12 +607,24 @@ public class RecommendationsViewBuilder(
 
     [ExcludeFromCodeCoverage]
     public Task<IActionResult> RouteToPrintAll(
-        Controller controller,
-        string categorySlug,
-        string sectionSlug,
-        string chunkSlug
-    )
+    Controller controller,
+    string categorySlug,
+    string sectionSlug,
+    string chunkSlug,
+    CategoryLandingContext context = CategoryLandingContext.School
+)
     {
+        if (context == CategoryLandingContext.MAT)
+        {
+            return RouteToMatPrint(
+                controller,
+                categorySlug,
+                sectionSlug,
+                null,
+                chunkSlug
+            );
+        }
+
         return RouteBySectionAndRecommendation(
             controller,
             categorySlug,
@@ -552,7 +640,8 @@ public class RecommendationsViewBuilder(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        ShareByEmailInputViewModel? inputModel = null
+        ShareByEmailInputViewModel? inputModel = null,
+        CategoryLandingContext context = CategoryLandingContext.School
     )
     {
         var category =
@@ -575,20 +664,61 @@ public class RecommendationsViewBuilder(
                 $"Could not find chunk for slug {chunkSlug}"
             );
 
+        var isMat = context == CategoryLandingContext.MAT;
+
         var viewModel = BuildShareByEmailViewModel(
             nameof(RecommendationsController),
-            nameof(RecommendationsController.ShareSingleRecommendation),
+            isMat
+                ? nameof(RecommendationsController.ShareMatSingleRecommendation)
+                : nameof(RecommendationsController.ShareSingleRecommendation),
             category,
             recommendationChunk,
             categorySlug,
             sectionSlug,
             chunkSlug,
-            inputModel
+            inputModel,
+            isMat
         );
 
         if (inputModel is null || !controller.ModelState.IsValid)
         {
             return controller.View(ShareByEmailViewName, viewModel);
+        }
+
+        var textBodyId = recommendationChunk.Content[0].Id;
+
+        var textBody =
+            await ContentfulService.GetTextBodyByIdAsync(textBodyId)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find text body entry for id {textBodyId}"
+            );
+
+        if (isMat)
+        {
+            var notifySendResults = _notifyService.SendMatSingleRecommendationEmail(
+                inputModel.ToModel(),
+                textBody,
+                recommendationChunk.HeaderText,
+                category.Header.Text
+            );
+
+            var returnToModel = new ActionViewModel(
+                actionName: nameof(RecommendationsController.GetMatSingleRecommendation),
+                controllerName: nameof(RecommendationsController).GetControllerNameSlug(),
+                linkText: @$"Back to ""{recommendationChunk.HeaderText}""",
+                routeValues: new Dictionary<string, string>
+                {
+                { nameof(categorySlug), categorySlug },
+                { nameof(sectionSlug), sectionSlug },
+                { nameof(chunkSlug), chunkSlug },
+                }
+            );
+
+            return HandleNotifyShareResults(
+                controller,
+                notifySendResults,
+                returnToModel
+            );
         }
 
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
@@ -601,16 +731,10 @@ public class RecommendationsViewBuilder(
 
         if (latestRecommendationHistory?.NewStatus is null)
         {
-            throw new InvalidDataException("Cannot send an email without a recommendation status");
-        }
-
-        var textBodyId = recommendationChunk.Content[0].Id;
-
-        var textBody =
-            await ContentfulService.GetTextBodyByIdAsync(textBodyId)
-            ?? throw new ContentfulDataUnavailableException(
-                $"Could not find text body entry for id {textBodyId}"
+            throw new InvalidDataException(
+                "Cannot send an email without a recommendation status"
             );
+        }
 
         var establishmentName =
             await CurrentUser.GetActiveEstablishmentNameAsync()
@@ -618,7 +742,7 @@ public class RecommendationsViewBuilder(
                 "Cannot send an email without an active establishment name"
             );
 
-        var notifySendResults = _notifyService.SendSingleRecommendationEmail(
+        var schoolNotifySendResults = _notifyService.SendSingleRecommendationEmail(
             inputModel.ToModel(),
             textBody,
             establishmentName,
@@ -627,19 +751,23 @@ public class RecommendationsViewBuilder(
             latestRecommendationHistory.NewStatus.Value
         );
 
-        var returnToModel = new ActionViewModel(
+        var schoolReturnToModel = new ActionViewModel(
             actionName: nameof(RecommendationsController.GetSingleRecommendation),
             controllerName: nameof(RecommendationsController).GetControllerNameSlug(),
             linkText: @$"Back to ""{recommendationChunk.HeaderText}""",
             routeValues: new Dictionary<string, string>
             {
-                { nameof(categorySlug), categorySlug },
-                { nameof(sectionSlug), sectionSlug },
-                { nameof(chunkSlug), chunkSlug },
+            { nameof(categorySlug), categorySlug },
+            { nameof(sectionSlug), sectionSlug },
+            { nameof(chunkSlug), chunkSlug },
             }
         );
 
-        return HandleNotifyShareResults(controller, notifySendResults, returnToModel);
+        return HandleNotifyShareResults(
+            controller,
+            schoolNotifySendResults,
+            schoolReturnToModel
+        );
     }
 
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(

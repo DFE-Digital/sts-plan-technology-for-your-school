@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -127,6 +128,88 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             await _viewBuilder
                 .Received(1)
                 .RouteToShareStandardPageAsync(_controller, categorySlug, inputModel);
+        }
+
+        [Fact]
+        public async Task PrintMatStandard_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+
+            _viewBuilder
+                .RouteToCategoryLandingPrintPageAsync(
+                    _controller,
+                    categorySlug,
+                    CategoryLandingContext.MAT
+                )
+                .Returns(new OkResult());
+
+            var result = await _controller.PrintMatStandard(categorySlug);
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToCategoryLandingPrintPageAsync(
+                    _controller,
+                    categorySlug,
+                    CategoryLandingContext.MAT
+                );
+        }
+
+        [Fact]
+        public async Task ShareMatStandard_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+
+            _viewBuilder
+                .RouteToShareStandardPageAsync(
+                    _controller,
+                    categorySlug,
+                    inputModel: null,
+                    context: CategoryLandingContext.MAT
+                )
+                .Returns(new OkResult());
+
+            var result = await _controller.ShareMatStandard(categorySlug);
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToShareStandardPageAsync(
+                    _controller,
+                    categorySlug,
+                    inputModel: null,
+                    context: CategoryLandingContext.MAT
+                );
+        }
+
+        [Fact]
+        public async Task PostShareMatStandard_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+            var inputModel = new ShareByEmailInputViewModel
+            {
+                EmailAddresses = new List<string> { "test@test.com", "hello@hello.com" },
+                NameOfUser = "Drew",
+                UserMessage = "Hello",
+            };
+
+            _viewBuilder
+                .RouteToShareStandardPageAsync(
+                    _controller,
+                    categorySlug,
+                    inputModel,
+                    CategoryLandingContext.MAT
+                )
+                .Returns(new OkResult());
+
+            var result = await _controller.PostShareMatStandard(categorySlug, inputModel);
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToShareStandardPageAsync(
+                    _controller,
+                    categorySlug,
+                    inputModel,
+                    CategoryLandingContext.MAT
+                );
         }
 
         [Fact]

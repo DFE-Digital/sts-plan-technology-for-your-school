@@ -34,7 +34,8 @@ public sealed class TestableBaseViewBuilder(
         string categorySlug,
         string? sectionSlug,
         string? chunkSlug,
-        ShareByEmailInputViewModel? inputModel
+        ShareByEmailInputViewModel? inputModel,
+        bool isMat = false
     ) =>
         BuildShareByEmailViewModel(
             controllerName,
@@ -44,7 +45,8 @@ public sealed class TestableBaseViewBuilder(
             categorySlug,
             sectionSlug,
             chunkSlug,
-            inputModel
+            inputModel,
+            isMat
         );
 
     public static RedirectToActionResult CallHandleNotifyShareResults(

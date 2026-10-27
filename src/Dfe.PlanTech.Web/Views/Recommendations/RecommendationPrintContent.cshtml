@@ -1,79 +1,98 @@
-@model RecommendationsViewModel
+@using Dfe.PlanTech.Application.Providers.Interfaces
 @inject ICurrentUserProvider CurrentUser
+@model RecommendationsViewModel
 
 @{
-    var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
-
     if (Model.CategoryName != null)
     {
         ViewData[StatePassingMechanismConstants.Title] = $"{Model.CategoryName} - print view";
     }
 }
 
-@{
-    <div>
-        <span class="govuk-caption-xl">@schoolName</span>
-        <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
-            @Model.CategoryName
-        </h1>
+@if (Model.IsMat)
+{
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
+        @Model.CategoryName
+    </h1>
 
-        <h2 class="govuk-heading-l">@Model.SectionName</h2>
-
-        <p>
-            The self-assessment for @Model.SectionName.ToLowerInvariant() was completed on
-            <strong>@Model.LatestCompletionDate.</strong>
-        </p>
-    </div>
-
-    <div class="recommendation-action-header">
-        <div class="dfe-table-scroll" tabindex="0">
-            <table class="govuk-table">
-                <thead class="govuk-table__head">
-                    <tr class="govuk-table__row">
-                        <th scope="col" class="govuk-table__header">Recommendation</th>
-                        <th scope="col" class="govuk-table__header">Updated</th>
-                        <th scope="col" class="govuk-table__header govuk-!-text-align-right">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="govuk-table__body">
-                    @foreach (var chunk in Model.Chunks)
-                    {
-                        <tr class="govuk-table__row">
-                            <td class="govuk-table__cell table__cell custom-height">
-                                <div>@chunk.HeaderText</div>
-                            </td>
-                            <td class="govuk-table__cell govuk-hint govuk-!-font-size-16 govuk-!-padding-top-3">
-                                @chunk.LastUpdated.ToString("d MMM yyy")
-                            </td>
-                            <td class="govuk-table__cell govuk-!-text-align-right">
-                                <strong class="govuk-tag @((chunk.Status as RecommendationStatus?).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass))">
-                                    @chunk.Status.GetDisplayName()
-                                </strong>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <h2 class="govuk-heading-l">
+        @Model.SectionName
+    </h2>
 
     <hr class="govuk-section-break govuk-section-break--l">
 
-    <h2 class="govuk-heading-l">Recommendations</h2>
+    <h2 class="govuk-heading-l">
+        Recommendations
+    </h2>
 
     @foreach (var chunk in Model.Chunks)
     {
         <div class="recommendation-piece-content">
-            <h1 class="govuk-heading-l">@chunk.HeaderText</h1>
+            <h3 class="govuk-heading-m">
+                @chunk.HeaderText
+            </h3>
+
+            @foreach (var content in chunk.Content)
+            {
+                <partial name="Components/PageComponentFactory" model="@content" />
+            }
+
+            <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+        </div>
+    }
+}
+else
+{
+    var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
+
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
+        @Model.CategoryName
+    </h1>
+
+    @if (!string.IsNullOrWhiteSpace(schoolName))
+    {
+        <p class="govuk-body-l">
+            @schoolName
+        </p>
+    }
+
+    <h2 class="govuk-heading-l">
+        @Model.SectionName
+    </h2>
+
+    @if (!string.IsNullOrWhiteSpace(Model.LatestCompletionDate))
+    {
+        <p class="govuk-body">
+            Self-assessment completed on @Model.LatestCompletionDate
+        </p>
+    }
+
+    <hr class="govuk-section-break govuk-section-break--l">
+
+    <h2 class="govuk-heading-l">
+        Recommendations
+    </h2>
+
+    @foreach (var chunk in Model.Chunks)
+    {
+        <div class="recommendation-piece-content">
+            <h3 class="govuk-heading-m">
+                @chunk.HeaderText
+            </h3>
 
             <div class="dfe-table-scroll" tabindex="0">
                 <table class="govuk-table">
                     <thead class="govuk-table__head">
                         <tr class="govuk-table__row">
-                            <th scope="col" class="govuk-table__header">Status</th>
-                            <th scope="col" class="govuk-table__header">Updated</th>
+                            <th scope="col" class="govuk-table__header">
+                                Status
+                            </th>
+                            <th scope="col" class="govuk-table__header">
+                                Updated
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody class="govuk-table__body">
                         <tr class="govuk-table__row">
                             <td class="govuk-table__cell">
@@ -81,17 +100,23 @@
                                     @chunk.Status.GetDisplayName()
                                 </strong>
                             </td>
-                            <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
+
+                            <td class="govuk-table__cell">
+                                @chunk.LastUpdatedFormatted
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
+            <hr class="govuk-section-break govuk-section-break--m">
+
             @foreach (var content in chunk.Content)
             {
                 <partial name="Components/PageComponentFactory" model="@content" />
-                <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible" />
             }
+
+            <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
         </div>
     }
 }
