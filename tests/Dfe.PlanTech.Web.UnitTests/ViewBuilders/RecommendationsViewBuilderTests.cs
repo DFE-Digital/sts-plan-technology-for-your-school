@@ -1115,18 +1115,87 @@ public class RecommendationsViewBuilderTests
         };
         var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
         var section = CreateSection("section", chunk);
+        section.Sys = new SystemDetails("section-id");
+
         var category = CreateCategory("category");
 
         _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
         _contentfulService.GetSectionBySlugAsync("section").Returns(section);
         _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
 
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserOrganisationName.Returns("Test MAT");
+
+        _groupService
+            .GetGroupEstablishmentContextAsync(999)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                        {
+                            Id = 101,
+                            OrgName = "School One",
+                        },
+                        new SqlEstablishmentDto
+                        {
+                            Id = 102,
+                            OrgName = "School Two",
+                        },
+                        new SqlEstablishmentDto
+                        {
+                            Id = 103,
+                            OrgName = "School Three",
+                        },
+                    ],
+                    EstablishmentIds = [101, 102, 103],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                        {
+                            EstablishmentId = 101,
+                            SectionId = "section-id",
+                        },
+                        new SqlSubmissionDto
+                        {
+                            EstablishmentId = 102,
+                            SectionId = "section-id",
+                        },
+                    ],
+                }
+            );
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(101, "chunk-id")
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                }
+            );
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(102, "chunk-id")
+            .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
+
+        var expectedSchoolsList = string.Join(
+            Environment.NewLine,
+            [
+                $"* School One: {RecommendationStatus.Complete.GetDisplayName()}",
+                $"* School Two: {RecommendationStatus.NotStarted.GetDisplayName()}",
+            ]
+        );
+
         _notifyService
             .SendMatSingleRecommendationEmail(
                 Arg.Any<ShareByEmailModel>(),
                 textBody,
                 "Use MFA",
-                "category"
+                "category",
+                "Test MAT",
+                "section",
+                expectedSchoolsList
             )
             .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
 
@@ -1150,7 +1219,6 @@ public class RecommendationsViewBuilderTests
             nameof(RecommendationsController).GetControllerNameSlug(),
             redirect.ControllerName
         );
-
         var routeValues = Assert.IsType<IDictionary<string, object>>(
             redirect.RouteValues!,
             exactMatch: false
@@ -1169,14 +1237,26 @@ public class RecommendationsViewBuilderTests
                 ),
                 textBody,
                 "Use MFA",
-                "category"
+                "category",
+                "Test MAT",
+                "section",
+                expectedSchoolsList
             );
 
         await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
         await _currentUser.DidNotReceive().GetActiveEstablishmentNameAsync();
+
+        await _recommendationService
+            .Received(1)
+            .GetLatestRecommendationHistoryAsync(101, "chunk-id");
+
+        await _recommendationService
+            .Received(1)
+            .GetLatestRecommendationHistoryAsync(102, "chunk-id");
+
         await _recommendationService
             .DidNotReceive()
-            .GetLatestRecommendationHistoryAsync(Arg.Any<int>(), Arg.Any<string>());
+            .GetLatestRecommendationHistoryAsync(103, "chunk-id");
 
         _notifyService
             .DidNotReceive()

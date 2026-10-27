@@ -163,11 +163,11 @@ public class PagesViewBuilder(
     }
 
     public async Task<IActionResult> RouteToShareStandardPageAsync(
-       Controller controller,
-       string categorySlug,
-       ShareByEmailInputViewModel? inputModel = null,
-       CategoryLandingContext context = CategoryLandingContext.School
-   )
+    Controller controller,
+    string categorySlug,
+    ShareByEmailInputViewModel? inputModel = null,
+    CategoryLandingContext context = CategoryLandingContext.School
+)
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
 
@@ -199,10 +199,17 @@ public class PagesViewBuilder(
 
         if (isMat)
         {
+            var matName =
+                CurrentUser.UserOrganisationName
+                ?? throw new InvalidDataException(
+                    "Cannot send an email without a MAT name"
+                );
+
             var matNotifyResults = _notifyService.SendMatStandardEmail(
                 inputModel.ToModel(),
                 category.Sections,
-                category.Header.Text
+                category.Header.Text,
+                matName
             );
 
             var matReturnToModel = new ActionViewModel(
@@ -211,7 +218,7 @@ public class PagesViewBuilder(
                 linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
                 routeValues: new Dictionary<string, string>
                 {
-            { nameof(categorySlug), categorySlug }
+                { nameof(categorySlug), categorySlug }
                 }
             );
 

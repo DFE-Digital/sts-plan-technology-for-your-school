@@ -87,22 +87,24 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
     }
 
     public List<NotifySendResult> SendMatStandardEmail(
-    ShareByEmailModel model,
-    List<QuestionnaireSectionEntry> sections,
-    string categoryName
-)
+        ShareByEmailModel model,
+        List<QuestionnaireSectionEntry> sections,
+        string categoryName,
+        string matName
+    )
     {
         var userMessage = BuildUserMessage(model);
         var standardMarkdown = BuildMatStandardMarkdown(sections);
 
         var personalisation = new Dictionary<string, object>
-    {
-        { "name of user", model.NameOfUser },
-        { "standard lowercase", categoryName.ToLowerInvariant() },
-        { "user message", userMessage },
-        { "standard", categoryName },
-        { "recommendations", standardMarkdown },
-    };
+        {
+            { "name of user", model.NameOfUser },
+            { "school", matName },
+            { "standard lowercase", categoryName.ToLowerInvariant() },
+            { "user message", userMessage },
+            { "standard", categoryName },
+            { "recommendations mat", standardMarkdown },
+        };
 
         var correlationId = Guid.NewGuid().ToString();
 
@@ -110,28 +112,34 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             model,
             personalisation,
             correlationId,
-            NotifyConstants.ShareStandardTemplateId
+            NotifyConstants.ShareMatStandardTemplateId
         );
     }
 
     public List<NotifySendResult> SendMatSingleRecommendationEmail(
-    ShareByEmailModel model,
-    ComponentTextBodyEntry textBody,
-    string recommendationHeader,
-    string categoryName
-)
+        ShareByEmailModel model,
+        ComponentTextBodyEntry textBody,
+        string recommendationHeader,
+        string categoryName,
+        string matName,
+        string topic,
+        string schoolsList
+    )
     {
         var userMessage = BuildUserMessage(model);
         var recommendationMarkdown = MarkdownRenderer.Render(textBody.RichText);
 
         var personalisation = new Dictionary<string, object>
-    {
-        { "name of user", model.NameOfUser },
-        { "standard", categoryName.ToLowerInvariant() },
-        { "user message", userMessage },
-        { "recommendation name", recommendationHeader },
-        { "recommendation", recommendationMarkdown },
-    };
+        {
+            { "name of user", model.NameOfUser },
+            { "school", matName },
+            { "standard", categoryName.ToLowerInvariant() },
+            { "user message", userMessage },
+            { "recommendation name", recommendationHeader },
+            { "recommendation", recommendationMarkdown },
+            { "topic", topic.ToLowerInvariant() },
+            { "schools list", schoolsList },
+        };
 
         var correlationId = Guid.NewGuid().ToString();
 
@@ -139,7 +147,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             model,
             personalisation,
             correlationId,
-            NotifyConstants.ShareSingleRecommendationTemplateId
+            NotifyConstants.ShareMatSingleRecommendationTemplateId
         );
     }
 
