@@ -775,11 +775,13 @@ public class PagesViewBuilderTests
         var category = CreateCategory("Category");
 
         _contentfulService.GetCategoryBySlugAsync("category", 4).Returns(category);
+        _currentUser.UserOrganisationName.Returns("Test MAT");
 
         _notifyService
             .SendMatStandardEmail(
                 Arg.Any<ShareByEmailModel>(),
                 Arg.Any<List<QuestionnaireSectionEntry>>(),
+                Arg.Any<string>(),
                 Arg.Any<string>()
             )
             .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
@@ -818,6 +820,7 @@ public class PagesViewBuilderTests
                     && m.UserMessage == inputModel.UserMessage
                 ),
                 category.Sections,
+                "Test MAT",
                 "Category"
             );
 

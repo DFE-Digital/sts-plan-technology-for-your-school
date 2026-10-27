@@ -636,13 +636,13 @@ public class RecommendationsViewBuilder(
     }
 
     public async Task<IActionResult> RouteToShareRecommendationAsync(
-        Controller controller,
-        string categorySlug,
-        string sectionSlug,
-        string chunkSlug,
-        ShareByEmailInputViewModel? inputModel = null,
-        CategoryLandingContext context = CategoryLandingContext.School
-    )
+    Controller controller,
+    string categorySlug,
+    string sectionSlug,
+    string chunkSlug,
+    ShareByEmailInputViewModel? inputModel = null,
+    CategoryLandingContext context = CategoryLandingContext.School
+)
     {
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -695,16 +695,80 @@ public class RecommendationsViewBuilder(
 
         if (isMat)
         {
-            var notifySendResults = _notifyService.SendMatSingleRecommendationEmail(
-                inputModel.ToModel(),
-                textBody,
-                recommendationChunk.HeaderText,
-                category.Header.Text
+            var matName =
+                CurrentUser.UserOrganisationName
+                ?? throw new InvalidDataException(
+                    "Cannot send an email without a MAT name"
+                );
+
+            var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
+
+            var groupContext =
+                await _groupService.GetGroupEstablishmentContextAsync(
+                    groupEstablishmentId
+                );
+
+            var completedEstablishmentIds = groupContext.CompletedSubmissions
+                .Where(submission =>
+                    submission.SectionId == section.Id
+                    && groupContext.EstablishmentIds.Contains(
+                        submission.EstablishmentId
+                    )
+                )
+                .Select(submission => submission.EstablishmentId)
+                .Distinct()
+                .ToHashSet();
+
+            var schoolStatusLines = new List<string>();
+
+            foreach (
+                var establishment in groupContext.Establishments
+                    .Where(establishment =>
+                        completedEstablishmentIds.Contains(establishment.Id)
+                    )
+                    .OrderBy(
+                        establishment => establishment.OrgName ?? string.Empty,
+                        StringComparer.OrdinalIgnoreCase
+                    )
+            )
+            {
+                var history =
+                    await _recommendationService.GetLatestRecommendationHistoryAsync(
+                        establishment.Id,
+                        recommendationChunk.Id
+                    );
+
+                var status =
+                    history?.NewStatus ?? RecommendationStatus.NotStarted;
+
+                schoolStatusLines.Add(
+                    $"* {establishment.OrgName ?? string.Empty}: {status.GetDisplayName()}"
+                );
+            }
+
+            var schoolsList = string.Join(
+                Environment.NewLine,
+                schoolStatusLines
             );
 
+            var notifySendResults =
+             _notifyService.SendMatSingleRecommendationEmail(
+                 inputModel.ToModel(),
+                 textBody,
+                 matName,
+                 recommendationChunk.HeaderText,
+                 category.Header.Text,
+                 section.Name,
+                 schoolsList
+             );
+
             var returnToModel = new ActionViewModel(
-                actionName: nameof(RecommendationsController.GetMatSingleRecommendation),
-                controllerName: nameof(RecommendationsController).GetControllerNameSlug(),
+                actionName: nameof(
+                    RecommendationsController.GetMatSingleRecommendation
+                ),
+                controllerName: nameof(
+                    RecommendationsController
+                ).GetControllerNameSlug(),
                 linkText: @$"Back to ""{recommendationChunk.HeaderText}""",
                 routeValues: new Dictionary<string, string>
                 {
@@ -757,9 +821,9 @@ public class RecommendationsViewBuilder(
             linkText: @$"Back to ""{recommendationChunk.HeaderText}""",
             routeValues: new Dictionary<string, string>
             {
-            { nameof(categorySlug), categorySlug },
-            { nameof(sectionSlug), sectionSlug },
-            { nameof(chunkSlug), chunkSlug },
+                { nameof(categorySlug), categorySlug },
+                { nameof(sectionSlug), sectionSlug },
+                { nameof(chunkSlug), chunkSlug },
             }
         );
 
