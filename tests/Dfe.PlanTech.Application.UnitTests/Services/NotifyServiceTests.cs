@@ -489,8 +489,8 @@ public class NotifyServiceTests
         var result = sut.SendMatStandardEmail(
             model,
             sections,
-            "Digital Standards",
-            "Test MAT"
+             "Test MAT",
+            "Digital Standards"
         );
 
         Assert.Same(expectedResults, result);
@@ -541,9 +541,9 @@ public class NotifyServiceTests
         var result = sut.SendMatSingleRecommendationEmail(
             model,
             textBody,
+            "Test MAT",
             "Test Recommendation",
             "Digital leadership",
-            "Test MAT",
             "Roles and responsibilities",
             "* School One: Complete"
         );

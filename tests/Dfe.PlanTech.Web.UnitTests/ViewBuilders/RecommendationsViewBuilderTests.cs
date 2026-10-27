@@ -1191,9 +1191,9 @@ public class RecommendationsViewBuilderTests
             .SendMatSingleRecommendationEmail(
                 Arg.Any<ShareByEmailModel>(),
                 textBody,
+                "Test MAT",
                 "Use MFA",
                 "category",
-                "Test MAT",
                 "section",
                 expectedSchoolsList
             )
@@ -1236,9 +1236,9 @@ public class RecommendationsViewBuilderTests
                     && m.UserMessage == inputModel.UserMessage
                 ),
                 textBody,
+                "Test MAT",
                 "Use MFA",
                 "category",
-                "Test MAT",
                 "section",
                 expectedSchoolsList
             );

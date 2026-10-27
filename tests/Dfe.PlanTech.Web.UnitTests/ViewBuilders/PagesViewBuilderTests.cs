@@ -820,8 +820,8 @@ public class PagesViewBuilderTests
                     && m.UserMessage == inputModel.UserMessage
                 ),
                 category.Sections,
-                "Category",
-                "Test MAT"
+                "Test MAT",
+                "Category"
             );
 
         await _currentUser.DidNotReceive().GetActiveEstablishmentNameAsync();
