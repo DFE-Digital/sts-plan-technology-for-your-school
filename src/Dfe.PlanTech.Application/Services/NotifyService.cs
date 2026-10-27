@@ -17,6 +17,11 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
     private readonly INotifyWorkflow _notifyWorkflow =
         notifyWorkflow ?? throw new ArgumentNullException(nameof(notifyWorkflow));
 
+    private const string NameOfUserPersonalisation = "name of user";
+    private const string SchoolPersonalisation = "school";
+    private const string StandardPersonalisation = "standard";
+    private const string UserMessagePersonalisation = "user message";
+
     public List<NotifySendResult> SendSingleRecommendationEmail(
         ShareByEmailModel model,
         ComponentTextBodyEntry textBody,
@@ -30,10 +35,10 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         var recommendationMarkdown = MarkdownRenderer.Render(textBody.RichText);
         var personalisation = new Dictionary<string, object>
         {
-            { "name of user", model.NameOfUser },
-            { "school", establishmentName },
-            { "standard", categoryName.ToLowerInvariant() },
-            { "user message", userMessage },
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, establishmentName },
+            { StandardPersonalisation, categoryName.ToLowerInvariant() },
+            { UserMessagePersonalisation, userMessage },
             { "recommendation name", recommendationHeader },
             { "status", recommendationStatus.GetDisplayName() },
             { "recommendation", recommendationMarkdown },
@@ -67,11 +72,11 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         );
         var personalisation = new Dictionary<string, object>
         {
-            { "name of user", model.NameOfUser },
-            { "school", establishmentName },
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, establishmentName },
             { "standard lowercase", categoryName.ToLowerInvariant() },
-            { "user message", userMessage },
-            { "standard", categoryName },
+            { UserMessagePersonalisation, userMessage },
+            { StandardPersonalisation, categoryName },
             { "recommendations", standardMarkdown },
         };
 
@@ -89,8 +94,8 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
     public List<NotifySendResult> SendMatStandardEmail(
         ShareByEmailModel model,
         List<QuestionnaireSectionEntry> sections,
-        string categoryName,
-        string matName
+        string matName,
+        string categoryName
     )
     {
         var userMessage = BuildUserMessage(model);
@@ -98,11 +103,11 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
 
         var personalisation = new Dictionary<string, object>
         {
-            { "name of user", model.NameOfUser },
-            { "school", matName },
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, matName },
             { "standard lowercase", categoryName.ToLowerInvariant() },
-            { "user message", userMessage },
-            { "standard", categoryName },
+            { UserMessagePersonalisation, userMessage },
+            { StandardPersonalisation, categoryName },
             { "recommendations mat", standardMarkdown },
         };
 
@@ -119,9 +124,9 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
     public List<NotifySendResult> SendMatSingleRecommendationEmail(
         ShareByEmailModel model,
         ComponentTextBodyEntry textBody,
+        string matName,
         string recommendationHeader,
         string categoryName,
-        string matName,
         string topic,
         string schoolsList
     )
@@ -131,10 +136,10 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
 
         var personalisation = new Dictionary<string, object>
         {
-            { "name of user", model.NameOfUser },
-            { "school", matName },
-            { "standard", categoryName.ToLowerInvariant() },
-            { "user message", userMessage },
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, matName },
+            { StandardPersonalisation, categoryName.ToLowerInvariant() },
+            { UserMessagePersonalisation, userMessage },
             { "recommendation name", recommendationHeader },
             { "recommendation", recommendationMarkdown },
             { "topic", topic.ToLowerInvariant() },

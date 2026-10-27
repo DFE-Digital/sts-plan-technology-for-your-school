@@ -208,8 +208,8 @@ public class PagesViewBuilder(
             var matNotifyResults = _notifyService.SendMatStandardEmail(
                 inputModel.ToModel(),
                 category.Sections,
-                category.Header.Text,
-                matName
+                matName,
+                category.Header.Text
             );
 
             var matReturnToModel = new ActionViewModel(

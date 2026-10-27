@@ -752,15 +752,15 @@ public class RecommendationsViewBuilder(
             );
 
             var notifySendResults =
-                _notifyService.SendMatSingleRecommendationEmail(
-                    inputModel.ToModel(),
-                    textBody,
-                    recommendationChunk.HeaderText,
-                    category.Header.Text,
-                    matName,
-                    section.Name,
-                    schoolsList
-                );
+             _notifyService.SendMatSingleRecommendationEmail(
+                 inputModel.ToModel(),
+                 textBody,
+                 matName,
+                 recommendationChunk.HeaderText,
+                 category.Header.Text,
+                 section.Name,
+                 schoolsList
+             );
 
             var returnToModel = new ActionViewModel(
                 actionName: nameof(
