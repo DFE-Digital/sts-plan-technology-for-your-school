@@ -1,11 +1,12 @@
-using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -13,11 +14,12 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class PagesViewBuilder(
-    ILogger<PagesViewBuilder> logger,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
@@ -136,46 +138,95 @@ public class PagesViewBuilder(
 
     public async Task<IActionResult> RouteToCategoryLandingPrintPageAsync(
         Controller controller,
-        string categorySlug
+        string categorySlug,
+        CategoryLandingContext context = CategoryLandingContext.School
     )
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
+
         if (category is null)
         {
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModel(controller, category, categorySlug);
+        var landingPageViewModel = BuildLandingPageViewModel(
+            controller,
+            category,
+            categorySlug,
+            context: context
+        );
 
-        return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
+        return controller.View(
+            CategoryLandingPagePrintView,
+            landingPageViewModel
+        );
     }
 
     public async Task<IActionResult> RouteToShareStandardPageAsync(
-        Controller controller,
-        string categorySlug,
-        ShareByEmailInputViewModel? inputModel = null
-    )
+    Controller controller,
+    string categorySlug,
+    ShareByEmailInputViewModel? inputModel = null,
+    CategoryLandingContext context = CategoryLandingContext.School
+)
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
+
         if (category is null)
         {
             return controller.RedirectToHomePage();
         }
 
+        var isMat = context == CategoryLandingContext.MAT;
+
         var viewModel = BuildShareByEmailViewModel(
             nameof(PagesController),
-            nameof(PagesController.ShareStandard),
+            isMat
+                ? nameof(PagesController.ShareMatStandard)
+                : nameof(PagesController.ShareStandard),
             category,
             null,
             categorySlug,
             null,
             null,
-            inputModel
+            inputModel,
+            isMat
         );
 
         if (inputModel is null || !controller.ModelState.IsValid)
         {
             return controller.View(ShareByEmailViewName, viewModel);
+        }
+
+        if (isMat)
+        {
+            var matName =
+                CurrentUser.UserOrganisationName
+                ?? throw new InvalidDataException(
+                    "Cannot send an email without a MAT name"
+                );
+
+            var matNotifyResults = _notifyService.SendMatStandardEmail(
+                inputModel.ToModel(),
+                category.Sections,
+                matName,
+                category.Header.Text
+            );
+
+            var matReturnToModel = new ActionViewModel(
+                actionName: nameof(GroupsController.GetMatRecommendationsLanding),
+                controllerName: nameof(GroupsController).GetControllerNameSlug(),
+                linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
+                routeValues: new Dictionary<string, string>
+                {
+                { nameof(categorySlug), categorySlug }
+                }
+            );
+
+            return HandleNotifyShareResults(
+                controller,
+                matNotifyResults,
+                matReturnToModel
+            );
         }
 
         var establishmentName =
@@ -185,15 +236,19 @@ public class PagesViewBuilder(
             );
 
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+
         var recommendationStatuses =
-            await _recommendationService.GetLatestRecommendationStatusesAsync(establishmentId);
+            await _recommendationService.GetLatestRecommendationStatusesAsync(
+                establishmentId
+            );
 
         var sectionIds = category.Sections.Select(s => s.Id).ToList();
 
-        var sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
-            establishmentId,
-            sectionIds
-        );
+        var sectionStatuses =
+            await _submissionService.GetSectionStatusesForSchoolAsync(
+                establishmentId,
+                sectionIds
+            );
 
         var notifyResults = _notifyService.SendStandardEmail(
             inputModel.ToModel(),
@@ -208,30 +263,50 @@ public class PagesViewBuilder(
             actionName: nameof(PagesController.GetByRoute),
             controllerName: nameof(PagesController),
             linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
-            routeValues: new Dictionary<string, string> { { "route", categorySlug } }
+            routeValues: new Dictionary<string, string>
+            {
+            { "route", categorySlug }
+            }
         );
 
-        return HandleNotifyShareResults(controller, notifyResults, returnToModel);
+        return HandleNotifyShareResults(
+            controller,
+            notifyResults,
+            returnToModel
+        );
     }
 
     private static CategoryLandingPageViewModel BuildLandingPageViewModel(
         Controller controller,
         QuestionnaireCategoryEntry category,
         string categorySlug,
-        List<RelatedActionEntry>? relatedActions = null
+        List<RelatedActionEntry>? relatedActions = null,
+        CategoryLandingContext context = CategoryLandingContext.School
     )
     {
+        var relatedActionsViewModels =
+            relatedActions
+                ?.Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList()
+            ?? [];
+
         return new CategoryLandingPageViewModel
         {
             Slug = categorySlug,
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData[StatePassingMechanismConstants.SectionName] as string,
+            SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
             HasBanner = category.HasBanner,
             AfterContentContent = category.AfterContentContent,
             RelatedActions = BuildRelatedActionsViewModels(relatedActions),
+            Context = context,
         };
     }
 
@@ -255,6 +330,33 @@ public class PagesViewBuilder(
         }
 
         return shareResultsViewModel;
+    }
+
+    public async Task<IActionResult> RouteToMatCategoryLandingPageAsync(
+        Controller controller,
+        string categorySlug
+    )
+    {
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
+
+        if (category is null)
+        {
+            return controller.RedirectToHomePage();
+        }
+
+        var page = await ContentfulService.GetPageBySlugAsync(categorySlug);
+
+        var landingPageViewModel = BuildLandingPageViewModel(
+            controller,
+            category,
+            categorySlug,
+            page?.RelatedActions,
+            CategoryLandingContext.MAT
+        );
+
+        controller.ViewData[StatePassingMechanismConstants.Title] = category.Header.Text;
+
+        return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 
     private async Task<IActionResult> RouteToLandingPageView(Controller controller, PageEntry page)
@@ -290,8 +392,13 @@ public class PagesViewBuilder(
         }
 
         return relatedActions
-            .Where(x => !string.IsNullOrWhiteSpace(x.Title) && !string.IsNullOrWhiteSpace(x.Url))
-            .Select(x => new RelatedActionViewModel { Text = x.Title!, Url = x.Url! })
+            .Where(x => x is not null)
+            .Select(x => new RelatedActionViewModel
+            {
+                Text = x.Title ?? string.Empty,
+                Url = x.Url ?? string.Empty,
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Url))
             .ToList();
     }
 }

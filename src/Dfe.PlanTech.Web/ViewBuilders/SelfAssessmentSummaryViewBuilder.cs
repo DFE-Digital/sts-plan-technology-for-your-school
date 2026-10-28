@@ -37,7 +37,7 @@ public class SelfAssessmentSummaryViewBuilder(
 
         if (CurrentUser.IsMat && viewModel.CompletedSchoolCount == 0)
         {
-            return controller.Redirect($"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}");
+            return controller.Redirect($"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}");
         }
 
         return controller.View(SelfAssessmentSummaryViewName, viewModel);
@@ -83,7 +83,7 @@ public class SelfAssessmentSummaryViewBuilder(
             RecommendationLinks = submittedSubmissions.Select(BuildRecommendationLink).ToList(),
             ShowSubmitAnotherSelfAssessment = true,
             SubmitAnotherSelfAssessmentHref = CurrentUser.IsMat
-                ? $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
+                ? $"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
                 : $"/{recommendationCategorySlug}",
             BackToHomeHref = UrlConstants.HomePage,
         };
@@ -104,7 +104,9 @@ public class SelfAssessmentSummaryViewBuilder(
 
                 SchoolName = CurrentUser.IsMat ? submission.Establishment!.OrgName : null,
 
-                Href = $"/{recommendationCategorySlug}",
+                Href = CurrentUser.IsMat
+                    ? $"/trust/{recommendationCategorySlug}"
+                    : $"/{recommendationCategorySlug}",
             };
         }
     }

@@ -4,6 +4,8 @@ $govuk-font-family: Inter, sans-serif;
 @import '../../node_modules/govuk-frontend/dist/govuk/index.scss';
 @import '../../node_modules/dfe-frontend/packages/dfefrontend.scss';
 
+@import '../../node_modules/@ministryofjustice/frontend/moj/components/multi-select/multi-select';
+
 @import 'variables';
 @import 'app-task-list';
 @import 'aside';

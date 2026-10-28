@@ -1,6 +1,5 @@
 using System.Data;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
@@ -29,14 +28,10 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
  * As you'll note in SubmitResponse below, the parameters are sent in that order.
  */
 
-public class StoredProcedureRepository : IStoredProcedureRepository
+public class StoredProcedureRepository(PlanTechDbContext dbContext) : IStoredProcedureRepository
 {
-    protected readonly PlanTechDbContext _db;
-
-    public StoredProcedureRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<FirstActivityForEstablishmentRecommendationEntity?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
@@ -72,66 +67,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         }
 
         return results[0];
-    }
-
-    // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
-    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
-        string sectionIds,
-        int establishmentId
-    )
-    {
-        var sectionIdList = sectionIds
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .ToList();
-
-        var currentSubmissions = await _db
-            .Submissions.Where(s =>
-                !s.Deleted
-                && s.EstablishmentId == establishmentId
-                && sectionIdList.Contains(s.SectionId)
-            )
-            .GroupBy(s => s.SectionId)
-            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
-            .ToListAsync();
-
-        var lastCompleteSubmissions = await _db
-            .Submissions.Where(s =>
-                !s.Deleted
-                && s.EstablishmentId == establishmentId
-                && sectionIdList.Contains(s.SectionId)
-                && (s.Status == SubmissionStatus.CompleteReviewed)
-            )
-            .GroupBy(s => s.SectionId)
-            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
-            .ToListAsync();
-
-        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
-        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
-            s => s.SectionId,
-            s => s
-        );
-
-        var result = sectionIdList
-            .Select(sectionId =>
-            {
-                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
-                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
-
-                return new SectionStatusEntity
-                {
-                    SectionId = sectionId,
-                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
-                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                    DateUpdated =
-                        currentSubmission?.DateLastUpdated
-                        ?? currentSubmission?.DateCreated
-                        ?? DateTime.UtcNow,
-                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                };
-            })
-            .ToList();
-
-        return result;
     }
 
     private static string BuildCommandString(string storedProcedureName, SqlParameter[] parameters)

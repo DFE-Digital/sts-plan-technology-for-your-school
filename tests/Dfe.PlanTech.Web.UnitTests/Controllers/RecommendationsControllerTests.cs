@@ -215,4 +215,522 @@ public class RecommendationsControllerTests
             )
         );
     }
+
+    [Fact]
+    public async Task GetMatSingleRecommendation_CallsViewBuilderAndReturnsResult()
+    {
+        var categorySlug = "cat";
+        var sectionSlug = "sec";
+        var chunkSlug = "chunk";
+
+        _viewBuilder
+            .RouteToSingleRecommendation(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                false,
+                CategoryLandingContext.MAT
+            )
+            .Returns(new OkResult());
+
+        var result = await _controller.GetMatSingleRecommendation(
+            categorySlug,
+            sectionSlug,
+            chunkSlug
+        );
+
+        await _viewBuilder
+            .Received(1)
+            .RouteToSingleRecommendation(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                false,
+                CategoryLandingContext.MAT
+            );
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task PrintMatSingleRecommendation_CallsViewBuilderAndReturnsResult()
+    {
+        var categorySlug = "cat";
+        var sectionSlug = "sec";
+        var chunkSlug = "chunk";
+
+        _viewBuilder
+            .RouteToPrintSingle(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                CategoryLandingContext.MAT
+            )
+            .Returns(new OkResult());
+
+        var result = await _controller.PrintMatSingleRecommendation(
+            categorySlug,
+            sectionSlug,
+            chunkSlug
+        );
+
+        await _viewBuilder
+            .Received(1)
+            .RouteToPrintSingle(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                CategoryLandingContext.MAT
+            );
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task PrintMatAllRecommendations_CallsViewBuilderAndReturnsResult()
+    {
+        var categorySlug = "cat";
+        var sectionSlug = "sec";
+        var chunkSlug = "chunk";
+
+        _viewBuilder
+            .RouteToPrintAll(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                CategoryLandingContext.MAT
+            )
+            .Returns(new OkResult());
+
+        var result = await _controller.PrintMatAllRecommendations(
+            categorySlug,
+            sectionSlug,
+            chunkSlug
+        );
+
+        await _viewBuilder
+            .Received(1)
+            .RouteToPrintAll(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                CategoryLandingContext.MAT
+            );
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task ShareMatSingleRecommendation_CallsViewBuilderAndReturnsResult()
+    {
+        var categorySlug = "cat";
+        var sectionSlug = "sec";
+        var chunkSlug = "chunk";
+
+        _viewBuilder
+            .RouteToShareRecommendationAsync(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                inputModel: null,
+                context: CategoryLandingContext.MAT
+            )
+            .Returns(new OkResult());
+
+        var result = await _controller.ShareMatSingleRecommendation(
+            categorySlug,
+            sectionSlug,
+            chunkSlug
+        );
+
+        await _viewBuilder
+            .Received(1)
+            .RouteToShareRecommendationAsync(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                inputModel: null,
+                context: CategoryLandingContext.MAT
+            );
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task PostShareMatSingleRecommendation_CallsViewBuilderAndReturnsResult()
+    {
+        var categorySlug = "cat";
+        var sectionSlug = "sec";
+        var chunkSlug = "chunk";
+        var inputModel = new ShareByEmailInputViewModel
+        {
+            EmailAddresses = new List<string> { "test@test.com", "hello@hello.com" },
+            NameOfUser = "Drew",
+            UserMessage = "Hello",
+        };
+
+        _viewBuilder
+            .RouteToShareRecommendationAsync(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                inputModel,
+                CategoryLandingContext.MAT
+            )
+            .Returns(new OkResult());
+
+        var result = await _controller.PostShareMatSingleRecommendation(
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            inputModel
+        );
+
+        await _viewBuilder
+            .Received(1)
+            .RouteToShareRecommendationAsync(
+                _controller,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                inputModel,
+                CategoryLandingContext.MAT
+            );
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Theory]
+    [InlineData(null, "sec", "chunk")]
+    [InlineData("cat", null, "chunk")]
+    [InlineData("cat", "sec", null)]
+    public async Task GetMatSingleRecommendation_WithNullValues_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _controller.GetMatSingleRecommendation(
+                categorySlug!,
+                sectionSlug!,
+                chunkSlug!
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToSingleRecommendation(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData("", "sec", "chunk")]
+    [InlineData(" ", "sec", "chunk")]
+    [InlineData("cat", "", "chunk")]
+    [InlineData("cat", " ", "chunk")]
+    [InlineData("cat", "sec", "")]
+    [InlineData("cat", "sec", " ")]
+    public async Task GetMatSingleRecommendation_WithEmptyValues_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _controller.GetMatSingleRecommendation(
+                categorySlug,
+                sectionSlug,
+                chunkSlug
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToSingleRecommendation(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData(null, "sec", "chunk")]
+    [InlineData("cat", null, "chunk")]
+    [InlineData("cat", "sec", null)]
+    public async Task PrintMatSingleRecommendation_WithNullValues_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _controller.PrintMatSingleRecommendation(
+                categorySlug!,
+                sectionSlug!,
+                chunkSlug!
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToPrintSingle(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData("", "sec", "chunk")]
+    [InlineData(" ", "sec", "chunk")]
+    [InlineData("cat", "", "chunk")]
+    [InlineData("cat", " ", "chunk")]
+    [InlineData("cat", "sec", "")]
+    [InlineData("cat", "sec", " ")]
+    public async Task PrintMatSingleRecommendation_WithEmptyValues_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _controller.PrintMatSingleRecommendation(
+                categorySlug,
+                sectionSlug,
+                chunkSlug
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToPrintSingle(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData(null, "sec", "chunk")]
+    [InlineData("cat", null, "chunk")]
+    [InlineData("cat", "sec", null)]
+    public async Task PrintMatAllRecommendations_WithNullValues_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _controller.PrintMatAllRecommendations(
+                categorySlug!,
+                sectionSlug!,
+                chunkSlug!
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToPrintAll(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData("", "sec", "chunk")]
+    [InlineData(" ", "sec", "chunk")]
+    [InlineData("cat", "", "chunk")]
+    [InlineData("cat", " ", "chunk")]
+    [InlineData("cat", "sec", "")]
+    [InlineData("cat", "sec", " ")]
+    public async Task PrintMatAllRecommendations_WithEmptyValues_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _controller.PrintMatAllRecommendations(
+                categorySlug,
+                sectionSlug,
+                chunkSlug
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToPrintAll(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData(null, "sec", "chunk")]
+    [InlineData("cat", null, "chunk")]
+    [InlineData("cat", "sec", null)]
+    public async Task ShareMatSingleRecommendation_WithNullValues_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _controller.ShareMatSingleRecommendation(
+                categorySlug!,
+                sectionSlug!,
+                chunkSlug!
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToShareRecommendationAsync(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<ShareByEmailInputViewModel?>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData("", "sec", "chunk")]
+    [InlineData(" ", "sec", "chunk")]
+    [InlineData("cat", "", "chunk")]
+    [InlineData("cat", " ", "chunk")]
+    [InlineData("cat", "sec", "")]
+    [InlineData("cat", "sec", " ")]
+    public async Task ShareMatSingleRecommendation_WithEmptyValues_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _controller.ShareMatSingleRecommendation(
+                categorySlug,
+                sectionSlug,
+                chunkSlug
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToShareRecommendationAsync(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<ShareByEmailInputViewModel?>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData(null, "sec", "chunk")]
+    [InlineData("cat", null, "chunk")]
+    [InlineData("cat", "sec", null)]
+    public async Task PostShareMatSingleRecommendation_WithNullValues_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? chunkSlug
+    )
+    {
+        var inputModel = new ShareByEmailInputViewModel
+        {
+            EmailAddresses = new List<string> { "test@test.com" },
+            NameOfUser = "Drew",
+        };
+
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _controller.PostShareMatSingleRecommendation(
+                categorySlug!,
+                sectionSlug!,
+                chunkSlug!,
+                inputModel
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToShareRecommendationAsync(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<ShareByEmailInputViewModel?>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
+
+    [Theory]
+    [InlineData("", "sec", "chunk")]
+    [InlineData(" ", "sec", "chunk")]
+    [InlineData("cat", "", "chunk")]
+    [InlineData("cat", " ", "chunk")]
+    [InlineData("cat", "sec", "")]
+    [InlineData("cat", "sec", " ")]
+    public async Task PostShareMatSingleRecommendation_WithEmptyValues_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        var inputModel = new ShareByEmailInputViewModel
+        {
+            EmailAddresses = new List<string> { "test@test.com" },
+            NameOfUser = "Drew",
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _controller.PostShareMatSingleRecommendation(
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                inputModel
+            )
+        );
+
+        await _viewBuilder
+            .DidNotReceive()
+            .RouteToShareRecommendationAsync(
+                Arg.Any<Controller>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<ShareByEmailInputViewModel?>(),
+                Arg.Any<CategoryLandingContext>()
+            );
+    }
 }

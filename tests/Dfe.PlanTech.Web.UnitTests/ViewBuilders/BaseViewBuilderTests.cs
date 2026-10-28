@@ -180,6 +180,7 @@ public class BaseViewBuilderTests
         Assert.Equal("Category heading", result.Caption);
         Assert.Equal("Share list of recommendations by email", result.Heading);
         Assert.Same(inputModel, result.InputModel);
+        Assert.False(result.IsMat);
     }
 
     [Fact]
@@ -211,6 +212,29 @@ public class BaseViewBuilderTests
         Assert.Equal("Chunk heading", result.Caption);
         Assert.Equal("Share a recommendation by email", result.Heading);
         Assert.Null(result.InputModel);
+    }
+
+    [Fact]
+    public void BuildShareByEmailViewModel_WhenIsMatIsTrue_SetsIsMat()
+    {
+        var category = new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry { Text = "Category heading" },
+        };
+
+        var result = TestableBaseViewBuilder.CallBuildShareByEmailViewModel(
+            controllerName: "PagesController",
+            actionName: "PostShare",
+            category: category,
+            chunk: null,
+            categorySlug: "category-slug",
+            sectionSlug: null,
+            chunkSlug: null,
+            inputModel: null,
+            isMat: true
+        );
+
+        Assert.True(result.IsMat);
     }
 
     [Fact]

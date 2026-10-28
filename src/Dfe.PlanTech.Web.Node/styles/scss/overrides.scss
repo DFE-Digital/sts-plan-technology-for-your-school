@@ -292,3 +292,66 @@ ul.landing-page-list > li {
 .app-auth-action__link:active {
   color: hsla(0, 0%, 100%, 0.99);
 }
+
+#select-statuses-table {
+  .update {
+    white-space: nowrap;
+  }
+  .govuk-table__cell {
+    vertical-align: middle;
+  }
+  .govuk-table__header {
+    vertical-align: middle;
+  }
+  .govuk-table__header.status,
+  .govuk-table__cell.status 
+  {
+    text-align: right;
+  }
+  .schools {
+    width: 100%;
+  }
+}
+
+.organisation-context-header {
+  background: #eaf2f5;
+  box-shadow: 0 0 0 100vmax #eaf2f5;
+  clip-path: inset(0 -100vmax);
+  padding-bottom: 16px;
+}
+
+.organisation-context-header .govuk-breadcrumbs {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.organisation-context-header .school-ident-name {
+  margin-bottom: 0;
+}
+
+.organisation-context-header:not(:has(.govuk-breadcrumbs)) h1.govuk-heading-l.school-ident-name {
+    padding-top: 77px !important;
+    transform: translateY(-32px);
+}
+
+h1.govuk-heading-l.school-ident-name {
+    padding-top: 32px !important;
+    margin-bottom: 16px;
+}
+
+.group-recommendation-progress .govuk-table__header,
+.group-recommendation-progress .govuk-table__cell {
+    vertical-align: middle;
+}
+
+.group-recommendation-progress__last-updated {
+    color: #505a5f;
+}
+
+table.govuk-table.group-recommendation-progress {
+    margin-top: 0px;
+}
+
+.group-recommendation-progress__status {
+    text-align: right !important;
+}
