@@ -5,12 +5,12 @@ on:
     branches: ['main', 'development']
     paths:
       - 'src/Dfe.PlanTech.Web.Node/**'
-
+      
 permissions:
   checks: read
   pull-requests: read
   contents: write
-
+  
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
