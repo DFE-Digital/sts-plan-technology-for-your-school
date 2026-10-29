@@ -7,8 +7,7 @@
     var sectionSlug = Model.Section?.InterstitialPage.Slug;
     var recommendationSlug = Model.RecommendationChunk?.Slug;
     var sectionName = Model.Section?.Name ?? "";
-    var backLinkHref = $"/home";
-
+    var backLinkHref = $"/trust/{categorySlug}/{sectionSlug}/recommendations/{recommendationSlug}";
     var dynamicValues = new Dictionary<string, string>
     {
         ["topic"] = sectionName.ToLowerInvariant(),
@@ -18,11 +17,7 @@
 }
 
 @section NavButton {
-    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.HomePage"
-                     class="noprint non-js-only govuk-back-link">
-        Home
-    </govuk-back-link>
-    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
+    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint">
         @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToUpdateStatusBackLink)
     </govuk-back-link>
 }
