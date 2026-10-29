@@ -16,10 +16,7 @@
 }
 
 @section NavButton {
-    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
-        Home
-    </govuk-back-link>
-    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
+    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint">
         @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectStatusBackLink)
     </govuk-back-link>
 
