@@ -294,7 +294,7 @@ public class ReviewAnswersViewBuilder(
             QuestionsAnswered = responses.Count,
             TotalQuestions = section.Questions.Count(),
             ShowInProgressDisclaimer = isMatInProgressView,
-            BackLinkHref = isMatInProgressView ? $"/school/{categorySlug}" : $"/{categorySlug}",
+            BackLinkHref = isMatInProgressView ? $"/{categorySlug}/{sectionSlug}/self-assessment" : $"/{categorySlug}",
             BackButtonText = isMatInProgressView
                 ? $"Back to {section.Name.ToLowerInvariant()}"
                 : "Back to recommendations",

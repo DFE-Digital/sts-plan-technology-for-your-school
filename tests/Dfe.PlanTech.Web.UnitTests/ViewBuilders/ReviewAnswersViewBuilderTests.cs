@@ -1428,6 +1428,66 @@ public class ReviewAnswersViewBuilderTests
     }
 
     [Fact]
+    public void BuildViewAnswersViewModel_WhenMatInProgressView_SetsBackLinkToSelfAssessment()
+    {
+        var section = new QuestionnaireSectionEntry
+        {
+            Name = "Monitoring",
+            Questions = [],
+        };
+
+        var submissionModel = new SubmissionRoutingDataModel(
+            null,
+            section,
+            null,
+            SubmissionStatus.InProgress
+        );
+
+        var result = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
+            section,
+            submissionModel,
+            "filtering-monitoring-standard",
+            "monitoring",
+            isMatInProgressView: true,
+            schoolName: "Test School"
+        );
+
+        Assert.Equal(
+            "/filtering-monitoring-standard/monitoring/self-assessment",
+            result.BackLinkHref
+        );
+    }
+
+    [Fact]
+    public void BuildViewAnswersViewModel_WhenNotMatInProgressView_KeepsCategoryBackLink()
+    {
+        var section = new QuestionnaireSectionEntry
+        {
+            Name = "Monitoring",
+            Questions = [],
+        };
+
+        var submissionModel = new SubmissionRoutingDataModel(
+            null,
+            section,
+            null,
+            SubmissionStatus.CompleteReviewed
+        );
+
+        var result = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
+            section,
+            submissionModel,
+            "filtering-monitoring-standard",
+            "monitoring"
+        );
+
+        Assert.Equal(
+            "/filtering-monitoring-standard",
+            result.BackLinkHref
+        );
+    }
+
+    [Fact]
     public void Constructor_WithNullMatEstablishmentProvider_ThrowsArgumentNullException()
     {
         var exception =
