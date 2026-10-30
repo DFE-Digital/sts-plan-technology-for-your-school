@@ -316,7 +316,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
-        controller.TempData["SectionName"] = "Some Section";
+        controller.TempData[StatePassingMechanismConstants.SectionName] = "Some Section";
 
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
@@ -586,7 +586,7 @@ public class PagesViewBuilderTests
 
         var inputModel = new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["test@example.com"],
         };
 
@@ -871,7 +871,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
-        controller.TempData["SectionName"] = "Some Section";
+        controller.TempData[StatePassingMechanismConstants.SectionName] = "Some Section";
 
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
@@ -898,7 +898,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
-        controller.TempData["SectionName"] = "Some Section";
+        controller.TempData[StatePassingMechanismConstants.SectionName] = "Some Section";
 
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
@@ -949,10 +949,7 @@ public class PagesViewBuilderTests
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
 
-        var action = await sut.RouteToMatCategoryLandingPageAsync(
-            controller,
-            "missing-category"
-        );
+        var action = await sut.RouteToMatCategoryLandingPageAsync(controller, "missing-category");
 
         var redirect = Assert.IsType<RedirectToActionResult>(action);
         Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
@@ -986,10 +983,7 @@ public class PagesViewBuilderTests
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
 
-        var action = await sut.RouteToMatCategoryLandingPageAsync(
-            controller,
-            categorySlug
-        );
+        var action = await sut.RouteToMatCategoryLandingPageAsync(controller, categorySlug);
 
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
@@ -1029,7 +1023,7 @@ public class PagesViewBuilderTests
     {
         return new ShareByEmailInputViewModel
         {
-            NameOfUser = "Drew",
+            NameOfUser = "John",
             EmailAddresses = ["drew@example.com"],
             UserMessage = "Hello",
         };
