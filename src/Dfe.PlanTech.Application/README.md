@@ -109,7 +109,7 @@ Thirteen focused configuration classes bound from `appsettings.json`, covering:
 | `ContentSecurityPolicyConfiguration` | CSP header sources |
 | `DfeSignInConfiguration` | OAuth settings for DfE Sign-in |
 | `ContentfulOptionsConfiguration` | Preview vs. production environment |
-| `GoogleTagManagerConfiguration` / `TrackingOptionsConfiguration` | GTM and Clarity IDs |
+| `GoogleTagManagerConfiguration` | GTM container ID for G4A/Clarity |
 | `RobotsConfiguration` | `robots.txt` rules |
 | `ErrorMessagesConfiguration` / `ErrorPagesConfiguration` | Error content |
 | `ContactOptionsConfiguration` | Contact link |
