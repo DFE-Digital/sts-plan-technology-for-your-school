@@ -6,5 +6,4 @@ namespace Dfe.PlanTech.Core.Configuration;
 public record GoogleTagManagerConfiguration
 {
     public string Id { get; set; } = "";
-    public string SiteVerificationId { get; init; } = "";
 }

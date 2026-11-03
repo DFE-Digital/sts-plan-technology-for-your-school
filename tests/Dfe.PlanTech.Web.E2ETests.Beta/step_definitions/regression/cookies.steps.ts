@@ -48,9 +48,6 @@ Then('Google Tag Manager should be enabled', async function () {
     { timeout: 10000 },
   );
 
-  const hasMeta = await this.page.locator('meta[name="google-site-verification"]').count();
-  expect(hasMeta).toBeGreaterThan(0);
-
   const hasScript = await this.page.locator('head script[src*="googletagmanager"]').count();
   expect(hasScript).toBeGreaterThan(0);
 
@@ -62,7 +59,6 @@ Then('Google Tag Manager should be enabled', async function () {
 });
 
 Then('Google Tag Manager should be disabled', async function () {
-  await expect(this.page.locator('meta[name="google-site-verification"]')).toHaveCount(0);
   const noScriptText = await this.page.locator('noscript').allTextContents();
   const hasGTM = noScriptText.some((t: string | string[]) =>
     t.includes('www.googletagmanager.com'),
