@@ -230,8 +230,7 @@ public class RecommendationServiceTests
     }
 
     [Fact]
-    public async Task
-        GetLatestRecommendationStatusesByRecommendationIdAsync_WhenWorkflowThrows_ThenPropagatesException()
+    public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenWorkflowThrows_ThenPropagatesException()
     {
         // Arrange - Workflow encounters error during recommendation lookup
         var establishmentId = 999;
@@ -273,8 +272,8 @@ public class RecommendationServiceTests
             establishmentId,
             userId,
             newStatus,
-            noteText,
-            matEstablishmentId
+            noteText: noteText,
+            matEstablishmentId: matEstablishmentId
         );
 
         // Assert
@@ -285,8 +284,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                noteText,
-                matEstablishmentId
+                noteText: noteText,
+                matEstablishmentId: matEstablishmentId
             );
     }
 
@@ -317,8 +316,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                null,
-                null
+                noteText: null,
+                matEstablishmentId: null
             );
     }
 
@@ -330,6 +329,7 @@ public class RecommendationServiceTests
         var establishmentId = 111;
         var userId = 222;
         var newStatus = RecommendationStatus.InProgress;
+
         var expectedException = new InvalidOperationException("Recommendation not found");
 
         _recommendationWorkflow
@@ -338,8 +338,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                null,
-                null
+                noteText: null,
+                matEstablishmentId: null
             )
             .ThrowsAsync(expectedException);
 
@@ -363,8 +363,8 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                null,
-                null
+                noteText: null,
+                matEstablishmentId: null
             );
     }
 
@@ -386,7 +386,7 @@ public class RecommendationServiceTests
             establishmentId,
             userId,
             newStatus,
-            emptyNoteText
+            noteText: emptyNoteText
         );
 
         // Assert - Confirms empty string is passed to workflow (not null)
@@ -397,14 +397,13 @@ public class RecommendationServiceTests
                 establishmentId,
                 userId,
                 newStatus,
-                emptyNoteText,
-                null
+                noteText: emptyNoteText,
+                matEstablishmentId: null
             );
     }
 
     [Fact]
-    public async Task
-        GetFirstActivityForEstablishmentRecommendationAsync_WhenCalledWithAllParameters_ThenDelegatesToWorkflow()
+    public async Task GetFirstActivityForEstablishmentRecommendationAsync_WhenCalledWithAllParameters_ThenDelegatesToWorkflow()
     {
         // Arrange
         var establishmentId = 123;
@@ -474,39 +473,24 @@ public class RecommendationServiceTests
     public async Task GetRecommendationsByContentfulReferencesAsync_WhenCalled_ThenDelegatesToWorkflow()
     {
         // Arrange
-        var recommendationContentfulReferences = new[]
-        {
-            "rec-001",
-            "rec-002"
-        };
+        var recommendationContentfulReferences = new[] { "rec-001", "rec-002" };
 
         var expectedResult = new List<SqlRecommendationDto>
         {
-            new()
-            {
-                Id = 1,
-                ContentfulSysId = "rec-001"
-            },
-            new()
-            {
-                Id = 2,
-                ContentfulSysId = "rec-002"
-            }
+            new() { Id = 1, ContentfulSysId = "rec-001" },
+            new() { Id = 2, ContentfulSysId = "rec-002" },
         };
 
         _recommendationWorkflow
-            .GetRecommendationsByContentfulReferencesAsync(
-                recommendationContentfulReferences
-            )
+            .GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences)
             .Returns(expectedResult);
 
         var service = CreateServiceUnderTest();
 
         // Act
-        var result =
-            await service.GetRecommendationsByContentfulReferencesAsync(
-                recommendationContentfulReferences
-            );
+        var result = await service.GetRecommendationsByContentfulReferencesAsync(
+            recommendationContentfulReferences
+        );
 
         // Assert
         Assert.Equal(expectedResult, result);
@@ -524,27 +508,20 @@ public class RecommendationServiceTests
     public async Task GetRecommendationsByContentfulReferencesAsync_WhenWorkflowReturnsEmpty_ThenReturnsEmpty()
     {
         // Arrange
-        var recommendationContentfulReferences = new[]
-        {
-            "rec-001",
-            "rec-002"
-        };
+        var recommendationContentfulReferences = new[] { "rec-001", "rec-002" };
 
         var expectedResult = new List<SqlRecommendationDto>();
 
         _recommendationWorkflow
-            .GetRecommendationsByContentfulReferencesAsync(
-                recommendationContentfulReferences
-            )
+            .GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences)
             .Returns(expectedResult);
 
         var service = CreateServiceUnderTest();
 
         // Act
-        var result =
-            await service.GetRecommendationsByContentfulReferencesAsync(
-                recommendationContentfulReferences
-            );
+        var result = await service.GetRecommendationsByContentfulReferencesAsync(
+            recommendationContentfulReferences
+        );
 
         // Assert
         Assert.Empty(result);
@@ -562,34 +539,24 @@ public class RecommendationServiceTests
     public async Task GetRecommendationsByContentfulReferencesAsync_WhenWorkflowThrows_ThenPropagatesException()
     {
         // Arrange
-        var recommendationContentfulReferences = new[]
-        {
-            "rec-error"
-        };
+        var recommendationContentfulReferences = new[] { "rec-error" };
 
-        var expectedException =
-            new InvalidOperationException("Test exception from workflow");
+        var expectedException = new InvalidOperationException("Test exception from workflow");
 
         _recommendationWorkflow
-            .GetRecommendationsByContentfulReferencesAsync(
-                recommendationContentfulReferences
-            )
+            .GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences)
             .ThrowsAsync(expectedException);
 
         var service = CreateServiceUnderTest();
 
         // Act & Assert
-        var actualException =
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.GetRecommendationsByContentfulReferencesAsync(
-                    recommendationContentfulReferences
-                )
-            );
-
-        Assert.Equal(
-            expectedException.Message,
-            actualException.Message
+        var actualException = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.GetRecommendationsByContentfulReferencesAsync(
+                recommendationContentfulReferences
+            )
         );
+
+        Assert.Equal(expectedException.Message, actualException.Message);
 
         await _recommendationWorkflow
             .Received(1)

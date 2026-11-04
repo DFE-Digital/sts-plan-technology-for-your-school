@@ -10,7 +10,7 @@ public class UserContentViewRepository(
     IUserActionIdProvider userActionIdProvider
 ) : IUserContentViewRepository
 {
-    private readonly PlanTechDbContext _dbContext =
+    protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     private readonly IUserActionIdProvider _userActionIdProvider =
         userActionIdProvider ?? throw new ArgumentNullException(nameof(userActionIdProvider));
@@ -26,13 +26,13 @@ public class UserContentViewRepository(
             UserActionId = userActionId,
         };
 
-        _dbContext.UserContentViews.Add(userContentView);
-        await _dbContext.SaveChangesAsync();
+        _db.UserContentViews.Add(userContentView);
+        await _db.SaveChangesAsync();
     }
 
     public Task<int> GetNumberOfTimesContentViewedByUserAsync(int userId, string contentfulRef)
     {
-        return _dbContext.UserContentViews.CountAsync(ua =>
+        return _db.UserContentViews.CountAsync(ua =>
             ua.UserId == userId && ua.ContentfulRef.Equals(contentfulRef)
         );
     }

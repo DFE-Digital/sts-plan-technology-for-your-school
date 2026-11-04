@@ -1,17 +1,14 @@
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class RecommendationRepository : IRecommendationRepository
+public class RecommendationRepository(PlanTechDbContext dbContext) : IRecommendationRepository
 {
-    private PlanTechDbContext _db;
-
-    public RecommendationRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<
         IEnumerable<RecommendationEntity>
@@ -19,10 +16,76 @@ public class RecommendationRepository : IRecommendationRepository
         IEnumerable<string> recommendationContentfulReferences
     )
     {
+        // Recommendations are versioned by inserting a new row per text change, so return only the
+        // latest row per reference. Callers resolve a single recommendation via FirstOrDefault(),
+        // which would otherwise pick an arbitrary version.
         return await _db
             .Recommendations.Where(r =>
                 recommendationContentfulReferences.Contains(r.ContentfulRef)
             )
+            .GroupBy(r => r.ContentfulRef)
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First())
+            .ToListAsync();
+    }
+
+    public async Task<List<RecommendationEntity>> UpsertRecommendationsAsync(
+        IEnumerable<SqlRecommendationDto> recommendationDtos
+    )
+    {
+        var contentfulRefs = recommendationDtos.Select(r => r.ContentfulSysId);
+        var existingRecommendations = await _db
+            .Recommendations.Where(recommendation =>
+                contentfulRefs.Contains(recommendation.ContentfulRef)
+            )
+            .Where(recommendation => recommendation != null)
+            .GroupBy(recommendation => recommendation.ContentfulRef)
+            .Select(group => group.OrderByDescending(g => g.DateCreated).First())
+            .ToListAsync();
+
+        var existingRecommendationContentfulRefs = existingRecommendations
+            .Select(r => r.ContentfulRef)
+            .ToList();
+
+        var recommendationEntitiesToInsert = recommendationDtos
+            .Where(rm => !existingRecommendationContentfulRefs.Contains(rm.ContentfulSysId))
+            .Select(RecommendationEntity.BuildEntity)
+            .ToList();
+
+        var recommendationDtoDictionary = recommendationDtos.ToDictionary(
+            r => r.ContentfulSysId,
+            r => r
+        );
+
+        foreach (var existingRecommendation in existingRecommendations)
+        {
+            recommendationDtoDictionary.TryGetValue(
+                existingRecommendation.ContentfulRef,
+                out var recommendationDto
+            );
+            if (recommendationDto is null)
+            {
+                continue;
+            }
+
+            var recommendationEntity = RecommendationEntity.BuildEntity(recommendationDto);
+            if (
+                !string.Equals(
+                    recommendationDto.RecommendationText,
+                    existingRecommendation.RecommendationText
+                )
+            )
+            {
+                recommendationEntitiesToInsert.Add(recommendationEntity);
+            }
+        }
+
+        _db.AddRange(recommendationEntitiesToInsert);
+        await _db.SaveChangesAsync();
+
+        return await _db
+            .Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef))
+            .GroupBy(r => r.ContentfulRef)
+            .Select(group => group.OrderByDescending(r => r.DateCreated).First())
             .ToListAsync();
     }
 }

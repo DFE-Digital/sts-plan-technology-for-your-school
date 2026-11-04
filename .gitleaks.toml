@@ -1,0 +1,8 @@
+[extend]
+useDefault = true   # keep all the built-in rules
+
+[allowlist]
+description = "Bundled/minified frontend assets"
+paths = [
+  '''src/Dfe\.PlanTech\.Web/wwwroot/js/.*\.js$''',
+]
