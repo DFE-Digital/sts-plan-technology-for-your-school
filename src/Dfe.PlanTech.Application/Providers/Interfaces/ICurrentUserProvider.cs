@@ -1,11 +1,14 @@
+using Dfe.PlanTech.Core.Models;
+
 namespace Dfe.PlanTech.Application.Providers.Interfaces;
 
 public interface ICurrentUserProvider
 {
     string? DsiReference { get; }
-    string? Email { get; }
     string? GroupSelectedSchoolUrn { get; }
     string? GroupSelectedSchoolName { get; }
+    Guid? SessionId { get; }
+    int? UserId { get; }
 
     // Active Establishment - the selected establishment (if MAT user has selected one), otherwise the user's organisation
     Task<string?> GetActiveEstablishmentNameAsync();
@@ -34,11 +37,17 @@ public interface ICurrentUserProvider
     bool IsGroup { get; }
     bool IsMat { get; }
     bool IsSatOrSSat { get; }
-    int? UserId { get; }
-    bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds);
-    (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
-    void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
-    void ClearSelectedGroupSchool();
-    Guid? SessionId { get; }
+
+    bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds);
+
+    void ClearFocusedAndSelectedEstablishments();
+    SelectedEstablishmentDataModel? GetFocusedSchool();
+    Task SetFocusedSchoolAsync(string selectedSchoolUrn, string selectedSchoolName);
+    IReadOnlyList<int> GetSelectedEstablishmentIds();
+    IReadOnlyList<string> GetSelectedEstablishmentNames();
+    IReadOnlyList<SelectedEstablishmentDataModel> GetSelectedEstablishments();
+    void SetSelectedEstablishments(int id, string urn, string name);
+    void SetSelectedEstablishments(SelectedEstablishmentDataModel establishment);
+    void SetSelectedEstablishments(IList<SelectedEstablishmentDataModel> establishments);
 }

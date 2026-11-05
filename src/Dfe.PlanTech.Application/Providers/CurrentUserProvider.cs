@@ -35,13 +35,16 @@ public class CurrentUserProvider : ICurrentUserProvider
         GetStringFromClaim(ClaimConstants.NameIdentifier)
         ?? throw new AuthenticationException("User is not authenticated");
 
-    public string? Email =>
-        GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
-        ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
+    public string? GroupSelectedSchoolUrn => GetFocusedSchool()?.Urn;
 
-    public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool()?.Urn;
+    public string? GroupSelectedSchoolName => GetFocusedSchool()?.Name; // TODO: understand how/if relates to `GetActiveEstablishmentNameAsync` and if we might be able/willing to remove `GroupSelectedSchoolName` (this is from the cookie, versus `GetActiveEstablishmentNameAsync` is from the database?)
 
-    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name; // TODO: understand how/if relates to `GetActiveEstablishmentNameAsync` and if we might be able/willing to remove `GroupSelectedSchoolName` (this is from the cookie, versus `GetActiveEstablishmentNameAsync` is from the database?)
+    public Guid? SessionId =>
+        Guid.TryParse(GetNameIdentifierFromClaim(ClaimConstants.SessionId), out var sessionId)
+            ? sessionId
+            : null;
+
+    public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
     // Active Establishment methods - resolve to selected school for MAT users, otherwise Organisation
     public async Task<string?> GetActiveEstablishmentNameAsync()
@@ -129,111 +132,106 @@ public class CurrentUserProvider : ICurrentUserProvider
     public string? UserOrganisationCategoryName => Organisation?.Category?.Name;
 
     public bool UserOrganisationSelectsSchools =>
-        Organisation?.Category?.Id != null
-        && DsiConstants.SelectASchoolOrganisationCategoryIds.Contains(Organisation.Category.Id);
+        OrganisationCategoryIdMatchesAny(DsiConstants.SelectASchoolOrganisationCategoryIds);
 
-    public bool IsAuthenticated => GetIsAuthenticated();
+    public bool IsAuthenticated =>
+        _contextAccessor.HttpContext?.User.GetAuthorisationStatus().IsAuthenticated == true;
 
     public bool IsGroup =>
-        Organisation?.Category?.Id != null
-        && DsiConstants.GroupOrganisationCategoryIds.Contains(Organisation.Category.Id);
+        OrganisationCategoryIdMatchesAny(DsiConstants.GroupOrganisationCategoryIds);
 
-    public bool IsMat =>
-        Organisation?.Category?.Id != null
-        && Organisation.Category.Id.Equals(DsiConstants.MatOrganisationCategoryId);
+    public bool IsMat => OrganisationCategoryIdMatchesAny([DsiConstants.MatOrganisationCategoryId]);
 
     public bool IsSatOrSSat =>
-        Organisation?.Category?.Id != null
-        && DsiConstants.SatOrganisationCategoryIds.Contains(Organisation.Category.Id);
+        OrganisationCategoryIdMatchesAny(DsiConstants.SatOrganisationCategoryIds);
 
-    private EstablishmentModel? Organisation =>
-        _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
-
-    public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
+    public bool IsInRole(string role) => _contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
     public bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds)
     {
         return Organisation?.Category?.Id != null && categoryIds.Contains(Organisation.Category.Id);
     }
 
-    public Guid? SessionId =>
-        Guid.TryParse(GetNameIdentifierFromClaim(ClaimConstants.SessionId), out var sessionId)
-            ? sessionId
-            : null;
-
-    public bool IsInRole(string role) => _contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
-
-    public void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName)
+    public void ClearFocusedAndSelectedEstablishments()
     {
-        if (string.IsNullOrEmpty(selectedSchoolUrn) || string.IsNullOrEmpty(selectedSchoolName))
+        Session.ClearFocusedAndSelectedEstablishments();
+    }
+
+    public SelectedEstablishmentDataModel? GetFocusedSchool()
+    {
+        var session = _contextAccessor.HttpContext?.Session;
+        if (session is null)
         {
-            throw new InvalidDataException("No Urn/School name set for selection.");
+            throw new InvalidOperationException("Cannot access the current session.");
         }
 
-        var schoolData = new SelectedSchoolCookieDataModel
+        return session.GetFocusedEstablishment();
+    }
+
+    public async Task SetFocusedSchoolAsync(string urn, string name)
+    {
+        if (string.IsNullOrEmpty(urn) || string.IsNullOrEmpty(name))
         {
-            Urn = selectedSchoolUrn,
-            Name = selectedSchoolName,
+            throw new InvalidDataException("No URN/school name set for selection.");
+        }
+
+        // Optimisation: Throw before calling the database if session is null.
+        var session = Session;
+
+        var establishment =
+            await _establishmentService.GetEstablishmentByReferenceAsync(urn)
+            ?? throw new InvalidDataException("No establishment was found matching the given URN.");
+
+        session.SetFocusedEstablishment(establishment.Id, urn, name);
+    }
+
+    public IReadOnlyList<int> GetSelectedEstablishmentIds()
+    {
+        return Session.GetSelectedEstablishmentIds();
+    }
+
+    public IReadOnlyList<string> GetSelectedEstablishmentNames()
+    {
+        return Session.GetSelectedEstablishmentNames();
+    }
+
+    public IReadOnlyList<SelectedEstablishmentDataModel> GetSelectedEstablishments()
+    {
+        return Session.GetSelectedEstablishments();
+    }
+
+    public void SetSelectedEstablishments(int id, string urn, string name)
+    {
+        var establishment = new SelectedEstablishmentDataModel
+        {
+            Id = id,
+            Urn = urn,
+            Name = name,
         };
-
-        var schoolDataJson = System.Text.Json.JsonSerializer.Serialize(schoolData);
-
-        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieConstants.SelectedSchool);
-
-        _contextAccessor.HttpContext?.Response.Cookies.Append(
-            CookieConstants.SelectedSchool,
-            schoolDataJson,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-            }
-        );
+        Session.SetSelectedEstablishments([establishment]);
     }
 
-    public (string Urn, string Name)? GetGroupSelectedSchool()
+    public void SetSelectedEstablishments(SelectedEstablishmentDataModel establishment)
     {
-        var httpContext = _contextAccessor.HttpContext;
-
-        if (
-            httpContext == null
-            || !httpContext.Request.Cookies.TryGetValue(
-                CookieConstants.SelectedSchool,
-                out var cookieValue
-            )
-            || string.IsNullOrWhiteSpace(cookieValue)
-        )
-        {
-            return null;
-        }
-
-        try
-        {
-            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieDataModel>(
-                cookieValue
-            );
-            if (
-                school != null
-                && !string.IsNullOrEmpty(school.Urn)
-                && !string.IsNullOrEmpty(school.Name)
-            )
-            {
-                return (school.Urn, school.Name);
-            }
-        }
-        catch (System.Text.Json.JsonException)
-        {
-            return null;
-        }
-
-        return null;
+        Session.SetSelectedEstablishments([establishment]);
     }
+
+    public void SetSelectedEstablishments(IList<SelectedEstablishmentDataModel> establishments)
+    {
+        Session.SetSelectedEstablishments(establishments);
+    }
+
+    private EstablishmentModel? Organisation =>
+        _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     // Private instance method to load selected school asynchronously
     private async Task<SqlEstablishmentDto?> LoadSelectedSchoolAsync()
     {
-        var httpContext = _contextAccessor.HttpContext;
+        var session = _contextAccessor.HttpContext?.Session;
+        if (session is null)
+        {
+            throw new InvalidOperationException("Cannot access the current session.");
+        }
 
         // Early return if user is not authenticated
         if (!IsAuthenticated)
@@ -241,74 +239,67 @@ public class CurrentUserProvider : ICurrentUserProvider
             return null;
         }
 
+        var focusedSchool = session.GetFocusedEstablishment();
+
         // Early return if user is not a group user - they shouldn't have a selected school cookie
         if (!IsGroup)
         {
             // Non-group users should not have a selected school cookie - clear it if present
-            if (httpContext?.Request.Cookies.ContainsKey(CookieConstants.SelectedSchool) == true)
+            if (focusedSchool is not null)
             {
                 _logger.LogWarning(
                     "Non-group user has school selection cookie but should not. Clearing school selection cookie ({CookieName}).",
                     CookieConstants.SelectedSchool
                 );
-                ClearSelectedSchoolCookie(httpContext);
+                session.ClearFocusedEstablishment();
             }
             return null;
         }
 
         // From here on, we know the user is a group user
-        if (
-            httpContext == null
-            || !httpContext.Request.Cookies.TryGetValue(
-                CookieConstants.SelectedSchool,
-                out var cookieValue
-            )
-            || string.IsNullOrWhiteSpace(cookieValue)
-        )
+        if (focusedSchool is null || string.IsNullOrWhiteSpace(focusedSchool.Urn))
+        {
+            _logger.LogWarning(
+                "Focused school session value is missing URN value. Clearing focused school session value."
+            );
+            session.ClearFocusedEstablishment();
+            return null;
+        }
+
+        var urn = focusedSchool.Urn;
+
+        var isValidUrn = await IsValidUrn(session, urn);
+        if (!isValidUrn)
         {
             return null;
         }
 
-        string? urn;
         try
         {
-            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieDataModel>(
-                cookieValue
-            );
-            urn = school?.Urn;
-            if (string.IsNullOrWhiteSpace(urn))
-            {
-                _logger.LogWarning(
-                    "School selection cookie is missing URN value. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
-                    cookieValue.Length,
-                    CookieConstants.SelectedSchool
-                );
-                ClearSelectedSchoolCookie(httpContext);
-                return null;
-            }
+            return await _establishmentService.GetEstablishmentByReferenceAsync(urn);
         }
-        catch (System.Text.Json.JsonException ex)
+        catch (Exception ex)
         {
             _logger.LogWarning(
                 ex,
-                "School selection cookie contains invalid JSON. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
-                cookieValue.Length,
-                CookieConstants.SelectedSchool
+                "Failed to get establishment details for URN {Urn} from the database: {Message}. Clearing focused school session value.",
+                urn,
+                ex.Message
             );
-            ClearSelectedSchoolCookie(httpContext);
             return null;
         }
+    }
 
-        // Validate that the selected school is within the user's group
-        if (UserOrganisationId == null)
+    private async Task<bool> IsValidUrn(ISession session, string urn)
+    {
+        if (UserOrganisationId is null)
         {
             _logger.LogWarning(
-                "Group user attempted to access establishment {SelectedUrn} but has no organisation ID. Clearing school selection cookie ({CookieName}).",
-                urn,
-                CookieConstants.SelectedSchool
+                "Group user attempted to access establishment {SelectedUrn} but has no organisation ID. Clearing focused school session value.",
+                urn
             );
-            ClearSelectedSchoolCookie(httpContext);
-            return null;
+            session.ClearFocusedEstablishment();
+            return false;
         }
 
         try
@@ -326,68 +317,36 @@ public class CurrentUserProvider : ICurrentUserProvider
             if (!selectedSchoolIsValid)
             {
                 _logger.LogWarning(
-                    "Group user attempted to access establishment {SelectedUrn} that is not within their group (GID: {GroupId}). Clearing school selection cookie ({CookieName}).",
+                    "Group user attempted to access establishment {SelectedUrn} which is not within their group (GID: {GroupId}). Clearing focused school session value.",
                     urn,
-                    UserOrganisationId.Value,
-                    CookieConstants.SelectedSchool
+                    UserOrganisationId.Value
                 );
-                ClearSelectedSchoolCookie(httpContext);
-                return null;
+                session.ClearFocusedEstablishment();
+                return false;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Failed to validate group membership for URN {Urn} in group {GroupId}. Clearing school selection cookie ({CookieName}).",
+                "Failed to validate group membership for URN {Urn} in group {GroupId}. Clearing focused school session value.",
                 urn,
-                UserOrganisationId.Value,
-                CookieConstants.SelectedSchool
+                UserOrganisationId.Value
             );
-            ClearSelectedSchoolCookie(httpContext);
-            return null;
+            session.ClearFocusedEstablishment();
+            return false;
         }
 
-        try
-        {
-            return await _establishmentService.GetEstablishmentByReferenceAsync(urn);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Failed to get establishment details for URN {Urn} from the database: {Message}. Clearing school selection cookie ({CookieName}).",
-                urn,
-                ex.Message,
-                CookieConstants.SelectedSchool
-            );
-            return null;
-        }
+        return true;
     }
 
-    public void ClearSelectedGroupSchool()
-    {
-        var httpContext = _contextAccessor.HttpContext;
-
-        if (httpContext != null)
-        {
-            ClearSelectedSchoolCookie(httpContext);
-        }
-    }
-
-    private static void ClearSelectedSchoolCookie(HttpContext httpContext)
-    {
-        httpContext.Response.Cookies.Delete(CookieConstants.SelectedSchool);
-    }
+    private ISession Session =>
+        _contextAccessor.HttpContext?.Session
+        ?? throw new InvalidOperationException("Cannot access the current session.");
 
     private int? GetIntFromClaim(string claimType)
     {
         return int.TryParse(GetNameIdentifierFromClaim(claimType), out var id) ? id : null;
-    }
-
-    private bool GetIsAuthenticated()
-    {
-        return _contextAccessor.HttpContext?.User.GetAuthorisationStatus().IsAuthenticated == true;
     }
 
     private string? GetNameIdentifierFromClaim(string claimType)

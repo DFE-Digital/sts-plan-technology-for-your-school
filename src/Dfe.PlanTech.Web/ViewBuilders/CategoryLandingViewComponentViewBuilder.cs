@@ -57,11 +57,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
         return context switch
         {
-            CategoryLandingContext.MAT => await BuildMatViewModelAsync(
-                category,
-                slug,
-                sectionName
-            ),
+            CategoryLandingContext.MAT => await BuildMatViewModelAsync(category, slug, sectionName),
             CategoryLandingContext.School => await BuildSchoolViewModelAsync(
                 category,
                 slug,
@@ -171,7 +167,7 @@ public class CategoryLandingViewComponentViewBuilder(
                     CompletedUserActionId: { } completedUserActionId
                 } => completedUserActionId,
 
-                _ => (Guid?)null
+                _ => (Guid?)null,
             };
 
             string? establishmentName = null;
@@ -181,8 +177,8 @@ public class CategoryLandingViewComponentViewBuilder(
                 var userAction = await _userActionTrackingService.GetAsync(id);
 
                 if (
-                    (userAction?.MatEstablishmentId ?? userAction?.EstablishmentId)
-                    is { } userActionEstablishmentId
+                    (userAction?.MatEstablishmentId ?? userAction?.EstablishmentId) is
+                    { } userActionEstablishmentId
                 )
                 {
                     var userActionEstablishment =
@@ -222,8 +218,9 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-            var groupContext =
-                await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+            var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
+                groupEstablishmentId
+            );
 
             var establishmentIds = groupContext.EstablishmentIds;
             var completedSubmissions = groupContext.CompletedSubmissions;
@@ -231,13 +228,10 @@ public class CategoryLandingViewComponentViewBuilder(
             var completedCountBySectionId = completedSubmissions
                 .Where(s => establishmentIds.Contains(s.EstablishmentId))
                 .GroupBy(s => s.SectionId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(s => s.EstablishmentId).Distinct().Count()
-                );
+                .ToDictionary(g => g.Key, g => g.Select(s => s.EstablishmentId).Distinct().Count());
 
-            var categoryLandingSections = category.Sections
-                .Select(section =>
+            var categoryLandingSections = category
+                .Sections.Select(section =>
                 {
                     var completedCount = completedCountBySectionId.GetValueOrDefault(section.Id);
 
@@ -269,7 +263,9 @@ public class CategoryLandingViewComponentViewBuilder(
                 Sections = category.Sections,
                 SectionName = sectionName,
                 CategoryLandingSections = categoryLandingSections,
-                CompletedSectionsCount = categoryLandingSections.Count(x => x.HasSubmittedAssessments),
+                CompletedSectionsCount = categoryLandingSections.Count(x =>
+                    x.HasSubmittedAssessments
+                ),
                 StatusLinkPartialName = CategoryLandingSectionAssessmentLink,
                 Context = CategoryLandingContext.MAT,
             };
@@ -369,12 +365,13 @@ public class CategoryLandingViewComponentViewBuilder(
             };
         }
     }
+
     private static CategoryLandingSectionRecommendationsViewModel BuildMatSectionRecommendations(
-    QuestionnaireSectionEntry section
-)
+        QuestionnaireSectionEntry section
+    )
     {
-        var chunks = section.CoreRecommendations
-            .Select(recommendation => new RecommendationChunkViewModel
+        var chunks = section
+            .CoreRecommendations.Select(recommendation => new RecommendationChunkViewModel
             {
                 Header = recommendation.HeaderText,
                 Slug = recommendation.Slug,
@@ -397,7 +394,7 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (sortType != null)
             {
-                await _userService.UpsertUserSettingsAsync(
+                await _userService.GetOrCreateUserSettingsAsync(
                     CurrentUser.UserId.Value,
                     sortType.Value
                 );

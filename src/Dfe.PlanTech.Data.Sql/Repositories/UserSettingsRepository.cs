@@ -11,7 +11,7 @@ public class UserSettingsRepository(PlanTechDbContext dbContext) : IUserSettings
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-    public async Task<UserSettingsEntity> UpsertUserSettingsAsync(
+    public async Task<UserSettingsEntity> GetOrCreateUserSettingsAsync(
         int userId,
         RecommendationSortOrder sortOrder
     )

@@ -10,6 +10,7 @@ public class SqlGiasEstablishmentDto : ISqlDto
     public int LocalAuthorityCode { get; init; }
     public int PhaseCode { get; init; }
     public int? TypeOfEstablishmentCode { get; init; }
+    public string? TypeOfEstablishmentName { get; init; }
     public string? Ukprn { get; init; }
     public DateTime SyncedAt { get; init; }
 }

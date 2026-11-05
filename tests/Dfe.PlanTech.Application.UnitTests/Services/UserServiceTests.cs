@@ -12,15 +12,18 @@ public class UserServiceTests
     private UserService CreateServiceUnderTest() => new UserService(_userWorkflow);
 
     [Fact]
-    public async Task UpsertUserSettings_Calls_Workflow()
+    public async Task GetOrCreateUserSettings_Calls_Workflow()
     {
         var sut = CreateServiceUnderTest();
 
-        var result = await sut.UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
+        var result = await sut.GetOrCreateUserSettingsAsync(
+            123,
+            RecommendationSortOrder.LastUpdated
+        );
 
         await _userWorkflow
             .Received(1)
-            .UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
+            .GetOrCreateUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
     }
 
     [Fact]

@@ -19,7 +19,8 @@ public class GroupsController : BaseController<GroupsController>
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
-    public const string SubmitSchoolsUpdateStatusSelectionAction = "SubmitSelectedSchoolsToUpdateStatus";
+    public const string SubmitSchoolsUpdateStatusSelectionAction =
+        "SubmitSelectedSchoolsToUpdateStatus";
     public const string UpdateSelectedSchoolStatusRoute = "UpdateSelectedSchoolsStatus";
 
     public const string GetMatStandardsListAction = "GetMatStandardsList";
@@ -44,8 +45,12 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder =
             groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
-        _groupSelectSchoolsToAssessValidator = groupSelectSchoolsToAssessValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToAssessValidator));
-        _groupSelectSchoolsToUpdateStatusValidator = groupSelectSchoolsToUpdateStatusValidator ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToUpdateStatusValidator));
+        _groupSelectSchoolsToAssessValidator =
+            groupSelectSchoolsToAssessValidator
+            ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToAssessValidator));
+        _groupSelectSchoolsToUpdateStatusValidator =
+            groupSelectSchoolsToUpdateStatusValidator
+            ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToUpdateStatusValidator));
 
         _pagesViewBuilder =
             pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
@@ -57,9 +62,7 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASchoolView()
     {
-        HttpContext.Session.Remove(
-            SessionConstants.SelectedEstablishmentsKey
-        );
+        HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
 
         return await _groupsViewBuilder.RouteToSelectASchoolViewModelAsync(this);
     }
@@ -70,19 +73,12 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
-        var selectedEstablishmentIdsBeforeClear = HttpContext.Session.GetSelectedEstablishmentIds();
-
-        _currentUser.ClearSelectedGroupSchool();
-
-        HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+        HttpContext.Session.ClearFocusedAndSelectedEstablishments();
 
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
     }
 
-    [HttpGet(
-        $"{UrlConstants.TrustSlug}/standards",
-        Name = GetMatStandardsListAction
-    )]
+    [HttpGet($"{UrlConstants.TrustSlug}/standards", Name = GetMatStandardsListAction)]
     public async Task<IActionResult> GetMatStandardsList()
     {
         return await _groupsViewBuilder.RouteToMatStandardsListAsync(this);
@@ -106,7 +102,10 @@ public class GroupsController : BaseController<GroupsController>
         $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}",
         Name = GetSelectASchoolToUpdateStatusAction
     )]
-    public async Task<IActionResult> GetSelectSchoolsToUpdateView(string sectionSlug, string recommendationSlug)
+    public async Task<IActionResult> GetSelectSchoolsToUpdateView(
+        string sectionSlug,
+        string recommendationSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
@@ -122,7 +121,10 @@ public class GroupsController : BaseController<GroupsController>
         $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsSelectStatusToUpdateSlug}",
         Name = GetSelectStatusToUpdateAction
     )]
-    public async Task<IActionResult> GetSelectStatusView(string sectionSlug, string recommendationSlug)
+    public async Task<IActionResult> GetSelectStatusView(
+        string sectionSlug,
+        string recommendationSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
@@ -145,20 +147,16 @@ public class GroupsController : BaseController<GroupsController>
         ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
         ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        var selectedEstablishmentIdsBeforeClear = HttpContext.Session.GetSelectedEstablishmentIds();
+        var selectedEstablishmentIdsBeforeClear = HttpContext.Session.GetSelectedEstablishments();
 
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-        HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+        _currentUser.ClearFocusedAndSelectedEstablishments();
+        await _currentUser.SetFocusedSchoolAsync(schoolUrn, schoolName);
 
-        _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
+        var selectedEstablishmentIdsAfterClear = HttpContext.Session.GetSelectedEstablishments();
 
-        var selectedEstablishmentIdsAfterClear = HttpContext.Session.GetSelectedEstablishmentIds();
-
-        return RedirectToAction(
-            nameof(GetMatRecommendationsLanding),
-            new { categorySlug }
-        );
+        return RedirectToAction(nameof(GetMatRecommendationsLanding), new { categorySlug });
     }
 
     [HttpPost(
@@ -205,7 +203,10 @@ public class GroupsController : BaseController<GroupsController>
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(recommendationSlug);
 
-        await _groupSelectSchoolsToUpdateStatusValidator.ValidateSelectionAsync(viewModel, ModelState);
+        await _groupSelectSchoolsToUpdateStatusValidator.ValidateSelectionAsync(
+            viewModel,
+            ModelState
+        );
 
         if (!ModelState.IsValid)
         {
@@ -219,15 +220,21 @@ public class GroupsController : BaseController<GroupsController>
 
         var updateStatusVm = new GroupsSelectStatusToUpdateViewModel
         {
-            SelectedStatusKey = RecommendationStatus.NotStarted, SelectedSchoolsRefs = viewModel.SelectedSchoolsRefs
+            SelectedStatusKey = RecommendationStatus.NotStarted,
+            SelectedSchoolsRefs = viewModel.SelectedSchoolsRefs,
         };
 
-        return await _groupsViewBuilder.RouteToSelectStatusToUpdateViewModelAsync(this, sectionSlug, recommendationSlug, updateStatusVm);
-
+        return await _groupsViewBuilder.RouteToSelectStatusToUpdateViewModelAsync(
+            this,
+            sectionSlug,
+            recommendationSlug,
+            updateStatusVm
+        );
     }
 
     [HttpPost(
-        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsUpdateSchoolsStatus}", Name = UpdateSelectedSchoolStatusRoute
+        $"{UrlConstants.TrustSlug}/{{categorySlug}}/{{sectionSlug}}/{{recommendationSlug}}/{UrlConstants.GroupsUpdateSchoolsStatus}",
+        Name = UpdateSelectedSchoolStatusRoute
     )]
     public async Task<IActionResult> UpdateSelectedSchoolsStatus(
         [FromForm] GroupRecommendationInputViewModel inputViewModel,
@@ -253,7 +260,6 @@ public class GroupsController : BaseController<GroupsController>
             inputViewModel
         );
     }
-
 
     [HttpGet(
         $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
@@ -281,7 +287,7 @@ public class GroupsController : BaseController<GroupsController>
     {
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-        _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
+        await _currentUser.SetFocusedSchoolAsync(schoolUrn, schoolName);
 
         return Redirect(UrlConstants.HomePage);
     }
@@ -294,9 +300,6 @@ public class GroupsController : BaseController<GroupsController>
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        return await _pagesViewBuilder.RouteToMatCategoryLandingPageAsync(
-            this,
-            categorySlug
-        );
+        return await _pagesViewBuilder.RouteToMatCategoryLandingPageAsync(this, categorySlug);
     }
 }

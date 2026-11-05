@@ -18,20 +18,6 @@ namespace Dfe.PlanTech.Application;
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-    {
-        return services
-            .AddScoped<IContentfulService, ContentfulService>()
-            .AddScoped<IEstablishmentService, EstablishmentService>()
-            .AddScoped<INotifyService, NotifyService>()
-            .AddScoped<IQuestionService, QuestionService>()
-            .AddScoped<IRecommendationService, RecommendationService>()
-            .AddScoped<ISubmissionService, SubmissionService>()
-            .AddScoped<IGroupService, GroupService>()
-            .AddScoped<IUserContentViewService, UserContentViewService>()
-            .AddScoped<IUserService, UserService>();
-    }
-
     public static IServiceCollection AddApplicationProviders(this IServiceCollection services)
     {
         return services
@@ -40,11 +26,28 @@ public static class ServiceCollectionExtensions
             .AddScoped<IRedirectProvider, RedirectProvider>();
     }
 
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<IContentfulService, ContentfulService>()
+            .AddScoped<IEstablishmentService, EstablishmentService>()
+            .AddScoped<IGiasService, GiasService>()
+            .AddScoped<INotifyService, NotifyService>()
+            .AddScoped<IQuestionService, QuestionService>()
+            .AddScoped<IRecommendationService, RecommendationService>()
+            .AddScoped<ISignInService, SignInService>()
+            .AddScoped<ISubmissionService, SubmissionService>()
+            .AddScoped<IGroupService, GroupService>()
+            .AddScoped<IUserContentViewService, UserContentViewService>()
+            .AddScoped<IUserService, UserService>();
+    }
+
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
     {
         return services
             .AddScoped<IContentfulWorkflow, ContentfulWorkflow>()
             .AddScoped<IEstablishmentWorkflow, EstablishmentWorkflow>()
+            .AddScoped<IGiasWorkflow, GiasWorkflow>()
             .AddScoped<INotifyWorkflow, NotifyWorkflow>()
             .AddScoped<ISignInWorkflow, SignInWorkflow>()
             .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()

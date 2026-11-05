@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
@@ -22,7 +23,8 @@ public class CookieServiceTests
         {
             var json = JsonSerializer.Serialize(cookieModel);
             var encoded = Uri.EscapeDataString(json);
-            httpContext.Request.Headers["Cookie"] = $"{CookieService.CookieKey}={encoded}";
+            httpContext.Request.Headers["Cookie"] =
+                $"{CookieConstants.UserCookiesPreferences}={encoded}";
         }
 
         var accessor = Substitute.For<IHttpContextAccessor>();
@@ -44,9 +46,12 @@ public class CookieServiceTests
     private static DfeCookieModel GetLatestModelFromHeaders(DefaultHttpContext httpContext)
     {
         var setCookies = GetSetCookie(httpContext);
-        var header = setCookies.Last(s => s.Contains($"{CookieService.CookieKey}="));
-        var start = header.IndexOf($"{CookieService.CookieKey}=", StringComparison.Ordinal);
-        var valueIndex = start + CookieService.CookieKey.Length + 1;
+        var header = setCookies.Last(s => s.Contains($"{CookieConstants.UserCookiesPreferences}="));
+        var start = header.IndexOf(
+            $"{CookieConstants.UserCookiesPreferences}=",
+            StringComparison.Ordinal
+        );
+        var valueIndex = start + CookieConstants.UserCookiesPreferences.Length + 1;
         var end = header.IndexOf(';', valueIndex);
         var encoded = header.Substring(valueIndex, end - valueIndex);
         var json = Uri.UnescapeDataString(encoded);
@@ -55,7 +60,8 @@ public class CookieServiceTests
 
     private static DateTimeOffset? GetExpires(DefaultHttpContext httpContext)
     {
-        var header = GetSetCookie(httpContext).Last(s => s.Contains($"{CookieService.CookieKey}="));
+        var header = GetSetCookie(httpContext)
+            .Last(s => s.Contains($"{CookieConstants.UserCookiesPreferences}="));
         var expiresPart = header
             .Split(';')
             .FirstOrDefault(p =>
@@ -111,7 +117,12 @@ public class CookieServiceTests
         Assert.Equal(2, headers.Length);
         Assert.All(
             headers,
-            header => Assert.Contains(CookieService.CookieKey, header, StringComparison.Ordinal)
+            header =>
+                Assert.Contains(
+                    CookieConstants.UserCookiesPreferences,
+                    header,
+                    StringComparison.Ordinal
+                )
         );
 
         var last = headers.Last();

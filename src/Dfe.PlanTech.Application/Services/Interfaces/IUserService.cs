@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<SqlUserSettingsDto> UpsertUserSettingsAsync(
+        Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
             int userId,
             RecommendationSortOrder sortOrder
         );

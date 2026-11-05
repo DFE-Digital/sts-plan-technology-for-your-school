@@ -20,13 +20,11 @@ public class MatEstablishmentProvider(
 
     public IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession()
     {
-        var session = _httpContextAccessor.HttpContext?.Session;
-        if (session is null)
-        {
-            return [];
-        }
-
-        return session.GetSelectedEstablishmentIds().Distinct().ToArray();
+        return _httpContextAccessor
+                .HttpContext?.Session.GetSelectedEstablishmentIds()
+                .Distinct()
+                .ToArray()
+            ?? [];
     }
 
     public async Task<IReadOnlyList<string>> GetSelectedSchoolNamesAsync(

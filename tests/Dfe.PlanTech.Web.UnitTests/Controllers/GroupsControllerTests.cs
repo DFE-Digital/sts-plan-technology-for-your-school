@@ -34,15 +34,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
             _pagesViewBuilder = Substitute.For<IPagesViewBuilder>();
             _currentUser = Substitute.For<ICurrentUserProvider>();
-            _groupSelectSchoolsToAssessValidator = Substitute.For<IGroupSelectSchoolsToAssessValidator>();
-            _groupSelectSchoolsToUpdateStatusValidator = Substitute.For<IGroupSelectSchoolsToUpdateStatusValidator>();
+            _groupSelectSchoolsToAssessValidator =
+                Substitute.For<IGroupSelectSchoolsToAssessValidator>();
+            _groupSelectSchoolsToUpdateStatusValidator =
+                Substitute.For<IGroupSelectSchoolsToUpdateStatusValidator>();
 
             _session = new TestSession();
 
-            var httpContext = new DefaultHttpContext
-            {
-                Session = _session
-            };
+            var httpContext = new DefaultHttpContext { Session = _session };
 
             _controller = new GroupsController(
                 _logger,
@@ -56,8 +55,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 ControllerContext = new ControllerContext
                 {
                     HttpContext = httpContext,
-                    RouteData = new RouteData()
-                }
+                    RouteData = new RouteData(),
+                },
             };
         }
 
@@ -65,8 +64,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullCurrentUser_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, null!, _viewBuilder, _groupSelectSchoolsToAssessValidator,
-                    _groupSelectSchoolsToUpdateStatusValidator, _pagesViewBuilder)
+                new GroupsController(
+                    _logger,
+                    null!,
+                    _viewBuilder,
+                    _groupSelectSchoolsToAssessValidator,
+                    _groupSelectSchoolsToUpdateStatusValidator,
+                    _pagesViewBuilder
+                )
             );
 
             Assert.Equal("currentUser", ex.ParamName);
@@ -76,8 +81,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, null!, _groupSelectSchoolsToAssessValidator,
-                    _groupSelectSchoolsToUpdateStatusValidator, _pagesViewBuilder)
+                new GroupsController(
+                    _logger,
+                    _currentUser,
+                    null!,
+                    _groupSelectSchoolsToAssessValidator,
+                    _groupSelectSchoolsToUpdateStatusValidator,
+                    _pagesViewBuilder
+                )
             );
 
             Assert.Equal("groupsViewBuilder", ex.ParamName);
@@ -87,7 +98,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullPagesViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, _viewBuilder, _groupSelectSchoolsToAssessValidator, _groupSelectSchoolsToUpdateStatusValidator, null!)
+                new GroupsController(
+                    _logger,
+                    _currentUser,
+                    _viewBuilder,
+                    _groupSelectSchoolsToAssessValidator,
+                    _groupSelectSchoolsToUpdateStatusValidator,
+                    null!
+                )
             );
 
             Assert.Equal("pagesViewBuilder", ex.ParamName);
@@ -97,7 +115,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullValidator_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GroupsController(_logger, _currentUser, _viewBuilder, null!, _groupSelectSchoolsToUpdateStatusValidator, _pagesViewBuilder)
+                new GroupsController(
+                    _logger,
+                    _currentUser,
+                    _viewBuilder,
+                    null!,
+                    _groupSelectSchoolsToUpdateStatusValidator,
+                    _pagesViewBuilder
+                )
             );
 
             Assert.Equal("groupSelectSchoolsToAssessValidator", ex.ParamName);
@@ -106,15 +131,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASchoolView_CallsViewBuilderAndReturnsResult()
         {
-            _viewBuilder
-                .RouteToSelectASchoolViewModelAsync(_controller)
-                .Returns(new OkResult());
+            _viewBuilder.RouteToSelectASchoolViewModelAsync(_controller).Returns(new OkResult());
 
             var result = await _controller.GetSelectASchoolView();
 
-            await _viewBuilder
-                .Received(1)
-                .RouteToSelectASchoolViewModelAsync(_controller);
+            await _viewBuilder.Received(1).RouteToSelectASchoolViewModelAsync(_controller);
 
             Assert.IsType<OkResult>(result);
         }
@@ -125,25 +146,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var schoolUrn = "123456";
             var schoolName = "Test School";
 
-            var result = await _controller.SelectSchool(
-                schoolUrn,
-                schoolName
-            );
+            var result = await _controller.SelectSchool(schoolUrn, schoolName);
 
-            await _viewBuilder
-                .Received(1)
-                .RecordGroupSelectionAsync(schoolUrn, schoolName);
+            await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-            _currentUser
-                .Received(1)
-                .SetGroupSelectedSchool(schoolUrn, schoolName);
+            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn, schoolName);
 
             var redirect = Assert.IsType<RedirectResult>(result);
 
-            Assert.Equal(
-                UrlConstants.HomePage,
-                redirect.Url
-            );
+            Assert.Equal(UrlConstants.HomePage, redirect.Url);
         }
 
         [Fact]
@@ -159,19 +170,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 categorySlug
             );
 
-            await _viewBuilder
-                .Received(1)
-                .RecordGroupSelectionAsync(
-                    schoolUrn,
-                    schoolName
-                );
+            await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-            _currentUser
-                .Received(1)
-                .SetGroupSelectedSchool(
-                    schoolUrn,
-                    schoolName
-                );
+            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn, schoolName);
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
 
@@ -182,10 +183,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             Assert.Null(redirect.ControllerName);
 
-            Assert.Equal(
-                categorySlug,
-                redirect.RouteValues?["categorySlug"]
-            );
+            Assert.Equal(categorySlug, redirect.RouteValues?["categorySlug"]);
         }
 
         [Theory]
@@ -199,26 +197,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         )
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.SelectSchoolAndRedirect(
-                    schoolUrn!,
-                    schoolName!,
-                    categorySlug!
-                )
+                _controller.SelectSchoolAndRedirect(schoolUrn!, schoolName!, categorySlug!)
             );
 
             await _viewBuilder
                 .DidNotReceive()
-                .RecordGroupSelectionAsync(
-                    Arg.Any<string>(),
-                    Arg.Any<string>()
-                );
+                .RecordGroupSelectionAsync(Arg.Any<string>(), Arg.Any<string>());
 
             _currentUser
                 .DidNotReceive()
-                .SetGroupSelectedSchool(
-                    Arg.Any<string>(),
-                    Arg.Any<string>()
-                );
+                .SetGroupSelectedSchool(Arg.Any<string>(), Arg.Any<string>());
         }
 
         [Theory]
@@ -235,26 +223,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         )
         {
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _controller.SelectSchoolAndRedirect(
-                    schoolUrn,
-                    schoolName,
-                    categorySlug
-                )
+                _controller.SelectSchoolAndRedirect(schoolUrn, schoolName, categorySlug)
             );
 
             await _viewBuilder
                 .DidNotReceive()
-                .RecordGroupSelectionAsync(
-                    Arg.Any<string>(),
-                    Arg.Any<string>()
-                );
+                .RecordGroupSelectionAsync(Arg.Any<string>(), Arg.Any<string>());
 
             _currentUser
                 .DidNotReceive()
-                .SetGroupSelectedSchool(
-                    Arg.Any<string>(),
-                    Arg.Any<string>()
-                );
+                .SetGroupSelectedSchool(Arg.Any<string>(), Arg.Any<string>());
         }
 
         [Fact]
@@ -263,21 +241,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var sectionSlug = "some-section";
 
             _viewBuilder
-                .RouteToSelectSchoolsToAssessViewModelAsync(
-                    _controller,
-                    sectionSlug
-                )
+                .RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug)
                 .Returns(new OkResult());
 
-            var result =
-                await _controller.GetSelectSchoolsToAssessView(sectionSlug);
+            var result = await _controller.GetSelectSchoolsToAssessView(sectionSlug);
 
             await _viewBuilder
                 .Received(1)
-                .RouteToSelectSchoolsToAssessViewModelAsync(
-                    _controller,
-                    sectionSlug
-                );
+                .RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug);
 
             Assert.IsType<OkResult>(result);
         }
@@ -289,11 +260,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = new List<string>
-                {
-                    "000001",
-                    "000002"
-                },
+                SelectedSchoolsRefs = new List<string> { "000001", "000002" },
             };
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
@@ -311,26 +278,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = new List<string>
-                {
-                    "000001",
-                    "000002"
-                },
+                SelectedSchoolsRefs = new List<string> { "000001", "000002" },
             };
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
-            await _controller.SubmitSelectedSchoolsToAssess(
-                model,
-                sectionSlug
-            );
+            await _controller.SubmitSelectedSchoolsToAssess(model, sectionSlug);
 
             await _groupSelectSchoolsToAssessValidator
                 .Received(1)
-                .ValidateSelectionAsync(
-                    model,
-                    Arg.Any<ModelStateDictionary>()
-                );
+                .ValidateSelectionAsync(model, Arg.Any<ModelStateDictionary>());
         }
 
         [Theory]
@@ -344,11 +301,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         )
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.ViewInProgressAnswers(
-                    categorySlug!,
-                    sectionSlug!,
-                    schoolUrn!
-                )
+                _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!, schoolUrn!)
             );
         }
 
@@ -366,11 +319,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         )
         {
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _controller.ViewInProgressAnswers(
-                    categorySlug!,
-                    sectionSlug!,
-                    schoolUrn!
-                )
+                _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!, schoolUrn!)
             );
         }
 
@@ -384,12 +333,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = new List<string>
-                {
-                    "000001",
-                    "000002",
-                    "all"
-                },
+                SelectedSchoolsRefs = new List<string> { "000001", "000002", "all" },
             };
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -403,27 +347,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 )
                 .Do(callInfo =>
                 {
-                    var modelState =
-                        callInfo.Arg<ModelStateDictionary>();
+                    var modelState = callInfo.Arg<ModelStateDictionary>();
 
-                    modelState.AddModelError(
-                        "SelectedSchoolsRefs",
-                        "Error"
-                    );
+                    modelState.AddModelError("SelectedSchoolsRefs", "Error");
                 });
 
-            await _controller.SubmitSelectedSchoolsToAssess(
-                model,
-                sectionSlug
-            );
+            await _controller.SubmitSelectedSchoolsToAssess(model, sectionSlug);
 
             await _viewBuilder
                 .Received(1)
-                .RouteToSelectSchoolsToAssessViewModelAsync(
-                    _controller,
-                    sectionSlug,
-                    model
-                );
+                .RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug, model);
 
             await _viewBuilder
                 .DidNotReceive()
@@ -449,18 +382,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
-            await _controller.SubmitSelectedSchoolsToAssess(
-                viewModel,
-                sectionSlug
-            );
+            await _controller.SubmitSelectedSchoolsToAssess(viewModel, sectionSlug);
 
             await _viewBuilder
                 .Received(1)
-                .SubmitSelectedSchoolsToAssessAndRedirect(
-                    _controller,
-                    sectionSlug,
-                    viewModel
-                );
+                .SubmitSelectedSchoolsToAssessAndRedirect(_controller, sectionSlug, viewModel);
 
             await _viewBuilder
                 .DidNotReceive()
@@ -474,12 +400,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASelfAssessment_ClearsSelectedSchoolAndSession()
         {
-            IEnumerable<int> selectedEstablishmentIds = [101, 102];
+            List<int> selectedEstablishmentIds = [101, 102];
 
-            _controller.HttpContext.Session.SetValue(
-                SessionConstants.SelectedEstablishmentsKey,
-                selectedEstablishmentIds
-            );
+            _controller.HttpContext.Session.SetSelectedEstablishmentIds(selectedEstablishmentIds);
 
             _viewBuilder
                 .RouteToSelectASelfAssessmentViewModelAsync(_controller)
@@ -487,9 +410,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var result = await _controller.GetSelectASelfAssessment();
 
-            _currentUser
-                .Received(1)
-                .ClearSelectedGroupSchool();
+            _currentUser.Received(1).ClearSelectedGroupSchool();
 
             Assert.False(
                 _controller.HttpContext.Session.TryGetValue(
@@ -498,9 +419,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 )
             );
 
-            await _viewBuilder
-                .Received(1)
-                .RouteToSelectASelfAssessmentViewModelAsync(_controller);
+            await _viewBuilder.Received(1).RouteToSelectASelfAssessmentViewModelAsync(_controller);
 
             Assert.IsType<OkResult>(result);
         }
@@ -513,12 +432,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var schoolUrn = "900006";
 
             _viewBuilder
-                .RouteToViewInProgressAnswers(
-                    _controller,
-                    categorySlug,
-                    sectionSlug,
-                    schoolUrn
-                )
+                .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn)
                 .Returns(new OkResult());
 
             var result = await _controller.ViewInProgressAnswers(
@@ -529,12 +443,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _viewBuilder
                 .Received(1)
-                .RouteToViewInProgressAnswers(
-                    _controller,
-                    categorySlug,
-                    sectionSlug,
-                    schoolUrn
-                );
+                .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn);
 
             Assert.IsType<OkResult>(result);
         }
@@ -570,11 +479,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 )
                 .Returns(new OkResult());
 
-            var result =
-                await _controller.GetSelectSchoolsToUpdateView(
-                    sectionSlug,
-                    recommendationSlug
-                );
+            var result = await _controller.GetSelectSchoolsToUpdateView(
+                sectionSlug,
+                recommendationSlug
+            );
 
             await _viewBuilder
                 .Received(1)
@@ -592,19 +500,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var model = new GroupsSelectSchoolsToUpdateStatusViewModel
             {
-                SelectedSchoolsRefs =
-                [
-                    "000001",
-                    "000002"
-                ]
+                SelectedSchoolsRefs = ["000001", "000002"],
             };
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.SubmitSelectedSchoolsToUpdateStatus(
-                    model,
-                    null!,
-                    "recommendation"
-                )
+                _controller.SubmitSelectedSchoolsToUpdateStatus(model, null!, "recommendation")
             );
         }
 
@@ -613,19 +513,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var model = new GroupsSelectSchoolsToUpdateStatusViewModel
             {
-                SelectedSchoolsRefs =
-                [
-                    "000001",
-                    "000002"
-                ]
+                SelectedSchoolsRefs = ["000001", "000002"],
             };
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.SubmitSelectedSchoolsToUpdateStatus(
-                    model,
-                    "section",
-                    null!
-                )
+                _controller.SubmitSelectedSchoolsToUpdateStatus(model, "section", null!)
             );
         }
 
@@ -638,11 +530,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var model = new GroupsSelectSchoolsToUpdateStatusViewModel
             {
-                SelectedSchoolsRefs =
-                [
-                    "000001",
-                    "000002"
-                ]
+                SelectedSchoolsRefs = ["000001", "000002"],
             };
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -655,10 +543,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _groupSelectSchoolsToUpdateStatusValidator
                 .Received(1)
-                .ValidateSelectionAsync(
-                    model,
-                    Arg.Any<ModelStateDictionary>()
-                );
+                .ValidateSelectionAsync(model, Arg.Any<ModelStateDictionary>());
         }
 
         [Fact]
@@ -670,12 +555,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var model = new GroupsSelectSchoolsToUpdateStatusViewModel
             {
-                SelectedSchoolsRefs =
-                [
-                    "000001",
-                    "000002",
-                    "all"
-                ]
+                SelectedSchoolsRefs = ["000001", "000002", "all"],
             };
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -689,13 +569,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 )
                 .Do(callInfo =>
                 {
-                    var modelState =
-                        callInfo.Arg<ModelStateDictionary>();
+                    var modelState = callInfo.Arg<ModelStateDictionary>();
 
-                    modelState.AddModelError(
-                        "SelectedSchoolsRefs",
-                        "Error"
-                    );
+                    modelState.AddModelError("SelectedSchoolsRefs", "Error");
                 });
 
             await _controller.SubmitSelectedSchoolsToUpdateStatus(
@@ -723,21 +599,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var viewModel = new GroupsSelectSchoolsToUpdateStatusViewModel
             {
-                SelectedSchoolsRefs =
-                [
-                    "00001",
-                    "00002"
-                ]
+                SelectedSchoolsRefs = ["00001", "00002"],
             };
 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
-            var result =
-                await _controller.SubmitSelectedSchoolsToUpdateStatus(
-                    viewModel,
-                    sectionSlug,
-                    recommendationSlug
-                );
+            var result = await _controller.SubmitSelectedSchoolsToUpdateStatus(
+                viewModel,
+                sectionSlug,
+                recommendationSlug
+            );
 
             await _viewBuilder
                 .DidNotReceive()
@@ -752,15 +623,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetMatStandardsList_CallsViewBuilderAndReturnsResult()
         {
-            _viewBuilder
-                .RouteToMatStandardsListAsync(_controller)
-                .Returns(new OkResult());
+            _viewBuilder.RouteToMatStandardsListAsync(_controller).Returns(new OkResult());
 
             var result = await _controller.GetMatStandardsList();
 
-            await _viewBuilder
-                .Received(1)
-                .RouteToMatStandardsListAsync(_controller);
+            await _viewBuilder.Received(1).RouteToMatStandardsListAsync(_controller);
 
             Assert.IsType<OkResult>(result);
         }
@@ -771,20 +638,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "leadership-governance-standard";
 
             _pagesViewBuilder
-                .RouteToMatCategoryLandingPageAsync(
-                    _controller,
-                    categorySlug
-                )
+                .RouteToMatCategoryLandingPageAsync(_controller, categorySlug)
                 .Returns(new OkResult());
 
             var result = await _controller.GetMatRecommendationsLanding(categorySlug);
 
             await _pagesViewBuilder
                 .Received(1)
-                .RouteToMatCategoryLandingPageAsync(
-                    _controller,
-                    categorySlug
-                );
+                .RouteToMatCategoryLandingPageAsync(_controller, categorySlug);
 
             Assert.IsType<OkResult>(result);
         }
@@ -798,10 +659,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _pagesViewBuilder
                 .DidNotReceive()
-                .RouteToMatCategoryLandingPageAsync(
-                    Arg.Any<Controller>(),
-                    Arg.Any<string>()
-                );
+                .RouteToMatCategoryLandingPageAsync(Arg.Any<Controller>(), Arg.Any<string>());
         }
 
         [Theory]
@@ -817,10 +675,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _pagesViewBuilder
                 .DidNotReceive()
-                .RouteToMatCategoryLandingPageAsync(
-                    Arg.Any<Controller>(),
-                    Arg.Any<string>()
-                );
+                .RouteToMatCategoryLandingPageAsync(Arg.Any<Controller>(), Arg.Any<string>());
         }
 
         private sealed class TestSession : ISession
@@ -838,16 +693,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _values.Clear();
             }
 
-            public Task CommitAsync(
-                CancellationToken cancellationToken = default
-            )
+            public Task CommitAsync(CancellationToken cancellationToken = default)
             {
                 return Task.CompletedTask;
             }
 
-            public Task LoadAsync(
-                CancellationToken cancellationToken = default
-            )
+            public Task LoadAsync(CancellationToken cancellationToken = default)
             {
                 return Task.CompletedTask;
             }
@@ -862,10 +713,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _values[key] = value;
             }
 
-            public bool TryGetValue(
-                string key,
-                out byte[] value
-            )
+            public bool TryGetValue(string key, out byte[] value)
             {
                 return _values.TryGetValue(key, out value!);
             }

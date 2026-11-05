@@ -60,15 +60,15 @@ public class UserWorkflowTests
         await _userRepository.Received(1).GetUserBySignInRefAsync("dsi-abc");
     }
 
-    // --- UpsertUserSettingsAsync ---
+    // --- GetOrCreateUserSettingsAsync ---
 
     [Fact]
-    public async Task UpsertUserSettings_CallsRepository()
+    public async Task GetOrCreateUserSettings_CallsRepository()
     {
         var sut = CreateServiceUnderTest();
 
         _userSettingsRepository
-            .UpsertUserSettingsAsync(123, Arg.Any<RecommendationSortOrder>())
+            .GetOrCreateUserSettingsAsync(123, Arg.Any<RecommendationSortOrder>())
             .Returns(
                 new UserSettingsEntity
                 {
@@ -77,11 +77,14 @@ public class UserWorkflowTests
                 }
             );
 
-        var result = await sut.UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
+        var result = await sut.GetOrCreateUserSettingsAsync(
+            123,
+            RecommendationSortOrder.LastUpdated
+        );
 
         await _userSettingsRepository
             .Received(1)
-            .UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
+            .GetOrCreateUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
     }
 
     // --- GetUserSettingsByUserIdAsync ---

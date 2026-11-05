@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -117,12 +116,9 @@ public class SelfAssessmentSummaryViewBuilderTests
 
         _currentUser.IsMat.Returns(true);
 
-        IEnumerable<int> selectedEstablishmentIds = [101, 102];
+        List<int> selectedEstablishmentIds = [101, 102];
 
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
+        controller.HttpContext.Session.SetSelectedEstablishmentIds(selectedEstablishmentIds);
 
         var section = new QuestionnaireSectionEntry
         {
@@ -327,29 +323,22 @@ public class SelfAssessmentSummaryViewBuilderTests
             Name = "Cyber risk assessment",
         };
 
-        _contentful
-            .GetSectionBySlugAsync("cyber-risk-assessment")
-            .Returns(section);
+        _contentful.GetSectionBySlugAsync("cyber-risk-assessment").Returns(section);
 
-        _contentful
-            .GetAllCategoriesAsync()
-            .Returns([]);
+        _contentful.GetAllCategoriesAsync().Returns([]);
 
         _groupService
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Any<int[]>()
-            )
-            .Returns(
-            [
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
                 new SqlSubmissionDto
-            {
-                SectionId = "section-id",
-                Establishment = new SqlEstablishmentDto
                 {
-                    OrgName = "Test School",
-                    EstablishmentRef = "123456",
+                    SectionId = "section-id",
+                    Establishment = new SqlEstablishmentDto
+                    {
+                        OrgName = "Test School",
+                        EstablishmentRef = "123456",
+                    },
                 },
-            },
             ]);
 
         var controller = new TestController();
@@ -362,15 +351,9 @@ public class SelfAssessmentSummaryViewBuilderTests
 
         var view = Assert.IsType<ViewResult>(result);
 
-        Assert.Equal(
-            SelfAssessmentSummaryViewBuilder.SelfAssessmentSummaryViewName,
-            view.ViewName
-        );
+        Assert.Equal(SelfAssessmentSummaryViewBuilder.SelfAssessmentSummaryViewName, view.ViewName);
 
-        var model =
-            Assert.IsType<SelfAssessmentSummaryViewModel>(
-                view.Model
-            );
+        var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
 
         Assert.Equal(1, model.CompletedSchoolCount);
         Assert.Single(model.RecommendationLinks);

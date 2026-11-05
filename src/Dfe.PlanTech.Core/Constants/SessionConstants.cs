@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Core.Constants;
 
@@ -13,12 +14,8 @@ public static class SessionConstants
         new ReadOnlyDictionary<string, Type>(
             new Dictionary<string, Type>()
             {
-                { 
-                    SelectedEstablishmentsKey, typeof(IEnumerable<int>) 
-                },
-                { 
-                    FocusedEstablishmentKey, typeof(int) 
-                },
+                { SelectedEstablishmentsKey, typeof(IEnumerable<SelectedEstablishmentDataModel>) },
+                { FocusedEstablishmentKey, typeof(SelectedEstablishmentDataModel) },
             }
         );
 }

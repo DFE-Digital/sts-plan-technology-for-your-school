@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -14,14 +15,12 @@ public class CookieService(IHttpContextAccessor contextAccessor, ICookieWorkflow
     private readonly ICookieWorkflow _cookieWorkflow =
         cookieWorkflow ?? throw new ArgumentNullException(nameof(cookieWorkflow));
 
-    public const string CookieKey = "user_cookies_preferences";
-
     private DfeCookieModel? _dfeCookie;
     public DfeCookieModel Cookie => _dfeCookie ?? GetCookie();
 
     public void SetVisibility(bool visibility)
     {
-        CreateCookie(CookieKey, visibility: visibility);
+        CreateCookie(CookieConstants.UserCookiesPreferences, visibility: visibility);
     }
 
     public void SetCookieAcceptance(bool userAcceptsCookies)
@@ -33,7 +32,10 @@ public class CookieService(IHttpContextAccessor contextAccessor, ICookieWorkflow
             );
         }
 
-        CreateCookie(CookieKey, userAcceptsCookies: userAcceptsCookies);
+        CreateCookie(
+            CookieConstants.UserCookiesPreferences,
+            userAcceptsCookies: userAcceptsCookies
+        );
 
         if (!userAcceptsCookies)
         {
@@ -43,7 +45,10 @@ public class CookieService(IHttpContextAccessor contextAccessor, ICookieWorkflow
 
     public DfeCookieModel GetCookie()
     {
-        var cookie = _contextAccessor.HttpContext?.Request.Cookies[CookieKey];
+        var cookie = _contextAccessor
+            .HttpContext
+            ?.Request
+            .Cookies[CookieConstants.UserCookiesPreferences];
         if (cookie is null)
         {
             return new DfeCookieModel();
@@ -55,7 +60,9 @@ public class CookieService(IHttpContextAccessor contextAccessor, ICookieWorkflow
 
     private void DeleteCookie()
     {
-        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieKey);
+        _contextAccessor.HttpContext?.Response.Cookies.Delete(
+            CookieConstants.UserCookiesPreferences
+        );
     }
 
     private void CreateCookie(string key, bool? userAcceptsCookies = null, bool? visibility = null)

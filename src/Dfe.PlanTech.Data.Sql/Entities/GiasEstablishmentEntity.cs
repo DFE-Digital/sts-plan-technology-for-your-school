@@ -50,6 +50,7 @@ public class GiasEstablishmentEntity
             SyncedAt = SyncedAt,
             Ukprn = Ukprn,
             TypeOfEstablishmentCode = TypeOfEstablishmentCode,
+            TypeOfEstablishmentName = TypeOfEstablishment?.TypeOfEstablishmentName,
         };
     }
 }

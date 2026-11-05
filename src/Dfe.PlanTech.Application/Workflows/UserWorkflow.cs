@@ -21,12 +21,27 @@ public class UserWorkflow(
         return user?.AsDto();
     }
 
-    public async Task<SqlUserSettingsDto> UpsertUserSettingsAsync(
+    public async Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef)
+    {
+        var existingUser = await _userRepository.GetUserBySignInRefAsync(dfeSignInRef);
+        if (existingUser is not null)
+        {
+            return existingUser.AsDto();
+        }
+
+        var newUser = await _userRepository.CreateUserBySignInRefAsync(dfeSignInRef);
+        return newUser.AsDto();
+    }
+
+    public async Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
         int userId,
         RecommendationSortOrder sortOrder
     )
     {
-        var userSettings = await _userSettingsRepository.UpsertUserSettingsAsync(userId, sortOrder);
+        var userSettings = await _userSettingsRepository.GetOrCreateUserSettingsAsync(
+            userId,
+            sortOrder
+        );
         return userSettings.AsDto();
     }
 

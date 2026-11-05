@@ -97,7 +97,7 @@ public class SubmissionRepository(
                 };
             });
 
-        var recommendations = await UpsertRecommendations(recommendationDtos);
+        var recommendations = await GetOrCreateRecommendations(recommendationDtos);
 
         var responses = submission.Responses.Select(r => r.Answer.ContentfulRef).ToHashSet();
 
@@ -426,7 +426,7 @@ public class SubmissionRepository(
         return sectionQuestions;
     }
 
-    private async Task<List<RecommendationEntity>> UpsertRecommendations(
+    private async Task<List<RecommendationEntity>> GetOrCreateRecommendations(
         IEnumerable<SqlRecommendationDto> recommendationDtos
     )
     {

@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces
 {
     public interface IUserSettingsRepository
     {
-        Task<UserSettingsEntity> UpsertUserSettingsAsync(
+        Task<UserSettingsEntity> GetOrCreateUserSettingsAsync(
             int userId,
             RecommendationSortOrder sortOrder
         );

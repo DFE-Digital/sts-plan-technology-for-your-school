@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -113,9 +112,7 @@ public class SelfAssessmentSummaryViewBuilder(
 
     private async Task<List<SqlSubmissionDto>> GetMatSubmittedSubmissions(string sectionId)
     {
-        var selectedEstablishmentIds = _httpContextAccessor
-            .HttpContext!.Session.GetSelectedEstablishmentIds()
-            .ToArray();
+        var selectedEstablishmentIds = CurrentUser.GetSelectedEstablishmentIds().ToArray();
 
         if (selectedEstablishmentIds.Length == 0)
         {

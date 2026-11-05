@@ -6,6 +6,10 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 public interface IUserWorkflow
 {
     Task<SqlUserDto?> GetUserBySignInRefAsync(string dfeSignInRef);
-    Task<SqlUserSettingsDto> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder);
+    Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef);
+    Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
+        int userId,
+        RecommendationSortOrder sortOrder
+    );
     Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId);
 }
