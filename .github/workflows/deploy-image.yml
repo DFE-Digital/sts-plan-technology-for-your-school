@@ -22,7 +22,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AZ_FRONTDOOR_URL: ${{ inputs.environment == 'Staging' && secrets.AZ_FRONTDOOR_URL_STAGING || secrets.AZ_FRONTDOOR_URL }}
   ACR_DOCKER_IMAGE: plan-tech-app
   GCR_DOCKER_IMAGE: plan-technology-for-your-school
   GITHUB_CONTAINER_REGISTRY: ghcr.io
