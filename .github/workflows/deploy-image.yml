@@ -24,9 +24,7 @@ concurrency:
 env:
   AZ_FRONTDOOR_URL: ${{ inputs.environment == 'Staging' && secrets.AZ_FRONTDOOR_URL_STAGING || secrets.AZ_FRONTDOOR_URL }}
   ACR_DOCKER_IMAGE: plan-tech-app
-  ACR_SITE_OFFLINE_IMAGE: plan-tech-site-offline
   GCR_DOCKER_IMAGE: plan-technology-for-your-school
-  GCR_SITE_OFFLINE_IMAGE: plan-technology-site-offline
   GITHUB_CONTAINER_REGISTRY: ghcr.io
   ORG_NAME: dfe-digital
 
