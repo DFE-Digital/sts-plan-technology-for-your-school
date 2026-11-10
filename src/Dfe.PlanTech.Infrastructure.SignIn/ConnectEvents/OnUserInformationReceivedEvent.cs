@@ -46,7 +46,7 @@ public static class OnUserInformationReceivedEvent
                 "User {UserId} is authenticated but has no establishment",
                 dsiUserReference
             );
-            await signInService.RecordSignInUserOnly(dsiUserReference);
+            await signInService.RecordSignInUserOnlyAsync(dsiUserReference);
             return;
         }
 

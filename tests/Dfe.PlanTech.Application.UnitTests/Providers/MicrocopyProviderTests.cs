@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -52,9 +51,13 @@ public class MicrocopyProviderTests
         // Assert
         Assert.Null(result);
 
-        var logMessage = _logger.ReceivedLogMessages().FirstOrDefault();
-        Assert.NotNull(logMessage);
-        Assert.Equal("Microcopy record with key 'Missing key 1' was not found", logMessage.Message);
+        _logger
+            .ReceivedWithAnyArgs(1)
+            .LogWarning(
+                default,
+                default,
+                "Microcopy record with key 'Missing key 1' was not found"
+            );
     }
 
     [Fact]
@@ -62,7 +65,7 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var entry = new MicrocopyEntry { Key = "Key 2", Value = "Value 2" };
-        _contentful.GetMicrocopyEntriesAsync().Returns(new List<MicrocopyEntry> { entry });
+        _contentful.GetMicrocopyEntriesAsync().Returns([entry]);
 
         var sut = CreateServiceUnderTest();
 
@@ -72,12 +75,13 @@ public class MicrocopyProviderTests
         // Assert
         Assert.Equal(result?.Key, entry.Key);
 
-        var logMessage = _logger.ReceivedLogMessages().FirstOrDefault();
-        Assert.NotNull(logMessage);
-        Assert.Equal(
-            "Cannot find fallback text for microcopy with key 'Key 2'",
-            logMessage.Message
-        );
+        _logger
+            .ReceivedWithAnyArgs(1)
+            .LogWarning(
+                default,
+                default,
+                "Cannot find fallback text for microcopy with key 'Key 2'"
+            );
     }
 
     [Fact]

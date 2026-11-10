@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -116,9 +117,23 @@ public class SelfAssessmentSummaryViewBuilderTests
 
         _currentUser.IsMat.Returns(true);
 
-        List<int> selectedEstablishmentIds = [101, 102];
+        var selectedEstablishments = new List<SelectedEstablishmentDataModel>
+        {
+            new SelectedEstablishmentDataModel
+            {
+                Id = 101,
+                Name = "Test School 1",
+                Urn = "11111",
+            },
+            new SelectedEstablishmentDataModel
+            {
+                Id = 102,
+                Name = "Test School 2",
+                Urn = "22222",
+            },
+        };
 
-        controller.HttpContext.Session.SetSelectedEstablishmentIds(selectedEstablishmentIds);
+        controller.HttpContext.Session.SetSelectedEstablishments(selectedEstablishments);
 
         var section = new QuestionnaireSectionEntry
         {

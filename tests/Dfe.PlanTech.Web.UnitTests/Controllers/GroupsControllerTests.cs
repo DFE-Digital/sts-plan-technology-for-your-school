@@ -150,7 +150,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn, schoolName);
+            _currentUser.Received(1).SetFocusedSchoolAsync(schoolUrn, schoolName);
 
             var redirect = Assert.IsType<RedirectResult>(result);
 
@@ -172,7 +172,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn, schoolName);
+            _currentUser.Received(1).SetFocusedSchoolAsync(schoolUrn, schoolName);
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
 
@@ -206,7 +206,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _currentUser
                 .DidNotReceive()
-                .SetGroupSelectedSchool(Arg.Any<string>(), Arg.Any<string>());
+                .SetFocusedSchoolAsync(Arg.Any<string>(), Arg.Any<string>());
         }
 
         [Theory]
@@ -232,7 +232,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _currentUser
                 .DidNotReceive()
-                .SetGroupSelectedSchool(Arg.Any<string>(), Arg.Any<string>());
+                .SetFocusedSchoolAsync(Arg.Any<string>(), Arg.Any<string>());
         }
 
         [Fact]
@@ -400,9 +400,23 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASelfAssessment_ClearsSelectedSchoolAndSession()
         {
-            List<int> selectedEstablishmentIds = [101, 102];
+            var selectedEstablishments = new List<SelectedEstablishmentDataModel>
+            {
+                new SelectedEstablishmentDataModel
+                {
+                    Id = 101,
+                    Name = "Test School 1",
+                    Urn = "11111",
+                },
+                new SelectedEstablishmentDataModel
+                {
+                    Id = 102,
+                    Name = "Test School 2",
+                    Urn = "22222",
+                },
+            };
 
-            _controller.HttpContext.Session.SetSelectedEstablishmentIds(selectedEstablishmentIds);
+            _controller.HttpContext.Session.SetSelectedEstablishments(selectedEstablishments);
 
             _viewBuilder
                 .RouteToSelectASelfAssessmentViewModelAsync(_controller)
@@ -410,14 +424,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var result = await _controller.GetSelectASelfAssessment();
 
-            _currentUser.Received(1).ClearSelectedGroupSchool();
-
-            Assert.False(
-                _controller.HttpContext.Session.TryGetValue(
-                    SessionConstants.SelectedEstablishmentsKey,
-                    out _
-                )
-            );
+            _currentUser.Received(1).ClearFocusedAndSelectedEstablishments();
 
             await _viewBuilder.Received(1).RouteToSelectASelfAssessmentViewModelAsync(_controller);
 

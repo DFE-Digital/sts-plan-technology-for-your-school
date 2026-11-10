@@ -5,7 +5,9 @@ using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Web.UnitTests.TestHelpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -15,7 +17,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Context;
 
 public class CurrentUserTests
 {
-    private static (CurrentUserProvider sut, DefaultHttpContext ctx) Build(
+    private readonly IEstablishmentService _establishmentService =
+        Substitute.For<IEstablishmentService>();
+    private readonly ILogger<CurrentUserProvider> _logger = Substitute.For<
+        ILogger<CurrentUserProvider>
+    >();
+
+    private (CurrentUserProvider sut, DefaultHttpContext ctx) Build(
         IEnumerable<Claim>? claims = null,
         bool authenticated = true
     )
@@ -30,11 +38,10 @@ public class CurrentUserTests
         var principal = new ClaimsPrincipal(id);
         var ctx = new DefaultHttpContext();
         ctx.User = principal;
+        ctx.AttachSession();
 
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, _establishmentService, _logger);
         return (sut, ctx);
     }
 
@@ -79,23 +86,6 @@ public class CurrentUserTests
         Assert.Equal("User is not authenticated", ex.Message);
     }
 
-    // ---------- Email ----------
-
-    [Fact]
-    public void Email_Returns_Value_When_Claim_Present()
-    {
-        var (sut, _) = Build([BuildClaim(ClaimConstants.VerifiedEmail, "user@example.com")]);
-        Assert.Equal("user@example.com", sut.Email);
-    }
-
-    [Fact]
-    public void Email_Throws_When_Missing()
-    {
-        var (sut, _) = Build();
-        var ex = Assert.Throws<AuthenticationException>(() => _ = sut.Email);
-        Assert.Equal("User's Email is null", ex.Message);
-    }
-
     // ---------- EstablishmentId ----------
 
     [Fact]
@@ -116,41 +106,24 @@ public class CurrentUserTests
     {
         // Arrange - MAT user with selected school
         var orgJson = """
-            {
-              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-              "name": "Test Multi-Academy Trust",
-              "category": { "id": "010", "name": "Multi-Academy Trust" }
-            }
+                {
+                  "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+                  "name": "Test Multi-Academy Trust",
+                  "category": { "id": "010", "name": "Multi-Academy Trust" }
+                }
             """;
 
-        var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(
-                [
-                    BuildClaim(ClaimConstants.Organisation, orgJson),
-                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
-                ],
-                "test"
-            )
-        );
-        context.User = principal;
-
-        // Set selected school cookie
-        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
-        var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(
-            HeaderNames.Cookie,
-            $"SelectedSchool={Uri.EscapeDataString(json)}"
-        );
-
-        var accessor = new HttpContextAccessor { HttpContext = context };
-        var establishmentService = Substitute.For<IEstablishmentService>();
+        var claims = new List<Claim>
+        {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
+        };
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService
+        _establishmentService
             .GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(
-                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+                new List<SqlEstablishmentLinkDto>
                 {
                     new()
                     {
@@ -161,10 +134,10 @@ public class CurrentUserTests
                 }
             );
 
-        establishmentService
+        _establishmentService
             .GetEstablishmentByReferenceAsync("999888")
             .Returns(
-                new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+                new SqlEstablishmentDto
                 {
                     Id = 42, // Selected school's DB ID
                     OrgName = "Selected Academy",
@@ -172,8 +145,7 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var (sut, ctx) = Build(claims, true);
 
         // Act
         var result = await sut.GetActiveEstablishmentIdAsync();
@@ -408,117 +380,78 @@ public class CurrentUserTests
     [Fact]
     public void IsInRole_Reflects_Principal_Roles()
     {
-        var id = new ClaimsIdentity("auth");
-        id.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
-        var principal = new ClaimsPrincipal(id);
+        var claims = new List<Claim> { new(ClaimTypes.Role, "Admin") };
 
-        var ctx = new DefaultHttpContext { User = principal };
-        var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUserProvider(
-            accessor,
-            Substitute.For<IEstablishmentService>(),
-            Substitute.For<ILogger<CurrentUserProvider>>()
-        );
+        var (sut, ctx) = Build(claims, true);
 
         Assert.True(sut.IsInRole("Admin"));
         Assert.False(sut.IsInRole("Other"));
     }
 
     [Fact]
-    public void GetGroupSelectedSchool_Reads_From_Request_Cookies()
+    public void GetFocusedSchool_Reads_From_Request_Cookies()
     {
         var (sut, ctx) = Build();
 
-        var schoolData = new { Urn = "12345", Name = "Test school" };
-        var json = JsonSerializer.Serialize(schoolData);
-        var encoded = Uri.EscapeDataString(json);
+        var urn = "12345";
+        var name = "Test school";
 
-        // Set the Cookie header correctly
-        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
-
-        var result = sut.GetGroupSelectedSchool();
-
-        Assert.Equal(("12345", "Test school"), result);
-        Assert.Equal("12345", sut.GroupSelectedSchoolUrn);
-        Assert.Equal("Test school", sut.GroupSelectedSchoolName);
-    }
-
-    [Fact]
-    public void GetGroupSelectedSchool_ReturnsNull_WhenIncorrectDataModel()
-    {
-        var (sut, ctx) = Build();
-
-        var schoolData = new { Id = "12345", School = "Test school" };
-        var json = JsonSerializer.Serialize(schoolData);
-        var encoded = Uri.EscapeDataString(json);
-
-        // Set the Cookie header correctly
-        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
-
-        var result = sut.GetGroupSelectedSchool();
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void GetGroupSelectedSchool_ReturnsNull_WhenMalformedJson()
-    {
-        var (sut, ctx) = Build();
-
-        var malformedJson = "{\"Urn\":\"12345\",\"Name\":\"Test school\"";
-        var encoded = Uri.EscapeDataString(malformedJson);
-
-        // Set the Cookie header correctly
-        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
-
-        var result = sut.GetGroupSelectedSchool();
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void SetGroupSelectedSchool_Writes_Response_Cookie_And_Throws_On_Empty()
-    {
-        var (sut, ctx) = Build();
-
-        // valid -> writes Set-Cookie
-        sut.SetGroupSelectedSchool("99999", "Test school");
-
-        var setCookies = ctx.Response.Headers[HeaderNames.SetCookie];
-
-        Assert.True(setCookies.Count > 0);
-        Assert.True(setCookies.Count > 0);
-
-        var cookie = setCookies.LastOrDefault(v =>
-            v != null
-            && v.StartsWith("SelectedSchool=", StringComparison.OrdinalIgnoreCase)
-            && !v.Contains("01 Jan 1970", StringComparison.OrdinalIgnoreCase)
+        ctx.Session.SetValue(
+            SessionConstants.FocusedEstablishmentKey,
+            new SelectedEstablishmentDataModel { Urn = urn, Name = name }
         );
 
-        Assert.False(string.IsNullOrEmpty(cookie), $"Expected an appended SelectedSchool cookie.");
+        var result = sut.GetFocusedSchool();
 
-        var lower = cookie!.ToLowerInvariant();
-        Assert.Contains("httponly", lower);
-        Assert.Contains("secure", lower);
-        Assert.Contains("samesite=strict", lower);
+        Assert.NotNull(result);
+        Assert.Equal(urn, result.Urn);
+        Assert.Equal(urn, sut.GroupSelectedSchoolUrn);
+        Assert.Equal(name, result.Name);
+        Assert.Equal(name, sut.GroupSelectedSchoolName);
+    }
+
+    [Fact]
+    public void GetFocusedSchool_ReturnsNull_WhenIncorrectDataModel()
+    {
+        var (sut, ctx) = Build();
+
+        ctx.Session.SetValue(
+            SessionConstants.FocusedEstablishmentKey,
+            new EstablishmentModel { Id = Guid.NewGuid(), Uid = "54321" }
+        );
+
+        var result = sut.GetFocusedSchool();
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task SetFocusedSchool_Writes_Session_Value()
+    {
+        var (sut, ctx) = Build();
+
+        await sut.SetFocusedSchoolAsync("99999", "Test school");
+
+        var school =
+            ctx.Session.GetValue(SessionConstants.FocusedEstablishmentKey)
+            as SelectedEstablishmentDataModel;
+
+        Assert.NotNull(school);
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void SetGroupSelectedSchool_ThrowsInvalidDataException_WhenUrnIsNullOrEmpty(string? urn)
+    public async Task SetFocusedSchool_ThrowsInvalidDataException_WhenUrnIsNullOrEmpty(string? urn)
     {
         // Arrange
-        var context = new DefaultHttpContext();
-        var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
-        var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(httpContextAccessor, establishmentService, logger);
+        var (sut, ctx) = Build([], true);
 
         // Act & Assert
-        var ex = Assert.Throws<InvalidDataException>(() =>
-            sut.SetGroupSelectedSchool(urn!, "Test School")
+        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.SetFocusedSchoolAsync(urn!, "Test School")
         );
 
-        Assert.Equal("No Urn/School name set for selection.", ex.Message);
+        Assert.Equal("No URN/school name set for selection.", ex.Message);
     }
 
     // ---------- GetActiveEstablishmentNameAsync ----------

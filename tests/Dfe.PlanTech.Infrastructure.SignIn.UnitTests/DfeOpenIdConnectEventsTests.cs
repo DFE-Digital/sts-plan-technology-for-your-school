@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using System.Text.RegularExpressions;
-using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Data.Sql.Entities;
-using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
@@ -107,7 +107,7 @@ public partial class DfeOpenIdConnectEventsTests
         ]);
         identitySubstitute.IsAuthenticated.Returns(true);
 
-        var user = new UserEntity
+        var user = new SqlUserDto
         {
             Id = 2,
             DfeSignInRef = "testSignInRef",
@@ -116,7 +116,7 @@ public partial class DfeOpenIdConnectEventsTests
             Responses = [],
         };
 
-        var signIn = new SignInEntity
+        var signIn = new SqlSignInDto
         {
             Id = 3,
             UserId = 2,
@@ -124,24 +124,23 @@ public partial class DfeOpenIdConnectEventsTests
             SignInDateTime = DateTime.UtcNow,
             User = user,
         };
-        var establishmentRepositorySubstitute = Substitute.For<IEstablishmentRepository>();
 
-        var giasRepositorySubstitute = Substitute.For<IGiasRepository>();
+        var establishmentWorkflowSubstitute = Substitute.For<IEstablishmentWorkflow>();
+        var giasWorkflowSubstitute = Substitute.For<IGiasWorkflow>();
+        var signInWorkflowSubstitute = Substitute.For<ISignInWorkflow>();
+        var userWorkflowSubtitute = Substitute.For<IUserWorkflow>();
 
-        var signInRepositorySubstitute = Substitute.For<ISignInRepository>();
-        signInRepositorySubstitute.CreateSignInAsync(Arg.Any<int>()).Returns(signIn);
+        signInWorkflowSubstitute.CreateSignInAsync(Arg.Any<int>()).Returns(signIn);
+        userWorkflowSubtitute.GetOrCreateUserAsync(Arg.Any<string>()).Returns(user);
 
-        var userRepositorySubstitute = Substitute.For<IUserRepository>();
-        userRepositorySubstitute.CreateUserBySignInRefAsync(Arg.Any<string>()).Returns(user);
-
-        var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(
-            establishmentRepositorySubstitute,
-            signInRepositorySubstitute,
-            userRepositorySubstitute
+        var signInServiceSubstitute = Substitute.For<SignInService>(
+            establishmentWorkflowSubstitute,
+            signInWorkflowSubstitute,
+            userWorkflowSubtitute
         );
 
         var serviceProvider = Substitute.For<IServiceProvider>();
-        serviceProvider.GetService(typeof(ISignInWorkflow)).Returns(signInWorkflowSubstitute);
+        serviceProvider.GetService(typeof(ISignInService)).Returns(signInServiceSubstitute);
 
         var contextSubstitute = Substitute.For<HttpContext>();
         contextSubstitute.RequestServices.Returns(serviceProvider);
@@ -164,7 +163,7 @@ public partial class DfeOpenIdConnectEventsTests
                 LogLevel.Warning
             )
         );
-        await signInWorkflowSubstitute.Received(1).RecordSignInUserOnly(Arg.Any<string>());
+        await signInWorkflowSubstitute.Received(1).CreateSignInAsync(Arg.Any<int>());
     }
 
     [Theory]

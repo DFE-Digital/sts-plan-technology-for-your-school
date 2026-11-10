@@ -7,6 +7,32 @@ namespace Dfe.PlanTech.Core.Helpers;
 
 public static class SessionHelper
 {
+    public static Object? GetValue(this ISession session, string key)
+    {
+        if (!SessionConstants.SessionKeyTypes.TryGetValue(key, out var type))
+        {
+            throw new InvalidOperationException("Session does not expect that key");
+        }
+
+        var value = session.GetString(key);
+        return value != null ? JsonSerializer.Deserialize(value, type) : null;
+    }
+
+    public static void SetValue<T>(this ISession session, string key, T value)
+    {
+        if (
+            !SessionConstants.SessionKeyTypes.TryGetValue(key, out var type)
+            || !type.Equals(typeof(T))
+        )
+        {
+            throw new InvalidOperationException(
+                "Session does not expect that key or value is of wrong type for key"
+            );
+        }
+
+        session.SetString(key, JsonSerializer.Serialize(value));
+    }
+
     public static void ClearFocusedEstablishment(this ISession session)
     {
         session.Remove(SessionConstants.FocusedEstablishmentKey);
@@ -99,7 +125,7 @@ public static class SessionHelper
 
     public static void SetSelectedEstablishments(
         this ISession session,
-        IList<SelectedEstablishmentDataModel> selectedEstablishments
+        IEnumerable<SelectedEstablishmentDataModel> selectedEstablishments
     )
     {
         foreach (var establishment in selectedEstablishments)
@@ -121,31 +147,5 @@ public static class SessionHelper
         }
 
         session.SetValue(SessionConstants.SelectedEstablishmentsKey, selectedEstablishments);
-    }
-
-    private static Object? GetValue(this ISession session, string key)
-    {
-        if (!SessionConstants.SessionKeyTypes.TryGetValue(key, out var type))
-        {
-            throw new InvalidOperationException("Session does not expect that key");
-        }
-
-        var value = session.GetString(key);
-        return value != null ? JsonSerializer.Deserialize(value, type) : null;
-    }
-
-    private static void SetValue<T>(this ISession session, string key, T value)
-    {
-        if (
-            !SessionConstants.SessionKeyTypes.TryGetValue(key, out var type)
-            || !type.Equals(typeof(T))
-        )
-        {
-            throw new InvalidOperationException(
-                "Session does not expect that key or value is of wrong type for key"
-            );
-        }
-
-        session.SetString(key, JsonSerializer.Serialize(value));
     }
 }

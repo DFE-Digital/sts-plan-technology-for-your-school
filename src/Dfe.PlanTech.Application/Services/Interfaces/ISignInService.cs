@@ -9,6 +9,6 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
             string dfeSignInRef,
             EstablishmentModel dsiOrganisation
         );
-        Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef);
+        Task<SqlSignInDto> RecordSignInUserOnlyAsync(string dfeSignInRef);
     }
 }

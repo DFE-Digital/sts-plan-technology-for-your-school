@@ -17,6 +17,7 @@ public class GiasEstablishmentEntityTests
         var expectedLocalAuthorityCode = 5;
         var expectedPhaseCode = 6;
         var expectedTypeOfEstablishmentCode = 7;
+        var expectedTypeOfEstablishmentName = "Type of establishment";
         var expectedUkprn = "UKPRN123";
         var expectedSyncedAt = new DateTime(2026, 8, 24, 9, 0, 0);
 
@@ -30,6 +31,11 @@ public class GiasEstablishmentEntityTests
             LocalAuthorityCode = expectedLocalAuthorityCode,
             PhaseCode = expectedPhaseCode,
             TypeOfEstablishmentCode = expectedTypeOfEstablishmentCode,
+            TypeOfEstablishment = new GiasTypeOfEstablishmentEntity
+            {
+                TypeOfEstablishmentCode = expectedTypeOfEstablishmentCode,
+                TypeOfEstablishmentName = expectedTypeOfEstablishmentName,
+            },
             Ukprn = expectedUkprn,
             SyncedAt = expectedSyncedAt,
         };
@@ -46,6 +52,7 @@ public class GiasEstablishmentEntityTests
         Assert.Equal(expectedLocalAuthorityCode, dto.LocalAuthorityCode);
         Assert.Equal(expectedPhaseCode, dto.PhaseCode);
         Assert.Equal(expectedTypeOfEstablishmentCode, dto.TypeOfEstablishmentCode);
+        Assert.Equal(expectedTypeOfEstablishmentName, dto.TypeOfEstablishmentName);
         Assert.Equal(expectedUkprn, dto.Ukprn);
         Assert.Equal(expectedSyncedAt, dto.SyncedAt);
 
@@ -59,6 +66,7 @@ public class GiasEstablishmentEntityTests
             nameof(SqlGiasEstablishmentDto.LocalAuthorityCode),
             nameof(SqlGiasEstablishmentDto.PhaseCode),
             nameof(SqlGiasEstablishmentDto.TypeOfEstablishmentCode),
+            nameof(SqlGiasEstablishmentDto.TypeOfEstablishmentName),
             nameof(SqlGiasEstablishmentDto.Ukprn),
             nameof(SqlGiasEstablishmentDto.SyncedAt),
         ]);

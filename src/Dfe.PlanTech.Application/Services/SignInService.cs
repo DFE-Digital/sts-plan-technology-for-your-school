@@ -32,7 +32,7 @@ public class SignInService(
         return signIn;
     }
 
-    public async Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef)
+    public async Task<SqlSignInDto> RecordSignInUserOnlyAsync(string dfeSignInRef)
     {
         var user = await _userWorkflow.GetOrCreateUserAsync(dfeSignInRef);
         var signIn = await _signInWorkflow.CreateSignInAsync(user.Id);

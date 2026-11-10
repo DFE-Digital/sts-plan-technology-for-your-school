@@ -1,7 +1,7 @@
-using System.Text.Json;
 using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 
@@ -17,16 +17,23 @@ public class MatEstablishmentProviderTests
     {
         var session = new TestSession();
 
-        session.Set(
-            SessionConstants.SelectedEstablishmentsKey,
-            JsonSerializer.SerializeToUtf8Bytes(
-                new[]
-                {
-                    101,
-                    102,
-                }
-            )
-        );
+        var establishments = new List<SelectedEstablishmentDataModel>
+        {
+            new()
+            {
+                Id = 101,
+                Urn = "100001",
+                Name = "Test school 1",
+            },
+            new()
+            {
+                Id = 102,
+                Urn = "100002",
+                Name = "Test school 2",
+            },
+        };
+
+        session.SetSelectedEstablishments(establishments);
 
         var sut = CreateServiceUnderTest(session);
 
@@ -40,15 +47,11 @@ public class MatEstablishmentProviderTests
     {
         var session = new TestSession();
 
-        session.Set(
-            SessionConstants.SelectedEstablishmentsKey,
-            JsonSerializer.SerializeToUtf8Bytes(
-                new[]
-                {
-                    101
-                }
-            )
-        );
+        var id = 101;
+        var urn = "100000";
+        var name = "Test school";
+
+        session.SetSelectedEstablishments(id, urn, name);
 
         var sut = CreateServiceUnderTest(session);
 
@@ -62,10 +65,7 @@ public class MatEstablishmentProviderTests
     {
         var session = new TestSession();
 
-        session.Set(
-            SessionConstants.SelectedEstablishmentsKey,
-            JsonSerializer.SerializeToUtf8Bytes(Array.Empty<int>())
-        );
+        session.SetSelectedEstablishments([]);
 
         var sut = CreateServiceUnderTest(session);
 
@@ -86,24 +86,13 @@ public class MatEstablishmentProviderTests
         Assert.False(result);
     }
 
-    private MatEstablishmentProvider CreateServiceUnderTest(
-        ISession session
-    )
+    private MatEstablishmentProvider CreateServiceUnderTest(ISession session)
     {
-        var httpContext = new DefaultHttpContext
-        {
-            Session = session,
-        };
+        var httpContext = new DefaultHttpContext { Session = session };
 
-        var httpContextAccessor = new HttpContextAccessor
-        {
-            HttpContext = httpContext,
-        };
+        var httpContextAccessor = new HttpContextAccessor { HttpContext = httpContext };
 
-        return new MatEstablishmentProvider(
-            httpContextAccessor,
-            _establishmentService
-        );
+        return new MatEstablishmentProvider(httpContextAccessor, _establishmentService);
     }
 
     private sealed class TestSession : ISession
@@ -121,16 +110,12 @@ public class MatEstablishmentProviderTests
             _values.Clear();
         }
 
-        public Task CommitAsync(
-            CancellationToken cancellationToken = default
-        )
+        public Task CommitAsync(CancellationToken cancellationToken = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task LoadAsync(
-            CancellationToken cancellationToken = default
-        )
+        public Task LoadAsync(CancellationToken cancellationToken = default)
         {
             return Task.CompletedTask;
         }
@@ -140,18 +125,12 @@ public class MatEstablishmentProviderTests
             _values.Remove(key);
         }
 
-        public void Set(
-            string key,
-            byte[] value
-        )
+        public void Set(string key, byte[] value)
         {
             _values[key] = value;
         }
 
-        public bool TryGetValue(
-            string key,
-            out byte[] value
-        )
+        public bool TryGetValue(string key, out byte[] value)
         {
             return _values.TryGetValue(key, out value!);
         }

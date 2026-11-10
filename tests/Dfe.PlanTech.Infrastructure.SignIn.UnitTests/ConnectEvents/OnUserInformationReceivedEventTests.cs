@@ -2,13 +2,12 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
-using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
@@ -24,15 +23,15 @@ public class OnUserInformationReceivedEventTests
 {
     private static (
         UserInformationReceivedContext ctx,
-        ISignInWorkflow wf,
-        IGiasRepository gias,
+        ISignInService signIn,
+        IGiasService gias,
         ICurrentUserProvider user,
         ILogger<IDfeSignIn> logger
     ) BuildContext(ClaimsPrincipal principal)
     {
         var services = new ServiceCollection();
-        var signIn = Substitute.For<ISignInWorkflow>();
-        var gias = Substitute.For<IGiasRepository>();
+        var signIn = Substitute.For<ISignInService>();
+        var gias = Substitute.For<IGiasService>();
         var user = Substitute.For<ICurrentUserProvider>();
         services.AddSingleton(signIn);
         services.AddSingleton(gias);
@@ -112,8 +111,8 @@ public class OnUserInformationReceivedEventTests
         Assert.NotNull(ctx.Result);
         Assert.False(ctx.Result!.Succeeded);
         Assert.NotNull(ctx.Result.Failure);
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignIn(default!, default!);
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnly(default!);
+        await signIn.DidNotReceiveWithAnyArgs().RecordSignInAsync(default!, default!);
+        await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
     }
 
     [Fact]
@@ -148,14 +147,14 @@ public class OnUserInformationReceivedEventTests
         var principal = AuthenticatedPrincipal(
             new Claim(ClaimConstants.NameIdentifier, "dsi-ref-123")
         );
-        var (ctx, wf, _, _, logger) = BuildContext(principal);
+        var (ctx, signIn, _, _, logger) = BuildContext(principal);
 
         // Act
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
 
         // Assert: since GetOrganisation() returns null with no org claims, we should call the user-only workflow
-        await wf.Received(1).RecordSignInUserOnly(Arg.Any<string>());
-        await wf.DidNotReceiveWithAnyArgs().RecordSignIn(default!, default!);
+        await signIn.Received(1).RecordSignInUserOnlyAsync(Arg.Any<string>());
+        await signIn.DidNotReceiveWithAnyArgs().RecordSignInAsync(default!, default!);
 
         // Context not failed
         Assert.True(ctx.Result is null);
@@ -177,7 +176,9 @@ public class OnUserInformationReceivedEventTests
         var (ctx, signIn, gias, _, logger) = BuildContext(principal);
 
         var signInDto = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
-        signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
+        signIn
+            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
+            .Returns(signInDto);
 
         // Act
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
@@ -185,9 +186,9 @@ public class OnUserInformationReceivedEventTests
         // Assert: normal establishments never go through the SAT replacement lookup
         await signIn
             .Received(1)
-            .RecordSignIn("dsi-ref-123", Arg.Is<EstablishmentModel>(e => e.Urn == "111111"));
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnly(default!);
-        await gias.DidNotReceiveWithAnyArgs().GetSingleAcademySchool(default);
+            .RecordSignInAsync("dsi-ref-123", Arg.Is<EstablishmentModel>(e => e.Urn == "111111"));
+        await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
+        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentIdForSatAsync(default!);
 
         Assert.True(ctx.Result is null);
 
@@ -219,9 +220,12 @@ public class OnUserInformationReceivedEventTests
             UserId = 1,
             EstablishmentId = 1,
         };
-        signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
+        signIn
+            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
+            .Returns(signInDto);
 
-        gias.GetSingleAcademySchool(42).Returns((GiasEstablishmentEntity?)null);
+        gias.GetSchoolEstablishmentIdForSatAsync(Arg.Any<EstablishmentModel>())
+            .Returns(default(int?));
 
         // Act / Assert
         var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
@@ -255,7 +259,9 @@ public class OnUserInformationReceivedEventTests
             EstablishmentId = 1,
         };
 
-        signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
+        signIn
+            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
+            .Returns(signInDto);
 
         // Act / Assert
         var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
@@ -263,7 +269,7 @@ public class OnUserInformationReceivedEventTests
         );
 
         Assert.Contains("SAT", ex.Message);
-        await gias.DidNotReceiveWithAnyArgs().GetSingleAcademySchool(default);
+        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentIdForSatAsync(default!);
     }
 
     [Fact]
@@ -283,10 +289,12 @@ public class OnUserInformationReceivedEventTests
 
         var (ctx, signIn, gias, user, logger) = BuildContext(principal);
 
-        gias.GetSingleAcademySchool(99).Returns(CreateSchool(888888));
+        gias.GetSchoolEstablishmentIdForSatAsync(Arg.Any<EstablishmentModel>()).Returns(888888);
 
         var signInDto = new SqlSignInDto { UserId = 5, EstablishmentId = 6 };
-        signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
+        signIn
+            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
+            .Returns(signInDto);
 
         // Act
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
@@ -295,7 +303,10 @@ public class OnUserInformationReceivedEventTests
         // still gets added (it's set whenever the SAT branch runs, even on fallback).
         await signIn
             .Received(1)
-            .RecordSignIn("dsi-ref-fallback", Arg.Is<EstablishmentModel>(e => e.Urn == "888888"));
+            .RecordSignInAsync(
+                "dsi-ref-fallback",
+                Arg.Is<EstablishmentModel>(e => e.Urn == "888888")
+            );
     }
 
     // The rest of the behavior (adding DB_USER_ID and DB_ESTABLISHMENT_ID) is in a private method.
