@@ -63,14 +63,6 @@ public class EstablishmentWorkflow(
         return establishments.Select(e => e.AsDto());
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
-    {
-        var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(
-            establishmentId
-        );
-        return links.Select(l => l.AsDto()).ToList();
-    }
-
     public Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
     {
         return _establishmentLinkRepository.RecordGroupSelection(userGroupSelectionModel);
