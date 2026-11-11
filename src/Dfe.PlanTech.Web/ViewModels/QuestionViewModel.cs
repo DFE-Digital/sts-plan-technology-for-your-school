@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 

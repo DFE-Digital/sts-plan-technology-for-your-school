@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Microsoft.Extensions.Logging;
@@ -61,22 +60,12 @@ public class BannerConditionsContextProvider(
             }
         }
 
-        if (
-            banner.ShowToSchoolUsers == false
-            && _currentUser.OrganisationCategoryIdMatchesAny(
-                DsiConstants.EstablishmentOrganisationCategoryIds
-            )
-        )
+        if (banner.ShowToSchoolUsers == false && _currentUser.IsSchool)
         {
             return false; // Banner is not for school users, and the user is a school user
         }
 
-        if (
-            banner.ShowToGroupUsers == false
-            && _currentUser.OrganisationCategoryIdMatchesAny(
-                DsiConstants.SelectASchoolOrganisationCategoryIds
-            )
-        )
+        if (banner.ShowToGroupUsers == false && _currentUser.CanSelectSchools)
         {
             return false; // Banner is not for group users, and the user is a group user
         }
@@ -87,8 +76,8 @@ public class BannerConditionsContextProvider(
         }
 
         var establishmentId =
-            await _currentUser.GetActiveEstablishmentIdAsync()
-            ?? throw new InvalidDataException(nameof(_currentUser.GetActiveEstablishmentIdAsync));
+            _currentUser.FocusedSchool()?.Id
+            ?? throw new InvalidDataException("There is no focused school present in the session");
 
         foreach (var condition in banner.Conditions)
         {

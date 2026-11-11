@@ -15,20 +15,26 @@ public class EstablishmentRepository(PlanTechDbContext dbContext) : IEstablishme
         EstablishmentModel model
     )
     {
-        ArgumentNullException.ThrowIfNull(model);
+        var establishments = await CreateEstablishmentsFromModelsAsync([model]);
+        return establishments.Single();
+    }
 
-        var establishmentEntity = new EstablishmentEntity()
+    public async Task<List<EstablishmentEntity>> CreateEstablishmentsFromModelsAsync(
+        IEnumerable<EstablishmentModel> models
+    )
+    {
+        var establishmentEntities = models.Select(model => new EstablishmentEntity
         {
             EstablishmentRef = model.Reference,
             EstablishmentType = model.Type?.Name,
             OrgName = model.Name,
             GroupUid = model.GroupUid, // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
-        };
+        });
 
-        await _db.Establishments.AddAsync(establishmentEntity);
+        await _db.Establishments.AddRangeAsync(establishmentEntities);
         await _db.SaveChangesAsync();
 
-        return establishmentEntity;
+        return establishmentEntities.ToList();
     }
 
     public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(

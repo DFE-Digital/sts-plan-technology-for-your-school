@@ -41,7 +41,11 @@ public class CurrentUserTests
         ctx.AttachSession();
 
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUserProvider(accessor, _establishmentService, _logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: _establishmentService,
+            giasService: _logger
+        );
         return (sut, ctx);
     }
 
@@ -55,7 +59,11 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         Assert.Throws<ArgumentNullException>(() =>
-            new CurrentUserProvider(null!, establishmentService, logger)
+            new CurrentUserProvider(
+                contextAccessor: null!,
+                establishmentService: establishmentService,
+                giasService: logger
+            )
         );
     }
 
@@ -65,7 +73,11 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         Assert.Throws<ArgumentNullException>(() =>
-            new CurrentUserProvider(accessor, null!, logger)
+            new CurrentUserProvider(
+                contextAccessor: accessor,
+                establishmentService: null!,
+                giasService: logger
+            )
         );
     }
 
@@ -95,7 +107,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "42")]);
 
         // Act
-        var result = await sut.GetActiveEstablishmentIdAsync();
+        var result = await sut.GetActiveEstablishmentId();
 
         // Assert
         Assert.Equal(42, result);
@@ -148,7 +160,7 @@ public class CurrentUserTests
         var (sut, ctx) = Build(claims, true);
 
         // Act
-        var result = await sut.GetActiveEstablishmentIdAsync();
+        var result = await sut.GetActiveEstablishmentId();
 
         // Assert - Should return selected school's ID (42), not MAT's ID (100)
         Assert.Equal(42, result);
@@ -158,14 +170,14 @@ public class CurrentUserTests
     public async Task GetActiveEstablishmentIdAsync_WhenNoClaimAndNoSelectedSchool_ReturnsNull()
     {
         var (sut1, _) = Build();
-        Assert.Null(await sut1.GetActiveEstablishmentIdAsync());
+        Assert.Null(await sut1.GetActiveEstablishmentId());
     }
 
     [Fact]
     public async Task GetActiveEstablishmentIdAsync_WhenClaimIsNonNumeric_ReturnsNull()
     {
         var (sut2, _) = Build([BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int")]);
-        Assert.Null(await sut2.GetActiveEstablishmentIdAsync());
+        Assert.Null(await sut2.GetActiveEstablishmentId());
     }
 
     // ---------- UserId ----------
@@ -405,9 +417,9 @@ public class CurrentUserTests
 
         Assert.NotNull(result);
         Assert.Equal(urn, result.Urn);
-        Assert.Equal(urn, sut.GroupSelectedSchoolUrn);
+        Assert.Equal(urn, sut.GroupFocusedSchoolUrn);
         Assert.Equal(name, result.Name);
-        Assert.Equal(name, sut.GroupSelectedSchoolName);
+        Assert.Equal(name, sut.GroupFocusedSchoolName);
     }
 
     [Fact]
@@ -473,7 +485,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
-        var result = await sut.GetActiveEstablishmentNameAsync();
+        var result = await sut.GetActiveEstablishmentName();
 
         // Assert
         Assert.Equal("Test Primary School", result);
@@ -494,7 +506,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
-        var result = await sut.GetActiveEstablishmentNameAsync();
+        var result = await sut.GetActiveEstablishmentName();
 
         // Assert - Should return MAT name since no school selected
         Assert.Equal("Test Multi-Academy Trust", result);
@@ -512,34 +524,25 @@ public class CurrentUserTests
             }
             """;
 
-        var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(
-                [
-                    BuildClaim(ClaimConstants.Organisation, orgJson),
-                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
-                ],
-                "test"
-            )
-        );
-        context.User = principal;
+        var claims = new List<Claim>
+        {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
+        };
 
-        // Set selected school cookie
-        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
-        var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(
-            HeaderNames.Cookie,
-            $"SelectedSchool={Uri.EscapeDataString(json)}"
-        );
+        var (sut, ctx) = Build(claims);
 
-        var accessor = new HttpContextAccessor { HttpContext = context };
-        var establishmentService = Substitute.For<IEstablishmentService>();
+        // Set focused school
+        var id = 10;
+        var urn = "999888";
+        var name = "Selected Academy";
+        ctx.Session.SetFocusedEstablishment(id, urn, name);
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService
+        _establishmentService
             .GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(
-                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+                new List<SqlEstablishmentLinkDto>
                 {
                     new()
                     {
@@ -550,10 +553,10 @@ public class CurrentUserTests
                 }
             );
 
-        establishmentService
+        _establishmentService
             .GetEstablishmentByReferenceAsync("999888")
             .Returns(
-                new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+                new SqlEstablishmentDto
                 {
                     Id = 42,
                     OrgName = "Selected Academy from DB",
@@ -561,11 +564,8 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
-
         // Act
-        var result = await sut.GetActiveEstablishmentNameAsync();
+        var result = await sut.GetActiveEstablishmentName();
 
         // Assert - should return name from database, not cookie
         Assert.Equal("Selected Academy from DB", result);
@@ -608,10 +608,14 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var result = await sut.GetActiveEstablishmentNameAsync();
+        var result = await sut.GetActiveEstablishmentName();
 
         // Assert - should fall back to MAT/group name
         Assert.Equal("Test Multi-Academy Trust", result);
@@ -635,7 +639,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
-        var result = await sut.GetActiveEstablishmentUrnAsync();
+        var result = await sut.GetActiveEstablishmentUrn();
 
         // Assert
         Assert.Equal("123456", result);
@@ -658,7 +662,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
-        var result = await sut.GetActiveEstablishmentUrnAsync();
+        var result = await sut.GetActiveEstablishmentUrn();
 
         // Assert - MAT doesn't have URN, only schools do
         Assert.Null(result);
@@ -723,10 +727,14 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var result = await sut.GetActiveEstablishmentUrnAsync();
+        var result = await sut.GetActiveEstablishmentUrn();
 
         // Assert
         Assert.Equal("999888", result);
@@ -811,7 +819,11 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentUkprn();
@@ -899,7 +911,11 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentUid();
@@ -983,7 +999,11 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentDsiId();
@@ -1068,7 +1088,11 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentReference();
@@ -1094,7 +1118,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert
-        Assert.True(sut.UserOrganisationSelectsSchools);
+        Assert.True(sut.CanSelectSchools);
     }
 
     // [Fact]
@@ -1149,7 +1173,7 @@ public class CurrentUserTests
         var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert
-        Assert.False(sut.UserOrganisationSelectsSchools);
+        Assert.False(sut.CanSelectSchools);
     }
 
     [Fact]
@@ -1159,7 +1183,7 @@ public class CurrentUserTests
         var (sut, _) = Build();
 
         // Act / Assert
-        Assert.False(sut.UserOrganisationSelectsSchools);
+        Assert.False(sut.CanSelectSchools);
     }
 
     // ---------- LoadSelectedSchool validation (security tests) ----------
@@ -1200,12 +1224,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should ignore the manipulated cookie and return the user's actual school
         Assert.Equal(100, activeEstablishmentId); // Their actual school ID from claims
@@ -1289,12 +1317,16 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should reject the manipulated cookie and fall back to MAT details
         Assert.Equal(100, activeEstablishmentId); // MAT's ID
@@ -1337,12 +1369,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should return nulls (no access)
         Assert.Null(activeEstablishmentId);
@@ -1427,12 +1463,16 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should successfully return the selected school
         Assert.Equal(42, activeEstablishmentId); // Selected school's ID
@@ -1501,12 +1541,16 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should fail securely and fall back to MAT details
         Assert.Equal(100, activeEstablishmentId); // MAT's ID
@@ -1564,12 +1608,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should reject and fall back to MAT details
         Assert.Null(activeEstablishmentId); // No ID available
@@ -1629,12 +1677,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should fall back to MAT details
         Assert.Equal(100, activeEstablishmentId); // MAT's ID
@@ -1698,12 +1750,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should fall back to MAT details
         Assert.Equal(100, activeEstablishmentId); // MAT's ID
@@ -1767,12 +1823,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should fall back to MAT details
         Assert.Equal(100, activeEstablishmentId);
@@ -1827,12 +1887,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should fall back to MAT details
         Assert.Equal(100, activeEstablishmentId);
@@ -1887,12 +1951,16 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrn();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should fall back to MAT details
         Assert.Equal(100, activeEstablishmentId);
@@ -1948,11 +2016,15 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(
+            contextAccessor: accessor,
+            establishmentService: establishmentService,
+            giasService: logger
+        );
 
         // Act
-        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
-        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+        var activeEstablishmentId = await sut.GetActiveEstablishmentId();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentName();
 
         // Assert - Should gracefully fall back to MAT without throwing exceptions
         Assert.Equal(100, activeEstablishmentId);

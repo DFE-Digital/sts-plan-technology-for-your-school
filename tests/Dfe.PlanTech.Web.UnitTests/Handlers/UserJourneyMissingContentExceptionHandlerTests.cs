@@ -35,7 +35,14 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var accessor = new HttpContextAccessor { HttpContext = http };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        return (new CurrentUserProvider(accessor, establishmentService, logger), http);
+        return (
+            new CurrentUserProvider(
+                contextAccessor: accessor,
+                establishmentService: establishmentService,
+                giasService: logger
+            ),
+            http
+        );
     }
 
     private static Controller MakeController(HttpContext http)
@@ -134,7 +141,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var thrown = await Assert.ThrowsAsync<InvalidDataException>(() =>
             sut.Handle(controller, ex)
         );
-        Assert.Contains(nameof(CurrentUserProvider.GetActiveEstablishmentIdAsync), thrown.Message);
+        Assert.Contains(nameof(CurrentUserProvider.GetActiveEstablishmentId), thrown.Message);
 
         await submissionSvc
             .DidNotReceiveWithAnyArgs()

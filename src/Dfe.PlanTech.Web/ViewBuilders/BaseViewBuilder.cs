@@ -45,8 +45,10 @@ public class BaseViewBuilder(
     /// <exception cref="InvalidDataException"></exception>
     protected int GetUserOrganisationIdOrThrowException()
     {
-        return CurrentUser.UserOrganisationId
-            ?? throw new InvalidDataException(nameof(CurrentUser.UserOrganisationId));
+        return CurrentUser.UserEstablishment?.Id
+            ?? throw new InvalidDataException(
+                "There is no user establishment present in the session"
+            );
     }
 
     /// <summary>
@@ -54,10 +56,10 @@ public class BaseViewBuilder(
     /// </summary>
     /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
     /// <exception cref="InvalidDataException"></exception>
-    protected async Task<int> GetActiveEstablishmentIdOrThrowException()
+    protected int GetFocusedEstablishmentIdOrThrowException()
     {
-        return await CurrentUser.GetActiveEstablishmentIdAsync()
-            ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
+        return CurrentUser.FocusedSchool?.Id
+            ?? throw new InvalidDataException("There is no focused school present in the session");
     }
 
     protected static ShareByEmailViewModel BuildShareByEmailViewModel(

@@ -295,12 +295,23 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(
             new DistributedCachingOptions(ConnectionString: redisConnectionString)
         );
-        services.AddSingleton<ICmsCache, Infrastructure.Redis.RedisCache>();
+        services.AddSingleton<ICmsCache, RedisCache>();
         services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
         services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IRedisDependencyManager, RedisDependencyManager>();
 
-        // Add a separate cache for session tracking using database 1
+        // In `program.cs`, app.UseSession() links to an ISessionStore under the hood.
+        // That looks for an IDistributedCache, which is registered here via
+        // services.AddStackExchangeRedisCache(...) using a different database (the
+        // Contentful store defaults to 0).
+        //
+        // This separates the two automatically, with almost no visible sign anywhere
+        // else that they're kept in separate places. But THIS is that place.
+        //
+        // We did this because we used to use AddDistributedMemoryCache and hit a
+        // Container Apps replica problem where if the container app went elastic and
+        // span up another VM, none of the sessions matched to a key and the user was
+        // essentially logged out invisibly. This fixes it.
         services.AddStackExchangeRedisCache(options =>
         {
             options.ConfigurationOptions = ConfigurationOptions.Parse(redisConnectionString);

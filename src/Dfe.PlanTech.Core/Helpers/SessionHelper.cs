@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -7,7 +8,7 @@ namespace Dfe.PlanTech.Core.Helpers;
 
 public static class SessionHelper
 {
-    public static Object? GetValue(this ISession session, string key)
+    public static object? GetValue(this ISession session, string key)
     {
         if (!SessionConstants.SessionKeyTypes.TryGetValue(key, out var type))
         {
@@ -32,6 +33,36 @@ public static class SessionHelper
 
         session.SetString(key, JsonSerializer.Serialize(value));
     }
+
+    /* **** USER ESTABLISHMENT ****
+     * This is the database record in dbo.establishment which represents the user's organisation.
+     * For a school user, it will be a school.
+     * For a SAT, SSAT, or MAT user, it will be the trust.
+     */
+
+    public static SqlEstablishmentDto? GetUserEstablishment(this ISession session)
+    {
+        return
+            session.GetValue(SessionConstants.UserEstablishmentKey)
+                is SqlEstablishmentDto establishment
+            ? establishment
+            : null;
+    }
+
+    public static void SetUserEstablishment(
+        this ISession session,
+        SqlEstablishmentDto establishment
+    )
+    {
+        session.SetValue(SessionConstants.UserEstablishmentKey, establishment);
+    }
+
+    /* **** FOCUSED ESTABLISHMENT ****
+     * This is the dbo.establishment ID, URN, and name of the school the user is viewing.
+     * For a school user, it will represent their school.
+     * For a SAT or SSAT user, it will represent the single school within that trust.
+     * For a MAT user, it will represent the single school they have chosen to view.
+     */
 
     public static void ClearFocusedEstablishment(this ISession session)
     {
@@ -63,37 +94,45 @@ public static class SessionHelper
         session.SetValue(SessionConstants.FocusedEstablishmentKey, establishment);
     }
 
-    public static void ClearFocusedAndSelectedEstablishments(this ISession session)
+    /* **** GROUP SCHOOLS ****
+     * These are the dbo.establishment IDs, URNs, and names of the schools within a group user's group.
+     * School, SAT, and SSAT users should never have access to this.
+     * For a MAT user, it will represent the schools within their group according to GIAS.
+     */
+
+    public static void ClearGroupSchools(this ISession session)
     {
-        session.Remove(SessionConstants.FocusedEstablishmentKey);
+        session.Remove(SessionConstants.GroupEstablishmentsKey);
+    }
+
+    public static IReadOnlyList<SelectedEstablishmentDataModel> GetGroupSchools(
+        this ISession session
+    )
+    {
+        return
+            session.GetValue(SessionConstants.GroupEstablishmentsKey)
+                is IEnumerable<SelectedEstablishmentDataModel> groupSchools
+            ? groupSchools.ToArray()
+            : [];
+    }
+
+    public static void SetGroupSchools(
+        this ISession session,
+        IEnumerable<SelectedEstablishmentDataModel> groupSchools
+    )
+    {
+        session.SetValue(SessionConstants.GroupEstablishmentsKey, groupSchools);
+    }
+
+    /* **** SELECTED ESTABLISHMENTS ****
+     * These are the dbo.establishment database IDs, URNs, and names of the school the user has selected.
+     * School, SAT, and SSAT users should never have access to this.
+     * For MAT users, it will represent the subset of schools within their trust which they have selected for a bulk operation.
+     */
+
+    public static void ClearSelectedEstablishments(this ISession session)
+    {
         session.Remove(SessionConstants.SelectedEstablishmentsKey);
-    }
-
-    public static IReadOnlyList<int> GetSelectedEstablishmentIds(this ISession session)
-    {
-        var establishments = session.GetValue(SessionConstants.SelectedEstablishmentsKey);
-        if (
-            establishments is not IEnumerable<SelectedEstablishmentDataModel> selectedEstablishments
-        )
-        {
-            return [];
-        }
-
-        return selectedEstablishments.Select(e => e.Id).ToArray();
-    }
-
-    public static IReadOnlyList<string> GetSelectedEstablishmentNames(this ISession session)
-    {
-        var establishments = session.GetValue(SessionConstants.SelectedEstablishmentsKey);
-
-        if (
-            establishments is not IEnumerable<SelectedEstablishmentDataModel> selectedEstablishments
-        )
-        {
-            return [];
-        }
-
-        return selectedEstablishments.Select(e => e.Name).ToArray();
     }
 
     public static IReadOnlyList<SelectedEstablishmentDataModel> GetSelectedEstablishments(
@@ -130,9 +169,9 @@ public static class SessionHelper
     {
         foreach (var establishment in selectedEstablishments)
         {
-            if (establishment.Id == 0)
+            if (establishment.Id < 1)
             {
-                throw new InvalidDataException("Establishment ID cannot be 0");
+                throw new InvalidDataException("Establishment ID cannot be less than 1");
             }
 
             if (string.IsNullOrWhiteSpace(establishment.Name))

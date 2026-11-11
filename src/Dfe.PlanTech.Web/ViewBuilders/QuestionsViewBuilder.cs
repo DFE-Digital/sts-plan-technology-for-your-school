@@ -156,7 +156,7 @@ public class QuestionsViewBuilder(
             );
 
         var isMatWithoutSelectedSchool =
-            CurrentUser.IsMat && string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolUrn);
+            CurrentUser.IsMat && string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolUrn);
 
         if (isMatWithoutSelectedSchool)
         {
@@ -166,10 +166,10 @@ public class QuestionsViewBuilder(
         }
 
         var category =
-        await ContentfulService.GetCategoryBySlugAsync(categorySlug)
-        ?? throw new ContentfulDataUnavailableException(
-            $"Could not find category for slug {categorySlug}"
-        );
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
 
         var categoryName =
             category.Header?.Text
@@ -327,7 +327,7 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -383,7 +383,7 @@ public class QuestionsViewBuilder(
         bool isObsoleteSubmissionFlow
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -409,7 +409,7 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -439,7 +439,7 @@ public class QuestionsViewBuilder(
             : [];
 
         var userId = GetUserIdOrThrowException();
-        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var activeEstablishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         var userOrganisationId =
             CurrentUser.UserOrganisationId
@@ -583,7 +583,7 @@ public class QuestionsViewBuilder(
 
     private async Task<int> GetRoutingEstablishmentId()
     {
-        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var activeEstablishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         if (!CurrentUser.IsMat)
         {
@@ -650,7 +650,10 @@ public class QuestionsViewBuilder(
             SectionId = section?.Id,
         };
 
-        await PopulateMatSelectedSchools(viewModel);
+        if (CurrentUser.IsMat)
+        {
+            await PopulateMatSelectedSchools(viewModel);
+        }
 
         return viewModel;
     }

@@ -80,7 +80,7 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -130,9 +130,7 @@ public class RecommendationsViewBuilder(
             establishmentId
         );
 
-        var orderedHistory = recommendationHistory
-            .OrderByDescending(rh => rh.DateCreated)
-            .ToList();
+        var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
 
         var groupedHistory = orderedHistory
             .GroupBy(rh => $"{rh.DateCreated.Date:MMMM yyyy}")
@@ -219,8 +217,9 @@ public class RecommendationsViewBuilder(
 
         var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var groupContext =
-            await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+        var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
+            groupEstablishmentId
+        );
 
         var establishments = groupContext.Establishments;
         var establishmentIds = groupContext.EstablishmentIds;
@@ -239,31 +238,27 @@ public class RecommendationsViewBuilder(
         {
             return controller.RedirectToRoute(
                 GroupsController.GetSelectSchoolsToAssessAction,
-                new
-                {
-                    categorySlug,
-                    sectionSlug,
-                }
+                new { categorySlug, sectionSlug }
             );
         }
 
         var schools = new List<MatRecommendationSchoolViewModel>();
 
         foreach (
-            var establishment in establishments
-                .OrderBy(e => e.OrgName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+            var establishment in establishments.OrderBy(
+                e => e.OrgName ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase
+            )
         )
         {
-            var hasCompletedSelfAssessment =
-                completedEstablishmentIds.Contains(establishment.Id);
+            var hasCompletedSelfAssessment = completedEstablishmentIds.Contains(establishment.Id);
 
-            var history =
-                hasCompletedSelfAssessment
-                    ? await _recommendationService.GetLatestRecommendationHistoryAsync(
-                        establishment.Id,
-                        currentRecommendationChunk.Id
-                    )
-                    : null;
+            var history = hasCompletedSelfAssessment
+                ? await _recommendationService.GetLatestRecommendationHistoryAsync(
+                    establishment.Id,
+                    currentRecommendationChunk.Id
+                )
+                : null;
 
             schools.Add(
                 new MatRecommendationSchoolViewModel
@@ -333,7 +328,7 @@ public class RecommendationsViewBuilder(
         string? originatingSlug
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -428,7 +423,7 @@ public class RecommendationsViewBuilder(
         string sectionSlug,
         string? singleChunkSlug,
         string originatingSlug
-)
+    )
     {
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -445,9 +440,7 @@ public class RecommendationsViewBuilder(
         var recommendationChunks = section.CoreRecommendations.ToList();
 
         var selectedChunks = recommendationChunks
-            .Where(chunk =>
-                singleChunkSlug is null || chunk.Slug == singleChunkSlug
-            )
+            .Where(chunk => singleChunkSlug is null || chunk.Slug == singleChunkSlug)
             .Select(chunk => new RecommendationChunkViewModel
             {
                 Header = chunk.HeaderText,
@@ -463,10 +456,9 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var currentChunkIndex =
-            singleChunkSlug is null
-                ? -1
-                : recommendationChunks.FindIndex(chunk => chunk.Slug == singleChunkSlug);
+        var currentChunkIndex = singleChunkSlug is null
+            ? -1
+            : recommendationChunks.FindIndex(chunk => chunk.Slug == singleChunkSlug);
 
         var viewModel = new RecommendationsViewModel
         {
@@ -475,9 +467,7 @@ public class RecommendationsViewBuilder(
             SectionName = section.Name,
             SectionSlug = sectionSlug,
             Chunks = selectedChunks,
-            CurrentChunkCount = currentChunkIndex >= 0
-                ? currentChunkIndex + 1
-                : null,
+            CurrentChunkCount = currentChunkIndex >= 0 ? currentChunkIndex + 1 : null,
             TotalChunks = recommendationChunks.Count,
             OriginatingSlug = originatingSlug,
             IsMat = true,
@@ -494,7 +484,7 @@ public class RecommendationsViewBuilder(
         SingleRecommendationInputViewModel inputModel
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -577,22 +567,16 @@ public class RecommendationsViewBuilder(
 
     [ExcludeFromCodeCoverage]
     public Task<IActionResult> RouteToPrintSingle(
-    Controller controller,
-    string categorySlug,
-    string sectionSlug,
-    string chunkSlug,
-    CategoryLandingContext context = CategoryLandingContext.School
-)
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        CategoryLandingContext context = CategoryLandingContext.School
+    )
     {
         if (context == CategoryLandingContext.MAT)
         {
-            return RouteToMatPrint(
-                controller,
-                categorySlug,
-                sectionSlug,
-                chunkSlug,
-                chunkSlug
-            );
+            return RouteToMatPrint(controller, categorySlug, sectionSlug, chunkSlug, chunkSlug);
         }
 
         return RouteBySectionAndRecommendation(
@@ -607,22 +591,16 @@ public class RecommendationsViewBuilder(
 
     [ExcludeFromCodeCoverage]
     public Task<IActionResult> RouteToPrintAll(
-    Controller controller,
-    string categorySlug,
-    string sectionSlug,
-    string chunkSlug,
-    CategoryLandingContext context = CategoryLandingContext.School
-)
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        CategoryLandingContext context = CategoryLandingContext.School
+    )
     {
         if (context == CategoryLandingContext.MAT)
         {
-            return RouteToMatPrint(
-                controller,
-                categorySlug,
-                sectionSlug,
-                null,
-                chunkSlug
-            );
+            return RouteToMatPrint(controller, categorySlug, sectionSlug, null, chunkSlug);
         }
 
         return RouteBySectionAndRecommendation(
@@ -636,13 +614,13 @@ public class RecommendationsViewBuilder(
     }
 
     public async Task<IActionResult> RouteToShareRecommendationAsync(
-    Controller controller,
-    string categorySlug,
-    string sectionSlug,
-    string chunkSlug,
-    ShareByEmailInputViewModel? inputModel = null,
-    CategoryLandingContext context = CategoryLandingContext.School
-)
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        ShareByEmailInputViewModel? inputModel = null,
+        CategoryLandingContext context = CategoryLandingContext.School
+    )
     {
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -697,23 +675,18 @@ public class RecommendationsViewBuilder(
         {
             var matName =
                 CurrentUser.UserOrganisationName
-                ?? throw new InvalidDataException(
-                    "Cannot send an email without a MAT name"
-                );
+                ?? throw new InvalidDataException("Cannot send an email without a MAT name");
 
             var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-            var groupContext =
-                await _groupService.GetGroupEstablishmentContextAsync(
-                    groupEstablishmentId
-                );
+            var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
+                groupEstablishmentId
+            );
 
-            var completedEstablishmentIds = groupContext.CompletedSubmissions
-                .Where(submission =>
+            var completedEstablishmentIds = groupContext
+                .CompletedSubmissions.Where(submission =>
                     submission.SectionId == section.Id
-                    && groupContext.EstablishmentIds.Contains(
-                        submission.EstablishmentId
-                    )
+                    && groupContext.EstablishmentIds.Contains(submission.EstablishmentId)
                 )
                 .Select(submission => submission.EstablishmentId)
                 .Distinct()
@@ -722,8 +695,8 @@ public class RecommendationsViewBuilder(
             var schoolStatusLines = new List<string>();
 
             foreach (
-                var establishment in groupContext.Establishments
-                    .Where(establishment =>
+                var establishment in groupContext
+                    .Establishments.Where(establishment =>
                         completedEstablishmentIds.Contains(establishment.Id)
                     )
                     .OrderBy(
@@ -732,60 +705,46 @@ public class RecommendationsViewBuilder(
                     )
             )
             {
-                var history =
-                    await _recommendationService.GetLatestRecommendationHistoryAsync(
-                        establishment.Id,
-                        recommendationChunk.Id
-                    );
+                var history = await _recommendationService.GetLatestRecommendationHistoryAsync(
+                    establishment.Id,
+                    recommendationChunk.Id
+                );
 
-                var status =
-                    history?.NewStatus ?? RecommendationStatus.NotStarted;
+                var status = history?.NewStatus ?? RecommendationStatus.NotStarted;
 
                 schoolStatusLines.Add(
                     $"* {establishment.OrgName ?? string.Empty}: {status.GetDisplayName()}"
                 );
             }
 
-            var schoolsList = string.Join(
-                Environment.NewLine,
-                schoolStatusLines
+            var schoolsList = string.Join(Environment.NewLine, schoolStatusLines);
+
+            var notifySendResults = _notifyService.SendMatSingleRecommendationEmail(
+                inputModel.ToModel(),
+                textBody,
+                matName,
+                recommendationChunk.HeaderText,
+                category.Header.Text,
+                section.Name,
+                schoolsList
             );
 
-            var notifySendResults =
-             _notifyService.SendMatSingleRecommendationEmail(
-                 inputModel.ToModel(),
-                 textBody,
-                 matName,
-                 recommendationChunk.HeaderText,
-                 category.Header.Text,
-                 section.Name,
-                 schoolsList
-             );
-
             var returnToModel = new ActionViewModel(
-                actionName: nameof(
-                    RecommendationsController.GetMatSingleRecommendation
-                ),
-                controllerName: nameof(
-                    RecommendationsController
-                ).GetControllerNameSlug(),
+                actionName: nameof(RecommendationsController.GetMatSingleRecommendation),
+                controllerName: nameof(RecommendationsController).GetControllerNameSlug(),
                 linkText: @$"Back to ""{recommendationChunk.HeaderText}""",
                 routeValues: new Dictionary<string, string>
                 {
-                { nameof(categorySlug), categorySlug },
-                { nameof(sectionSlug), sectionSlug },
-                { nameof(chunkSlug), chunkSlug },
+                    { nameof(categorySlug), categorySlug },
+                    { nameof(sectionSlug), sectionSlug },
+                    { nameof(chunkSlug), chunkSlug },
                 }
             );
 
-            return HandleNotifyShareResults(
-                controller,
-                notifySendResults,
-                returnToModel
-            );
+            return HandleNotifyShareResults(controller, notifySendResults, returnToModel);
         }
 
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = GetFocusedEstablishmentIdOrThrowException();
 
         var latestRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
@@ -795,16 +754,12 @@ public class RecommendationsViewBuilder(
 
         if (latestRecommendationHistory?.NewStatus is null)
         {
-            throw new InvalidDataException(
-                "Cannot send an email without a recommendation status"
-            );
+            throw new InvalidDataException("Cannot send an email without a recommendation status");
         }
 
         var establishmentName =
-            await CurrentUser.GetActiveEstablishmentNameAsync()
-            ?? throw new InvalidDataException(
-                "Cannot send an email without an active establishment name"
-            );
+            CurrentUser.FocusedSchool?.Name
+            ?? throw new InvalidDataException("Cannot send an email without a focused school name");
 
         var schoolNotifySendResults = _notifyService.SendSingleRecommendationEmail(
             inputModel.ToModel(),
@@ -827,11 +782,7 @@ public class RecommendationsViewBuilder(
             }
         );
 
-        return HandleNotifyShareResults(
-            controller,
-            schoolNotifySendResults,
-            schoolReturnToModel
-        );
+        return HandleNotifyShareResults(controller, schoolNotifySendResults, schoolReturnToModel);
     }
 
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
@@ -850,7 +801,7 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
 
         var details = await _recommendationService.GetLatestRecommendationStatusesAsync(

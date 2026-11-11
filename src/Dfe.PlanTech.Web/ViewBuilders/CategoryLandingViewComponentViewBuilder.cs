@@ -77,7 +77,7 @@ public class CategoryLandingViewComponentViewBuilder(
         bool print
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;

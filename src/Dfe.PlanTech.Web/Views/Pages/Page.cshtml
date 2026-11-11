@@ -8,7 +8,7 @@
 
     var isSelectedSchoolHomePage =
         CurrentUser.IsMat &&
-        !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName) &&
+        !string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolName) &&
         Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
 
     var useBreadcrumbs = isTopicStartPage || isSelectedSchoolHomePage;
@@ -40,11 +40,11 @@
         else
         {
             if (CurrentUser.IsMat &&
-                !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName))
+                !string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolName))
             {
                 breadcrumbs.Add(new BreadcrumbItemViewModel
                 {
-                    Text = CurrentUser.GroupSelectedSchoolName,
+                    Text = CurrentUser.GroupFocusedSchoolName,
                     Href = UrlConstants.HomePage
                 });
             }

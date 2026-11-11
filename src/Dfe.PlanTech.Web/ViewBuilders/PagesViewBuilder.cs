@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -14,7 +15,6 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -58,8 +58,8 @@ public class PagesViewBuilder(
 
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
-            && CurrentUser.UserOrganisationSelectsSchools
-            && CurrentUser.GroupSelectedSchoolUrn is null
+            && CurrentUser.CanSelectSchools
+            && CurrentUser.FocusedSchool is null
             && !isMatTopicStartPage;
 
         if (shouldRedirectToSchoolSelection)
@@ -67,27 +67,21 @@ public class PagesViewBuilder(
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
 
-        // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
-        var hasSelectedASchool =
-            CurrentUser.UserOrganisationSelectsSchools
-            && CurrentUser.GroupSelectedSchoolUrn is not null;
+        var focusedSchoolUrn = CurrentUser.FocusedSchool?.Urn;
+        var hasSelectedASchool = CurrentUser.CanSelectSchools && focusedSchoolUrn is not null;
 
+        // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         if (hasSelectedASchool)
         {
-            // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
-            var groupId =
-                CurrentUser.UserOrganisationId
+            var groupEstablishmentId =
+                CurrentUser.UserEstablishment?.Id
                 ?? throw new InvalidDataException(
-                    "User is a MAT user but does not have an organisation ID (for the group)"
+                    "User is a MAT user but does not have an establishment ID for their group"
                 );
 
-            var groupSchools =
-                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
-
-            var selectedSchoolIsValid = groupSchools.Any(s =>
-                s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
+            var selectedSchoolIsValid = CurrentUser.GroupSchools.Any(s =>
+                s.Urn.Equals(focusedSchoolUrn)
             );
-
             if (!selectedSchoolIsValid)
             {
                 return controller.Redirect(UrlConstants.SelectASchoolPage);
@@ -121,10 +115,16 @@ public class PagesViewBuilder(
             }
             else
             {
-                viewModel.ActiveEstablishmentName =
-                    await CurrentUser.GetActiveEstablishmentNameAsync();
-                viewModel.ActiveEstablishmentUrn =
-                    await CurrentUser.GetActiveEstablishmentUrnAsync();
+                var focusedSchool = CurrentUser.FocusedSchool;
+                if (focusedSchool is null)
+                {
+                    throw new InvalidOperationException(
+                        "User is on a school page and does not have a focused school"
+                    );
+                }
+
+                viewModel.ActiveEstablishmentName = CurrentUser.FocusedSchool.Name;
+                viewModel.ActiveEstablishmentUrn = CurrentUser.FocusedSchool.Urn;
             }
         }
 
@@ -156,18 +156,15 @@ public class PagesViewBuilder(
             context: context
         );
 
-        return controller.View(
-            CategoryLandingPagePrintView,
-            landingPageViewModel
-        );
+        return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
     public async Task<IActionResult> RouteToShareStandardPageAsync(
-    Controller controller,
-    string categorySlug,
-    ShareByEmailInputViewModel? inputModel = null,
-    CategoryLandingContext context = CategoryLandingContext.School
-)
+        Controller controller,
+        string categorySlug,
+        ShareByEmailInputViewModel? inputModel = null,
+        CategoryLandingContext context = CategoryLandingContext.School
+    )
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
 
@@ -201,9 +198,7 @@ public class PagesViewBuilder(
         {
             var matName =
                 CurrentUser.UserOrganisationName
-                ?? throw new InvalidDataException(
-                    "Cannot send an email without a MAT name"
-                );
+                ?? throw new InvalidDataException("Cannot send an email without a MAT name");
 
             var matNotifyResults = _notifyService.SendMatStandardEmail(
                 inputModel.ToModel(),
@@ -218,15 +213,11 @@ public class PagesViewBuilder(
                 linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
                 routeValues: new Dictionary<string, string>
                 {
-                { nameof(categorySlug), categorySlug }
+                    { nameof(categorySlug), categorySlug },
                 }
             );
 
-            return HandleNotifyShareResults(
-                controller,
-                matNotifyResults,
-                matReturnToModel
-            );
+            return HandleNotifyShareResults(controller, matNotifyResults, matReturnToModel);
         }
 
         var establishmentName =
@@ -235,20 +226,17 @@ public class PagesViewBuilder(
                 "Cannot send an email without an active establishment name"
             );
 
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         var recommendationStatuses =
-            await _recommendationService.GetLatestRecommendationStatusesAsync(
-                establishmentId
-            );
+            await _recommendationService.GetLatestRecommendationStatusesAsync(establishmentId);
 
         var sectionIds = category.Sections.Select(s => s.Id).ToList();
 
-        var sectionStatuses =
-            await _submissionService.GetSectionStatusesForSchoolAsync(
-                establishmentId,
-                sectionIds
-            );
+        var sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
+            establishmentId,
+            sectionIds
+        );
 
         var notifyResults = _notifyService.SendStandardEmail(
             inputModel.ToModel(),
@@ -263,17 +251,10 @@ public class PagesViewBuilder(
             actionName: nameof(PagesController.GetByRoute),
             controllerName: nameof(PagesController),
             linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
-            routeValues: new Dictionary<string, string>
-            {
-            { "route", categorySlug }
-            }
+            routeValues: new Dictionary<string, string> { { "route", categorySlug } }
         );
 
-        return HandleNotifyShareResults(
-            controller,
-            notifyResults,
-            returnToModel
-        );
+        return HandleNotifyShareResults(controller, notifyResults, returnToModel);
     }
 
     private static CategoryLandingPageViewModel BuildLandingPageViewModel(

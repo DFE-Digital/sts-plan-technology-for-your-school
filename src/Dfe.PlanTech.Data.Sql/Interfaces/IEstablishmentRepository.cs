@@ -7,6 +7,9 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces;
 public interface IEstablishmentRepository
 {
     Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(EstablishmentModel model);
+    Task<List<EstablishmentEntity>> CreateEstablishmentsFromModelsAsync(
+        IEnumerable<EstablishmentModel> models
+    );
     Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference);
     Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(
         Expression<Func<EstablishmentEntity, bool>> predicate

@@ -27,7 +27,7 @@ public class SignInService(
         var establishment = await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
             dsiOrganisation
         );
-        var signIn = await _signInWorkflow.CreateSignInAsync(user.Id, establishment?.Id);
+        var signIn = await _signInWorkflow.CreateSignInAsync(user.Id, establishment.Id);
 
         return signIn;
     }

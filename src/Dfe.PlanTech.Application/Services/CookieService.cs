@@ -25,13 +25,6 @@ public class CookieService(IHttpContextAccessor contextAccessor, ICookieWorkflow
 
     public void SetCookieAcceptance(bool userAcceptsCookies)
     {
-        if (_contextAccessor.HttpContext is null)
-        {
-            throw new InvalidOperationException(
-                $"Cannot set cookie acceptance as {nameof(_contextAccessor.HttpContext)} is null"
-            );
-        }
-
         CreateCookie(
             CookieConstants.UserCookiesPreferences,
             userAcceptsCookies: userAcceptsCookies

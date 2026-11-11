@@ -15,6 +15,21 @@ public class EstablishmentWorkflow(
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
+
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        string establishmentUrn,
+        string establishmentName
+    )
+    {
+        var establishmentModel = new EstablishmentModel()
+        {
+            Name = establishmentName,
+            Urn = establishmentUrn,
+        };
+
+        return GetOrCreateEstablishmentAsync(establishmentModel);
+    }
+
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
     )
@@ -29,18 +44,27 @@ public class EstablishmentWorkflow(
         return establishment.AsDto();
     }
 
-    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
-        string establishmentUrn,
-        string establishmentName
+    public async Task<List<SqlEstablishmentDto>> GetOrCreateEstablishmentsAsync(
+        IEnumerable<EstablishmentModel> establishmentModels
     )
     {
-        var establishmentModel = new EstablishmentModel()
-        {
-            Name = establishmentName,
-            Urn = establishmentUrn,
-        };
+        var allReferences = establishmentModels.Select(e => e.Reference);
+        var existingEstablishments =
+            await _establishmentRepository.GetEstablishmentsByReferencesAsync(allReferences);
 
-        return GetOrCreateEstablishmentAsync(establishmentModel);
+        var existingReferences = existingEstablishments.Select(e => e.EstablishmentRef);
+        var missingReferences = allReferences.Except(existingReferences);
+        var missingModels = establishmentModels.Where(model =>
+            missingReferences.Contains(model.Reference)
+        );
+
+        var newEstablishments = await _establishmentRepository.CreateEstablishmentsFromModelsAsync(
+            missingModels
+        );
+
+        var allEstablishments = existingEstablishments.Union(newEstablishments);
+
+        return allEstablishments.Select(e => e.AsDto()).ToList();
     }
 
     public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(

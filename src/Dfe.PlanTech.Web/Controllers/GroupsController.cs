@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -62,7 +63,7 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASchoolView()
     {
-        HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+        _currentUser.ClearSelectedEstablishments();
 
         return await _groupsViewBuilder.RouteToSelectASchoolViewModelAsync(this);
     }
@@ -73,7 +74,7 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
-        HttpContext.Session.ClearFocusedAndSelectedEstablishments();
+        HttpContext.Session.ClearSelectedEstablishments();
 
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
     }
@@ -136,6 +137,7 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
+    // TODO: I think we can remove this
     [HttpGet($"{UrlConstants.TrustSlug}/select-school-and-redirect")]
     public async Task<IActionResult> SelectSchoolAndRedirect(
         string schoolUrn,
@@ -147,14 +149,20 @@ public class GroupsController : BaseController<GroupsController>
         ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
         ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        var selectedEstablishmentIdsBeforeClear = HttpContext.Session.GetSelectedEstablishments();
-
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-        _currentUser.ClearFocusedAndSelectedEstablishments();
-        await _currentUser.SetFocusedSchoolAsync(schoolUrn, schoolName);
+        _currentUser.ClearSelectedEstablishments();
 
-        var selectedEstablishmentIdsAfterClear = HttpContext.Session.GetSelectedEstablishments();
+        // Note from Drew: I don't think this method is used any more.
+        // Even if it is, I don't think it should be. Setting the ID to -1
+        // will cause it to fail, so we'll find out in testing whether it is.
+        var selectedEstablishment = new SelectedEstablishmentDataModel
+        {
+            Id = -1,
+            Name = schoolName,
+            Urn = schoolUrn,
+        };
+        _currentUser.SetSelectedEstablishments([selectedEstablishment]);
 
         return RedirectToAction(nameof(GetMatRecommendationsLanding), new { categorySlug });
     }

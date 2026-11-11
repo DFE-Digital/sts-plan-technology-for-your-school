@@ -144,7 +144,7 @@ public class ReviewAnswersViewBuilder(
     {
         try
         {
-            var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+            var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
             var userOrganisationId = CurrentUser.UserOrganisationId;
             var userId = GetUserIdOrThrowException();
 
@@ -294,7 +294,9 @@ public class ReviewAnswersViewBuilder(
             QuestionsAnswered = responses.Count,
             TotalQuestions = section.Questions.Count(),
             ShowInProgressDisclaimer = isMatInProgressView,
-            BackLinkHref = isMatInProgressView ? $"/{categorySlug}/{sectionSlug}/self-assessment" : $"/{categorySlug}",
+            BackLinkHref = isMatInProgressView
+                ? $"/{categorySlug}/{sectionSlug}/self-assessment"
+                : $"/{categorySlug}",
             BackButtonText = isMatInProgressView
                 ? $"Back to {section.Name.ToLowerInvariant()}"
                 : "Back to recommendations",
@@ -322,7 +324,7 @@ public class ReviewAnswersViewBuilder(
 
     private async Task<int> GetRoutingEstablishmentId()
     {
-        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var activeEstablishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         if (!CurrentUser.IsMat)
         {

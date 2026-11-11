@@ -33,7 +33,7 @@ public static class DsiConstants
     /// These are all the organisation types which access the service
     /// and have schools within them.
     /// </summary>
-    public static HashSet<string> GroupOrganisationCategoryIds { get; } =
+    public static HashSet<string> TrustOrganisationCategoryIds { get; } =
     [MatOrganisationCategoryId, SatOrganisationCategoryId, SSatOrganisationCategoryId];
 
     /// <summary>

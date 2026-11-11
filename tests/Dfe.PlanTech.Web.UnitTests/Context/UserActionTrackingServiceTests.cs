@@ -76,7 +76,7 @@ public class UserActionTrackingServiceTests
     {
         _currentUser.UserId.Returns(101);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(201);
-        _currentUser.IsGroup.Returns(true);
+        _currentUser.IsTrust.Returns(true);
         _currentUser.UserOrganisationId.Returns(301);
 
         var service = BuildService();

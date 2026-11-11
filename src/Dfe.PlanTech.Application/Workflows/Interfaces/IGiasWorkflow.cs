@@ -4,5 +4,7 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
 public interface IGiasWorkflow
 {
+    Task<IEnumerable<SqlGiasEstablishmentDto>> GetSchoolsInGroup(int groupUid);
     Task<SqlGiasEstablishmentDto?> GetSingleAcademySchool(int groupUid);
+    Task<bool> HasAllSchoolsInGroup(int groupUid, IEnumerable<int> schoolUrns);
 }

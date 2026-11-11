@@ -22,11 +22,11 @@
         });
     }
     else if (CurrentUser.IsMat &&
-             !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName))
+             !string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolName))
     {
         breadcrumbs.Add(new BreadcrumbItemViewModel
         {
-            Text = CurrentUser.GroupSelectedSchoolName,
+            Text = CurrentUser.GroupFocusedSchoolName,
             Href = UrlConstants.HomePage
         });
     }

@@ -21,7 +21,8 @@ public class MatEstablishmentProvider(
     public IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession()
     {
         return _httpContextAccessor
-                .HttpContext?.Session.GetSelectedEstablishmentIds()
+                .HttpContext?.Session.GetSelectedEstablishments()
+                .Select(e => e.Id)
                 .Distinct()
                 .ToArray()
             ?? [];
@@ -39,12 +40,11 @@ public class MatEstablishmentProvider(
         }
 
         var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession();
-
         if (selectedEstablishmentIds.Count == 0)
         {
-            return string.IsNullOrWhiteSpace(currentUser.GroupSelectedSchoolName)
+            return string.IsNullOrWhiteSpace(currentUser.FocusedSchool?.Name)
                 ? []
-                : [currentUser.GroupSelectedSchoolName];
+                : [currentUser.FocusedSchool.Name];
         }
 
         var schoolNames = new List<string>();

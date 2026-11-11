@@ -482,7 +482,7 @@ public class GroupsViewBuilderTests
         Assert.Equal("Test Academy Trust", vm.GroupName);
         Assert.Equal(new[] { categoryTwo, categoryOne }, vm.Categories);
 
-        currentUser.Received(1).ClearFocusedAndSelectedEstablishments();
+        currentUser.Received(1).ClearSelectedEstablishments();
         session.Received(1).Remove(SessionConstants.SelectedEstablishmentsKey);
     }
 

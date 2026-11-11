@@ -80,7 +80,7 @@ public class ValidateMatSelectedAttributeTests
 
         currentUser.IsAuthenticated.Returns(isAuthenticated);
         currentUser.IsMat.Returns(isMat);
-        currentUser.GroupSelectedSchoolUrn.Returns(groupSelectedSchoolUrn);
+        currentUser.GroupFocusedSchoolUrn.Returns(groupSelectedSchoolUrn);
 
         return currentUser;
     }

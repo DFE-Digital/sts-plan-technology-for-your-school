@@ -164,7 +164,7 @@ public class GroupsViewBuilder(
         GroupsSelectSchoolsToUpdateStatusViewModel? viewModel = null
     )
     {
-        controller.HttpContext.Session.ClearFocusedAndSelectedEstablishments();
+        CurrentUser.ClearSelectedEstablishments();
 
         //Get the MAT ID
         var establishmentId = GetUserOrganisationIdOrThrowException();
@@ -415,7 +415,7 @@ public class GroupsViewBuilder(
         GroupsSelectSchoolsToAssessViewModel? viewModel = null
     )
     {
-        controller.HttpContext.Session.ClearFocusedAndSelectedEstablishments();
+        CurrentUser.ClearSelectedEstablishments();
 
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
         var section =
@@ -508,7 +508,8 @@ public class GroupsViewBuilder(
 
         // If it's a single school with a submission in progress, redirect to it
         if (
-            selectedSchools.SingleOrDefault()?.LatestSubmissionStatus == SubmissionStatus.InProgress
+            selectedSchools.Count == 1
+            && selectedSchools.Single().LatestSubmissionStatus == SubmissionStatus.InProgress
         )
         {
             return controller.RedirectToRoute(
@@ -576,7 +577,7 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToMatStandardsListAsync(Controller controller)
     {
-        CurrentUser.ClearFocusedAndSelectedEstablishments();
+        CurrentUser.ClearSelectedEstablishments();
 
         var allCategories = await ContentfulService.GetAllCategoriesAsync() ?? [];
 

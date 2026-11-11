@@ -424,7 +424,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var result = await _controller.GetSelectASelfAssessment();
 
-            _currentUser.Received(1).ClearFocusedAndSelectedEstablishments();
+            _currentUser.Received(1).ClearSelectedEstablishments();
 
             await _viewBuilder.Received(1).RouteToSelectASelfAssessmentViewModelAsync(_controller);
 

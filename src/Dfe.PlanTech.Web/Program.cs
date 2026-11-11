@@ -82,13 +82,19 @@ builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicati
 
 builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environment);
 
+builder.Services.AddScoped<ISession>(sp =>
+    sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.Session
+    ?? throw new InvalidOperationException("There is no active HTTP session")
+);
+
 builder
-    .Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>()
-    .AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>()
-    .AddScoped<IUserActionTrackingService, UserActionTrackingService>()
-    .AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
+    .Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>()
+    .AddScoped<IUserActionIdProvider, UserActionIdProvider>()
+    .AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
 var app = builder.Build();
+
+app.UseSession();
 
 ContentComponentJsonExtensions.ValidateContentfulTypeMapping();
 
@@ -128,8 +134,6 @@ app.UseUserActionId();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseSession();
 
 app.MapHealthChecks("/health");
 app.MapControllerRoute(pattern: "{controller=Pages}/{action=GetByRoute}/{id?}", name: "default");

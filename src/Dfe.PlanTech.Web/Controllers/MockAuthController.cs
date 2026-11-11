@@ -251,13 +251,6 @@ public class MockAuthController(
             new("scope", "openid profile email"),
         };
 
-        if (record.DbMatEstablishmentId is not null)
-        {
-            claims.Add(
-                new(ClaimConstants.DB_MAT_ESTABLISHMENT_ID, record.DbMatEstablishmentId.ToString()!)
-            );
-        }
-
         var accessToken = CreateJwt(baseUrl, claims, now, expires);
 
         return Ok(

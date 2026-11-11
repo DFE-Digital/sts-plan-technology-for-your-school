@@ -13,7 +13,7 @@ public class ValidateMatSelectedAttribute : ActionFilterAttribute
         var currentUser =
             context.HttpContext.RequestServices.GetRequiredService<ICurrentUserProvider>();
 
-        if (currentUser is { IsAuthenticated: true, IsMat: true, GroupSelectedSchoolUrn: null })
+        if (currentUser is { IsAuthenticated: true, IsMat: true, GroupFocusedSchoolUrn: null })
         {
             context.Result = new RedirectToRouteResult(
                 new { controller = "Groups", action = "GetSelectASchoolView" }

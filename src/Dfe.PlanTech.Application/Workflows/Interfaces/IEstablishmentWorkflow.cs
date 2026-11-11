@@ -15,5 +15,8 @@ public interface IEstablishmentWorkflow
         string establishmentUrn,
         string establishmentName
     );
+    Task<List<SqlEstablishmentDto>> GetOrCreateEstablishmentsAsync(
+        IEnumerable<EstablishmentModel> establishmentModels
+    );
     Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel);
 }

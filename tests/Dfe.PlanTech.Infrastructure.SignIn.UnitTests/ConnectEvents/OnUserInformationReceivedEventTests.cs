@@ -188,7 +188,7 @@ public class OnUserInformationReceivedEventTests
             .Received(1)
             .RecordSignInAsync("dsi-ref-123", Arg.Is<EstablishmentModel>(e => e.Urn == "111111"));
         await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
-        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentIdForSatAsync(default!);
+        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentForSatAsync(default!);
 
         Assert.True(ctx.Result is null);
 
@@ -224,8 +224,8 @@ public class OnUserInformationReceivedEventTests
             .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
             .Returns(signInDto);
 
-        gias.GetSchoolEstablishmentIdForSatAsync(Arg.Any<EstablishmentModel>())
-            .Returns(default(int?));
+        gias.GetSchoolEstablishmentForSatAsync(Arg.Any<EstablishmentModel>())
+            .Returns(default(SelectedEstablishmentDataModel?));
 
         // Act / Assert
         var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
@@ -269,7 +269,7 @@ public class OnUserInformationReceivedEventTests
         );
 
         Assert.Contains("SAT", ex.Message);
-        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentIdForSatAsync(default!);
+        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentForSatAsync(default!);
     }
 
     [Fact]
@@ -277,9 +277,12 @@ public class OnUserInformationReceivedEventTests
     {
         // Arrange: GIAS finds the school, but the DSI API has no matching organisation for the user -
         // the code should fall back to the original SAT organisation rather than fail.
+        var urn = "888888";
+        var uid = "99";
+
         var originalOrg = CreateEstablishment(
-            urn: "888888",
-            uid: "99",
+            urn: urn,
+            uid: uid,
             categoryId: DsiConstants.SatOrganisationCategoryId
         );
         var principal = AuthenticatedPrincipal(
@@ -289,7 +292,15 @@ public class OnUserInformationReceivedEventTests
 
         var (ctx, signIn, gias, user, logger) = BuildContext(principal);
 
-        gias.GetSchoolEstablishmentIdForSatAsync(Arg.Any<EstablishmentModel>()).Returns(888888);
+        var selectedEstablishmentDataModel = new SelectedEstablishmentDataModel
+        {
+            Id = 1,
+            Name = "Test SAT school",
+            Urn = urn,
+        };
+
+        gias.GetSchoolEstablishmentForSatAsync(Arg.Any<EstablishmentModel>())
+            .Returns(selectedEstablishmentDataModel);
 
         var signInDto = new SqlSignInDto { UserId = 5, EstablishmentId = 6 };
         signIn

@@ -46,7 +46,7 @@ public class CategorySectionViewComponentViewBuilder(
         QuestionnaireCategoryEntry category
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
@@ -91,15 +91,14 @@ public class CategorySectionViewComponentViewBuilder(
     {
         var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var groupContext =
-            await _groupService.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+        var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
+            groupEstablishmentId
+        );
 
         var establishmentIds = groupContext.EstablishmentIds;
         var completedSubmissions = groupContext.CompletedSubmissions;
 
-        var categorySectionIds = category.Sections
-            .Select(section => section.Id)
-            .ToHashSet();
+        var categorySectionIds = category.Sections.Select(section => section.Id).ToHashSet();
 
         var completedSectionCount = completedSubmissions
             .Where(submission =>

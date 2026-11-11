@@ -116,7 +116,7 @@ public class SelfAssessmentSummaryViewBuilder(
 
         if (selectedEstablishmentIds.Length == 0)
         {
-            var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+            var activeEstablishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
             selectedEstablishmentIds = [activeEstablishmentId];
         }
@@ -130,7 +130,7 @@ public class SelfAssessmentSummaryViewBuilder(
 
     private async Task<List<SqlSubmissionDto>> GetSchoolSubmittedSubmissions(string sectionId)
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
 
         var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections([
             establishmentId,

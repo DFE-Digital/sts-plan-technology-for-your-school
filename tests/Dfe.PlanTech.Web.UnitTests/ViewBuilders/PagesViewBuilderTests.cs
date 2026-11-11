@@ -209,9 +209,9 @@ public class PagesViewBuilderTests
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.UserOrganisationSelectsSchools.Returns(true);
+        currentUser.CanSelectSchools.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+        currentUser.GroupFocusedSchoolUrn.Returns((string?)null);
 
         var controller = new TestController();
 
@@ -244,9 +244,9 @@ public class PagesViewBuilderTests
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
-        currentUser.UserOrganisationSelectsSchools.Returns(true);
+        currentUser.CanSelectSchools.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns("123456");
+        currentUser.GroupFocusedSchoolUrn.Returns("123456");
 
         establishmentService.GetEstablishmentLinksWithRecommendationCounts(654321).Returns([]);
 
@@ -290,7 +290,7 @@ public class PagesViewBuilderTests
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
         currentUser.GetActiveEstablishmentIdAsync().Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns("123456");
+        currentUser.GroupFocusedSchoolUrn.Returns("123456");
 
         var controller = new TestController("/test-path");
 
@@ -482,7 +482,7 @@ public class PagesViewBuilderTests
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns("123456");
+        currentUser.GroupFocusedSchoolUrn.Returns("123456");
 
         contentful.GetCategoryBySlugAsync(slug).Returns(category);
         contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
@@ -796,14 +796,8 @@ public class PagesViewBuilderTests
         );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(
-            nameof(GroupsController.GetMatRecommendationsLanding),
-            redirect.ActionName
-        );
-        Assert.Equal(
-            nameof(GroupsController).GetControllerNameSlug(),
-            redirect.ControllerName
-        );
+        Assert.Equal(nameof(GroupsController.GetMatRecommendationsLanding), redirect.ActionName);
+        Assert.Equal(nameof(GroupsController).GetControllerNameSlug(), redirect.ControllerName);
 
         var routeValues = Assert.IsType<IDictionary<string, object>>(
             redirect.RouteValues!,
@@ -831,10 +825,7 @@ public class PagesViewBuilderTests
             .GetLatestRecommendationStatusesAsync(Arg.Any<int>());
         await _submissionService
             .DidNotReceive()
-            .GetSectionStatusesForSchoolAsync(
-                Arg.Any<int>(),
-                Arg.Any<List<string>>()
-            );
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<List<string>>());
         _notifyService
             .DidNotReceive()
             .SendStandardEmail(
@@ -924,8 +915,8 @@ public class PagesViewBuilderTests
         var currentUser = Substitute.For<ICurrentUserProvider>();
         currentUser.IsMat.Returns(true);
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.UserOrganisationSelectsSchools.Returns(true);
-        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+        currentUser.CanSelectSchools.Returns(true);
+        currentUser.GroupFocusedSchoolUrn.Returns((string?)null);
 
         var sut = CreateServiceUnderTest(currentUser: currentUser, useCurrentUserDefaults: false);
         var controller = new TestController();
@@ -949,10 +940,7 @@ public class PagesViewBuilderTests
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
 
-        var action = await sut.RouteToMatCategoryLandingPageAsync(
-            controller,
-            "missing-category"
-        );
+        var action = await sut.RouteToMatCategoryLandingPageAsync(controller, "missing-category");
 
         var redirect = Assert.IsType<RedirectToActionResult>(action);
         Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
@@ -986,10 +974,7 @@ public class PagesViewBuilderTests
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
 
-        var action = await sut.RouteToMatCategoryLandingPageAsync(
-            controller,
-            categorySlug
-        );
+        var action = await sut.RouteToMatCategoryLandingPageAsync(controller, categorySlug);
 
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
