@@ -160,12 +160,32 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
     private async Task<List<SqlEstablishmentDto>> ResolveGroupEstablishmentsAsync(int groupEstablishmentId)
     {
         var groupUid = await GetGroupUidOrThrowAsync(groupEstablishmentId);
-        var giasSchools = await _giasRepository.GetSchoolsForGroupAsync(groupUid);
-        var establishments = new List<SqlEstablishmentDto>();
-        foreach (var school in giasSchools.DistinctBy(e => e.Urn))
+        var giasSchools = (await _giasRepository.GetSchoolsForGroupAsync(groupUid))
+            .DistinctBy(school => school.Urn)
+            .ToList();
+
+        if (giasSchools.Count == 0)
+            return [];
+
+        var existing = await _establishmentService.GetEstablishmentsByReferencesAsync(
+            giasSchools.Select(school => school.Urn.ToString()));
+        var byUrn = existing
+            .Where(establishment => establishment.EstablishmentRef != null)
+            .GroupBy(establishment => establishment.EstablishmentRef!)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+
+        var establishments = new List<SqlEstablishmentDto>(giasSchools.Count);
+        foreach (var school in giasSchools)
         {
-            establishments.Add(await _establishmentService.GetOrCreateEstablishmentAsync(
-                school.Urn.ToString(), school.EstablishmentName));
+            var urn = school.Urn.ToString();
+            if (!byUrn.TryGetValue(urn, out var establishment))
+            {
+                establishment = await _establishmentService.GetOrCreateEstablishmentAsync(
+                    urn, school.EstablishmentName);
+                byUrn[urn] = establishment;
+            }
+
+            establishments.Add(establishment);
         }
         return establishments;
     }
