@@ -121,9 +121,9 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
 
     public async Task<List<SqlEstablishmentLinkDto>> GetGroupSchoolsAsync(int groupEstablishmentId, bool includeRecommendationCounts = false)
     {
-        var context = await GetGroupEstablishmentContextAsync(groupEstablishmentId);
+        var establishments = await ResolveGroupEstablishmentsAsync(groupEstablishmentId);
         var schools = new List<SqlEstablishmentLinkDto>();
-        foreach (var school in context.Establishments)
+        foreach (var school in establishments)
         {
             var dto = new SqlEstablishmentLinkDto
             {
@@ -146,14 +146,7 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
 
     public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId)
     {
-        var groupUid = await GetGroupUidOrThrowAsync(groupEstablishmentId);
-        var giasSchools = await _giasRepository.GetSchoolsForGroupAsync(groupUid);
-        var establishments = new List<SqlEstablishmentDto>();
-        foreach (var school in giasSchools.DistinctBy(e => e.Urn))
-        {
-            establishments.Add(await _establishmentService.GetOrCreateEstablishmentAsync(
-                school.Urn.ToString(), school.EstablishmentName));
-        }
+        var establishments = await ResolveGroupEstablishmentsAsync(groupEstablishmentId);
         var ids = establishments.Select(e => e.Id).Distinct().ToArray();
         var completed = ids.Length == 0 ? [] : await GetGroupCompletedSubmissions(ids);
         return new GroupEstablishmentModel
@@ -162,5 +155,18 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
             EstablishmentIds = ids,
             CompletedSubmissions = completed
         };
+    }
+
+    private async Task<List<SqlEstablishmentDto>> ResolveGroupEstablishmentsAsync(int groupEstablishmentId)
+    {
+        var groupUid = await GetGroupUidOrThrowAsync(groupEstablishmentId);
+        var giasSchools = await _giasRepository.GetSchoolsForGroupAsync(groupUid);
+        var establishments = new List<SqlEstablishmentDto>();
+        foreach (var school in giasSchools.DistinctBy(e => e.Urn))
+        {
+            establishments.Add(await _establishmentService.GetOrCreateEstablishmentAsync(
+                school.Urn.ToString(), school.EstablishmentName));
+        }
+        return establishments;
     }
 }
