@@ -20,6 +20,10 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
 
+  "[sql]": {
+    "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
+  },
+
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform"
   },
@@ -27,5 +31,6 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.tabSize": 2
   },
+
   "python-envs.defaultEnvManager": "ms-python.python:system"
 }
