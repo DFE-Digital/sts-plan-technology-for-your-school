@@ -8,8 +8,6 @@ new AnchorScroll();
 
 initAll();
 
-document
-    .querySelectorAll('[data-module="moj-multi-select"]')
-    .forEach((element) => {
-        new MultiSelect(element);
-    });
+document.querySelectorAll('[data-module="moj-multi-select"]').forEach((element) => {
+  new MultiSelect(element);
+});

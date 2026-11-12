@@ -36,10 +36,16 @@
                     ["schoolCount"] = topic.OutstandingAssessmentCount.ToString()
                 };
 
-                @await Microcopy.GetTextByKeyAsync(
-                    ContentfulMicrocopyConstants.MatLandingPageTopicOutstandingCount,
-                    outstandingValues
-                )
+                var outstandingText = await Microcopy.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.MatLandingPageTopicOutstandingCount,
+                outstandingValues
+                );
+
+                outstandingText = topic.OutstandingAssessmentCount == 1
+                ? outstandingText.Replace("schools", "school")
+                : outstandingText;
+
+                @outstandingText
             }
 
             @{

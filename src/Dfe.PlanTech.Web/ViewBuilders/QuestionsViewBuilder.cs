@@ -199,7 +199,7 @@ public class QuestionsViewBuilder(
             );
 
             viewModel.TrustSchoolAssessmentContinueHref =
-                $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
+                $"/trust/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
         }
 
         return controller.View(InterstitialPagePath, viewModel);

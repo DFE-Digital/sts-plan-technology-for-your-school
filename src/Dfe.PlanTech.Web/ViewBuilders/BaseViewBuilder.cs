@@ -68,7 +68,8 @@ public class BaseViewBuilder(
         string categorySlug,
         string? sectionSlug,
         string? chunkSlug,
-        ShareByEmailInputViewModel? inputModel
+        ShareByEmailInputViewModel? inputModel,
+        bool isMat = false
     )
     {
         var heading = chunkSlug is null
@@ -85,6 +86,7 @@ public class BaseViewBuilder(
             Caption = chunk?.HeaderText ?? category.Header.Text,
             Heading = heading,
             InputModel = inputModel,
+            IsMat = isMat,
         };
     }
 

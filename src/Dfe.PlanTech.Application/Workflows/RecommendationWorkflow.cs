@@ -21,7 +21,7 @@ public class RecommendationWorkflow(
             await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([
                 recommendationContentfulReference,
             ]);
-        var recommendation = recommendations.FirstOrDefault();
+        var recommendation = recommendations?.OrderByDescending(r => r.DateCreated).FirstOrDefault();
         if (recommendation == null)
         {
             return null;
@@ -44,7 +44,7 @@ public class RecommendationWorkflow(
             await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([
                 recommendationContentfulReference,
             ]);
-        var recommendation = recommendations.FirstOrDefault();
+        var recommendation = recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault();
         if (recommendation == null)
         {
             return [];

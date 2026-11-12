@@ -17,6 +17,11 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
     private readonly INotifyWorkflow _notifyWorkflow =
         notifyWorkflow ?? throw new ArgumentNullException(nameof(notifyWorkflow));
 
+    private const string NameOfUserPersonalisation = "name of user";
+    private const string SchoolPersonalisation = "school";
+    private const string StandardPersonalisation = "standard";
+    private const string UserMessagePersonalisation = "user message";
+
     public List<NotifySendResult> SendSingleRecommendationEmail(
         ShareByEmailModel model,
         ComponentTextBodyEntry textBody,
@@ -30,16 +35,15 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         var recommendationMarkdown = MarkdownRenderer.Render(textBody.RichText);
         var personalisation = new Dictionary<string, object>
         {
-            { "name of user", model.NameOfUser },
-            { "school", establishmentName },
-            { "standard", categoryName.ToLowerInvariant() },
-            { "user message", userMessage },
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, establishmentName },
+            { StandardPersonalisation, categoryName.ToLowerInvariant() },
+            { UserMessagePersonalisation, userMessage },
             { "recommendation name", recommendationHeader },
             { "status", recommendationStatus.GetDisplayName() },
             { "recommendation", recommendationMarkdown },
         };
 
-        // TODO: Use active correlation ID once implemented
         var correlationId = Guid.NewGuid().ToString();
 
         return _notifyWorkflow.SendEmails(
@@ -67,15 +71,14 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         );
         var personalisation = new Dictionary<string, object>
         {
-            { "name of user", model.NameOfUser },
-            { "school", establishmentName },
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, establishmentName },
             { "standard lowercase", categoryName.ToLowerInvariant() },
-            { "user message", userMessage },
-            { "standard", categoryName },
+            { UserMessagePersonalisation, userMessage },
+            { StandardPersonalisation, categoryName },
             { "recommendations", standardMarkdown },
         };
 
-        // TODO: Use active correlation ID once implemented
         var correlationId = Guid.NewGuid().ToString();
 
         return _notifyWorkflow.SendEmails(
@@ -83,6 +86,71 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             personalisation,
             correlationId,
             NotifyConstants.ShareStandardTemplateId
+        );
+    }
+
+    public List<NotifySendResult> SendMatStandardEmail(
+        ShareByEmailModel model,
+        List<QuestionnaireSectionEntry> sections,
+        string matName,
+        string categoryName
+    )
+    {
+        var userMessage = BuildUserMessage(model);
+        var standardMarkdown = BuildMatStandardMarkdown(sections);
+
+        var personalisation = new Dictionary<string, object>
+        {
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, matName },
+            { "standard lowercase", categoryName.ToLowerInvariant() },
+            { UserMessagePersonalisation, userMessage },
+            { StandardPersonalisation, categoryName },
+            { "recommendations mat", standardMarkdown },
+        };
+
+        var correlationId = Guid.NewGuid().ToString();
+
+        return _notifyWorkflow.SendEmails(
+            model,
+            personalisation,
+            correlationId,
+            NotifyConstants.ShareMatStandardTemplateId
+        );
+    }
+
+    public List<NotifySendResult> SendMatSingleRecommendationEmail(
+        ShareByEmailModel model,
+        ComponentTextBodyEntry textBody,
+        string matName,
+        string recommendationHeader,
+        string categoryName,
+        string topic,
+        string schoolsList
+    )
+    {
+        var userMessage = BuildUserMessage(model);
+        var recommendationMarkdown = MarkdownRenderer.Render(textBody.RichText);
+
+        var personalisation = new Dictionary<string, object>
+        {
+            { NameOfUserPersonalisation, model.NameOfUser },
+            { SchoolPersonalisation, matName },
+            { StandardPersonalisation, categoryName.ToLowerInvariant() },
+            { UserMessagePersonalisation, userMessage },
+            { "recommendation name", recommendationHeader },
+            { "recommendation", recommendationMarkdown },
+            { "topic", topic.ToLowerInvariant() },
+            { "schools list", schoolsList },
+        };
+
+        var correlationId = Guid.NewGuid().ToString();
+
+        return _notifyWorkflow.SendEmails(
+            model,
+            personalisation,
+            correlationId,
+            NotifyConstants.ShareMatSingleRecommendationTemplateId
         );
     }
 
@@ -105,6 +173,36 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         }
 
         return userMessage.Trim();
+    }
+
+    private static string BuildMatStandardMarkdown(
+        List<QuestionnaireSectionEntry> sections
+    )
+    {
+        var stringBuilder = new StringBuilder();
+
+        foreach (var section in sections)
+        {
+            stringBuilder.AppendLine(
+                $"## Recommendations for {section.Name.ToLowerInvariant()}"
+            );
+            stringBuilder.AppendLine();
+
+            var recommendations = section.CoreRecommendations.ToList();
+
+            for (var i = 0; i < recommendations.Count; i++)
+            {
+                var recommendation = recommendations[i];
+
+                stringBuilder.AppendLine(
+                    $"{i + 1}. {recommendation.HeaderText}"
+                );
+            }
+
+            stringBuilder.AppendLine();
+        }
+
+        return stringBuilder.ToString();
     }
 
     private static string BuildStandardMarkdown(

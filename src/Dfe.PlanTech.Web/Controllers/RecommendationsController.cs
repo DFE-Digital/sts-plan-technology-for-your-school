@@ -184,4 +184,99 @@ public class RecommendationsController(
             CategoryLandingContext.MAT
         );
     }
+
+    [HttpGet(
+    "trust/{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print",
+    Name = "PrintMatSingleRecommendation"
+)]
+    public async Task<IActionResult> PrintMatSingleRecommendation(
+    string categorySlug,
+    string sectionSlug,
+    string chunkSlug
+)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToPrintSingle(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            CategoryLandingContext.MAT
+        );
+    }
+
+    [HttpGet(
+        "trust/{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print-all",
+        Name = "PrintMatAllRecommendations"
+    )]
+    public async Task<IActionResult> PrintMatAllRecommendations(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToPrintAll(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            CategoryLandingContext.MAT
+        );
+    }
+
+    [HttpGet(
+        "trust/{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/share",
+        Name = "ShareMatSingleRecommendation"
+    )]
+    public async Task<IActionResult> ShareMatSingleRecommendation(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToShareRecommendationAsync(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            inputModel: null,
+            context: CategoryLandingContext.MAT
+        );
+    }
+
+    [HttpPost(
+        "trust/{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/share",
+        Name = "ShareMatSingleRecommendation"
+    )]
+    public async Task<IActionResult> PostShareMatSingleRecommendation(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        [FromForm] ShareByEmailInputViewModel inputModel
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToShareRecommendationAsync(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            inputModel,
+            CategoryLandingContext.MAT
+        );
+    }
 }
