@@ -30,6 +30,7 @@ public class QuestionsViewBuilderTests
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
     private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
+    private readonly IGroupService _groupSvc = Substitute.For<IGroupService>();
     private readonly ICurrentUserProvider _currentUserProvider = Substitute.For<ICurrentUserProvider>();
     private readonly IMatEstablishmentProvider _matEstablishmentProvider = Substitute.For<IMatEstablishmentProvider>();
 
@@ -87,6 +88,7 @@ public class QuestionsViewBuilderTests
             _questionSvc,
             _submissionSvc,
             _establishmentSvc,
+            _groupSvc,
             _matEstablishmentProvider
         );
 
@@ -159,6 +161,7 @@ public class QuestionsViewBuilderTests
                 _questionSvc,
                 _submissionSvc,
                 _establishmentSvc,
+                _groupSvc,
                 null!
             )
         );
@@ -1515,8 +1518,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1582,8 +1585,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1646,8 +1649,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1708,8 +1711,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1761,20 +1764,22 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinks(999)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { EstablishmentName = "Test School", Urn = "900006" },
-                }
-            );
-
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
 
         _submissionSvc
             .GetLatestSubmissionResponsesModel(
@@ -1884,8 +1889,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([]);
 
         var result = await sut.RouteToInterstitialPage(
