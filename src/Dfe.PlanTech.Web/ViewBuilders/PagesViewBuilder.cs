@@ -25,6 +25,7 @@ public class PagesViewBuilder(
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     IEstablishmentService establishmentService,
+    IGroupService groupService,
     INotifyService notifyService,
     ISubmissionService submissionService,
     IRecommendationService recommendationService
@@ -82,7 +83,7 @@ public class PagesViewBuilder(
                 );
 
             var groupSchools =
-                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
+                await groupService.GetGroupSchoolsAsync(groupId, true);
 
             var selectedSchoolIsValid = groupSchools.Any(s =>
                 s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)

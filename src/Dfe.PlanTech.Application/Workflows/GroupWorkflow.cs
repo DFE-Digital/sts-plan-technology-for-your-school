@@ -9,14 +9,14 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository, IEstablishmentGroupRepository establishmentGroupRepository) : IGroupWorkflow
+public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository, IGiasRepository giasRepository, IRecommendationWorkflow recommendationWorkflow) : IGroupWorkflow
 {
+    private readonly IGiasRepository _giasRepository = giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
-        establishmentGroupRepository ?? throw new ArgumentNullException(nameof(establishmentGroupRepository));
 
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository = recommendationHistoryRepository ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
 
@@ -103,31 +103,90 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
 
     }
 
-    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
-        int groupEstablishmentId
-    )
+        private async Task<int> GetGroupUidOrThrowAsync(int groupEstablishmentId)
     {
-        var establishments =
-            await _establishmentGroupRepository
-                .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
+        var group = await _establishmentService.GetEstablishmentByIdAsync(groupEstablishmentId);
+        if (!int.TryParse(group.GroupUid, out var groupUid) || groupUid <= 0)
+            throw new InvalidDataException($"Group {groupEstablishmentId} has no valid GroupUid");
+        return groupUid;
+    }
 
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
+    public async Task<bool> IsSchoolWithinGroupAsync(int groupEstablishmentId, string schoolUrn)
+    {
+        if (!int.TryParse(schoolUrn, out var urn) || urn <= 0)
+            return false;
+        var groupUid = await GetGroupUidOrThrowAsync(groupEstablishmentId);
+        return await _giasRepository.IsSchoolWithinGroupAsync(groupUid, urn);
+    }
 
-        var completedSubmissions =
-            establishmentIds.Length != 0
-                ? await GetGroupCompletedSubmissions(establishmentIds)
-                : [];
+    public async Task<List<SqlEstablishmentLinkDto>> GetGroupSchoolsAsync(int groupEstablishmentId, bool includeRecommendationCounts = false)
+    {
+        var establishments = await ResolveGroupEstablishmentsAsync(groupEstablishmentId);
+        var schools = new List<SqlEstablishmentLinkDto>();
+        foreach (var school in establishments)
+        {
+            var dto = new SqlEstablishmentLinkDto
+            {
+                Id = school.Id,
+                Urn = school.EstablishmentRef,
+                EstablishmentName = school.OrgName ?? string.Empty,
+                GroupUid = school.GroupUid ?? string.Empty
+            };
+            if (includeRecommendationCounts)
+            {
+                var statuses = await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(school.Id);
+                dto.InProgressOrCompletedRecommendationsCount = statuses.Values.Count(r =>
+                    r.NewStatus == RecommendationStatus.Complete ||
+                    r.NewStatus == RecommendationStatus.InProgress);
+            }
+            schools.Add(dto);
+        }
+        return schools;
+    }
 
+    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId)
+    {
+        var establishments = await ResolveGroupEstablishmentsAsync(groupEstablishmentId);
+        var ids = establishments.Select(e => e.Id).Distinct().ToArray();
+        var completed = ids.Length == 0 ? [] : await GetGroupCompletedSubmissions(ids);
         return new GroupEstablishmentModel
         {
-            Establishments = establishments
-                .Select(e => e.AsDto())
-                .ToList(),
-            EstablishmentIds = establishmentIds,
-            CompletedSubmissions = completedSubmissions,
+            Establishments = establishments,
+            EstablishmentIds = ids,
+            CompletedSubmissions = completed
         };
+    }
+
+    private async Task<List<SqlEstablishmentDto>> ResolveGroupEstablishmentsAsync(int groupEstablishmentId)
+    {
+        var groupUid = await GetGroupUidOrThrowAsync(groupEstablishmentId);
+        var giasSchools = (await _giasRepository.GetSchoolsForGroupAsync(groupUid))
+            .DistinctBy(school => school.Urn)
+            .ToList();
+
+        if (giasSchools.Count == 0)
+            return [];
+
+        var existing = await _establishmentService.GetEstablishmentsByReferencesAsync(
+            giasSchools.Select(school => school.Urn.ToString()));
+        var byUrn = existing
+            .Where(establishment => establishment.EstablishmentRef != null)
+            .GroupBy(establishment => establishment.EstablishmentRef!)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+
+        var establishments = new List<SqlEstablishmentDto>(giasSchools.Count);
+        foreach (var school in giasSchools)
+        {
+            var urn = school.Urn.ToString();
+            if (!byUrn.TryGetValue(urn, out var establishment))
+            {
+                establishment = await _establishmentService.GetOrCreateEstablishmentAsync(
+                    urn, school.EstablishmentName);
+                byUrn[urn] = establishment;
+            }
+
+            establishments.Add(establishment);
+        }
+        return establishments;
     }
 }
