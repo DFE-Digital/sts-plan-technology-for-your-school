@@ -21,6 +21,11 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <SonarQubeSetting Include="sonar.coverage.exclusions">
+      <Value>RunOnceMigrationScripts/*.sql</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="EnvironmentSpecificScripts\" />
   </ItemGroup>
   <ItemGroup>
