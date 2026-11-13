@@ -2,32 +2,68 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class EstablishmentWorkflow(
+    ILogger<EstablishmentWorkflow> logger,
     IEstablishmentRepository establishmentRepository,
-    IEstablishmentLinkRepository establishmentLinkRepository
+    IEstablishmentLinkRepository establishmentLinkRepository,
+    IGiasRepository giasRepository
 ) : IEstablishmentWorkflow
 {
+    private readonly ILogger<EstablishmentWorkflow> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
     private readonly IEstablishmentRepository _establishmentRepository =
         establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
+    private readonly IGiasRepository _giasRepository =
+        giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
 
-    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
-        string establishmentUrn,
-        string establishmentName
+    public async Task<SqlEstablishmentDto> GetOrCreateSchoolAsync(
+        string schoolUrn,
+        string schoolName
     )
     {
-        var establishmentModel = new EstablishmentModel()
+        if (!int.TryParse(schoolUrn, out var urn))
         {
-            Name = establishmentName,
-            Urn = establishmentUrn,
-        };
+            throw new InvalidDataException("Cannot parse an integer URN from the provided string");
+        }
 
-        return GetOrCreateEstablishmentAsync(establishmentModel);
+        var giasSchool = await _giasRepository.GetSchoolByUrn(urn);
+
+        EstablishmentModel? establishmentModel = null;
+        if (giasSchool is null)
+        {
+            _logger.LogWarning(
+                "Could not find establishment with URN {Urn} in GIAS data. Creating establishment from minimal establishment model.",
+                schoolUrn
+            );
+
+            establishmentModel = new EstablishmentModel { Name = schoolName, Urn = schoolUrn };
+        }
+        else
+        {
+            establishmentModel = new EstablishmentModel
+            {
+                Name = giasSchool.EstablishmentName,
+                Type = giasSchool.TypeOfEstablishment?.TypeOfEstablishmentName is null
+                    ? null
+                    : new IdWithNameModel
+                    {
+                        Name = giasSchool.TypeOfEstablishment.TypeOfEstablishmentName,
+                    },
+                Ukprn = giasSchool.Ukprn,
+                Urn = giasSchool.Urn.ToString(),
+                GroupUid = null,
+            };
+        }
+
+        return await GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
@@ -37,6 +73,7 @@ public class EstablishmentWorkflow(
         var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(
             establishmentModel.Reference
         );
+
         establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(
             establishmentModel
         );
@@ -67,14 +104,30 @@ public class EstablishmentWorkflow(
         return allEstablishments.Select(e => e.AsDto()).ToList();
     }
 
+    public async Task<SqlEstablishmentDto?> GetEstablishmentByIdAsync(int id)
+    {
+        var establishment = await _establishmentRepository.GetEstablishmentByIdAsync(id);
+        return establishment?.AsDto();
+    }
+
+    public async Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByIdsAsync(
+        IEnumerable<int> establishmentIds
+    )
+    {
+        var establishments = await _establishmentRepository.GetEstablishmentsByIdsAsync(
+            establishmentIds
+        );
+        return establishments.Select(e => e.AsDto());
+    }
+
     public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(
         string establishmentReference
     )
     {
-        var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync([
-            establishmentReference,
-        ]);
-        return establishments.FirstOrDefault()?.AsDto();
+        var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(
+            establishmentReference
+        );
+        return establishment?.AsDto();
     }
 
     public async Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(

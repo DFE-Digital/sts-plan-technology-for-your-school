@@ -9,6 +9,19 @@ public class GiasWorkflow(IGiasRepository giasRepository) : IGiasWorkflow
     private readonly IGiasRepository _giasRepository =
         giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
 
+    public async Task<SqlGiasEstablishmentDto?> GetSchoolByUrn(string schoolUrn)
+    {
+        if (!int.TryParse(schoolUrn, out var urn))
+        {
+            throw new InvalidDataException(
+                $"Provided string {nameof(schoolUrn)} cannot be parsed as a URN"
+            );
+        }
+
+        var school = await _giasRepository.GetSchoolByUrn(urn);
+        return school?.AsDto();
+    }
+
     public async Task<IEnumerable<SqlGiasEstablishmentDto>> GetSchoolsInGroup(int groupUid)
     {
         var groupSchools = await _giasRepository.GetSchoolsInGroup(groupUid);
@@ -24,7 +37,6 @@ public class GiasWorkflow(IGiasRepository giasRepository) : IGiasWorkflow
     public async Task<bool> HasAllSchoolsInGroup(int groupUid, IEnumerable<int> schoolUrns)
     {
         var groupSchools = await _giasRepository.GetSchoolsInGroup(groupUid);
-
         return groupSchools.Select(gs => gs.Urn).ToHashSet().IsSupersetOf(schoolUrns);
     }
 }

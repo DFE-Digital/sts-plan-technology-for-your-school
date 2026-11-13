@@ -83,7 +83,7 @@ public class GiasService(IEstablishmentWorkflow establishmentWorkflow, IGiasWork
 
         return new SelectedEstablishmentDataModel
         {
-            Id = dbEstablishment.Id,
+            EstablishmentId = dbEstablishment.Id,
             Name = school.EstablishmentName,
             Urn = school.Urn.ToString(),
         };
@@ -135,7 +135,7 @@ public class GiasService(IEstablishmentWorkflow establishmentWorkflow, IGiasWork
         return dbEstablishments
             .Select(dbEstablishment => new SelectedEstablishmentDataModel
             {
-                Id = dbEstablishment.Id,
+                EstablishmentId = dbEstablishment.Id,
                 Name = dbEstablishment.OrgName!,
                 Urn = dbEstablishment.EstablishmentRef,
             })

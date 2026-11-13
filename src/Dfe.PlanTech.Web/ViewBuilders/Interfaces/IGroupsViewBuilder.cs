@@ -9,6 +9,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
         Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller);
         Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(Controller controller);
         Task RecordGroupSelectionAsync(
+            int selectedEstablishmentId,
             string selectedEstablishmentUrn,
             string selectedEstablishmentName
         );
@@ -22,7 +23,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             Controller controller,
             string sectionSlug,
             GroupsSelectSchoolsToAssessViewModel viewModel
-         );
+        );
 
         Task<IActionResult> RouteToViewInProgressAnswers(
             Controller controller,

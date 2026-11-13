@@ -21,16 +21,14 @@ public class MatEstablishmentProvider(
     public IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession()
     {
         return _httpContextAccessor
-                .HttpContext?.Session.GetSelectedEstablishments()
-                .Select(e => e.Id)
+                .HttpContext?.Session.GetSelectedSchools()
+                .Select(e => e.EstablishmentId)
                 .Distinct()
                 .ToArray()
             ?? [];
     }
 
-    public async Task<IReadOnlyList<string>> GetSelectedSchoolNamesAsync(
-        ICurrentUserProvider currentUser
-    )
+    public IReadOnlyList<string> GetSelectedSchoolNamesAsync(ICurrentUserProvider currentUser)
     {
         ArgumentNullException.ThrowIfNull(currentUser);
 
@@ -39,26 +37,11 @@ public class MatEstablishmentProvider(
             return [];
         }
 
-        var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession();
-        if (selectedEstablishmentIds.Count == 0)
+        var schoolNames = currentUser!.GetSelectedSchoolNames();
+        if (schoolNames.Count == 0)
         {
-            return string.IsNullOrWhiteSpace(currentUser.FocusedSchool?.Name)
-                ? []
-                : [currentUser.FocusedSchool.Name];
-        }
-
-        var schoolNames = new List<string>();
-
-        foreach (var establishmentId in selectedEstablishmentIds)
-        {
-            var establishment = await _establishmentService.GetEstablishmentByIdAsync(
-                establishmentId
-            );
-
-            if (establishment is not null && !string.IsNullOrWhiteSpace(establishment.OrgName))
-            {
-                schoolNames.Add(establishment.OrgName);
-            }
+            var school = currentUser.GetFocusedSchool();
+            return school is null ? [] : [school.Name];
         }
 
         return schoolNames;

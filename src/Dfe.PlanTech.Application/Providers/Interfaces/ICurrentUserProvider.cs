@@ -5,36 +5,36 @@ namespace Dfe.PlanTech.Application.Providers.Interfaces;
 
 public interface ICurrentUserProvider
 {
-    string? DsiReference { get; }
+    string DsiReference { get; }
     Guid? SessionId { get; }
-    int? UserId { get; }
-    public SqlEstablishmentDto? UserEstablishment { get; }
+    int UserId { get; }
 
     // User Organisation - the organisation the currently logged in user is linked to (from OIDC claims)
     // For school users, this is the establishmentId for the school
     // For MAT users, this represents the MAT/group, not the selected establishment
-    EstablishmentModel? UserOrganisation { get; }
+    EstablishmentModel? DsiOrganisation { get; }
 
     bool IsAuthenticated { get; }
     bool IsSchool { get; }
-    bool IsGroup { get; }
+    bool IsTrust { get; }
     bool IsMat { get; }
     bool IsSatOrSSat { get; }
     bool CanSelectSchools { get; }
 
+    public SqlEstablishmentDto Establishment { get; }
     void SetEstablishment(SqlEstablishmentDto establishment);
 
     public void ClearFocusedSchool();
-    SelectedEstablishmentDataModel? FocusedSchool { get; }
+    SelectedEstablishmentDataModel GetFocusedSchool();
     Task SetFocusedSchoolAsync(string selectedSchoolUrn, string selectedSchoolName);
 
-    IReadOnlyList<SelectedEstablishmentDataModel> GroupSchools { get; }
+    List<SelectedEstablishmentDataModel> GetGroupSchools();
     Task SetGroupSchools(IEnumerable<SelectedEstablishmentDataModel> schools);
 
-    void ClearSelectedEstablishments();
-    IReadOnlyList<int> GetSelectedEstablishmentIds();
-    IReadOnlyList<string> GetSelectedEstablishmentNames();
-    IReadOnlyList<SelectedEstablishmentDataModel> GetSelectedEstablishments();
-    void SetSelectedEstablishments(SelectedEstablishmentDataModel establishment);
-    void SetSelectedEstablishments(IList<SelectedEstablishmentDataModel> establishments);
+    void ClearSelectedSchools();
+    List<int> GetSelectedSchoolEstablishmentIds();
+    List<string> GetSelectedSchoolNames();
+    List<SelectedEstablishmentDataModel> GetSelectedSchools();
+    void SetSelectedSchools(SelectedEstablishmentDataModel establishment);
+    void SetSelectedSchools(IEnumerable<SelectedEstablishmentDataModel> establishments);
 }

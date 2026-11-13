@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 public interface IEstablishmentService
 {
     Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
-    Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+    Task<SqlEstablishmentDto> GetOrCreateSchoolAsync(
         string establishmentUrn,
         string establishmentName
     );
@@ -23,9 +23,9 @@ public interface IEstablishmentService
     Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id);
 
     Task RecordGroupSelection(
-        string userDsiReference,
-        int? userEstablishmentId,
-        EstablishmentModel userEstablishmentModel,
+        int userId,
+        int userEstablishmentId,
+        int selectedEstablishmentId,
         string selectedEstablishmentUrn,
         string selectedEstablishmentName
     );

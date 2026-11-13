@@ -21,37 +21,13 @@ public class UserContentViewService(
 
     public async Task RecordContentViewAsync(string contentfulRef)
     {
-        var userId = _currentUser.UserId;
-        if (userId is null)
-        {
-            logger.LogWarning(
-                "No current user ID found calling {MethodName}",
-                nameof(RecordContentViewAsync)
-            );
-            throw new InvalidOperationException(
-                $"User ID was null when calling {nameof(RecordContentViewAsync)}"
-            );
-        }
-
-        await _userContentViewRepository.CreateAsync(userId.Value, contentfulRef);
+        await _userContentViewRepository.CreateAsync(_currentUser.UserId, contentfulRef);
     }
 
     public async Task<int> GetNumberOfTimesContentViewedByUserAsync(string contentfulRef)
     {
-        var userId = _currentUser.UserId;
-        if (userId is null)
-        {
-            logger.LogWarning(
-                "No current user ID found calling {MethodName}",
-                nameof(GetNumberOfTimesContentViewedByUserAsync)
-            );
-            throw new InvalidOperationException(
-                $"User ID was null when calling {nameof(GetNumberOfTimesContentViewedByUserAsync)}"
-            );
-        }
-
         return await _userContentViewRepository.GetNumberOfTimesContentViewedByUserAsync(
-            userId.Value,
+            _currentUser.UserId,
             contentfulRef
         );
     }

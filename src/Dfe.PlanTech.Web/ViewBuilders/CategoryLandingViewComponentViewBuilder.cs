@@ -77,7 +77,7 @@ public class CategoryLandingViewComponentViewBuilder(
         bool print
     )
     {
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
+        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
@@ -85,7 +85,7 @@ public class CategoryLandingViewComponentViewBuilder(
         try
         {
             sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
-                establishmentId,
+                focusedEstablishmentId,
                 category.Sections.Select(s => s.Id)
             );
         }
@@ -104,7 +104,7 @@ public class CategoryLandingViewComponentViewBuilder(
         var sortType = await GetUserSortType(sortOrder);
 
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(
-                establishmentId,
+                focusedEstablishmentId,
                 category,
                 sectionStatuses,
                 progressRetrievalErrorMessage is not null,
@@ -216,17 +216,17 @@ public class CategoryLandingViewComponentViewBuilder(
     {
         try
         {
-            var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
+            var groupEstablishmentIds = CurrentUser
+                .GetGroupSchools()
+                .Select(s => s.EstablishmentId)
+                .ToArray();
 
-            var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
-                groupEstablishmentId
+            var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
+                groupEstablishmentIds
             );
 
-            var establishmentIds = groupContext.EstablishmentIds;
-            var completedSubmissions = groupContext.CompletedSubmissions;
-
             var completedCountBySectionId = completedSubmissions
-                .Where(s => establishmentIds.Contains(s.EstablishmentId))
+                .Where(s => groupEstablishmentIds.Contains(s.EstablishmentId))
                 .GroupBy(s => s.SectionId)
                 .ToDictionary(g => g.Key, g => g.Select(s => s.EstablishmentId).Distinct().Count());
 
@@ -250,8 +250,8 @@ public class CategoryLandingViewComponentViewBuilder(
                     )
                     {
                         HasSubmittedAssessments = hasSubmittedAssessments,
-                        HasOutstandingAssessments = completedCount < establishmentIds.Length,
-                        OutstandingAssessmentCount = establishmentIds.Length - completedCount,
+                        HasOutstandingAssessments = completedCount < groupEstablishmentIds.Length,
+                        OutstandingAssessmentCount = groupEstablishmentIds.Length - completedCount,
                     };
                 })
                 .ToList();
@@ -390,22 +390,17 @@ public class CategoryLandingViewComponentViewBuilder(
     {
         var sortType = sortOrder?.GetRecommendationSortEnumValue();
 
-        if (CurrentUser.UserId != null)
+        if (sortType != null)
         {
-            if (sortType != null)
-            {
-                await _userService.GetOrCreateUserSettingsAsync(
-                    CurrentUser.UserId.Value,
-                    sortType.Value
-                );
-            }
-            else
-            {
-                var userSettings = await _userService.GetUserSettingsByUserIdAsync(
-                    CurrentUser.UserId.Value
-                );
-                sortType = userSettings?.SortOrder;
-            }
+            await _userService.SetUserRecommendationSortOrderAsync(
+                CurrentUser.UserId,
+                sortType.Value
+            );
+        }
+        else
+        {
+            var userSettings = await _userService.GetUserSettingsByUserIdAsync(CurrentUser.UserId);
+            sortType = userSettings?.SortOrder;
         }
 
         return sortType ?? RecommendationSortOrder.Default;

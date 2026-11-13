@@ -7,9 +7,19 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 public interface IGroupWorkflow
 {
     Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds);
-    Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId);
+    Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(
+        List<SelectedEstablishmentDataModel> groupSchools,
+        string sectionId
+    );
 
-    Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>>
-        GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId);
-    Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId);
+    Task<
+        List<(
+            EstablishmentEntity establishment,
+            EstablishmentRecommendationHistoryEntity? recommendationHistory
+        )>
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+        int establishmentId,
+        int recommendationId
+    );
+    //Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId);
 }

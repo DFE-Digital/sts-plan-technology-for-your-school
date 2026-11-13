@@ -36,12 +36,8 @@ public class UserJourneyMissingContentExceptionHandler(
             exception.Section.Name
         );
 
-        var activeEstablishmentId =
-            _currentUser.FocusedSchool()?.Id
-            ?? throw new InvalidDataException("There is no focused school present in the session");
-
         await _submissionService.SetSubmissionInaccessibleAsync(
-            activeEstablishmentId,
+            _currentUser.GetFocusedSchool().EstablishmentId,
             exception.Section.Id
         );
 

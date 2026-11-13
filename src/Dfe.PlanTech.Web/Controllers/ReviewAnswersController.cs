@@ -82,14 +82,12 @@ public class ReviewAnswersController(
     public async Task<IActionResult> ConfirmCheckAnswers(
         string categorySlug,
         string sectionSlug,
-        string sectionName,
-        int submissionId
+        string sectionName
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionName);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
 
         TempData[StatePassingMechanismConstants.SectionName] = sectionName;
 
@@ -97,8 +95,7 @@ public class ReviewAnswersController(
             this,
             categorySlug,
             sectionSlug,
-            sectionName,
-            submissionId
+            sectionName
         );
     }
 

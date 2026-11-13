@@ -59,7 +59,7 @@ public class PagesViewBuilder(
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
             && CurrentUser.CanSelectSchools
-            && CurrentUser.FocusedSchool is null
+            && CurrentUser.GetSelectedSchools().Count == 0
             && !isMatTopicStartPage;
 
         if (shouldRedirectToSchoolSelection)
@@ -67,21 +67,15 @@ public class PagesViewBuilder(
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
 
-        var focusedSchoolUrn = CurrentUser.FocusedSchool?.Urn;
+        var focusedSchoolUrn = CurrentUser.GetFocusedSchool()?.Urn;
         var hasSelectedASchool = CurrentUser.CanSelectSchools && focusedSchoolUrn is not null;
 
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         if (hasSelectedASchool)
         {
-            var groupEstablishmentId =
-                CurrentUser.UserEstablishment?.Id
-                ?? throw new InvalidDataException(
-                    "User is a MAT user but does not have an establishment ID for their group"
-                );
-
-            var selectedSchoolIsValid = CurrentUser.GroupSchools.Any(s =>
-                s.Urn.Equals(focusedSchoolUrn)
-            );
+            var selectedSchoolIsValid = CurrentUser
+                .GetGroupSchools()
+                .Any(s => s.Urn.Equals(focusedSchoolUrn));
             if (!selectedSchoolIsValid)
             {
                 return controller.Redirect(UrlConstants.SelectASchoolPage);
@@ -115,16 +109,9 @@ public class PagesViewBuilder(
             }
             else
             {
-                var focusedSchool = CurrentUser.FocusedSchool;
-                if (focusedSchool is null)
-                {
-                    throw new InvalidOperationException(
-                        "User is on a school page and does not have a focused school"
-                    );
-                }
-
-                viewModel.ActiveEstablishmentName = CurrentUser.FocusedSchool.Name;
-                viewModel.ActiveEstablishmentUrn = CurrentUser.FocusedSchool.Urn;
+                var focusedSchool = CurrentUser.GetFocusedSchool();
+                viewModel.ActiveEstablishmentName = focusedSchool.Name;
+                viewModel.ActiveEstablishmentUrn = focusedSchool.Urn;
             }
         }
 
@@ -197,7 +184,7 @@ public class PagesViewBuilder(
         if (isMat)
         {
             var matName =
-                CurrentUser.UserOrganisationName
+                CurrentUser.Establishment.OrgName
                 ?? throw new InvalidDataException("Cannot send an email without a MAT name");
 
             var matNotifyResults = _notifyService.SendMatStandardEmail(
@@ -220,21 +207,17 @@ public class PagesViewBuilder(
             return HandleNotifyShareResults(controller, matNotifyResults, matReturnToModel);
         }
 
-        var establishmentName =
-            await CurrentUser.GetActiveEstablishmentNameAsync()
-            ?? throw new InvalidDataException(
-                "Cannot send an email without an active establishment name"
-            );
-
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
+        var focusedSchool = CurrentUser.GetFocusedSchool();
 
         var recommendationStatuses =
-            await _recommendationService.GetLatestRecommendationStatusesAsync(establishmentId);
+            await _recommendationService.GetLatestRecommendationStatusesAsync(
+                focusedSchool.EstablishmentId
+            );
 
         var sectionIds = category.Sections.Select(s => s.Id).ToList();
 
         var sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
-            establishmentId,
+            focusedSchool.EstablishmentId,
             sectionIds
         );
 
@@ -244,7 +227,7 @@ public class PagesViewBuilder(
             sectionStatuses,
             recommendationStatuses,
             category.Header.Text,
-            establishmentName
+            focusedSchool.Name
         );
 
         var returnToModel = new ActionViewModel(

@@ -37,6 +37,18 @@ public class EstablishmentRepository(PlanTechDbContext dbContext) : IEstablishme
         return establishmentEntities.ToList();
     }
 
+    public async Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId) =>
+        await _db.Establishments.FindAsync(establishmentId);
+
+    public Task<List<EstablishmentEntity>> GetEstablishmentsByIdsAsync(
+        IEnumerable<int> establishmentIds
+    )
+    {
+        return GetEstablishmentsByAsync(establishment =>
+            establishmentIds.Contains(establishment.Id)
+        );
+    }
+
     public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(
         string establishmentReference
     )
@@ -47,16 +59,14 @@ public class EstablishmentRepository(PlanTechDbContext dbContext) : IEstablishme
         return establishments.FirstOrDefault();
     }
 
-    public async Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId) =>
-        await _db.Establishments.FindAsync(establishmentId);
-
-    public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
+    public async Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     )
     {
-        return GetEstablishmentsByAsync(establishment =>
+        var establishments = await GetEstablishmentsByAsync(establishment =>
             establishmentReferences.Contains(establishment.EstablishmentRef)
         );
+        return establishments;
     }
 
     public Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(

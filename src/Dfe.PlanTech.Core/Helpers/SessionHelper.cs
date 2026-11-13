@@ -87,7 +87,7 @@ public static class SessionHelper
     {
         var establishment = new SelectedEstablishmentDataModel
         {
-            Id = id,
+            EstablishmentId = id,
             Urn = urn,
             Name = name,
         };
@@ -135,14 +135,12 @@ public static class SessionHelper
         session.Remove(SessionConstants.SelectedEstablishmentsKey);
     }
 
-    public static IReadOnlyList<SelectedEstablishmentDataModel> GetSelectedEstablishments(
-        this ISession session
-    )
+    public static List<SelectedEstablishmentDataModel> GetSelectedSchools(this ISession session)
     {
         return
             session.GetValue(SessionConstants.SelectedEstablishmentsKey)
                 is IEnumerable<SelectedEstablishmentDataModel> selectedEstablishments
-            ? selectedEstablishments.ToArray()
+            ? selectedEstablishments.ToList()
             : [];
     }
 
@@ -155,21 +153,21 @@ public static class SessionHelper
     {
         var establishment = new SelectedEstablishmentDataModel
         {
-            Id = id,
+            EstablishmentId = id,
             Urn = urn,
             Name = name,
         };
-        session.SetSelectedEstablishments([establishment]);
+        session.SetSelectedSchools([establishment]);
     }
 
-    public static void SetSelectedEstablishments(
+    public static void SetSelectedSchools(
         this ISession session,
         IEnumerable<SelectedEstablishmentDataModel> selectedEstablishments
     )
     {
         foreach (var establishment in selectedEstablishments)
         {
-            if (establishment.Id < 1)
+            if (establishment.EstablishmentId < 1)
             {
                 throw new InvalidDataException("Establishment ID cannot be less than 1");
             }

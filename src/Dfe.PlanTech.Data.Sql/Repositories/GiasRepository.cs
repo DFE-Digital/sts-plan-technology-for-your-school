@@ -9,6 +9,11 @@ public class GiasRepository(PlanTechDbContext dbContext) : IGiasRepository
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
+    public Task<GiasEstablishmentEntity?> GetSchoolByUrn(int urn)
+    {
+        return _db.GiasEstablishments.Where(e => e.Urn == urn).FirstOrDefaultAsync();
+    }
+
     public Task<List<GiasEstablishmentEntity>> GetSchoolsInGroup(int groupUid)
     {
         return _db

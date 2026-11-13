@@ -54,7 +54,7 @@ public interface ISubmissionRepository
 
     Task<int> SubmitResponse(AssessmentResponseModel response);
 
-    Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+    Task<List<SubmissionEntity>> GetEstablishmentsLatestCompletedSubmissionsBySectionsAsync(
         IEnumerable<int> establishmentIds
     );
 

@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Core.Models
 {
     public class SelectedEstablishmentDataModel
     {
-        public int Id { get; set; }
+        public int EstablishmentId { get; set; }
         public required string Urn { get; set; }
         public required string Name { get; set; }
         public SubmissionStatus? LatestSubmissionStatus { get; set; }

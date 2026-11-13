@@ -17,9 +17,15 @@ public static class SessionConstants
         new ReadOnlyDictionary<string, Type>(
             new Dictionary<string, Type>()
             {
-                { SelectedEstablishmentsKey, typeof(IEnumerable<SelectedEstablishmentDataModel>) },
-                { FocusedEstablishmentKey, typeof(SelectedEstablishmentDataModel) },
-                { GroupEstablishmentsKey, typeof(IEnumerable<SelectedEstablishmentDataModel>) },
+                {
+                    SelectedEstablishmentsKey,
+                    typeof(IEnumerable<Models.SelectedEstablishmentDataModel>)
+                },
+                { FocusedEstablishmentKey, typeof(Models.SelectedEstablishmentDataModel) },
+                {
+                    GroupEstablishmentsKey,
+                    typeof(IEnumerable<Models.SelectedEstablishmentDataModel>)
+                },
                 { UserEstablishmentKey, typeof(SqlEstablishmentDto) },
             }
         );

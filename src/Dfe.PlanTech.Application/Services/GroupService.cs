@@ -11,30 +11,34 @@ public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
     private readonly IGroupWorkflow _groupWorkflow =
         groupWorkflow ?? throw new ArgumentNullException(nameof(groupWorkflow));
 
-    public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds)
-    {
-        var submissions = await _groupWorkflow.GetGroupCompletedSubmissions(establishmentIds);
-        return submissions;
-    }
-
-    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId)
-    {
-        var submissions = await _groupWorkflow.GetGroupSubmissionInformationForSection(establishmentLinks, sectionId);
-        return submissions;
-    }
-
-    public async
-        Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>>
-        GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId)
-    {
-        var results = await _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(establishmentId, recommendationId);
-        return results;
-    }
-
-    public Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
-    int groupEstablishmentId
+    public Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(
+        int[] establishmentIds
     )
     {
-        return _groupWorkflow.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+        return _groupWorkflow.GetGroupCompletedSubmissions(establishmentIds);
+    }
+
+    public Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(
+        List<SelectedEstablishmentDataModel> groupSchools,
+        string sectionId
+    )
+    {
+        return _groupWorkflow.GetGroupSubmissionInformationForSection(groupSchools, sectionId);
+    }
+
+    public Task<
+        List<(
+            EstablishmentEntity establishment,
+            EstablishmentRecommendationHistoryEntity? recommendationHistory
+        )>
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+        int establishmentId,
+        int recommendationId
+    )
+    {
+        return _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+            establishmentId,
+            recommendationId
+        );
     }
 }

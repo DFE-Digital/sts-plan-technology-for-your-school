@@ -39,7 +39,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = await GetRoutingEstablishmentId();
+        var establishmentId = GetRoutingEstablishmentId();
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -86,7 +86,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = await GetRoutingEstablishmentId();
+        var establishmentId = GetRoutingEstablishmentId();
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -138,15 +138,30 @@ public class ReviewAnswersViewBuilder(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        string sectionName,
-        int submissionId
+        string sectionName
     )
     {
+        int submissionId = 0;
+
         try
         {
-            var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
-            var userOrganisationId = CurrentUser.UserOrganisationId;
-            var userId = GetUserIdOrThrowException();
+            var selectedEstablishmentIds = new List<int>();
+            if (CurrentUser.CanSelectSchools)
+            {
+                var selectedSchools = CurrentUser.GetSelectedSchools();
+                selectedEstablishmentIds.AddRange(selectedSchools.Select(s => s.EstablishmentId));
+            }
+            else
+            {
+                selectedEstablishmentIds.Add(CurrentUser.GetFocusedSchool()!.EstablishmentId);
+            }
+
+            if (selectedEstablishmentIds.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "User attempted to confirm answers but does not have any schools selected"
+                );
+            }
 
             var section =
                 await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -154,56 +169,27 @@ public class ReviewAnswersViewBuilder(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            if (CurrentUser.IsMat || CurrentUser.IsSatOrSSat)
+            var userEstablishmentId = CurrentUser.Establishment.Id;
+
+            foreach (var establishmentId in selectedEstablishmentIds)
             {
-                var selectedEstablishmentIds =
-                    _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
-
-                if (selectedEstablishmentIds.Count > 0)
-                {
-                    foreach (var selectedEstablishmentId in selectedEstablishmentIds)
-                    {
-                        var submissionModel =
-                            await _submissionService.GetLatestSubmissionResponsesModel(
-                                selectedEstablishmentId,
-                                section,
-                                SubmissionStatus.InProgress
-                            );
-
-                        if (submissionModel is null)
-                        {
-                            throw new InvalidOperationException(
-                                $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
-                            );
-                        }
-
-                        await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                            selectedEstablishmentId,
-                            userOrganisationId,
-                            submissionModel.SubmissionId,
-                            userId,
-                            section
-                        );
-                    }
-                }
-                else
-                {
-                    await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                var submissionModel =
+                    await _submissionService.GetLatestSubmissionResponsesModel(
                         establishmentId,
-                        userOrganisationId,
-                        submissionId,
-                        userId,
-                        section
+                        section,
+                        SubmissionStatus.InProgress
+                    )
+                    ?? throw new InvalidOperationException(
+                        $"Could not find an in-progress submission for establishment {establishmentId}"
                     );
-                }
-            }
-            else
-            {
+
+                submissionId = submissionModel.SubmissionId;
+
                 await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
                     establishmentId,
-                    null,
-                    submissionId,
-                    userId,
+                    userEstablishmentId == establishmentId ? null : userEstablishmentId,
+                    submissionModel.SubmissionId,
+                    CurrentUser.UserId,
                     section
                 );
             }
@@ -322,20 +308,16 @@ public class ReviewAnswersViewBuilder(
         );
     }
 
-    private async Task<int> GetRoutingEstablishmentId()
+    private int GetRoutingEstablishmentId()
     {
-        var activeEstablishmentId = await GetFocusedEstablishmentIdOrThrowException();
-
-        if (!CurrentUser.IsMat)
+        if (CurrentUser.CanSelectSchools)
         {
-            return activeEstablishmentId;
+            return CurrentUser.GetSelectedSchoolEstablishmentIds().First();
         }
-
-        var selectedEstablishmentId = _matEstablishmentProvider
-            .GetSelectedEstablishmentIdsFromSession()
-            .FirstOrDefault();
-
-        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
+        else
+        {
+            return CurrentUser.GetFocusedSchool().EstablishmentId;
+        }
     }
 
     private async Task<ReviewAnswersViewModel> BuildViewModel(
@@ -359,9 +341,7 @@ public class ReviewAnswersViewBuilder(
             ? null
             : new SubmissionResponsesViewModel(routingData.Submission);
 
-        var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(
-            CurrentUser
-        );
+        var selectedSchoolNames = CurrentUser.GetSelectedSchoolNames();
 
         var sectionId =
             routingData.QuestionnaireSection.Sys?.Id

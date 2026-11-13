@@ -10,12 +10,13 @@ public interface IEstablishmentRepository
     Task<List<EstablishmentEntity>> CreateEstablishmentsFromModelsAsync(
         IEnumerable<EstablishmentModel> models
     );
-    Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference);
-    Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(
-        Expression<Func<EstablishmentEntity, bool>> predicate
-    );
     Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId);
+    Task<List<EstablishmentEntity>> GetEstablishmentsByIdsAsync(IEnumerable<int> establishmentIds);
+    Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference);
     Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
+    );
+    Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(
+        Expression<Func<EstablishmentEntity, bool>> predicate
     );
 }

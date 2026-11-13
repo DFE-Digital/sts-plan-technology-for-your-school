@@ -7,9 +7,9 @@ public interface IUserWorkflow
 {
     Task<SqlUserDto?> GetUserBySignInRefAsync(string dfeSignInRef);
     Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef);
-    Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
+    Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId);
+    Task<SqlUserSettingsDto> SetUserRecommendationSortOrderAsync(
         int userId,
         RecommendationSortOrder sortOrder
     );
-    Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId);
 }

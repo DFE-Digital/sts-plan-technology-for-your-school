@@ -8,10 +8,7 @@ namespace Dfe.PlanTech.Core.Models;
 public sealed class EstablishmentModel
 {
     public const string InvalidEstablishmentErrorMessage =
-        $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
-
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+        $"{nameof(Urn)}, {nameof(Ukprn)}, and {nameof(Uid)} are all invalid";
 
     [JsonPropertyName("category")]
     public IdWithNameModel? Category { get; set; }
@@ -55,7 +52,6 @@ public sealed class EstablishmentModel
             yield return Urn;
             yield return Ukprn;
             yield return Uid;
-            yield return Id.ToString();
         }
     }
 }

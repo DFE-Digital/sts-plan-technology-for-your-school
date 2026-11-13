@@ -33,14 +33,6 @@ public class UserActionTrackingService(
 
         var request = httpContext.Request;
 
-        var userId = _currentUser.UserId;
-
-        if (userId is null)
-        {
-            logger.LogInformation("No current user ID found");
-            return;
-        }
-
         var requestedUrl = $"{request.Path}{request.QueryString}";
 
         if (
@@ -66,13 +58,21 @@ public class UserActionTrackingService(
 
         httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
 
+        int establishmentId = _currentUser.Establishment.Id;
+        int? matEstablishmentId = null;
+        if (_currentUser.IsTrust)
+        {
+            establishmentId = _currentUser.GetFocusedSchool().EstablishmentId;
+            matEstablishmentId = _currentUser.Establishment.Id;
+        }
+
         var userAction = new UserActionEntity
         {
             Id = userActionId,
             SessionId = _currentUser.SessionId,
-            UserId = userId.Value,
-            EstablishmentId = await _currentUser.GetActiveEstablishmentIdAsync(),
-            MatEstablishmentId = _currentUser.IsGroup ? _currentUser.UserOrganisationId : null,
+            UserId = currentUser.UserId,
+            EstablishmentId = establishmentId,
+            MatEstablishmentId = matEstablishmentId,
             RequestedUrl = requestedUrl,
         };
 

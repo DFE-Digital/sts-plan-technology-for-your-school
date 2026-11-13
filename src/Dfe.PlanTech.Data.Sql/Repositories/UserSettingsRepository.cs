@@ -11,7 +11,12 @@ public class UserSettingsRepository(PlanTechDbContext dbContext) : IUserSettings
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-    public async Task<UserSettingsEntity> GetOrCreateUserSettingsAsync(
+    public Task<UserSettingsEntity?> GetUserSettingsByUserIdAsync(int userId)
+    {
+        return GetUserSettingsByAsync(u => u.UserId.Equals(userId));
+    }
+
+    public async Task<UserSettingsEntity> SetUserRecommendationSortOrderAsync(
         int userId,
         RecommendationSortOrder sortOrder
     )
@@ -36,11 +41,6 @@ public class UserSettingsRepository(PlanTechDbContext dbContext) : IUserSettings
         await _db.SaveChangesAsync();
 
         return userSettingsEntity;
-    }
-
-    public Task<UserSettingsEntity?> GetUserSettingsByUserIdAsync(int userId)
-    {
-        return GetUserSettingsByAsync(u => u.UserId.Equals(userId));
     }
 
     private Task<UserSettingsEntity?> GetUserSettingsByAsync(

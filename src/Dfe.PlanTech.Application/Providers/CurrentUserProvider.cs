@@ -10,34 +10,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Providers;
 
-public class CurrentUserProvider : ICurrentUserProvider
+public class CurrentUserProvider(
+    ILogger<CurrentUserProvider> logger,
+    IHttpContextAccessor contextAccessor,
+    IEstablishmentService establishmentService,
+    IGiasService giasService
+) : ICurrentUserProvider
 {
-    private readonly ILogger<CurrentUserProvider> _logger;
-    private readonly IHttpContextAccessor _contextAccessor;
-    private readonly IEstablishmentService _establishmentService;
-    private readonly IGiasService _giasService;
-    private readonly Lazy<Task<IEnumerable<SelectedEstablishmentDataModel>>> _selectedSchoolLazy;
+    private readonly ILogger<CurrentUserProvider> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IHttpContextAccessor _contextAccessor =
+        contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+    private readonly IEstablishmentService _establishmentService =
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IGiasService _giasService =
+        giasService ?? throw new ArgumentNullException(nameof(giasService));
 
-    public CurrentUserProvider(
-        ILogger<CurrentUserProvider> logger,
-        IHttpContextAccessor contextAccessor,
-        IEstablishmentService establishmentService,
-        IGiasService giasService
-    )
-    {
-        _contextAccessor =
-            contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-        _establishmentService =
-            establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-        _giasService = giasService ?? throw new ArgumentNullException(nameof(giasService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-        _selectedSchoolLazy = new Lazy<Task<IEnumerable<SelectedEstablishmentDataModel>>>(
-            LoadSelectedSchoolsAsync
-        );
-    }
-
-    public string? DsiReference =>
+    public string DsiReference =>
         GetStringFromClaim(ClaimConstants.NameIdentifier)
         ?? throw new AuthenticationException("User is not authenticated");
 
@@ -46,11 +35,20 @@ public class CurrentUserProvider : ICurrentUserProvider
             ? sessionId
             : null;
 
-    public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
+    public int UserId =>
+        GetIntFromClaim(ClaimConstants.DB_USER_ID)
+        ?? throw new AuthenticationException("User ID missing from claims");
 
-    public SqlEstablishmentDto? UserEstablishment => Session.GetUserEstablishment();
+    public SqlEstablishmentDto Establishment =>
+        Session.GetUserEstablishment()
+        ?? throw new InvalidDataException("User has no establishment");
 
-    public EstablishmentModel? UserOrganisation =>
+    public void SetEstablishment(SqlEstablishmentDto establishment)
+    {
+        Session.SetUserEstablishment(establishment);
+    }
+
+    public EstablishmentModel? DsiOrganisation =>
         _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     public bool IsAuthenticated =>
@@ -59,25 +57,20 @@ public class CurrentUserProvider : ICurrentUserProvider
     public bool IsSchool =>
         OrganisationCategoryIdMatchesAny(DsiConstants.EstablishmentOrganisationCategoryIds);
 
-    public bool IsGroup =>
-        OrganisationCategoryIdMatchesAny(DsiConstants.TrustOrganisationCategoryIds);
-
     public bool IsMat => OrganisationCategoryIdMatchesAny([DsiConstants.MatOrganisationCategoryId]);
 
     public bool IsSatOrSSat =>
         OrganisationCategoryIdMatchesAny(DsiConstants.SatOrganisationCategoryIds);
 
+    public bool IsTrust =>
+        OrganisationCategoryIdMatchesAny(DsiConstants.TrustOrganisationCategoryIds);
+
     public bool CanSelectSchools =>
         OrganisationCategoryIdMatchesAny(DsiConstants.SelectASchoolOrganisationCategoryIds);
 
-    public void SetEstablishment(SqlEstablishmentDto establishment)
-    {
-        Session.SetUserEstablishment(establishment);
-    }
-
     public void ClearFocusedSchool()
     {
-        if (UserOrganisation?.Category?.Id != DsiConstants.MatOrganisationCategoryId)
+        if (DsiOrganisation?.Category?.Id != DsiConstants.MatOrganisationCategoryId)
         {
             throw new InvalidOperationException("Only MATs can clear their focused school");
         }
@@ -85,7 +78,23 @@ public class CurrentUserProvider : ICurrentUserProvider
         Session.ClearFocusedEstablishment();
     }
 
-    public SelectedEstablishmentDataModel? FocusedSchool => Session.GetFocusedEstablishment();
+    /// <summary>
+    /// Get the focused school for the current user if set, otherwise run actionIsNull if set,
+    /// otherwise return null.
+    /// </summary>
+    /// <param name="actionIfNull">The action to execute if the value is null</param>
+    /// <returns>The focused school for the user</returns>
+    public SelectedEstablishmentDataModel GetFocusedSchool()
+    {
+        var focusedEstablishment = Session.GetFocusedEstablishment();
+        if (!CanSelectSchools && focusedEstablishment is null)
+        {
+            throw new InvalidOperationException("Non-group user's focused school is null");
+        }
+
+        return Session.GetFocusedEstablishment()
+            ?? throw new InvalidDataException("There is no focused school present in the session");
+    }
 
     public async Task SetFocusedSchoolAsync(string urn, string name)
     {
@@ -94,7 +103,7 @@ public class CurrentUserProvider : ICurrentUserProvider
             throw new InvalidDataException("No URN/school name set for selection.");
         }
 
-        if (CanSelectSchools && !GroupSchools.Any(gs => gs.Urn.Equals(urn)))
+        if (CanSelectSchools && !GetGroupSchools().Any(gs => gs.Urn.Equals(urn)))
         {
             throw new InvalidOperationException(
                 "User attempted to set a focused school that is not in their group"
@@ -104,24 +113,35 @@ public class CurrentUserProvider : ICurrentUserProvider
         // Optimisation: Throw before calling the database if session is null.
         var session = Session;
 
-        var establishment =
-            await _establishmentService.GetEstablishmentByReferenceAsync(urn)
-            ?? throw new InvalidDataException("No establishment was found matching the given URN.");
-
-        session.SetFocusedEstablishment(establishment.Id, urn, name);
+        var establishment = await _establishmentService.GetOrCreateSchoolAsync(urn, name);
+        session.SetFocusedEstablishment(
+            establishment.Id,
+            establishment.EstablishmentRef,
+            establishment.OrgName!
+        );
     }
 
-    public IReadOnlyList<SelectedEstablishmentDataModel> GroupSchools => Session.GetGroupSchools();
+    public List<SelectedEstablishmentDataModel> GetGroupSchools()
+    {
+        if (!CanSelectSchools)
+        {
+            throw new InvalidOperationException(
+                "Attempted to get group schools for a non-group user"
+            );
+        }
+
+        return Session.GetGroupSchools().ToList();
+    }
 
     public async Task SetGroupSchools(IEnumerable<SelectedEstablishmentDataModel> schools)
     {
-        if (schools.Any(gs => gs.Urn is null))
+        if (schools.Any(s => s.Urn is null))
         {
             throw new InvalidDataException("All group schools must have a URN");
         }
 
-        var urns = schools.Select(e => e.Urn!);
-        var allUrnsValid = await HasSchoolsInGroup(urns);
+        var urns = schools.Select(s => s.Urn!);
+        var allUrnsValid = AllUrnsValid(urns);
         if (!allUrnsValid)
         {
             throw new InvalidDataException(
@@ -143,111 +163,84 @@ public class CurrentUserProvider : ICurrentUserProvider
         session.SetGroupSchools(schools);
     }
 
-    public void ClearSelectedEstablishments()
+    public void ClearSelectedSchools()
     {
         Session.ClearSelectedEstablishments();
     }
 
-    public IReadOnlyList<int> GetSelectedEstablishmentIds()
+    public List<int> GetSelectedSchoolEstablishmentIds()
     {
-        return GetSelectedEstablishments().Select(e => e.Id).ToArray();
+        return GetSelectedSchools().Select(e => e.EstablishmentId).ToList();
     }
 
-    public IReadOnlyList<string> GetSelectedEstablishmentNames()
+    public List<string> GetSelectedSchoolNames()
     {
-        return GetSelectedEstablishments().Select(e => e.Name).ToArray();
+        return GetSelectedSchools().Select(e => e.Name).ToList();
     }
 
-    public IReadOnlyList<SelectedEstablishmentDataModel> GetSelectedEstablishments()
+    /// <summary>
+    /// Get the selected schools for the current user if set, otherwise run actionIsNull if set,
+    /// otherwise return an empty list.
+    /// </summary>
+    /// <param name="actionIfNull">The action to execute if the value is null</param>
+    /// <returns>The selected schools for the user</returns>
+    public List<SelectedEstablishmentDataModel> GetSelectedSchools()
     {
-        return Session.GetSelectedEstablishments();
-    }
-
-    public void SetSelectedEstablishments(SelectedEstablishmentDataModel establishment)
-    {
-        Session.SetSelectedEstablishments([establishment]);
-    }
-
-    public void SetSelectedEstablishments(
-        IEnumerable<SelectedEstablishmentDataModel> establishments
-    )
-    {
-        Session.SetSelectedEstablishments(establishments);
-    }
-
-    private bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds)
-    {
-        return UserOrganisation?.Category?.Id != null
-            && categoryIds.Contains(UserOrganisation.Category.Id);
-    }
-
-    // Private instance method to load selected school asynchronously
-    private async Task<IEnumerable<SelectedEstablishmentDataModel>> LoadSelectedSchoolsAsync()
-    {
-        var session = _contextAccessor.HttpContext?.Session;
-        if (session is null)
-        {
-            throw new InvalidOperationException("Cannot access the current session.");
-        }
-
-        // Early return if user is not authenticated
-        if (!IsAuthenticated)
-        {
-            return [];
-        }
-
-        var selectedSchools = session.GetSelectedEstablishments();
-
-        // Early return if user is not a group user.
-        // They shouldn't be able to select schools, so warn and clear it if present.
         if (!CanSelectSchools)
         {
-            if (selectedSchools is not null)
-            {
-                _logger.LogWarning(
-                    "Non-group user has selected schools but should not be able to. Clearing selected schools from session ({SessionKey}).",
-                    SessionConstants.SelectedEstablishmentsKey
-                );
-
-                session.ClearSelectedEstablishments();
-            }
-            return [];
+            throw new InvalidOperationException(
+                "Attempted to get selected schools for a non-group user"
+            );
         }
 
-        // From here on, we know the user should be able to select schools
-        if (selectedSchools.Count == 0)
+        var selectedSchools = Session.GetSelectedSchools();
+        return selectedSchools.Count == 0
+            ? throw new InvalidOperationException("User has not selected any schools")
+            : selectedSchools;
+    }
+
+    public void SetSelectedSchools(SelectedEstablishmentDataModel establishment)
+    {
+        SetSelectedSchools([establishment]);
+    }
+
+    public void SetSelectedSchools(IEnumerable<SelectedEstablishmentDataModel> establishments)
+    {
+        if (!CanSelectSchools)
         {
-            _logger.LogWarning("Selected schools session value is empty.");
-
-            return [];
+            throw new InvalidOperationException("User cannot set selected establishments");
         }
 
-        var urns = Session.GetSelectedEstablishments().Select(e => e.Urn);
-        var allUrnsValid = await HasSchoolsInGroup(urns);
+        var session = Session;
+        if (establishments.Count() == 0)
+        {
+            session.ClearSelectedEstablishments();
+        }
+
+        var urns = establishments.Select(e => e.Urn);
+        var allUrnsValid = AllUrnsValid(urns);
         if (!allUrnsValid)
         {
             _logger.LogInformation("Clearing selected establishments.");
             session.ClearSelectedEstablishments();
-            return [];
         }
 
-        return selectedSchools;
+        session.SetSelectedSchools(establishments);
     }
 
-    private async Task<bool> HasSchoolsInGroup(IEnumerable<string> urns)
+    private bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds)
+    {
+        return DsiOrganisation?.Category?.Id != null
+            && categoryIds.Contains(DsiOrganisation.Category.Id);
+    }
+
+    private bool AllUrnsValid(IEnumerable<string> urns)
     {
         var selectedUrns = "[" + string.Join(", ", urns) + "]";
 
-        if (UserOrganisation?.Id is null || UserEstablishment?.Id is null)
-        {
-            _logger.LogWarning(
-                "Group user attempted to access establishments {SelectedUrns} but has no organisation ID or establishment ID.",
-                selectedUrns
-            );
-            return false;
-        }
-
-        if (UserOrganisation.GroupUid is null)
+        var groupEstablishmentId = Establishment.Id;
+        var groupUid = DsiOrganisation?.GroupUid ?? Establishment.GroupUid;
+        if (groupUid is null)
         {
             _logger.LogWarning(
                 "Group user attempted to access establishments {SelectedUrns} but the user's Organisation Group UID is empty and the service cannot validate that the schools are within the user's group.",
@@ -256,32 +249,15 @@ public class CurrentUserProvider : ICurrentUserProvider
             return false;
         }
 
-        var userOrganisationEstablishmentId = UserEstablishment.Id;
+        var groupSchools = Session.GetGroupSchools();
+        var allSchoolsInGroup = groupSchools.Select(gs => gs.Urn).ToHashSet().IsSupersetOf(urns);
 
-        try
+        if (!allSchoolsInGroup)
         {
-            // Get all schools in the user's group
-            var allSchoolsInGroup = await _giasService.HasAllSchoolsInGroup(
-                UserOrganisation.GroupUid,
-                urns
-            );
-            if (!allSchoolsInGroup)
-            {
-                _logger.LogWarning(
-                    "Group user attempted to access establishments {SelectedUrns}, but at least one is not within their group (group establishment ID: {GroupId}).",
-                    selectedUrns,
-                    userOrganisationEstablishmentId
-                );
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Failed to validate group membership for URNs {SelectedUrns} in group {GroupId}.",
+            _logger.LogWarning(
+                "Group user attempted to access establishments {SelectedUrns}, but at least one is not within their group (group establishment ID: {GroupId}).",
                 selectedUrns,
-                userOrganisationEstablishmentId
+                groupEstablishmentId
             );
             return false;
         }

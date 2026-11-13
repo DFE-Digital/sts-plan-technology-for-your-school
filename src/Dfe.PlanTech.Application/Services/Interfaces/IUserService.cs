@@ -5,10 +5,10 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
+        Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId);
+        Task<SqlUserSettingsDto> SetUserRecommendationSortOrderAsync(
             int userId,
             RecommendationSortOrder sortOrder
         );
-        Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId);
     }
 }

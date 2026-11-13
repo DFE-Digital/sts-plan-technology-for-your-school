@@ -75,9 +75,7 @@ public class BannerConditionsContextProvider(
             return true; // No conditions, show the banner
         }
 
-        var establishmentId =
-            _currentUser.FocusedSchool()?.Id
-            ?? throw new InvalidDataException("There is no focused school present in the session");
+        var establishmentId = _currentUser.GetFocusedSchool().EstablishmentId;
 
         foreach (var condition in banner.Conditions)
         {

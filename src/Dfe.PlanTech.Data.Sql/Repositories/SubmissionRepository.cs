@@ -741,9 +741,9 @@ public class SubmissionRepository(
 
     public async Task<
         List<SubmissionEntity>
-    > GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds)
+    > GetEstablishmentsLatestCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds)
     {
-        var establishmentIdList = establishmentIds.Distinct().ToList();
+        var establishmentIdList = establishmentIds.Distinct().ToArray();
 
         var results = await _db
             .Submissions.Include(s => s.Establishment)

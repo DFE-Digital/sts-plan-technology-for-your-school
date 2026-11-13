@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
@@ -9,61 +8,60 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository, IEstablishmentGroupRepository establishmentGroupRepository) : IGroupWorkflow
+public class GroupWorkflow(
+    IEstablishmentGroupRepository establishmentGroupRepository,
+    IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository,
+    ISubmissionRepository submissionRepository
+) : IGroupWorkflow
 {
+    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
+        establishmentGroupRepository
+        ?? throw new ArgumentNullException(nameof(establishmentGroupRepository));
+    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
+        recommendationHistoryRepository
+        ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
-        establishmentGroupRepository ?? throw new ArgumentNullException(nameof(establishmentGroupRepository));
-
-    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository = recommendationHistoryRepository ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
 
     public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds)
     {
-        var submissions = await _submissionRepository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds);
-
+        var submissions =
+            await _submissionRepository.GetEstablishmentsLatestCompletedSubmissionsBySectionsAsync(
+                establishmentIds
+            );
         return submissions.Select(s => s.AsDto()).ToList();
     }
 
-    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId)
+    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(
+        List<SelectedEstablishmentDataModel> groupSchools,
+        string sectionId
+    )
     {
-        var establishments = new List<SqlEstablishmentDto>();
+        var establishmentIds = groupSchools.Select(e => e.EstablishmentId).Distinct().ToArray();
 
-        foreach (var e in establishmentLinks)
-        {
-            establishments.Add(
-                await _establishmentService.GetOrCreateEstablishmentAsync(
-                    e.Urn,
-                    e.EstablishmentName));
-        }
-
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
-        var groupLatestSubmissions = await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
-            ?? [];
+        var groupLatestSubmissions =
+            await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(
+                establishmentIds,
+                sectionId
+            ) ?? [];
 
         var groupSubmissionInfo = new List<SubmissionInformationModel>();
 
-        foreach (var est in establishments)
+        foreach (var school in groupSchools)
         {
-            var submission = groupLatestSubmissions
-                    .FirstOrDefault(s => s.Establishment.EstablishmentRef == est.EstablishmentRef);
-
+            var submission = groupLatestSubmissions.FirstOrDefault(s =>
+                s.EstablishmentId == school.EstablishmentId
+            );
             if (submission == null)
             {
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
-                        EstablishmentId = est.Id,
-                        EstablishmentName = est.OrgName ?? "",
-                        EstablishmentRef = est.EstablishmentRef ?? "",
+                        EstablishmentId = school.EstablishmentId,
+                        EstablishmentName = school.Name,
+                        EstablishmentRef = school.Urn,
                         SectionId = sectionId,
-                        Status = SubmissionStatus.NotStarted
+                        Status = SubmissionStatus.NotStarted,
                     }
                 );
             }
@@ -72,19 +70,23 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
-                        EstablishmentId = submission.EstablishmentId,
-                        EstablishmentName = est.OrgName ?? "",
-                        EstablishmentRef = est.EstablishmentRef ?? "",
+                        EstablishmentId = school.EstablishmentId,
+                        EstablishmentName = school.Name,
+                        EstablishmentRef = school.Urn,
                         SectionId = sectionId,
                         SubmissionId = submission.Id,
                         DateCreated = DateTimeHelper.FormattedDateShort(submission.DateCreated),
-                        DateLastUpdated = submission.DateLastUpdated != null
-                            ? DateTimeHelper.FormattedDateShort(submission.DateLastUpdated.Value)
-                            : null,
-                        DateCompleted = submission.DateCompleted != null
-                            ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
-                            : null,
-                        Status = submission.Status
+                        DateLastUpdated =
+                            submission.DateLastUpdated != null
+                                ? DateTimeHelper.FormattedDateShort(
+                                    submission.DateLastUpdated.Value
+                                )
+                                : null,
+                        DateCompleted =
+                            submission.DateCompleted != null
+                                ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
+                                : null,
+                        Status = submission.Status,
                     }
                 );
             }
@@ -93,41 +95,50 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         return groupSubmissionInfo;
     }
 
-    public async Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>> GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId)
-    {
-        var results =
-            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(establishmentId,
-                recommendationId);
-
-        return results;
-
-    }
-
-    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
-        int groupEstablishmentId
+    public async Task<
+        List<(
+            EstablishmentEntity establishment,
+            EstablishmentRecommendationHistoryEntity? recommendationHistory
+        )>
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+        int establishmentId,
+        int recommendationId
     )
     {
-        var establishments =
-            await _establishmentGroupRepository
-                .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
+        var results =
+            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+                establishmentId,
+                recommendationId
+            );
 
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
-        var completedSubmissions =
-            establishmentIds.Length != 0
-                ? await GetGroupCompletedSubmissions(establishmentIds)
-                : [];
-
-        return new GroupEstablishmentModel
-        {
-            Establishments = establishments
-                .Select(e => e.AsDto())
-                .ToList(),
-            EstablishmentIds = establishmentIds,
-            CompletedSubmissions = completedSubmissions,
-        };
+        return results;
     }
+
+    //public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+    //    int groupEstablishmentId
+    //)
+    //{
+    //    var establishments =
+    //        await _establishmentGroupRepository
+    //            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
+
+    //    var establishmentIds = establishments
+    //        .Select(e => e.Id)
+    //        .Distinct()
+    //        .ToArray();
+
+    //    var completedSubmissions =
+    //        establishmentIds.Length != 0
+    //            ? await GetGroupCompletedSubmissions(establishmentIds)
+    //            : [];
+
+    //    return new GroupEstablishmentModel
+    //    {
+    //        Establishments = establishments
+    //            .Select(e => e.AsDto())
+    //            .ToList(),
+    //        EstablishmentIds = establishmentIds,
+    //        CompletedSubmissions = completedSubmissions,
+    //    };
+    //}
 }

@@ -80,7 +80,8 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
+        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -109,7 +110,7 @@ public class RecommendationsViewBuilder(
 
         var currentRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                establishmentId,
+                focusedEstablishmentId,
                 currentRecommendationChunk.Id
             );
 
@@ -127,7 +128,7 @@ public class RecommendationsViewBuilder(
 
         var recommendationHistory = await _recommendationService.GetRecommendationHistoryAsync(
             currentRecommendationChunk.Id,
-            establishmentId
+            focusedEstablishmentId
         );
 
         var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
@@ -138,7 +139,7 @@ public class RecommendationsViewBuilder(
 
         var firstActivity =
             await _recommendationService.GetFirstActivityForEstablishmentRecommendationAsync(
-                establishmentId,
+                focusedEstablishmentId,
                 currentRecommendationChunk.Id
             );
 
@@ -189,6 +190,11 @@ public class RecommendationsViewBuilder(
         string chunkSlug
     )
     {
+        if (!CurrentUser.IsMat)
+        {
+            throw new InvalidOperationException("Non-group users cannot be routed to a MAT page.");
+        }
+
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -215,20 +221,20 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
-        var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
+        var matEstablishment = CurrentUser.Establishment;
+        var groupSchools = CurrentUser
+            .GetGroupSchools()
+            .OrderBy(e => e.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+        var groupSchoolEstablishmentIds = groupSchools.Select(s => s.EstablishmentId).ToArray();
 
-        var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
-            groupEstablishmentId
+        var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
+            groupSchoolEstablishmentIds
         );
-
-        var establishments = groupContext.Establishments;
-        var establishmentIds = groupContext.EstablishmentIds;
-        var completedSubmissions = groupContext.CompletedSubmissions;
 
         var completedEstablishmentIds = completedSubmissions
             .Where(submission =>
                 submission.SectionId == section.Id
-                && establishmentIds.Contains(submission.EstablishmentId)
+                && groupSchoolEstablishmentIds.Contains(submission.EstablishmentId)
             )
             .Select(submission => submission.EstablishmentId)
             .Distinct()
@@ -244,18 +250,15 @@ public class RecommendationsViewBuilder(
 
         var schools = new List<MatRecommendationSchoolViewModel>();
 
-        foreach (
-            var establishment in establishments.OrderBy(
-                e => e.OrgName ?? string.Empty,
-                StringComparer.OrdinalIgnoreCase
-            )
-        )
+        foreach (var school in groupSchools)
         {
-            var hasCompletedSelfAssessment = completedEstablishmentIds.Contains(establishment.Id);
+            var hasCompletedSelfAssessment = completedEstablishmentIds.Contains(
+                school.EstablishmentId
+            );
 
             var history = hasCompletedSelfAssessment
                 ? await _recommendationService.GetLatestRecommendationHistoryAsync(
-                    establishment.Id,
+                    school.EstablishmentId,
                     currentRecommendationChunk.Id
                 )
                 : null;
@@ -263,8 +266,8 @@ public class RecommendationsViewBuilder(
             schools.Add(
                 new MatRecommendationSchoolViewModel
                 {
-                    EstablishmentId = establishment.Id,
-                    SchoolName = establishment.OrgName ?? string.Empty,
+                    EstablishmentId = school.EstablishmentId,
+                    SchoolName = school.Name ?? string.Empty,
                     Status = hasCompletedSelfAssessment
                         ? history?.NewStatus ?? RecommendationStatus.NotStarted
                         : null,
@@ -328,7 +331,7 @@ public class RecommendationsViewBuilder(
         string? originatingSlug
     )
     {
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
+        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
 
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -343,7 +346,7 @@ public class RecommendationsViewBuilder(
             );
 
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
-            establishmentId,
+            focusedEstablishmentId,
             section,
             status: SubmissionStatus.CompleteReviewed
         );
@@ -484,7 +487,7 @@ public class RecommendationsViewBuilder(
         SingleRecommendationInputViewModel inputModel
     )
     {
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
+        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -502,7 +505,7 @@ public class RecommendationsViewBuilder(
 
         var recommendationHistory = await _recommendationService.GetRecommendationHistoryAsync(
             currentRecommendationChunk.Id,
-            establishmentId
+            focusedEstablishmentId
         );
 
         var currentStatus = recommendationHistory
@@ -537,13 +540,12 @@ public class RecommendationsViewBuilder(
 
         defaultNoteText = string.IsNullOrWhiteSpace(defaultNoteText) ? null : defaultNoteText;
 
-        var userId = GetUserIdOrThrowException();
-        var userOrganisationId = CurrentUser.UserOrganisationId;
+        var userOrganisationId = CurrentUser.Establishment.Id;
 
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
-            establishmentId,
-            userId,
+            focusedEstablishmentId,
+            CurrentUser.UserId,
             inputModel.SelectedStatusEnum!.Value,
             noteText: inputModel.Notes ?? defaultNoteText,
             matEstablishmentId: CurrentUser.IsMat || CurrentUser.IsSatOrSSat
@@ -673,47 +675,40 @@ public class RecommendationsViewBuilder(
 
         if (isMat)
         {
+            var matEstablishment = CurrentUser.Establishment;
             var matName =
-                CurrentUser.UserOrganisationName
+                matEstablishment.OrgName
                 ?? throw new InvalidDataException("Cannot send an email without a MAT name");
+            var matSchools = CurrentUser.GetGroupSchools();
+            var matSchoolIds = matSchools.Select(s => s.EstablishmentId).ToArray();
 
-            var groupEstablishmentId = GetUserOrganisationIdOrThrowException();
-
-            var groupContext = await _groupService.GetGroupEstablishmentContextAsync(
-                groupEstablishmentId
+            var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
+                matSchoolIds
             );
 
-            var completedEstablishmentIds = groupContext
-                .CompletedSubmissions.Where(submission =>
-                    submission.SectionId == section.Id
-                    && groupContext.EstablishmentIds.Contains(submission.EstablishmentId)
-                )
+            var completedEstablishmentIds = completedSubmissions
+                .Where(submission => submission.SectionId == section.Id)
                 .Select(submission => submission.EstablishmentId)
                 .Distinct()
                 .ToHashSet();
 
+            var orderedSchools = matSchools
+                .Where(s => completedEstablishmentIds.Contains(s.EstablishmentId))
+                .OrderBy(s => s.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+
             var schoolStatusLines = new List<string>();
 
-            foreach (
-                var establishment in groupContext
-                    .Establishments.Where(establishment =>
-                        completedEstablishmentIds.Contains(establishment.Id)
-                    )
-                    .OrderBy(
-                        establishment => establishment.OrgName ?? string.Empty,
-                        StringComparer.OrdinalIgnoreCase
-                    )
-            )
+            foreach (var school in orderedSchools)
             {
                 var history = await _recommendationService.GetLatestRecommendationHistoryAsync(
-                    establishment.Id,
+                    school.EstablishmentId,
                     recommendationChunk.Id
                 );
 
                 var status = history?.NewStatus ?? RecommendationStatus.NotStarted;
 
                 schoolStatusLines.Add(
-                    $"* {establishment.OrgName ?? string.Empty}: {status.GetDisplayName()}"
+                    $"* {school.Name ?? string.Empty}: {status.GetDisplayName()}"
                 );
             }
 
@@ -744,11 +739,11 @@ public class RecommendationsViewBuilder(
             return HandleNotifyShareResults(controller, notifySendResults, returnToModel);
         }
 
-        var establishmentId = GetFocusedEstablishmentIdOrThrowException();
+        var focusedSchool = CurrentUser.GetFocusedSchool();
 
         var latestRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                establishmentId,
+                focusedSchool.EstablishmentId,
                 recommendationChunk.Id
             );
 
@@ -757,14 +752,10 @@ public class RecommendationsViewBuilder(
             throw new InvalidDataException("Cannot send an email without a recommendation status");
         }
 
-        var establishmentName =
-            CurrentUser.FocusedSchool?.Name
-            ?? throw new InvalidDataException("Cannot send an email without a focused school name");
-
         var schoolNotifySendResults = _notifyService.SendSingleRecommendationEmail(
             inputModel.ToModel(),
             textBody,
-            establishmentName,
+            focusedSchool.Name,
             recommendationChunk.HeaderText,
             category.Header.Text,
             latestRecommendationHistory.NewStatus.Value
@@ -801,11 +792,12 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
+        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
 
         var details = await _recommendationService.GetLatestRecommendationStatusesAsync(
-            establishmentId
+            focusedEstablishmentId
         );
 
         var chunkViewModels = section

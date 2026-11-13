@@ -154,7 +154,7 @@ public static class OnUserInformationReceivedEvent
             // If we found the (S)SAT's school, override the establishmentId in the claims.
             // We recorded the SAT in the sign-in record, but we will treat the user as being from
             // a school from now so we need to store the school establishment ID in the claims.
-            signIn.EstablishmentId = satEstablishment.Id;
+            signIn.EstablishmentId = satEstablishment.EstablishmentId;
             await currentUser.SetFocusedSchoolAsync(satEstablishment.Urn, satEstablishment.Name);
         }
 
@@ -218,10 +218,6 @@ public static class OnUserInformationReceivedEvent
         {
             return;
         }
-
-        string establishmentId =
-            signin.EstablishmentId?.ToString()
-            ?? throw new InvalidDataException(nameof(signin.EstablishmentId));
 
         ClaimsIdentity claimsIdentity = new([
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),

@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
@@ -26,41 +25,6 @@ public class BaseViewBuilder(
         currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected const string ShareByEmailViewName = "~/Views/Shared/Email/ShareByEmail.cshtml";
-
-    protected string GetDsiReferenceOrThrowException()
-    {
-        return CurrentUser.DsiReference
-            ?? throw new AuthenticationException("User is not authenticated");
-    }
-
-    protected int GetUserIdOrThrowException()
-    {
-        return CurrentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
-    /// <exception cref="InvalidDataException"></exception>
-    protected int GetUserOrganisationIdOrThrowException()
-    {
-        return CurrentUser.UserEstablishment?.Id
-            ?? throw new InvalidDataException(
-                "There is no user establishment present in the session"
-            );
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
-    /// <exception cref="InvalidDataException"></exception>
-    protected int GetFocusedEstablishmentIdOrThrowException()
-    {
-        return CurrentUser.FocusedSchool?.Id
-            ?? throw new InvalidDataException("There is no focused school present in the session");
-    }
 
     protected static ShareByEmailViewModel BuildShareByEmailViewModel(
         string controllerName,

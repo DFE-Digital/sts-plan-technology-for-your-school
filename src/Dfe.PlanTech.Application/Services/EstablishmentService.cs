@@ -30,12 +30,12 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+    public Task<SqlEstablishmentDto> GetOrCreateSchoolAsync(
         string establishmentUrn,
         string establishmentName
     )
     {
-        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentUrn, establishmentName);
+        return _establishmentWorkflow.GetOrCreateSchoolAsync(establishmentUrn, establishmentName);
     }
 
     public Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId)
@@ -43,7 +43,9 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetGroupEstablishments(establishmentId);
     }
 
-    public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
+    public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
+        IEnumerable<string> establishmentReferences
+    )
     {
         return _establishmentWorkflow.GetEstablishmentsByReferencesAsync(establishmentReferences);
     }
@@ -111,29 +113,17 @@ public class EstablishmentService(
     }
 
     public async Task RecordGroupSelection(
-        string userDsiReference,
-        int? userEstablishmentId,
-        EstablishmentModel userEstablishmentModel,
+        int userId,
+        int userEstablishmentId,
+        int selectedEstablishmentId,
         string selectedEstablishmentUrn,
         string selectedEstablishmentName
     )
     {
-        var user =
-            await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
-            ?? throw new InvalidDataException("User does not exist");
-
-        if (userEstablishmentId is null)
-        {
-            var userEstablishment = await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
-                userEstablishmentModel
-            );
-            userEstablishmentId = userEstablishment.Id;
-        }
-
-        var selectedEstablishment = await _establishmentWorkflow.GetEstablishmentByReferenceAsync(
-            selectedEstablishmentUrn
+        var selectedEstablishment = await _establishmentWorkflow.GetEstablishmentByIdAsync(
+            selectedEstablishmentId
         );
-        selectedEstablishment ??= await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
+        selectedEstablishment ??= await _establishmentWorkflow.GetOrCreateSchoolAsync(
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
@@ -142,8 +132,8 @@ public class EstablishmentService(
         {
             SelectedEstablishmentId = selectedEstablishment.Id,
             SelectedEstablishmentName = selectedEstablishmentName,
-            UserEstablishmentId = userEstablishmentId.Value,
-            UserId = user.Id,
+            UserEstablishmentId = userEstablishmentId,
+            UserId = userId,
         };
 
         await _establishmentWorkflow.RecordGroupSelection(selectionModel);

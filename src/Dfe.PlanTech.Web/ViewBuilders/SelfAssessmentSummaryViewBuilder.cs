@@ -65,13 +65,10 @@ public class SelfAssessmentSummaryViewBuilder(
             c.Sections?.Any(s => s.Id == sectionId) == true
         );
 
+        var categoryName = category?.Header?.Text ?? categorySlug.Replace("-", " ");
         var recommendationCategorySlug = category?.LandingPage?.Slug ?? categorySlug;
 
-        var categoryName = category?.Header?.Text ?? categorySlug.Replace("-", " ");
-
-        var submittedSubmissions = CurrentUser.IsMat
-            ? await GetMatSubmittedSubmissions(sectionId)
-            : await GetSchoolSubmittedSubmissions(sectionId);
+        var submittedSubmissions = await GetSubmittedSubmissions(sectionId);
 
         return new SelfAssessmentSummaryViewModel
         {
@@ -110,31 +107,16 @@ public class SelfAssessmentSummaryViewBuilder(
         }
     }
 
-    private async Task<List<SqlSubmissionDto>> GetMatSubmittedSubmissions(string sectionId)
+    private async Task<List<SqlSubmissionDto>> GetSubmittedSubmissions(string sectionId)
     {
-        var selectedEstablishmentIds = CurrentUser.GetSelectedEstablishmentIds().ToArray();
+        var selectedSchoolIds = CurrentUser.GetSelectedSchoolEstablishmentIds();
+        var focusedSchoolId = CurrentUser.GetFocusedSchool().EstablishmentId;
 
-        if (selectedEstablishmentIds.Length == 0)
-        {
-            var activeEstablishmentId = await GetFocusedEstablishmentIdOrThrowException();
-
-            selectedEstablishmentIds = [activeEstablishmentId];
-        }
+        var establishmentIds = selectedSchoolIds.Union([focusedSchoolId]).ToArray();
 
         var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
-            selectedEstablishmentIds
+            establishmentIds
         );
-
-        return completedSubmissions.Where(s => s.SectionId == sectionId).ToList();
-    }
-
-    private async Task<List<SqlSubmissionDto>> GetSchoolSubmittedSubmissions(string sectionId)
-    {
-        var establishmentId = await GetFocusedEstablishmentIdOrThrowException();
-
-        var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections([
-            establishmentId,
-        ]);
 
         return completedSubmissions.Where(s => s.SectionId == sectionId).ToList();
     }

@@ -33,21 +33,21 @@ public class UserWorkflow(
         return newUser.AsDto();
     }
 
-    public async Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
-        int userId,
-        RecommendationSortOrder sortOrder
-    )
-    {
-        var userSettings = await _userSettingsRepository.GetOrCreateUserSettingsAsync(
-            userId,
-            sortOrder
-        );
-        return userSettings.AsDto();
-    }
-
     public async Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId)
     {
         var userSettings = await _userSettingsRepository.GetUserSettingsByUserIdAsync(userId);
         return userSettings?.AsDto();
+    }
+
+    public async Task<SqlUserSettingsDto> SetUserRecommendationSortOrderAsync(
+        int userId,
+        RecommendationSortOrder sortOrder
+    )
+    {
+        var userSettings = await _userSettingsRepository.SetUserRecommendationSortOrderAsync(
+            userId,
+            sortOrder
+        );
+        return userSettings.AsDto();
     }
 }

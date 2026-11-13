@@ -57,10 +57,6 @@ public static class UserClaimsHelper
             organisationJson,
             _jsonSerialiserOptions
         );
-        if (organisation?.Id == Guid.Empty)
-        {
-            return null;
-        }
 
         return organisation;
     }

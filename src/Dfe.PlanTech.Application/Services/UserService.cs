@@ -10,16 +10,16 @@ public class UserService(IUserWorkflow userWorkflow) : IUserService
     private readonly IUserWorkflow _userWorkflow =
         userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
-    public Task<SqlUserSettingsDto> GetOrCreateUserSettingsAsync(
+    public Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId)
+    {
+        return _userWorkflow.GetUserSettingsByUserIdAsync(userId);
+    }
+
+    public Task<SqlUserSettingsDto> SetUserRecommendationSortOrderAsync(
         int userId,
         RecommendationSortOrder sortOrder
     )
     {
-        return _userWorkflow.GetOrCreateUserSettingsAsync(userId, sortOrder);
-    }
-
-    public Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId)
-    {
-        return _userWorkflow.GetUserSettingsByUserIdAsync(userId);
+        return _userWorkflow.SetUserRecommendationSortOrderAsync(userId, sortOrder);
     }
 }
