@@ -22,6 +22,8 @@ public static class DsiConstants
     public const string BillingAuthorityCategoryId = "052";
     public const string YouthCustodyServiceCategoryId = "053";
 
+    public const string DsiTestMultiAcademyTrustUkprn = "00000046";
+
     /// <summary>
     /// DSI organisation category IDs representing schools
     /// </summary>

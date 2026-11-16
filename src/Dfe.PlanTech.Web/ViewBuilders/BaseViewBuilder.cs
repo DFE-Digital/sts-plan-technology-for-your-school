@@ -56,6 +56,13 @@ public class BaseViewBuilder(
         };
     }
 
+    protected IEnumerable<SelectedEstablishmentDataModel> GetFocusedOrSelectedSchools()
+    {
+        return CurrentUser.CanSelectSchools
+            ? CurrentUser.GetSelectedSchools()!
+            : [CurrentUser.GetFocusedSchool()!];
+    }
+
     protected static RedirectToActionResult HandleNotifyShareResults(
         Controller controller,
         List<NotifySendResult> notifySendResults,

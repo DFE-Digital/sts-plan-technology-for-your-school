@@ -17,6 +17,8 @@ public class GroupsSelectorViewModel
 
     public List<ContentfulEntry> Content { get; init; } = [];
 
+    public Dictionary<int, int> InProgressOrCompletedRecommendationCounts { get; set; } = [];
+
     public string TotalRecommendations { get; set; } = null!;
 
     public string? ProgressRetrievalErrorMessage { get; init; }

@@ -33,8 +33,13 @@ public interface IRecommendationService
         string recommendationContentfulReference
     );
 
+    Task<Dictionary<int, int>> GetInProgressOrCompletedRecommendationCounts(
+        IEnumerable<int> establishmentIds
+    );
+
     Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
-        IEnumerable<string> recommendationContentfulReferences);
+        IEnumerable<string> recommendationContentfulReferences
+    );
 
     Task UpdateEstablishmentsRecommendationStatusAsync(
         string recommendationContentfulReference,

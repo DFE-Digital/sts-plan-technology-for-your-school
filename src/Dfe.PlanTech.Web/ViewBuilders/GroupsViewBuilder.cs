@@ -86,6 +86,12 @@ public class GroupsViewBuilder(
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
         var groupSchools = CurrentUser.GetGroupSchools();
 
+        var schoolEstablishmentIds = groupSchools.Select(s => s.EstablishmentId);
+        var inProgressOrCompletedRecommendationCounts =
+            await _recommendationService.GetInProgressOrCompletedRecommendationCounts(
+                schoolEstablishmentIds
+            );
+
         var viewModel = new GroupsSelectorViewModel
         {
             GroupName = groupName,
@@ -94,6 +100,7 @@ public class GroupsViewBuilder(
             Title = new ComponentTitleEntry(groupName),
             Content = content,
             TotalRecommendations = totalRecommendations,
+            InProgressOrCompletedRecommendationCounts = inProgressOrCompletedRecommendationCounts,
             ProgressRetrievalErrorMessage = string.IsNullOrEmpty(totalRecommendations)
                 ? "Unable to retrieve progress"
                 : null,

@@ -3,10 +3,13 @@
 @model RecommendationsViewModel
 
 @{
+
     if (Model.CategoryName != null)
     {
         ViewData[StatePassingMechanismConstants.Title] = $"{Model.CategoryName} - print view";
     }
+
+    var focusedSchool = CurrentUser.GetFocusedSchool();
 }
 
 @if (Model.IsMat)
@@ -43,7 +46,7 @@
 }
 else
 {
-    var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
+    var schoolName = focusedSchool.Name;
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
         @Model.CategoryName

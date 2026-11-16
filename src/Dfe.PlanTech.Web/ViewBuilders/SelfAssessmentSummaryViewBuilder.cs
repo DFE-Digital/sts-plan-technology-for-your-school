@@ -109,13 +109,10 @@ public class SelfAssessmentSummaryViewBuilder(
 
     private async Task<List<SqlSubmissionDto>> GetSubmittedSubmissions(string sectionId)
     {
-        var selectedSchoolIds = CurrentUser.GetSelectedSchoolEstablishmentIds();
-        var focusedSchoolId = CurrentUser.GetFocusedSchool().EstablishmentId;
-
-        var establishmentIds = selectedSchoolIds.Union([focusedSchoolId]).ToArray();
+        var establishmentIds = GetFocusedOrSelectedSchools()!.Select(s => s.EstablishmentId);
 
         var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
-            establishmentIds
+            establishmentIds.ToArray()
         );
 
         return completedSubmissions.Where(s => s.SectionId == sectionId).ToList();

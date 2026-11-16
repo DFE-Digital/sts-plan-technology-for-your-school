@@ -4,17 +4,24 @@
 @model PageViewModel
 
 @{
+
+
+
     var isTopicStartPage = !string.IsNullOrWhiteSpace(Model.CategorySlug);
 
     var isSelectedSchoolHomePage =
         CurrentUser.IsMat &&
-        !string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolName) &&
+        !string.IsNullOrWhiteSpace(CurrentUser.GetFocusedSchool().Name) &&
         Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
 
     var useBreadcrumbs = isTopicStartPage || isSelectedSchoolHomePage;
 
     ViewData["UseBreadcrumbs"] = useBreadcrumbs;
     ViewData["UseOrganisationContextHeader"] = isTopicStartPage && Model.ShowTrustSchoolAssessmentTable;
+
+    var dsiOrganisation = CurrentUser.DsiOrganisation;
+
+    var focusedSchool = CurrentUser.GetFocusedSchool();
 
     var breadcrumbs = new List<BreadcrumbItemViewModel>
     {
@@ -39,12 +46,11 @@
         }
         else
         {
-            if (CurrentUser.IsMat &&
-                !string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolName))
+            if (CurrentUser.IsMat)
             {
                 breadcrumbs.Add(new BreadcrumbItemViewModel
                 {
-                    Text = CurrentUser.GroupFocusedSchoolName,
+                    Text = focusedSchool.Name,
                     Href = UrlConstants.HomePage
                 });
             }
@@ -69,11 +75,13 @@
 }
 
 @section OrganisationContext {
-    @if (isTopicStartPage &&
-             Model.ShowTrustSchoolAssessmentTable &&
-             !string.IsNullOrWhiteSpace(CurrentUser.UserOrganisationName))
+    @if (
+        isTopicStartPage &&
+        Model.ShowTrustSchoolAssessmentTable &&
+        dsiOrganisation is not null
+    )
     {
-        <partial name="_OrganisationContext" model="CurrentUser.UserOrganisationName" />
+        <partial name="_OrganisationContext" model="dsiOrganisation.Name" />
     }
 }
 

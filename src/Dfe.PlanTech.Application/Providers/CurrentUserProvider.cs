@@ -84,8 +84,13 @@ public class CurrentUserProvider(
     /// </summary>
     /// <param name="actionIfNull">The action to execute if the value is null</param>
     /// <returns>The focused school for the user</returns>
-    public SelectedEstablishmentDataModel GetFocusedSchool()
+    public SelectedEstablishmentDataModel? GetFocusedSchool()
     {
+        if (!IsAuthenticated)
+        {
+            return null;
+        }
+
         var focusedEstablishment = Session.GetFocusedEstablishment();
         if (!CanSelectSchools && focusedEstablishment is null)
         {
@@ -103,7 +108,9 @@ public class CurrentUserProvider(
             throw new InvalidDataException("No URN/school name set for selection.");
         }
 
-        if (CanSelectSchools && !GetGroupSchools().Any(gs => gs.Urn.Equals(urn)))
+        var hasSchools = GetGroupSchools()?.Any(gs => gs.Urn.Equals(urn)) ?? false;
+        ;
+        if (CanSelectSchools && !hasSchools)
         {
             throw new InvalidOperationException(
                 "User attempted to set a focused school that is not in their group"
@@ -121,8 +128,13 @@ public class CurrentUserProvider(
         );
     }
 
-    public List<SelectedEstablishmentDataModel> GetGroupSchools()
+    public List<SelectedEstablishmentDataModel>? GetGroupSchools()
     {
+        if (!IsAuthenticated)
+        {
+            return null;
+        }
+
         if (!CanSelectSchools)
         {
             throw new InvalidOperationException(
@@ -140,17 +152,18 @@ public class CurrentUserProvider(
             throw new InvalidDataException("All group schools must have a URN");
         }
 
+        // Optimisation: Throw before calling the database if session is null.
+        var session = Session;
+
         var urns = schools.Select(s => s.Urn!);
         var allUrnsValid = AllUrnsValid(urns);
         if (!allUrnsValid)
         {
-            throw new InvalidDataException(
+            _logger.LogWarning(
                 "Group user attempted to access a school that is not within their group."
             );
+            session.ClearGroupSchools();
         }
-
-        // Optimisation: Throw before calling the database if session is null.
-        var session = Session;
 
         var establishments = await _establishmentService.GetEstablishmentsByReferencesAsync(urns);
         if (urns.Count() != establishments.Count())
@@ -168,14 +181,14 @@ public class CurrentUserProvider(
         Session.ClearSelectedEstablishments();
     }
 
-    public List<int> GetSelectedSchoolEstablishmentIds()
+    public List<int>? GetSelectedSchoolEstablishmentIds()
     {
-        return GetSelectedSchools().Select(e => e.EstablishmentId).ToList();
+        return GetSelectedSchools()?.Select(e => e.EstablishmentId).ToList();
     }
 
-    public List<string> GetSelectedSchoolNames()
+    public List<string>? GetSelectedSchoolNames()
     {
-        return GetSelectedSchools().Select(e => e.Name).ToList();
+        return GetSelectedSchools()?.Select(e => e.Name).ToList();
     }
 
     /// <summary>
@@ -184,8 +197,13 @@ public class CurrentUserProvider(
     /// </summary>
     /// <param name="actionIfNull">The action to execute if the value is null</param>
     /// <returns>The selected schools for the user</returns>
-    public List<SelectedEstablishmentDataModel> GetSelectedSchools()
+    public List<SelectedEstablishmentDataModel>? GetSelectedSchools()
     {
+        if (!IsAuthenticated)
+        {
+            return null;
+        }
+
         if (!CanSelectSchools)
         {
             throw new InvalidOperationException(
@@ -193,10 +211,7 @@ public class CurrentUserProvider(
             );
         }
 
-        var selectedSchools = Session.GetSelectedSchools();
-        return selectedSchools.Count == 0
-            ? throw new InvalidOperationException("User has not selected any schools")
-            : selectedSchools;
+        return Session.GetSelectedSchools();
     }
 
     public void SetSelectedSchools(SelectedEstablishmentDataModel establishment)

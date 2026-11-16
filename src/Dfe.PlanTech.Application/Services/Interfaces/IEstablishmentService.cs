@@ -10,9 +10,6 @@ public interface IEstablishmentService
         string establishmentUrn,
         string establishmentName
     );
-    Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
-        int establishmentId
-    );
     Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId);
     Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences

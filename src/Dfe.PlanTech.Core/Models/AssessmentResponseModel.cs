@@ -31,7 +31,7 @@ public class AssessmentResponseModel
         Answer = questionAnswer.ChosenAnswer;
         Question = questionAnswer.Question;
         EstablishmentId = activeEstablishmentId;
-        UserId = userId;
         UserEstablishmentId = userEstablishmentId;
+        UserId = userId;
     }
 }

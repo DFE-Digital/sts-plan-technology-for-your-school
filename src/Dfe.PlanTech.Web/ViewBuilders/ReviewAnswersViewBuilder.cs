@@ -17,15 +17,11 @@ public class ReviewAnswersViewBuilder(
     ILogger<ReviewAnswersViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
-    ISubmissionService submissionService,
-    IMatEstablishmentProvider matEstablishmentProvider
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
-        matEstablishmentProvider
-        ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -39,7 +35,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = GetRoutingEstablishmentId();
+        var establishmentId = GetFocusedOrSelectedSchools().First().EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -86,7 +82,8 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = GetRoutingEstablishmentId();
+        var establishmentId = GetFocusedOrSelectedSchools().First().EstablishmentId;
+
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -308,18 +305,6 @@ public class ReviewAnswersViewBuilder(
         );
     }
 
-    private int GetRoutingEstablishmentId()
-    {
-        if (CurrentUser.CanSelectSchools)
-        {
-            return CurrentUser.GetSelectedSchoolEstablishmentIds().First();
-        }
-        else
-        {
-            return CurrentUser.GetFocusedSchool().EstablishmentId;
-        }
-    }
-
     private async Task<ReviewAnswersViewModel> BuildViewModel(
         SubmissionRoutingDataModel routingData,
         string categorySlug,
@@ -341,7 +326,9 @@ public class ReviewAnswersViewBuilder(
             ? null
             : new SubmissionResponsesViewModel(routingData.Submission);
 
-        var selectedSchoolNames = CurrentUser.GetSelectedSchoolNames();
+        var selectedSchoolNames = CurrentUser.CanSelectSchools
+            ? CurrentUser.GetSelectedSchoolNames()!
+            : [];
 
         var sectionId =
             routingData.QuestionnaireSection.Sys?.Id
@@ -361,8 +348,6 @@ public class ReviewAnswersViewBuilder(
                 $"Could not find category for section {sectionSlug}"
             );
 
-        var isMatBulkAssessment = _matEstablishmentProvider.IsBulkAssessment();
-
         return new ReviewAnswersViewModel
         {
             Title = new ComponentTitleEntry(pageTitle),
@@ -375,10 +360,7 @@ public class ReviewAnswersViewBuilder(
             SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage,
-            IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0,
-            IsMatBulkAssessment = isMatBulkAssessment,
-            SelectedSchoolCount = selectedSchoolNames.Count,
-            SelectedSchoolNames = selectedSchoolNames.ToList(),
+            SelectedSchoolNames = selectedSchoolNames,
         };
     }
 }

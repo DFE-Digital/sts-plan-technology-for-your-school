@@ -294,7 +294,7 @@ public class GroupsController : BaseController<GroupsController>
     {
         await _currentUser.SetFocusedSchoolAsync(schoolUrn, schoolName);
 
-        var focusedSchool = _currentUser.GetFocusedSchool();
+        var focusedSchool = _currentUser.GetFocusedSchool()!;
 
         await _groupsViewBuilder.RecordGroupSelectionAsync(
             focusedSchool.EstablishmentId,

@@ -16,7 +16,8 @@ public class QuestionViewModel
     public string? SectionName { get; init; }
     public string? SectionSlug { get; init; }
     public string? SectionId { get; init; }
-    public bool IsMatBulkAssessment { get; set; }
-    public int SelectedSchoolCount { get; set; }
     public List<string> SelectedSchoolNames { get; set; } = [];
+
+    public bool IsMultiSchoolAssessment => SelectedSchoolCount > 0;
+    public int SelectedSchoolCount => SelectedSchoolNames.Count;
 }

@@ -104,6 +104,13 @@ public class GiasService(IEstablishmentWorkflow establishmentWorkflow, IGiasWork
 
         // Now we know the user is from a group that can select schools, find the group's corresponding schools.
         IEnumerable<SqlGiasEstablishmentDto>? schools = null;
+
+        // Handle DSI TEST Multi-Academy Trust (010) not having a UID
+        if (dsiOrganisation.Ukprn == DsiConstants.DsiTestMultiAcademyTrustUkprn)
+        {
+            dsiOrganisation.Uid = "99999";
+        }
+
         if (int.TryParse(dsiOrganisation.Uid, out var groupUid))
         {
             schools = await _giasWorkflow.GetSchoolsInGroup(groupUid);

@@ -1,6 +1,4 @@
 using Dfe.PlanTech.Application;
-using Dfe.PlanTech.Application.Providers;
-using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Extensions;
@@ -88,8 +86,7 @@ builder.Services.AddScoped<ISession>(sp =>
 );
 
 builder
-    .Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>()
-    .AddScoped<IUserActionIdProvider, UserActionIdProvider>()
+    .Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>()
     .AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
 var app = builder.Build();

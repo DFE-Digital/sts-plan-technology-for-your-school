@@ -25,16 +25,16 @@ public interface ICurrentUserProvider
     void SetEstablishment(SqlEstablishmentDto establishment);
 
     public void ClearFocusedSchool();
-    SelectedEstablishmentDataModel GetFocusedSchool();
+    SelectedEstablishmentDataModel? GetFocusedSchool();
     Task SetFocusedSchoolAsync(string selectedSchoolUrn, string selectedSchoolName);
 
-    List<SelectedEstablishmentDataModel> GetGroupSchools();
+    List<SelectedEstablishmentDataModel>? GetGroupSchools();
     Task SetGroupSchools(IEnumerable<SelectedEstablishmentDataModel> schools);
 
     void ClearSelectedSchools();
-    List<int> GetSelectedSchoolEstablishmentIds();
-    List<string> GetSelectedSchoolNames();
-    List<SelectedEstablishmentDataModel> GetSelectedSchools();
+    List<int>? GetSelectedSchoolEstablishmentIds();
+    List<string>? GetSelectedSchoolNames();
+    List<SelectedEstablishmentDataModel>? GetSelectedSchools();
     void SetSelectedSchools(SelectedEstablishmentDataModel establishment);
     void SetSelectedSchools(IEnumerable<SelectedEstablishmentDataModel> establishments);
 }

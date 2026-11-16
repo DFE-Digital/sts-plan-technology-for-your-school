@@ -8,12 +8,15 @@ namespace Dfe.PlanTech.Application.Services;
 public class RecommendationService(IRecommendationWorkflow recommendationWorkflow)
     : IRecommendationService
 {
+    private readonly IRecommendationWorkflow _recommendationWorkflow =
+        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+
     public Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
         int establishmentId,
         string recommendationContentfulReference
     )
     {
-        return recommendationWorkflow.GetLatestRecommendationStatusAsync(
+        return _recommendationWorkflow.GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -23,7 +26,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         IEnumerable<SqlEstablishmentRecommendationHistoryDto>
     > GetRecommendationHistoryAsync(string recommendationContentfulReference, int establishmentId)
     {
-        return recommendationWorkflow.GetRecommendationHistoryAsync(
+        return _recommendationWorkflow.GetRecommendationHistoryAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -33,7 +36,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
     > GetLatestRecommendationStatusesAsync(int establishmentId)
     {
-        return recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+        return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
             establishmentId
         );
     }
@@ -48,7 +51,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         int? responseId = null
     )
     {
-        return recommendationWorkflow.UpdateRecommendationStatusAsync(
+        return _recommendationWorkflow.UpdateRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId,
             userId,
@@ -64,16 +67,43 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         string recommendationContentfulReference
     )
     {
-        return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendationAsync(
+        return _recommendationWorkflow.GetFirstActivityForEstablishmentRecommendationAsync(
             establishmentId,
             recommendationContentfulReference
         );
     }
 
-    public async Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
-        IEnumerable<string> recommendationContentfulReferences)
+    public async Task<Dictionary<int, int>> GetInProgressOrCompletedRecommendationCounts(
+        IEnumerable<int> establishmentIds
+    )
     {
-        return await recommendationWorkflow.GetRecommendationsByContentfulReferencesAsync(
+        var recommendationCounts = new Dictionary<int, int>();
+
+        foreach (var establishmentId in establishmentIds)
+        {
+            recommendationCounts.Add(establishmentId, 0);
+
+            var recommendations =
+                await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+                    establishmentId
+                );
+
+            recommendationCounts[establishmentId] = recommendations.Values.Count(r =>
+                r.NewStatus == RecommendationStatus.Complete
+                || r.NewStatus == RecommendationStatus.InProgress
+            );
+        }
+
+        return recommendationCounts;
+    }
+
+    public async Task<
+        IEnumerable<SqlRecommendationDto>
+    > GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences
+    )
+    {
+        return await _recommendationWorkflow.GetRecommendationsByContentfulReferencesAsync(
             recommendationContentfulReferences
         );
     }
@@ -88,6 +118,14 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         int? responseId = null
     )
     {
-        return recommendationWorkflow.UpdateEstablishmentsRecommendationStatusAsync(recommendationContentfulReference, establishmentIds, userId, newStatus, noteText, matEstablishmentId, responseId);
+        return _recommendationWorkflow.UpdateEstablishmentsRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentIds,
+            userId,
+            newStatus,
+            noteText,
+            matEstablishmentId,
+            responseId
+        );
     }
 }

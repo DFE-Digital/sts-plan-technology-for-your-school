@@ -24,7 +24,6 @@ public class PagesViewBuilder(
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
-    IEstablishmentService establishmentService,
     INotifyService notifyService,
     ISubmissionService submissionService,
     IRecommendationService recommendationService
@@ -59,7 +58,7 @@ public class PagesViewBuilder(
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
             && CurrentUser.CanSelectSchools
-            && CurrentUser.GetSelectedSchools().Count == 0
+            && CurrentUser.GetSelectedSchools()!.Count == 0
             && !isMatTopicStartPage;
 
         if (shouldRedirectToSchoolSelection)
@@ -67,19 +66,12 @@ public class PagesViewBuilder(
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
 
-        var focusedSchoolUrn = CurrentUser.GetFocusedSchool()?.Urn;
-        var hasSelectedASchool = CurrentUser.CanSelectSchools && focusedSchoolUrn is not null;
+        var selectedSchools = GetFocusedOrSelectedSchools().ToList();
 
-        // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
-        if (hasSelectedASchool)
+        // If the user can select schools and hasn't done so, redirect them to the select a school page.
+        if (CurrentUser.CanSelectSchools && selectedSchools.Count == 0)
         {
-            var selectedSchoolIsValid = CurrentUser
-                .GetGroupSchools()
-                .Any(s => s.Urn.Equals(focusedSchoolUrn));
-            if (!selectedSchoolIsValid)
-            {
-                return controller.Redirect(UrlConstants.SelectASchoolPage);
-            }
+            return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
 
         if (page.IsLandingPage == true)

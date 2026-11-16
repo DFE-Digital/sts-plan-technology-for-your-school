@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>()
             .AddScoped<IMicrocopyProvider, MicrocopyProvider>()
-            .AddScoped<IRedirectProvider, RedirectProvider>();
+            .AddSingleton<IRedirectProvider, RedirectProvider>(); // Note this is a singleton
     }
 
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)

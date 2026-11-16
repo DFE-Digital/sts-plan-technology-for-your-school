@@ -75,7 +75,7 @@ public class BannerConditionsContextProvider(
             return true; // No conditions, show the banner
         }
 
-        var establishmentId = _currentUser.GetFocusedSchool().EstablishmentId;
+        var establishmentId = _currentUser.GetFocusedSchool()!.EstablishmentId;
 
         foreach (var condition in banner.Conditions)
         {

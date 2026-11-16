@@ -12,6 +12,9 @@
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };
+
+    var dsiOrganisation = CurrentUser.DsiOrganisation;
+    var focusedSchool = CurrentUser.GetFocusedSchool();
 }
 
 @{
@@ -44,12 +47,11 @@
             Href = $"/trust/{Model.CategorySlug}"
         });
     }
-    else if (CurrentUser.IsMat &&
-             !string.IsNullOrWhiteSpace(CurrentUser.GroupFocusedSchoolName))
+    else if (CurrentUser.IsMat)
     {
         breadcrumbs.Add(new BreadcrumbItemViewModel
         {
-            Text = CurrentUser.GroupFocusedSchoolName,
+            Text = focusedSchool.Name,
             Href = UrlConstants.HomePage
         });
 
@@ -76,10 +78,9 @@
 }
 
 @section OrganisationContext {
-    @if (Model.IsMat &&
-             !string.IsNullOrWhiteSpace(CurrentUser.UserOrganisationName))
+    @if (Model.IsMat && dsiOrganisation is not null)
     {
-        <partial name="_OrganisationContext" model="CurrentUser.UserOrganisationName" />
+        <partial name="_OrganisationContext" model="dsiOrganisation.Name" />
     }
 }
 

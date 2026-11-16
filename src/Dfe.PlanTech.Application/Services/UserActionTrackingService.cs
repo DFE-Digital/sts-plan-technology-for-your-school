@@ -58,11 +58,11 @@ public class UserActionTrackingService(
 
         httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
 
-        int establishmentId = _currentUser.Establishment.Id;
+        int? establishmentId = _currentUser.Establishment.Id;
         int? matEstablishmentId = null;
         if (_currentUser.IsTrust)
         {
-            establishmentId = _currentUser.GetFocusedSchool().EstablishmentId;
+            establishmentId = _currentUser.GetFocusedSchool()?.EstablishmentId;
             matEstablishmentId = _currentUser.Establishment.Id;
         }
 

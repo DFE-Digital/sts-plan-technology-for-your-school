@@ -10,7 +10,7 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model.IsMatBulkAssessment)
+        @if (Model.IsMultiSchoolAssessment)
         {
             var schoolLabel =
                 Model.SelectedSchoolCount == 1
@@ -114,7 +114,7 @@
                name="sectionName"
                value="@Model.SectionName" />
 
-        @if (Model.IsMatMultiSchoolAssessment == true)
+        @if (Model.IsMultiSchoolAssessment == true)
         {
             var isSingleSchool = Model.SelectedSchoolCount == 1;
             var assessmentText = isSingleSchool ? "self-assessment" : "self-assessments";

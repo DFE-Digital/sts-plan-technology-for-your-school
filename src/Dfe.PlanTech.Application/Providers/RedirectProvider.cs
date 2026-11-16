@@ -2,6 +2,7 @@ using System.Reflection;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Providers;
@@ -9,16 +10,15 @@ namespace Dfe.PlanTech.Application.Providers;
 public class RedirectProvider : IRedirectProvider
 {
     private readonly ILogger<RedirectProvider> _logger;
-    private readonly IContentfulService _contentfulService;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     private readonly Lazy<HashSet<string>> _knownPaths;
     private readonly Lazy<Task<Dictionary<string, string>>> _redirectsTask;
 
-    public RedirectProvider(ILogger<RedirectProvider> logger, IContentfulService contentfulService)
+    public RedirectProvider(ILogger<RedirectProvider> logger, IServiceScopeFactory scopeFactory)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _contentfulService =
-            contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 
         _knownPaths = new(BuildKnownPaths, LazyThreadSafetyMode.ExecutionAndPublication);
         _redirectsTask = new(BuildRedirectsAsync, LazyThreadSafetyMode.ExecutionAndPublication);
@@ -72,7 +72,10 @@ public class RedirectProvider : IRedirectProvider
     {
         try
         {
-            var redirectEntries = await _contentfulService.GetRedirectsAsync();
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var contentfulService = scope.ServiceProvider.GetRequiredService<IContentfulService>();
+
+            var redirectEntries = await contentfulService.GetRedirectsAsync();
             var redirectGroups = redirectEntries
                 .SelectMany(r =>
                     r.RedirectFromList.Select(rl => new KeyValuePair<string, string>(

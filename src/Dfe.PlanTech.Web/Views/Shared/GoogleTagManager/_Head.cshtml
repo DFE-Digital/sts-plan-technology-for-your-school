@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Core.DataTransferObjects.Sql
 @inject GoogleTagManagerConfiguration GtmConfiguration;
 @inject ICookieService CookieService;
 @inject ICurrentUserProvider CurrentUser
@@ -14,8 +15,19 @@
 
     if (isAuthenticated)
     {
-        var establishmentId = (await CurrentUser.GetActiveEstablishmentIdAsync())?.ToString() ?? "Unknown";
-        var establishmentType = CurrentUser.UserOrganisationTypeName ?? (CurrentUser.UserOrganisationCategoryName ?? "Unknown");
+        SqlEstablishmentDto establishment;
+        string establishmentId = "Unknown";
+        string establishmentType = "Unknown";
+        try
+        {
+            establishment = CurrentUser.Establishment;
+            establishmentId = establishment.Id.ToString();
+            establishmentType = establishment.EstablishmentType ?? "Unknown";
+        }
+        catch
+        {
+            // Use the defaults
+        }
 
         dataLayerObj = new
         {
