@@ -115,7 +115,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var inputModel = new ShareByEmailInputViewModel
             {
                 EmailAddresses = new List<string> { "test@test.com", "hello@hello.com" },
-                NameOfUser = "Drew",
+                NameOfUser = "John",
                 UserMessage = "Hello",
             };
 

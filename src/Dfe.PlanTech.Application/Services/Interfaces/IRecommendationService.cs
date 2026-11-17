@@ -25,8 +25,7 @@ public interface IRecommendationService
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null,
-        int? responseId = null
+        int? matEstablishmentId = null
     );
     Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
@@ -34,7 +33,8 @@ public interface IRecommendationService
     );
 
     Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(
-        IEnumerable<string> recommendationContentfulReferences);
+        IEnumerable<string> recommendationContentfulReferences
+    );
 
     Task UpdateEstablishmentsRecommendationStatusAsync(
         string recommendationContentfulReference,

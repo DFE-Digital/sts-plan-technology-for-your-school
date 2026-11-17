@@ -26,23 +26,23 @@ public class QuestionsViewBuilder(
     IQuestionService questionService,
     ISubmissionService submissionService,
     IEstablishmentService establishmentService,
+    IGroupService groupService,
     IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
-    private readonly IQuestionService _questionService =
-        questionService ?? throw new ArgumentNullException(nameof(questionService));
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IEstablishmentService establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly ContactOptionsConfiguration _contactOptions =
-        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ErrorMessagesConfiguration _errorMessages =
-        errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
-    private readonly ContentfulOptionsConfiguration _contentfulOptions =
-        contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
-        matEstablishmentProvider
+    private readonly IQuestionService _questionService = questionService
+        ?? throw new ArgumentNullException(nameof(questionService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IEstablishmentService establishmentService = establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value
+        ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorMessagesConfiguration _errorMessages = errorMessages?.Value
+        ?? throw new ArgumentNullException(nameof(errorMessages));
+    private readonly ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions
+        ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = matEstablishmentProvider
         ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     private const string QuestionView = "Question";
@@ -60,8 +60,7 @@ public class QuestionsViewBuilder(
     {
         var establishmentId = await GetRoutingEstablishmentId();
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -72,8 +71,8 @@ public class QuestionsViewBuilder(
             status: SubmissionStatus.InProgress
         );
 
-        var isSlugForNextQuestion =
-            submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
+        var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug)
+            ?? false;
 
         if (isSlugForNextQuestion)
         {
@@ -127,8 +126,7 @@ public class QuestionsViewBuilder(
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.InProgress))
         {
-            var nextQuestionSlug =
-                submissionRoutingData.NextQuestion?.Slug
+            var nextQuestionSlug = submissionRoutingData.NextQuestion?.Slug
                 ?? throw new InvalidDataException("NextQuestion is null");
 
             return await RouteBySlugAndQuestionAsync(
@@ -149,8 +147,7 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var interstitialPage =
-            await ContentfulService.GetPageBySlugAsync(sectionSlug)
+        var interstitialPage = await ContentfulService.GetPageBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
@@ -165,14 +162,12 @@ public class QuestionsViewBuilder(
                 .ToList();
         }
 
-        var category =
-        await ContentfulService.GetCategoryBySlugAsync(categorySlug)
-        ?? throw new ContentfulDataUnavailableException(
-            $"Could not find category for slug {categorySlug}"
-        );
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
 
-        var categoryName =
-            category.Header?.Text
+        var categoryName = category.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category header text for slug {categorySlug}"
             );
@@ -184,8 +179,7 @@ public class QuestionsViewBuilder(
             CategorySlug = categorySlug,
         };
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -267,14 +261,12 @@ public class QuestionsViewBuilder(
         QuestionnaireSectionEntry section
     )
     {
-        var groupId =
-            CurrentUser.UserOrganisationId
+        var groupId = CurrentUser.UserOrganisationId
             ?? throw new InvalidDataException(
                 "User is a MAT user but does not have an organisation ID"
             );
 
-        var schools =
-            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
+        var schools = await groupService.GetGroupSchoolsAsync(groupId, true) ?? [];
 
         var rows = new List<TrustSchoolAssessmentRowViewModel>();
 
@@ -328,8 +320,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -384,8 +375,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
@@ -410,8 +400,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
@@ -441,14 +430,12 @@ public class QuestionsViewBuilder(
         var userId = GetUserIdOrThrowException();
         var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
 
-        var userOrganisationId =
-            CurrentUser.UserOrganisationId
+        var userOrganisationId = CurrentUser.UserOrganisationId
             ?? throw new InvalidOperationException(
                 "User organisation ID is null - user needs to be logged in to submit an answer"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );

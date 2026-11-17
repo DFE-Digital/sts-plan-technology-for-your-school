@@ -8,32 +8,56 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
 {
-    private readonly IGroupWorkflow _groupWorkflow =
-        groupWorkflow ?? throw new ArgumentNullException(nameof(groupWorkflow));
+    private readonly IGroupWorkflow _groupWorkflow = groupWorkflow
+        ?? throw new ArgumentNullException(nameof(groupWorkflow));
 
-    public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds)
+    public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(
+        int[] establishmentIds
+    )
     {
         var submissions = await _groupWorkflow.GetGroupCompletedSubmissions(establishmentIds);
         return submissions;
     }
 
-    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId)
+    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(
+        List<SqlEstablishmentLinkDto> establishmentLinks,
+        string sectionId
+    )
     {
-        var submissions = await _groupWorkflow.GetGroupSubmissionInformationForSection(establishmentLinks, sectionId);
+        var submissions = await _groupWorkflow.GetGroupSubmissionInformationForSection(
+            establishmentLinks,
+            sectionId
+        );
         return submissions;
     }
 
-    public async
-        Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>>
-        GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId)
+    public async Task<
+        List<(
+            EstablishmentEntity establishment,
+            EstablishmentRecommendationHistoryEntity? recommendationHistory
+        )>
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+        int establishmentId,
+        int recommendationId
+    )
     {
-        var results = await _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(establishmentId, recommendationId);
+        var results =
+            await _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+                establishmentId,
+                recommendationId
+            );
         return results;
     }
 
-    public Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
-    int groupEstablishmentId
-    )
+    public Task<List<SqlEstablishmentLinkDto>> GetGroupSchoolsAsync(
+        int groupEstablishmentId,
+        bool includeRecommendationCounts = false
+    ) => _groupWorkflow.GetGroupSchoolsAsync(groupEstablishmentId, includeRecommendationCounts);
+
+    public Task<bool> IsSchoolWithinGroupAsync(int groupEstablishmentId, string schoolUrn) =>
+        _groupWorkflow.IsSchoolWithinGroupAsync(groupEstablishmentId, schoolUrn);
+
+    public Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId)
     {
         return _groupWorkflow.GetGroupEstablishmentContextAsync(groupEstablishmentId);
     }

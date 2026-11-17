@@ -15,19 +15,22 @@ public class CurrentUserProvider : ICurrentUserProvider
     private readonly ILogger<CurrentUserProvider> _logger;
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly IEstablishmentService _establishmentService;
+    private readonly IGroupService _groupService;
     private readonly Lazy<Task<SqlEstablishmentDto?>> _selectedSchoolLazy;
 
     public CurrentUserProvider(
         IHttpContextAccessor contextAccessor,
         IEstablishmentService establishmentService,
+        IGroupService groupService,
         ILogger<CurrentUserProvider> logger
     )
     {
-        _contextAccessor =
-            contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-        _establishmentService =
-            establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+        _contextAccessor = contextAccessor
+            ?? throw new ArgumentNullException(nameof(contextAccessor));
+        _establishmentService = establishmentService
+            ?? throw new ArgumentNullException(nameof(establishmentService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
         _selectedSchoolLazy = new Lazy<Task<SqlEstablishmentDto?>>(() => LoadSelectedSchoolAsync());
     }
 
@@ -313,14 +316,9 @@ public class CurrentUserProvider : ICurrentUserProvider
 
         try
         {
-            // Get all schools in the user's group
-            var groupSchools =
-                await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
-                    UserOrganisationId.Value
-                );
-
-            var selectedSchoolIsValid = groupSchools.Any(s =>
-                s.Urn.Equals(urn, StringComparison.OrdinalIgnoreCase)
+            var selectedSchoolIsValid = await _groupService.IsSchoolWithinGroupAsync(
+                UserOrganisationId.Value,
+                urn
             );
 
             if (!selectedSchoolIsValid)

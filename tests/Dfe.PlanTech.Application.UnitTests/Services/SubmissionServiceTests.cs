@@ -197,30 +197,30 @@ public class SubmissionServiceTests
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 1,
                 section.Id,
-                [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
+                [SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
             )
             .Returns((SqlSubmissionDto?)null);
 
         var model = await sut.GetLatestSubmissionResponsesModel(
             1,
             section,
-            [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
+            [SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
         );
 
-        await _submissionWorkflow.Received(1)
+        await _submissionWorkflow
+            .Received(1)
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 1,
                 section.Id,
                 Arg.Is<IEnumerable<SubmissionStatus>>(s =>
-                    s.SequenceEqual(new[]
-                    {
-                        SubmissionStatus.InProgress,
-                        SubmissionStatus.Inaccessible
-                    })
+                    s.SequenceEqual(
+                        new[] { SubmissionStatus.InProgress, SubmissionStatus.Inaccessible }
+                    )
                 )
             );
 
-        await _submissionWorkflow.DidNotReceive()
+        await _submissionWorkflow
+            .DidNotReceive()
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 Arg.Any<int>(),
                 Arg.Any<string>(),
@@ -235,7 +235,11 @@ public class SubmissionServiceTests
         var (section, q1, _, _, _) = BuildSectionGraph();
 
         _submissionWorkflow
-            .GetLatestSubmissionWithOrderedResponsesAsync(10, section.Id, status: (SubmissionStatus?)null)
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                10,
+                section.Id,
+                status: (SubmissionStatus?)null
+            )
             .Returns((SqlSubmissionDto?)null);
 
         var rd = await sut.GetSubmissionRoutingDataAsync(10, section, status: null);
@@ -255,7 +259,11 @@ public class SubmissionServiceTests
         var sub = SubmissionWithResponses(completed: false, ("1", a1_to_q2.Id));
 
         _submissionWorkflow
-            .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: (SubmissionStatus?)null)
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                22,
+                section.Id,
+                status: (SubmissionStatus?)null
+            )
             .Returns(sub);
 
         var rd = await sut.GetSubmissionRoutingDataAsync(22, section, status: null);
@@ -266,7 +274,11 @@ public class SubmissionServiceTests
         // also verify pass-through arg:
         await _submissionWorkflow
             .Received(1)
-            .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: (SubmissionStatus?)null);
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                22,
+                section.Id,
+                status: (SubmissionStatus?)null
+            );
     }
 
     [Fact]
@@ -275,13 +287,14 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, a2_to_null) = BuildSectionGraph();
 
-        var sub = SubmissionWithResponses(
-            completed: true,
-            ("1", a2_to_null.Id)
-        );
+        var sub = SubmissionWithResponses(completed: true, ("1", a2_to_null.Id));
 
         _submissionWorkflow
-            .GetLatestSubmissionWithOrderedResponsesAsync(33, section.Id, status: (SubmissionStatus?)null)
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                33,
+                section.Id,
+                status: (SubmissionStatus?)null
+            )
             .Returns(sub);
 
         var rd = await sut.GetSubmissionRoutingDataAsync(33, section, status: null);
@@ -349,12 +362,12 @@ public class SubmissionServiceTests
         var expected = 42;
         var model = new SubmitAnswerModel();
 
-        _submissionWorkflow.SubmitAnswer(1, 2, 3, model).Returns(expected);
+        _submissionWorkflow.SubmitAnswerAsync(1, 2, 3, model).Returns(expected);
 
         var result = await sut.SubmitAnswerAsync(1, 2, 3, model);
 
         Assert.Equal(expected, result);
-        await _submissionWorkflow.Received(1).SubmitAnswer(1, 2, 3, model);
+        await _submissionWorkflow.Received(1).SubmitAnswerAsync(1, 2, 3, model);
     }
 
     [Fact]
@@ -363,11 +376,11 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var section = new QuestionnaireSectionEntry();
 
-        await sut.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 2, 3, 4, section);
+        await sut.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(1, 2, 3, 4, section);
 
         await _submissionWorkflow
             .Received(1)
-            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 2, 3, 4, section);
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(1, 2, 3, 4, section);
     }
 
     [Fact]

@@ -5,15 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class EstablishmentRecommendationHistoryRepository
+public class EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbContext)
     : IEstablishmentRecommendationHistoryRepository
 {
-    private PlanTechDbContext _db;
-
-    public EstablishmentRecommendationHistoryRepository(PlanTechDbContext dbContext)
-    {
-        _db = dbContext;
-    }
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<
         IEnumerable<EstablishmentRecommendationHistoryEntity>
@@ -52,12 +48,53 @@ public class EstablishmentRecommendationHistoryRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task CreateRecommendationHistoryAsync(
+    public async Task CreateRecommendationHistoriesAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int userId,
+        IEnumerable<RecommendationEntity> recommendations,
+        IDictionary<string, int> recommendationRefsToResponseIds,
+        IDictionary<string, RecommendationStatus> recommendationStatuses
+    )
+    {
+        var previousStatuses = await _db
+            .EstablishmentRecommendationHistories.Where(erh =>
+                erh.EstablishmentId == establishmentId
+                && erh.MatEstablishmentId == matEstablishmentId
+            )
+            .GroupBy(erh => erh.Recommendation.ContentfulRef, erh => erh)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus
+            );
+
+        var erhEntities = recommendations.Select(
+            recommendation => new EstablishmentRecommendationHistoryEntity
+            {
+                EstablishmentId = establishmentId,
+                MatEstablishmentId = matEstablishmentId,
+                RecommendationId = recommendation.Id,
+                ResponseId = recommendationRefsToResponseIds[recommendation.ContentfulRef],
+                UserId = userId,
+                PreviousStatus = previousStatuses.TryGetValue(
+                    recommendation.ContentfulRef,
+                    out var previousStatus
+                )
+                    ? previousStatus
+                    : null,
+                NewStatus = recommendationStatuses[recommendation.ContentfulRef],
+            }
+        );
+
+        await _db.EstablishmentRecommendationHistories.AddRangeAsync(erhEntities);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateRecommendationStatusAsync(
         int establishmentId,
         int recommendationId,
         int userId,
         int? matEstablishmentId,
-        int? responseId,
         RecommendationStatus? previousStatus,
         RecommendationStatus? newStatus,
         string noteText
@@ -69,7 +106,9 @@ public class EstablishmentRecommendationHistoryRepository
             RecommendationId = recommendationId,
             UserId = userId,
             MatEstablishmentId = matEstablishmentId,
-            ResponseId = responseId,
+            // Deliberately null: a manual status change is not driven by a self-assessment
+            // response, so there is no response to link it to.
+            ResponseId = null,
             PreviousStatus = previousStatus,
             NewStatus = newStatus,
             NoteText = noteText,
@@ -80,64 +119,63 @@ public class EstablishmentRecommendationHistoryRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task<List<(
-            EstablishmentEntity Establishment,
-            EstablishmentRecommendationHistoryEntity? History)>>
-        GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
-            int establishmentId,
-            int recommendationId)
+    public async Task<
+        List<(EstablishmentEntity Establishment, EstablishmentRecommendationHistoryEntity? History)>
+    > GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        int establishmentId,
+        int recommendationId
+    )
     {
         var results = await (
-                from activeEstablishment in _db.Establishments
+            from activeEstablishment in _db.Establishments
 
-                join link in _db.GiasGroupMemberships
-                    on activeEstablishment.GroupUid equals link.GroupUid.ToString()
+            join link in _db.GiasGroupMemberships
+                on activeEstablishment.GroupUid equals link.GroupUid.ToString()
 
-                join establishment in _db.Establishments
-                    on link.Urn.ToString() equals establishment.EstablishmentRef
+            join establishment in _db.Establishments
+                on link.Urn.ToString() equals establishment.EstablishmentRef
 
-                where activeEstablishment.Id == establishmentId
+            where activeEstablishment.Id == establishmentId
 
-                orderby establishment.OrgName
+            orderby establishment.OrgName
 
-                select new
-                {
-                    Establishment = establishment,
+            select new
+            {
+                Establishment = establishment,
 
-                    History = _db.EstablishmentRecommendationHistories
-                        .Where(history =>
-                            history.EstablishmentId == establishment.Id &&
-                            history.RecommendationId == recommendationId)
-                        .OrderByDescending(history => history.DateCreated)
-                        .ThenByDescending(history => history.Id)
-                        .FirstOrDefault()
-                })
+                History = _db
+                    .EstablishmentRecommendationHistories.Where(history =>
+                        history.EstablishmentId == establishment.Id
+                        && history.RecommendationId == recommendationId
+                    )
+                    .OrderByDescending(history => history.DateCreated)
+                    .ThenByDescending(history => history.Id)
+                    .FirstOrDefault(),
+            }
+        )
             .AsNoTracking()
             .ToListAsync();
 
-        return results
-            .Select(x => (x.Establishment, x.History))
-            .ToList();
+        return results.Select(x => (x.Establishment, x.History)).ToList();
     }
 
-    public async Task<List<EstablishmentRecommendationHistoryEntity>>
-        GetLatestRecommendationHistoriesAsync(
-            IEnumerable<int> establishmentIds,
-            int recommendationId
-        )
+    public async Task<
+        List<EstablishmentRecommendationHistoryEntity>
+    > GetLatestRecommendationHistoriesAsync(IEnumerable<int> establishmentIds, int recommendationId)
     {
         var ids = establishmentIds.ToArray();
 
-        return await _db.EstablishmentRecommendationHistories
-            .Where(history =>
-                ids.Contains(history.EstablishmentId) &&
-                history.RecommendationId == recommendationId
+        return await _db
+            .EstablishmentRecommendationHistories.Where(history =>
+                ids.Contains(history.EstablishmentId)
+                && history.RecommendationId == recommendationId
             )
             .GroupBy(history => history.EstablishmentId)
-            .Select(group => group
-                .OrderByDescending(history => history.DateCreated)
-                .ThenByDescending(history => history.Id)
-                .First()
+            .Select(group =>
+                group
+                    .OrderByDescending(history => history.DateCreated)
+                    .ThenByDescending(history => history.Id)
+                    .First()
             )
             .ToListAsync();
     }
