@@ -151,9 +151,7 @@ public class CurrentUserTests
         var groupService = Substitute.For<IGroupService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        groupService
-            .IsSchoolWithinGroupAsync(100, "999888")
-            .Returns(true);
+        groupService.IsSchoolWithinGroupAsync(100, "999888").Returns(true);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
@@ -506,7 +504,12 @@ public class CurrentUserTests
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(httpContextAccessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            httpContextAccessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act & Assert
         var ex = Assert.Throws<InvalidDataException>(() =>
@@ -599,9 +602,7 @@ public class CurrentUserTests
         var groupService = Substitute.For<IGroupService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        groupService
-            .IsSchoolWithinGroupAsync(100, "999888")
-            .Returns(true);
+        groupService.IsSchoolWithinGroupAsync(100, "999888").Returns(true);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
@@ -661,7 +662,12 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -754,9 +760,7 @@ public class CurrentUserTests
         var groupService = Substitute.For<IGroupService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        groupService
-            .IsSchoolWithinGroupAsync(100, "999888")
-            .Returns(true);
+        groupService.IsSchoolWithinGroupAsync(100, "999888").Returns(true);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
@@ -858,7 +862,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentUkprn();
@@ -946,7 +955,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentUid();
@@ -1030,7 +1044,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentDsiId();
@@ -1115,7 +1134,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var result = sut.GetActiveEstablishmentReference();
@@ -1247,7 +1271,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1315,9 +1344,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
         var groupService = Substitute.For<IGroupService>();
 
-        groupService
-            .IsSchoolWithinGroupAsync(100, "888777")
-            .Returns(false);
+        groupService.IsSchoolWithinGroupAsync(100, "888777").Returns(false);
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
@@ -1426,9 +1453,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
         var groupService = Substitute.For<IGroupService>();
 
-        groupService
-            .IsSchoolWithinGroupAsync(100, "111222")
-            .Returns(true);
+        groupService.IsSchoolWithinGroupAsync(100, "111222").Returns(true);
 
         // Setup: Return the school details from the database
         establishmentService
@@ -1783,7 +1808,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1843,7 +1873,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1903,7 +1938,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1964,7 +2004,12 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
+        var sut = new CurrentUserProvider(
+            accessor,
+            establishmentService,
+            Substitute.For<IGroupService>(),
+            logger
+        );
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();

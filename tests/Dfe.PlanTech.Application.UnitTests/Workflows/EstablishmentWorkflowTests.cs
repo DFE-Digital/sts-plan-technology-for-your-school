@@ -11,8 +11,7 @@ public class EstablishmentWorkflowTests
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
     private readonly IEstablishmentLinkRepository _linkRepo =
         Substitute.For<IEstablishmentLinkRepository>();
-    private readonly ISubmissionRepository _subRepo =
-        Substitute.For<ISubmissionRepository>();
+    private readonly ISubmissionRepository _subRepo = Substitute.For<ISubmissionRepository>();
     private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
@@ -235,14 +234,8 @@ public class EstablishmentWorkflowTests
     [Fact]
     public void Ctor_Null_Repos_Throw()
     {
-        Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, _linkRepo)
-        );
-        Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(_estRepo, null!)
-        );
-        Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, null!)
-        );
+        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(null!, _linkRepo));
+        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, null!));
+        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(null!, null!));
     }
 }

@@ -368,10 +368,10 @@ public class ContentfulWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         var entries = new List<MicrocopyEntry>
-    {
-        new() { Sys = new SystemDetails("M1") },
-        new() { Sys = new SystemDetails("M2") },
-    };
+        {
+            new() { Sys = new SystemDetails("M1") },
+            new() { Sys = new SystemDetails("M2") },
+        };
 
         _repo
             .GetPaginatedEntriesAsync<MicrocopyEntry>(
@@ -395,11 +395,7 @@ public class ContentfulWorkflowTests
     {
         var sut = CreateServiceUnderTest();
 
-        _repo
-            .GetPaginatedEntriesAsync<MicrocopyEntry>(
-                Arg.Any<GetEntriesOptions>()
-            )
-            .Returns([]);
+        _repo.GetPaginatedEntriesAsync<MicrocopyEntry>(Arg.Any<GetEntriesOptions>()).Returns([]);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
             sut.GetMicrocopyEntriesAsync()

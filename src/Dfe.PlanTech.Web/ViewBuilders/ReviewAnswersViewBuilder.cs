@@ -21,10 +21,9 @@ public class ReviewAnswersViewBuilder(
     IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
-        matEstablishmentProvider
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = matEstablishmentProvider
         ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
@@ -41,8 +40,7 @@ public class ReviewAnswersViewBuilder(
     {
         var establishmentId = await GetRoutingEstablishmentId();
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -87,8 +85,7 @@ public class ReviewAnswersViewBuilder(
     )
     {
         var establishmentId = await GetRoutingEstablishmentId();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -145,53 +142,41 @@ public class ReviewAnswersViewBuilder(
         try
         {
             var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-            var userOrganisationId = CurrentUser.UserOrganisationId;
+            var isGroupUser = CurrentUser.IsMat || CurrentUser.IsSatOrSSat;
+            var groupEstablishmentId = isGroupUser ? CurrentUser.UserOrganisationId : null;
             var userId = GetUserIdOrThrowException();
 
-            var section =
-                await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
                 ?? throw new ContentfulDataUnavailableException(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            if (CurrentUser.IsMat || CurrentUser.IsSatOrSSat)
+            var selectedEstablishmentIds = isGroupUser
+                ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession()
+                : [];
+
+            if (selectedEstablishmentIds.Count > 0)
             {
-                var selectedEstablishmentIds =
-                    _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
-
-                if (selectedEstablishmentIds.Count > 0)
+                foreach (var selectedEstablishmentId in selectedEstablishmentIds)
                 {
-                    foreach (var selectedEstablishmentId in selectedEstablishmentIds)
-                    {
-                        var submissionModel =
-                            await _submissionService.GetLatestSubmissionResponsesModel(
-                                selectedEstablishmentId,
-                                section,
-                                SubmissionStatus.InProgress
-                            );
-
-                        if (submissionModel is null)
-                        {
-                            throw new InvalidOperationException(
-                                $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
-                            );
-                        }
-
-                        await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                    var submissionModel =
+                        await _submissionService.GetLatestSubmissionResponsesModel(
                             selectedEstablishmentId,
-                            userOrganisationId,
-                            submissionModel.SubmissionId,
-                            userId,
-                            section
+                            section,
+                            SubmissionStatus.InProgress
+                        );
+
+                    if (submissionModel is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
                         );
                     }
-                }
-                else
-                {
-                    await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                        establishmentId,
-                        userOrganisationId,
-                        submissionId,
+
+                    await _submissionService.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
+                        selectedEstablishmentId,
+                        groupEstablishmentId,
+                        submissionModel.SubmissionId,
                         userId,
                         section
                     );
@@ -199,9 +184,9 @@ public class ReviewAnswersViewBuilder(
             }
             else
             {
-                await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                await _submissionService.ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
                     establishmentId,
-                    null,
+                    groupEstablishmentId,
                     submissionId,
                     userId,
                     section
@@ -215,11 +200,12 @@ public class ReviewAnswersViewBuilder(
                 "An error occurred while confirming a user's answers for submission {SubmissionId}",
                 submissionId
             );
-            controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            controller.TempData[StatePassingMechanismConstants.ErrorMessage] =
+                InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
-        controller.TempData["SectionName"] = sectionName;
+        controller.TempData[StatePassingMechanismConstants.SectionName] = sectionName;
 
         //Check to be removed when we have sorted routing of new pages
         if (CurrentUser.IsMat)
@@ -268,8 +254,10 @@ public class ReviewAnswersViewBuilder(
             .ToList();
 
         // Get ordered retired responses from section questions and select out the responses from the submission
-        var orderedRetiredResponses =
-            submissionModel.Submission?.Responses?.OrderBy(r => r.Order).ToList() ?? [];
+        var orderedRetiredResponses = submissionModel
+            .Submission?.Responses?.OrderBy(r => r.Order)
+            .ToList()
+            ?? [];
 
         //Join the two lists together with core first so we only rely on the order columnn for the retired responses
         List<QuestionWithAnswerModel> responses =
@@ -294,7 +282,9 @@ public class ReviewAnswersViewBuilder(
             QuestionsAnswered = responses.Count,
             TotalQuestions = section.Questions.Count(),
             ShowInProgressDisclaimer = isMatInProgressView,
-            BackLinkHref = isMatInProgressView ? $"/{categorySlug}/{sectionSlug}/self-assessment" : $"/{categorySlug}",
+            BackLinkHref = isMatInProgressView
+                ? $"/{categorySlug}/{sectionSlug}/self-assessment"
+                : $"/{categorySlug}",
             BackButtonText = isMatInProgressView
                 ? $"Back to {section.Name.ToLowerInvariant()}"
                 : "Back to recommendations",
@@ -361,8 +351,7 @@ public class ReviewAnswersViewBuilder(
             CurrentUser
         );
 
-        var sectionId =
-            routingData.QuestionnaireSection.Sys?.Id
+        var sectionId = routingData.QuestionnaireSection.Sys?.Id
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section id for slug {sectionSlug}"
             );
@@ -373,8 +362,7 @@ public class ReviewAnswersViewBuilder(
             c.Sections?.Any(s => s.Id == sectionId) == true
         );
 
-        var categoryName =
-            category?.Header?.Text
+        var categoryName = category?.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for section {sectionSlug}"
             );

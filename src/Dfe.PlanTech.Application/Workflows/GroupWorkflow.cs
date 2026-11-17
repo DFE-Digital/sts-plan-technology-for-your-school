@@ -9,25 +9,41 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository, IGiasRepository giasRepository, IRecommendationWorkflow recommendationWorkflow) : IGroupWorkflow
+public class GroupWorkflow(
+    ISubmissionRepository submissionRepository,
+    IEstablishmentService establishmentService,
+    IEstablishmentRecommendationHistoryRepository recommendationHistoryRepository,
+    IGiasRepository giasRepository,
+    IRecommendationWorkflow recommendationWorkflow
+) : IGroupWorkflow
 {
-    private readonly IGiasRepository _giasRepository = giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
-    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly ISubmissionRepository _submissionRepository =
-        submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IGiasRepository _giasRepository = giasRepository
+        ?? throw new ArgumentNullException(nameof(giasRepository));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow
+        ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly ISubmissionRepository _submissionRepository = submissionRepository
+        ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly IEstablishmentService _establishmentService = establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
 
-    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository = recommendationHistoryRepository ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
+    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
+        recommendationHistoryRepository
+        ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
 
     public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds)
     {
-        var submissions = await _submissionRepository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds);
+        var submissions =
+            await _submissionRepository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+                establishmentIds
+            );
 
         return submissions.Select(s => s.AsDto()).ToList();
     }
 
-    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId)
+    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(
+        List<SqlEstablishmentLinkDto> establishmentLinks,
+        string sectionId
+    )
     {
         var establishments = new List<SqlEstablishmentDto>();
 
@@ -36,23 +52,26 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
             establishments.Add(
                 await _establishmentService.GetOrCreateEstablishmentAsync(
                     e.Urn,
-                    e.EstablishmentName));
+                    e.EstablishmentName
+                )
+            );
         }
 
-        var establishmentIds = establishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
+        var establishmentIds = establishments.Select(e => e.Id).Distinct().ToArray();
 
-        var groupLatestSubmissions = await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
-            ?? [];
+        var groupLatestSubmissions =
+            await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(
+                establishmentIds,
+                sectionId
+            ) ?? [];
 
         var groupSubmissionInfo = new List<SubmissionInformationModel>();
 
         foreach (var est in establishments)
         {
-            var submission = groupLatestSubmissions
-                    .FirstOrDefault(s => s.Establishment.EstablishmentRef == est.EstablishmentRef);
+            var submission = groupLatestSubmissions.FirstOrDefault(s =>
+                s.Establishment.EstablishmentRef == est.EstablishmentRef
+            );
 
             if (submission == null)
             {
@@ -63,7 +82,7 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                         EstablishmentName = est.OrgName ?? "",
                         EstablishmentRef = est.EstablishmentRef ?? "",
                         SectionId = sectionId,
-                        Status = SubmissionStatus.NotStarted
+                        Status = SubmissionStatus.NotStarted,
                     }
                 );
             }
@@ -78,13 +97,17 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                         SectionId = sectionId,
                         SubmissionId = submission.Id,
                         DateCreated = DateTimeHelper.FormattedDateShort(submission.DateCreated),
-                        DateLastUpdated = submission.DateLastUpdated != null
-                            ? DateTimeHelper.FormattedDateShort(submission.DateLastUpdated.Value)
-                            : null,
-                        DateCompleted = submission.DateCompleted != null
-                            ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
-                            : null,
-                        Status = submission.Status
+                        DateLastUpdated =
+                            submission.DateLastUpdated != null
+                                ? DateTimeHelper.FormattedDateShort(
+                                    submission.DateLastUpdated.Value
+                                )
+                                : null,
+                        DateCompleted =
+                            submission.DateCompleted != null
+                                ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
+                                : null,
+                        Status = submission.Status,
                     }
                 );
             }
@@ -93,17 +116,26 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         return groupSubmissionInfo;
     }
 
-    public async Task<List<(EstablishmentEntity establishment, EstablishmentRecommendationHistoryEntity? recommendationHistory)>> GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(int establishmentId, int recommendationId)
+    public async Task<
+        List<(
+            EstablishmentEntity establishment,
+            EstablishmentRecommendationHistoryEntity? recommendationHistory
+        )>
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+        int establishmentId,
+        int recommendationId
+    )
     {
         var results =
-            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(establishmentId,
-                recommendationId);
+            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+                establishmentId,
+                recommendationId
+            );
 
         return results;
-
     }
 
-        private async Task<int> GetGroupUidOrThrowAsync(int groupEstablishmentId)
+    private async Task<int> GetGroupUidOrThrowAsync(int groupEstablishmentId)
     {
         var group = await _establishmentService.GetEstablishmentByIdAsync(groupEstablishmentId);
         if (!int.TryParse(group.GroupUid, out var groupUid) || groupUid <= 0)
@@ -119,7 +151,10 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         return await _giasRepository.IsSchoolWithinGroupAsync(groupUid, urn);
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetGroupSchoolsAsync(int groupEstablishmentId, bool includeRecommendationCounts = false)
+    public async Task<List<SqlEstablishmentLinkDto>> GetGroupSchoolsAsync(
+        int groupEstablishmentId,
+        bool includeRecommendationCounts = false
+    )
     {
         var establishments = await ResolveGroupEstablishmentsAsync(groupEstablishmentId);
         var schools = new List<SqlEstablishmentLinkDto>();
@@ -130,21 +165,27 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                 Id = school.Id,
                 Urn = school.EstablishmentRef,
                 EstablishmentName = school.OrgName ?? string.Empty,
-                GroupUid = school.GroupUid ?? string.Empty
+                GroupUid = school.GroupUid ?? string.Empty,
             };
             if (includeRecommendationCounts)
             {
-                var statuses = await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(school.Id);
+                var statuses =
+                    await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+                        school.Id
+                    );
                 dto.InProgressOrCompletedRecommendationsCount = statuses.Values.Count(r =>
-                    r.NewStatus == RecommendationStatus.Complete ||
-                    r.NewStatus == RecommendationStatus.InProgress);
+                    r.NewStatus == RecommendationStatus.Complete
+                    || r.NewStatus == RecommendationStatus.InProgress
+                );
             }
             schools.Add(dto);
         }
         return schools;
     }
 
-    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId)
+    public async Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
+        int groupEstablishmentId
+    )
     {
         var establishments = await ResolveGroupEstablishmentsAsync(groupEstablishmentId);
         var ids = establishments.Select(e => e.Id).Distinct().ToArray();
@@ -153,11 +194,13 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         {
             Establishments = establishments,
             EstablishmentIds = ids,
-            CompletedSubmissions = completed
+            CompletedSubmissions = completed,
         };
     }
 
-    private async Task<List<SqlEstablishmentDto>> ResolveGroupEstablishmentsAsync(int groupEstablishmentId)
+    private async Task<List<SqlEstablishmentDto>> ResolveGroupEstablishmentsAsync(
+        int groupEstablishmentId
+    )
     {
         var groupUid = await GetGroupUidOrThrowAsync(groupEstablishmentId);
         var giasSchools = (await _giasRepository.GetSchoolsForGroupAsync(groupUid))
@@ -168,7 +211,8 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
             return [];
 
         var existing = await _establishmentService.GetEstablishmentsByReferencesAsync(
-            giasSchools.Select(school => school.Urn.ToString()));
+            giasSchools.Select(school => school.Urn.ToString())
+        );
         var byUrn = existing
             .Where(establishment => establishment.EstablishmentRef != null)
             .GroupBy(establishment => establishment.EstablishmentRef!)
@@ -181,7 +225,9 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
             if (!byUrn.TryGetValue(urn, out var establishment))
             {
                 establishment = await _establishmentService.GetOrCreateEstablishmentAsync(
-                    urn, school.EstablishmentName);
+                    urn,
+                    school.EstablishmentName
+                );
                 byUrn[urn] = establishment;
             }
 

@@ -9,7 +9,7 @@ public interface ISubmissionWorkflow
 {
     Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, string sectionId);
 
-    Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+    Task ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(
         int establishmentId,
         int? matEstablishmentId,
         int submissionId,
@@ -59,7 +59,7 @@ public interface ISubmissionWorkflow
 
     Task SetSubmissionReviewedAsync(int submissionId);
 
-    Task<int> SubmitAnswer(
+    Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,
         int userEstablishmentId,

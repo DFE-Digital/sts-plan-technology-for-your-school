@@ -116,10 +116,7 @@ public class ContentfulServiceTests
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "M1";
 
-        var expected = new List<MicrocopyEntry>
-    {
-        new() { Sys = new SystemDetails(id) },
-    };
+        var expected = new List<MicrocopyEntry> { new() { Sys = new SystemDetails(id) } };
 
         contentfulWorkflow.GetMicrocopyEntriesAsync().Returns(expected);
 

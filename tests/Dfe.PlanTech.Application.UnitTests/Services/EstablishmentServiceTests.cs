@@ -23,7 +23,12 @@ public class EstablishmentServiceTests
     private static readonly string[] urnAandBandC = ["URN-A", "URN-B", "URN-C"];
 
     private EstablishmentService CreateServiceUnderTest() =>
-        new EstablishmentService(_establishmentWorkflow, _establishmentRepository, _recommendationWorkflow, _userWorkflow);
+        new EstablishmentService(
+            _establishmentWorkflow,
+            _establishmentRepository,
+            _recommendationWorkflow,
+            _userWorkflow
+        );
 
     [Fact]
     public async Task GetOrCreateEstablishmentAsync_Delegates_To_Workflow()
@@ -69,7 +74,7 @@ public class EstablishmentServiceTests
             Id = 123,
             EstablishmentRef = "URN-123",
             OrgName = "School 123",
-            GroupUid = "500"
+            GroupUid = "500",
         };
 
         _establishmentRepository.GetEstablishmentByIdAsync(123).Returns(entity);
@@ -193,7 +198,9 @@ public class EstablishmentServiceTests
 
         _establishmentRepository.GetEstablishmentByIdAsync(999).Returns((EstablishmentEntity?)null);
 
-        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.GetEstablishmentByIdAsync(999));
+        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            sut.GetEstablishmentByIdAsync(999)
+        );
 
         Assert.Equal("Establishment with id 999 not found", ex.Message);
     }

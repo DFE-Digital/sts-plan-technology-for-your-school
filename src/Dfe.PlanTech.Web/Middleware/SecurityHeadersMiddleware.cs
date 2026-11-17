@@ -82,7 +82,8 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
 
     private static void AddPermissionsPolicy(HttpContext context)
     {
-        context.Response.Headers["Permissions-Policy"] ="camera=(), microphone=(), geolocation=(), payment=()";
+        context.Response.Headers["Permissions-Policy"] =
+            "camera=(), microphone=(), geolocation=(), payment=()";
     }
 }
 

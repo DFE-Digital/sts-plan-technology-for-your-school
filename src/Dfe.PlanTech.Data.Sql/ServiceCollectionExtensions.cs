@@ -41,21 +41,25 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
+            .AddScoped<IAnswerRepository, AnswerRepository>()
+            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
+            .AddScoped<IEstablishmentGroupRepository, EstablishmentGroupRepository>()
             .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
             .AddScoped<
                 IEstablishmentRecommendationHistoryRepository,
                 EstablishmentRecommendationHistoryRepository
             >()
-            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<IGiasRepository, GiasRepository>()
+            .AddScoped<IQuestionRepository, QuestionRepository>()
             .AddScoped<IRecommendationRepository, RecommendationRepository>()
+            .AddScoped<IResponseRepository, ResponseRepository>()
             .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
+            .AddScoped<ITransactionManager, TransactionManager>()
             .AddScoped<IUserRepository, UserRepository>()
-            .AddScoped<IUserSettingsRepository, UserSettingsRepository>()
             .AddScoped<IUserActionRepository, UserActionRepository>()
             .AddScoped<IUserContentViewRepository, UserContentViewRepository>()
-            .AddScoped<IEstablishmentGroupRepository, EstablishmentGroupRepository>();
+            .AddScoped<IUserSettingsRepository, UserSettingsRepository>();
     }
 }

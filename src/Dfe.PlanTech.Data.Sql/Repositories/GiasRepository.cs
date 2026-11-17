@@ -6,13 +6,13 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class GiasRepository(PlanTechDbContext dbContext) : IGiasRepository
 {
-    protected readonly PlanTechDbContext _db =
-        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    protected readonly PlanTechDbContext _db = dbContext
+        ?? throw new ArgumentNullException(nameof(dbContext));
 
     public Task<List<GiasEstablishmentEntity>> GetSchoolsForGroupAsync(int groupUid)
     {
-        return _db.GiasEstablishmentGroups
-            .AsNoTracking()
+        return _db
+            .GiasEstablishmentGroups.AsNoTracking()
             .Where(g => g.GroupUid == groupUid && g.GroupStatusCode == "OPEN")
             .SelectMany(g => g.GroupMemberships)
             .SelectMany(m => m.Establishments)
@@ -22,8 +22,8 @@ public class GiasRepository(PlanTechDbContext dbContext) : IGiasRepository
 
     public Task<bool> IsSchoolWithinGroupAsync(int groupUid, int schoolUrn)
     {
-        return _db.GiasEstablishmentGroups
-            .AsNoTracking()
+        return _db
+            .GiasEstablishmentGroups.AsNoTracking()
             .Where(g => g.GroupUid == groupUid && g.GroupStatusCode == "OPEN")
             .SelectMany(g => g.GroupMemberships)
             .SelectMany(m => m.Establishments)

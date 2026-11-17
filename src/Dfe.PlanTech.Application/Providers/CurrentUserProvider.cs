@@ -25,10 +25,10 @@ public class CurrentUserProvider : ICurrentUserProvider
         ILogger<CurrentUserProvider> logger
     )
     {
-        _contextAccessor =
-            contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-        _establishmentService =
-            establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+        _contextAccessor = contextAccessor
+            ?? throw new ArgumentNullException(nameof(contextAccessor));
+        _establishmentService = establishmentService
+            ?? throw new ArgumentNullException(nameof(establishmentService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
         _selectedSchoolLazy = new Lazy<Task<SqlEstablishmentDto?>>(() => LoadSelectedSchoolAsync());
@@ -317,7 +317,9 @@ public class CurrentUserProvider : ICurrentUserProvider
         try
         {
             var selectedSchoolIsValid = await _groupService.IsSchoolWithinGroupAsync(
-                UserOrganisationId.Value, urn);
+                UserOrganisationId.Value,
+                urn
+            );
 
             if (!selectedSchoolIsValid)
             {

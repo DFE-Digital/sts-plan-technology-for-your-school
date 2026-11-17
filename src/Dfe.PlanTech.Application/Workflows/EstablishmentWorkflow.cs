@@ -10,11 +10,12 @@ public class EstablishmentWorkflow(
     IEstablishmentLinkRepository establishmentLinkRepository
 ) : IEstablishmentWorkflow
 {
-    private readonly IEstablishmentRepository _establishmentRepository =
-        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository
+        ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
+
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
     )

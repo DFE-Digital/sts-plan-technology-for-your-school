@@ -14,14 +14,14 @@ public class EstablishmentService(
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
 {
-    private readonly IEstablishmentWorkflow _establishmentWorkflow =
-        establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly IRecommendationWorkflow _recommendationWorkflow =
-        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly IUserWorkflow _userWorkflow =
-        userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
-    private readonly IEstablishmentRepository _establishmentRepository =
-        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow
+        ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow
+        ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly IUserWorkflow _userWorkflow = userWorkflow
+        ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository
+        ?? throw new ArgumentNullException(nameof(establishmentRepository));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
@@ -35,10 +35,15 @@ public class EstablishmentService(
         string establishmentName
     )
     {
-        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentUrn, establishmentName);
+        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(
+            establishmentUrn,
+            establishmentName
+        );
     }
 
-    public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
+    public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
+        IEnumerable<string> establishmentReferences
+    )
     {
         return _establishmentWorkflow.GetEstablishmentsByReferencesAsync(establishmentReferences);
     }
@@ -72,8 +77,7 @@ public class EstablishmentService(
         string selectedEstablishmentName
     )
     {
-        var user =
-            await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
+        var user = await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
             ?? throw new InvalidDataException("User does not exist");
 
         if (userEstablishmentId is null)

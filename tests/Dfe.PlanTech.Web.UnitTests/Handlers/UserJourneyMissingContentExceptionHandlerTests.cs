@@ -36,7 +36,10 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var establishmentService = Substitute.For<IEstablishmentService>();
         var groupService = Substitute.For<IGroupService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        return (new CurrentUserProvider(accessor, establishmentService, groupService, logger), http);
+        return (
+            new CurrentUserProvider(accessor, establishmentService, groupService, logger),
+            http
+        );
     }
 
     private static Controller MakeController(HttpContext http)

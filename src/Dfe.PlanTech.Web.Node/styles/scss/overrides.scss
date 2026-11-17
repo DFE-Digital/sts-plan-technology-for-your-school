@@ -310,8 +310,7 @@ ul.landing-page-list > li {
     vertical-align: middle;
   }
   .govuk-table__header.status,
-  .govuk-table__cell.status
-  {
+  .govuk-table__cell.status {
     text-align: right;
   }
   .schools {
@@ -336,28 +335,28 @@ ul.landing-page-list > li {
 }
 
 .organisation-context-header:not(:has(.govuk-breadcrumbs)) h1.govuk-heading-l.school-ident-name {
-    padding-top: 77px !important;
-    transform: translateY(-32px);
+  padding-top: 77px !important;
+  transform: translateY(-32px);
 }
 
 h1.govuk-heading-l.school-ident-name {
-    padding-top: 32px !important;
-    margin-bottom: 16px;
+  padding-top: 32px !important;
+  margin-bottom: 16px;
 }
 
 .group-recommendation-progress .govuk-table__header,
 .group-recommendation-progress .govuk-table__cell {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 .group-recommendation-progress__last-updated {
-    color: #505a5f;
+  color: #505a5f;
 }
 
 table.govuk-table.group-recommendation-progress {
-    margin-top: 0px;
+  margin-top: 0px;
 }
 
 .group-recommendation-progress__status {
-    text-align: right !important;
+  text-align: right !important;
 }
