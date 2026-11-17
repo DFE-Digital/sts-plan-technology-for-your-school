@@ -13,6 +13,8 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
     {
         AddFramejackingPreventHeaders(context);
         AddContentSecurityPolicy(context);
+        AddReferrerPolicy(context);
+        AddPermissionsPolicy(context);
         context.Response.Headers.CacheControl = "no-store";
 
         await _next(context);
@@ -71,6 +73,16 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
         };
         var csp = string.Join("; ", cspDirectives);
         context.Response.Headers.ContentSecurityPolicy = csp;
+    }
+
+    private static void AddReferrerPolicy(HttpContext context)
+    {
+        context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    }
+
+    private static void AddPermissionsPolicy(HttpContext context)
+    {
+        context.Response.Headers["Permissions-Policy"] ="camera=(), microphone=(), geolocation=(), payment=()";
     }
 }
 
