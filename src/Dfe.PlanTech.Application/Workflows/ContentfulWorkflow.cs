@@ -229,4 +229,25 @@ public class ContentfulWorkflow(
             );
         }
     }
+
+    public async Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
+    {
+        var options = new GetEntriesOptions
+        {
+            Limit = 500,
+            Page = 1,
+        };
+
+        var entries = await _contentfulRepository
+            .GetPaginatedEntriesAsync<MicrocopyEntry>(options);
+
+        if (!entries.Any())
+        {
+            throw new ContentfulDataUnavailableException(
+                $"Could not find entries of type {nameof(MicrocopyEntry)}"
+            );
+        }
+
+        return entries.ToList();
+    }
 }

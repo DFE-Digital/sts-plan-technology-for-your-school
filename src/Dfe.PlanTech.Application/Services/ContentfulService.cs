@@ -42,9 +42,8 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
 
     public Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
     {
-        return contentfulWorkflow.GetEntriesAsync<MicrocopyEntry>();
+        return _contentfulWorkflow.GetMicrocopyEntriesAsync();
     }
-
     public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()
     {
         return contentfulWorkflow.GetEntriesAsync<NavigationLinkEntry>();

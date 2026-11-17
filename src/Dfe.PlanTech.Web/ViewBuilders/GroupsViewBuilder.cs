@@ -152,8 +152,6 @@ public class GroupsViewBuilder(
                     schoolName: schoolEstablishment.OrgName
                 );
 
-                viewModel.BackLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
-
                 return controller.View(ReviewAnswersViewBuilder.ViewAnswersViewName, viewModel);
 
             default:

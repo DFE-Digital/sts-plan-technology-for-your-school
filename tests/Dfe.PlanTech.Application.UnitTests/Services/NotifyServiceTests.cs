@@ -489,6 +489,7 @@ public class NotifyServiceTests
         var result = sut.SendMatStandardEmail(
             model,
             sections,
+             "Test MAT",
             "Digital Standards"
         );
 
@@ -500,20 +501,20 @@ public class NotifyServiceTests
                 model,
                 Arg.Is<Dictionary<string, object>>(d =>
                     (string)d["name of user"] == "John"
+                    && (string)d["school"] == "Test MAT"
                     && (string)d["standard lowercase"] == "digital standards"
                     && (string)d["user message"] == string.Empty
                     && (string)d["standard"] == "Digital Standards"
-                    && ((string)d["recommendations"]).Contains(
+                    && ((string)d["recommendations mat"]).Contains(
                         "## Recommendations for digital technology registers"
                     )
-                    && ((string)d["recommendations"]).Contains(
+                    && ((string)d["recommendations mat"]).Contains(
                         "1. Assign a digital lead"
                     )
-                    && !((string)d["recommendations"]).Contains("self-assessment")
-                    && !d.ContainsKey("school")
+                    && !((string)d["recommendations mat"]).Contains("self-assessment")
                 ),
                 Arg.Any<string>(),
-                NotifyConstants.ShareStandardTemplateId
+                NotifyConstants.ShareMatStandardTemplateId
             );
     }
 
@@ -540,8 +541,11 @@ public class NotifyServiceTests
         var result = sut.SendMatSingleRecommendationEmail(
             model,
             textBody,
+            "Test MAT",
             "Test Recommendation",
-            "Digital leadership"
+            "Digital leadership",
+            "Roles and responsibilities",
+            "* School One: Complete"
         );
 
         Assert.Same(expectedResults, result);
@@ -552,15 +556,17 @@ public class NotifyServiceTests
                 model,
                 Arg.Is<Dictionary<string, object>>(d =>
                     (string)d["name of user"] == "John"
+                    && (string)d["school"] == "Test MAT"
                     && (string)d["standard"] == "digital leadership"
                     && (string)d["user message"] == string.Empty
                     && (string)d["recommendation name"] == "Test Recommendation"
                     && d.ContainsKey("recommendation")
-                    && !d.ContainsKey("school")
+                    && (string)d["topic"] == "roles and responsibilities"
+                    && (string)d["schools list"] == "* School One: Complete"
                     && !d.ContainsKey("status")
                 ),
                 Arg.Any<string>(),
-                NotifyConstants.ShareSingleRecommendationTemplateId
+                NotifyConstants.ShareMatSingleRecommendationTemplateId
             );
     }
 
