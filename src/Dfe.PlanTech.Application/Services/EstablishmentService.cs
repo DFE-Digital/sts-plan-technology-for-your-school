@@ -38,11 +38,6 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentUrn, establishmentName);
     }
 
-    public Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId)
-    {
-        return _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-    }
-
     public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
     {
         return _establishmentWorkflow.GetEstablishmentsByReferencesAsync(establishmentReferences);
@@ -67,47 +62,6 @@ public class EstablishmentService(
         }
 
         return establishmentEntity.AsDto();
-    }
-
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
-        int establishmentId
-    )
-    {
-        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(
-            establishmentId
-        );
-
-        var linkUrns = establishmentLinks.Select(s => s.Urn);
-        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(
-            linkUrns
-        );
-
-        var establishmentLinkMap = establishments
-            .Where(e => e.EstablishmentRef is not null)
-            .ToDictionary(e => e.EstablishmentRef!, e => e.Id);
-
-        foreach (var establishmentLink in establishmentLinks)
-        {
-            if (!establishmentLinkMap.ContainsKey(establishmentLink.Urn))
-            {
-                establishmentLink.InProgressOrCompletedRecommendationsCount = 0;
-                continue;
-            }
-
-            var schoolEstablishmentId = establishmentLinkMap[establishmentLink.Urn];
-            var recommendations =
-                await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
-                    schoolEstablishmentId
-                );
-
-            establishmentLink.InProgressOrCompletedRecommendationsCount =
-                recommendations.Values.Count(r =>
-                    r.NewStatus == RecommendationStatus.Complete
-                    || r.NewStatus == RecommendationStatus.InProgress
-                );
-        }
-
-        return establishmentLinks.ToList();
     }
 
     public async Task RecordGroupSelection(

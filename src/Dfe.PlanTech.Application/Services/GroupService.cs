@@ -31,6 +31,12 @@ public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
         return results;
     }
 
+    public Task<List<SqlEstablishmentLinkDto>> GetGroupSchoolsAsync(int groupEstablishmentId, bool includeRecommendationCounts = false)
+        => _groupWorkflow.GetGroupSchoolsAsync(groupEstablishmentId, includeRecommendationCounts);
+
+    public Task<bool> IsSchoolWithinGroupAsync(int groupEstablishmentId, string schoolUrn)
+        => _groupWorkflow.IsSchoolWithinGroupAsync(groupEstablishmentId, schoolUrn);
+
     public Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(
     int groupEstablishmentId
     )
