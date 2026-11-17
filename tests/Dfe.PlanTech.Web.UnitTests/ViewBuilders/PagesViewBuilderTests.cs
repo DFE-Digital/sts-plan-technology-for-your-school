@@ -35,6 +35,7 @@ public class PagesViewBuilderTests
     private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
     private readonly IEstablishmentService _establishmentService =
         Substitute.For<IEstablishmentService>();
+    private readonly IGroupService _groupService = Substitute.For<IGroupService>();
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
@@ -58,6 +59,7 @@ public class PagesViewBuilderTests
         IContentfulService? contentful = null,
         ICurrentUserProvider? currentUser = null,
         IEstablishmentService? establishmentService = null,
+        IGroupService? groupService = null,
         INotifyService? notifyService = null,
         ISubmissionService? submissionService = null,
         IRecommendationService? recommendationService = null,
@@ -71,6 +73,7 @@ public class PagesViewBuilderTests
         contentful ??= _contentfulService;
         currentUser ??= _currentUser;
         establishmentService ??= _establishmentService;
+        groupService ??= _groupService;
         notifyService ??= _notifyService;
         submissionService ??= _submissionService;
         recommendationService ??= _recommendationService;
@@ -91,6 +94,7 @@ public class PagesViewBuilderTests
             contentful,
             currentUser,
             establishmentService,
+            groupService,
             notifyService,
             submissionService,
             recommendationService
@@ -147,6 +151,7 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var notifyService = Substitute.For<INotifyService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var reocmmendationService = Substitute.For<IRecommendationService>();
@@ -159,6 +164,7 @@ public class PagesViewBuilderTests
                 contentful,
                 currentUser,
                 establishmentService,
+                groupService,
                 notifyService,
                 submissionService,
                 reocmmendationService
@@ -173,6 +179,7 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var notifyService = Substitute.For<INotifyService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var reocmmendationService = Substitute.For<IRecommendationService>();
@@ -185,6 +192,7 @@ public class PagesViewBuilderTests
                 contentful,
                 currentUser,
                 establishmentService,
+                groupService,
                 notifyService,
                 submissionService,
                 reocmmendationService
@@ -234,11 +242,13 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
             currentUser: currentUser,
-            establishmentService: establishmentService
+            establishmentService: establishmentService,
+            groupService: groupService
         );
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
@@ -248,7 +258,7 @@ public class PagesViewBuilderTests
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(654321).Returns([]);
+        groupService.GetGroupSchoolsAsync(654321, true).Returns([]);
 
         var controller = new TestController();
 
@@ -271,11 +281,12 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         // Setup establishmentService to return a list containing the selected school
         // (needed to verify that the user has access to the selected school)
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>())
+        groupService
+            .GetGroupSchoolsAsync(Arg.Any<int>(), true)
             .Returns(
                 new List<SqlEstablishmentLinkDto> { new SqlEstablishmentLinkDto { Urn = "123456" } }
             );
@@ -283,7 +294,8 @@ public class PagesViewBuilderTests
         var sut = CreateServiceUnderTest(
             contentful: contentful,
             currentUser: currentUser,
-            establishmentService: establishmentService
+            establishmentService: establishmentService,
+            groupService: groupService
         );
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
