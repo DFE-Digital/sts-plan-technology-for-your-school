@@ -6,8 +6,8 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IContentfulService
 {
-    private readonly IContentfulWorkflow _contentfulWorkflow =
-        contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
+    private readonly IContentfulWorkflow _contentfulWorkflow = contentfulWorkflow
+        ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
 
     public Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(
         string slug,
@@ -42,7 +42,7 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
 
     public Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
     {
-        return contentfulWorkflow.GetEntriesAsync<MicrocopyEntry>();
+        return _contentfulWorkflow.GetMicrocopyEntriesAsync();
     }
 
     public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()

@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
@@ -24,15 +25,17 @@ public class GroupWorkflowTests
 
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
-    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
-        Substitute.For<IEstablishmentGroupRepository>();
+    private readonly IGiasRepository _giasRepository = Substitute.For<IGiasRepository>();
+    private readonly Dfe.PlanTech.Application.Workflows.Interfaces.IRecommendationWorkflow _recommendationWorkflow =
+        Substitute.For<Dfe.PlanTech.Application.Workflows.Interfaces.IRecommendationWorkflow>();
 
     private GroupWorkflow CreateServiceUnderTest() =>
         new(
             _submissionRepository,
             _establishmentService,
             _recommendationHistoryRepository,
-            _establishmentGroupRepository
+            _giasRepository,
+            _recommendationWorkflow
         );
 
     private static EstablishmentEntity BuildEstablishment(int id = 1)
@@ -72,34 +75,61 @@ public class GroupWorkflowTests
 
         var groupEstablishmentId = 100;
 
-        _establishmentGroupRepository
-            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId)
+        _establishmentService
+            .GetEstablishmentByIdAsync(groupEstablishmentId)
+            .Returns(new SqlEstablishmentDto { Id = groupEstablishmentId, GroupUid = "500" });
+
+        _giasRepository
+            .GetSchoolsForGroupAsync(500)
+            .Returns([
+                new GiasEstablishmentEntity
+                {
+                    Urn = 1,
+                    EstablishmentName = "School One",
+                    EstablishmentStatusCode = 1,
+                    LocalAuthorityCode = 1,
+                    PhaseCode = 1,
+                    SyncedAt = DateTime.UtcNow,
+                    Ukprn = "",
+                },
+                new GiasEstablishmentEntity
+                {
+                    Urn = 2,
+                    EstablishmentName = "School Two",
+                    EstablishmentStatusCode = 1,
+                    LocalAuthorityCode = 1,
+                    PhaseCode = 1,
+                    SyncedAt = DateTime.UtcNow,
+                    Ukprn = "",
+                },
+            ]);
+
+        _establishmentService
+            .GetOrCreateEstablishmentAsync("1", "School One")
             .Returns(
-            [
-                new EstablishmentEntity
+                new SqlEstablishmentDto
                 {
                     Id = 1,
-                    OrgName = "School One"
-                },
-                new EstablishmentEntity
+                    EstablishmentRef = "1",
+                    OrgName = "School One",
+                }
+            );
+        _establishmentService
+            .GetOrCreateEstablishmentAsync("2", "School Two")
+            .Returns(
+                new SqlEstablishmentDto
                 {
                     Id = 2,
-                    OrgName = "School Two"
+                    EstablishmentRef = "2",
+                    OrgName = "School Two",
                 }
-            ]);
+            );
 
         _submissionRepository
             .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
                 Arg.Is<int[]>(ids => ids.SequenceEqual(EstablishmentIdsOneAndTwo))
             )
-            .Returns(
-            [
-                BuildSubmission(
-                    id: 100,
-                    establishmentId: 1,
-                    sectionId: "SEC-1"
-                )
-            ]);
+            .Returns([BuildSubmission(id: 100, establishmentId: 1, sectionId: "SEC-1")]);
 
         var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
@@ -112,9 +142,7 @@ public class GroupWorkflowTests
         Assert.Equal(1, submission.EstablishmentId);
         Assert.Equal("SEC-1", submission.SectionId);
 
-        await _establishmentGroupRepository
-            .Received(1)
-            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId);
+        await _giasRepository.Received(1).GetSchoolsForGroupAsync(500);
     }
 
     [Fact]
@@ -124,14 +152,65 @@ public class GroupWorkflowTests
 
         var groupEstablishmentId = 100;
 
-        _establishmentGroupRepository
-            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId)
-            .Returns(
-            [
-                new EstablishmentEntity { Id = 1 },
-                new EstablishmentEntity { Id = 2 },
-                new EstablishmentEntity { Id = 1 }
+        _establishmentService
+            .GetEstablishmentByIdAsync(groupEstablishmentId)
+            .Returns(new SqlEstablishmentDto { Id = groupEstablishmentId, GroupUid = "500" });
+
+        _giasRepository
+            .GetSchoolsForGroupAsync(500)
+            .Returns([
+                new GiasEstablishmentEntity
+                {
+                    Urn = 1,
+                    EstablishmentName = "School One",
+                    EstablishmentStatusCode = 1,
+                    LocalAuthorityCode = 1,
+                    PhaseCode = 1,
+                    SyncedAt = DateTime.UtcNow,
+                    Ukprn = "",
+                },
+                new GiasEstablishmentEntity
+                {
+                    Urn = 2,
+                    EstablishmentName = "School Two",
+                    EstablishmentStatusCode = 1,
+                    LocalAuthorityCode = 1,
+                    PhaseCode = 1,
+                    SyncedAt = DateTime.UtcNow,
+                    Ukprn = "",
+                },
+                new GiasEstablishmentEntity
+                {
+                    Urn = 1,
+                    EstablishmentName = "School One",
+                    EstablishmentStatusCode = 1,
+                    LocalAuthorityCode = 1,
+                    PhaseCode = 1,
+                    SyncedAt = DateTime.UtcNow,
+                    Ukprn = "",
+                },
             ]);
+
+        _establishmentService
+            .GetOrCreateEstablishmentAsync("1", "School One")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 1,
+                    EstablishmentRef = "1",
+                    OrgName = "School One",
+                }
+            );
+        _establishmentService
+            .GetOrCreateEstablishmentAsync("2", "School Two")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 2,
+                    EstablishmentRef = "2",
+                    OrgName = "School Two",
+                }
+            );
 
         _submissionRepository
             .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
@@ -157,9 +236,10 @@ public class GroupWorkflowTests
 
         var groupEstablishmentId = 100;
 
-        _establishmentGroupRepository
-            .GetLinkedEstablishmentsByGroupEstablishmentIdAsync(groupEstablishmentId)
-            .Returns([]);
+        _establishmentService
+            .GetEstablishmentByIdAsync(groupEstablishmentId)
+            .Returns(new SqlEstablishmentDto { Id = groupEstablishmentId, GroupUid = "500" });
+        _giasRepository.GetSchoolsForGroupAsync(500).Returns([]);
 
         var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
 
@@ -169,9 +249,7 @@ public class GroupWorkflowTests
 
         await _submissionRepository
             .DidNotReceive()
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-                Arg.Any<int[]>()
-            );
+            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(Arg.Any<int[]>());
     }
 
     [Fact]
@@ -203,16 +281,8 @@ public class GroupWorkflowTests
 
         var submissions = new List<SubmissionEntity>
         {
-            BuildSubmission(
-                id: 100,
-                establishmentId: 1,
-                sectionId: "SEC-1"
-            ),
-            BuildSubmission(
-                id: 200,
-                establishmentId: 2,
-                sectionId: "SEC-2"
-            ),
+            BuildSubmission(id: 100, establishmentId: 1, sectionId: "SEC-1"),
+            BuildSubmission(id: 200, establishmentId: 2, sectionId: "SEC-2"),
         };
 
         _submissionRepository
@@ -274,47 +344,47 @@ public class GroupWorkflowTests
         var establishmentLink1 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef1",
-            EstablishmentName = "testName1"
+            EstablishmentName = "testName1",
         };
 
         var establishmentLink2 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef2",
-            EstablishmentName = "testName2"
+            EstablishmentName = "testName2",
         };
 
         var establishmentLink3 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef3",
-            EstablishmentName = "testName3"
+            EstablishmentName = "testName3",
         };
 
         var establishmentLinks = new List<SqlEstablishmentLinkDto>()
         {
             establishmentLink1,
             establishmentLink2,
-            establishmentLink3
+            establishmentLink3,
         };
 
         var establishment1 = new SqlEstablishmentDto()
         {
             Id = 1,
             EstablishmentRef = "testRef1",
-            OrgName = "testName1"
+            OrgName = "testName1",
         };
 
         var establishment2 = new SqlEstablishmentDto()
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "testName2"
+            OrgName = "testName2",
         };
 
         var establishment3 = new SqlEstablishmentDto()
         {
             Id = 3,
             EstablishmentRef = "testRef3",
-            OrgName = "testName3"
+            OrgName = "testName3",
         };
 
         var establishmentIds = EstablishmentIdsOneTwoAndThree;
@@ -351,54 +421,38 @@ public class GroupWorkflowTests
 
         var establishmentLinks = new List<SqlEstablishmentLinkDto>()
         {
-            new()
-            {
-                Urn = "testRef1",
-                EstablishmentName = "testName1"
-            },
-            new()
-            {
-                Urn = "testRef2",
-                EstablishmentName = "testName2"
-            },
-            new()
-            {
-                Urn = "testRef3",
-                EstablishmentName = "testName3"
-            },
-            new()
-            {
-                Urn = "testRef4",
-                EstablishmentName = "testName4"
-            }
+            new() { Urn = "testRef1", EstablishmentName = "testName1" },
+            new() { Urn = "testRef2", EstablishmentName = "testName2" },
+            new() { Urn = "testRef3", EstablishmentName = "testName3" },
+            new() { Urn = "testRef4", EstablishmentName = "testName4" },
         };
 
         var establishment1 = new SqlEstablishmentDto()
         {
             Id = 1,
             EstablishmentRef = "testRef1",
-            OrgName = "testName1"
+            OrgName = "testName1",
         };
 
         var establishment2 = new SqlEstablishmentDto()
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "testName2"
+            OrgName = "testName2",
         };
 
         var establishment3 = new SqlEstablishmentDto()
         {
             Id = 3,
             EstablishmentRef = "testRef3",
-            OrgName = "testName3"
+            OrgName = "testName3",
         };
 
         var establishment4 = new SqlEstablishmentDto()
         {
             Id = 4,
             EstablishmentRef = "testRef4",
-            OrgName = "testName4"
+            OrgName = "testName4",
         };
 
         var establishmentIds = EstablishmentIdsOneToFour;
@@ -418,30 +472,22 @@ public class GroupWorkflowTests
 
         var submissions = new List<SubmissionEntity>
         {
-            BuildSubmission(
-                id: 100,
-                establishmentId: 1,
-                sectionId
-            ),
-            BuildSubmission(
-                id: 200,
-                establishmentId: 2,
-                sectionId
-            ),
+            BuildSubmission(id: 100, establishmentId: 1, sectionId),
+            BuildSubmission(id: 200, establishmentId: 2, sectionId),
         };
 
         submissions[0].Establishment = new EstablishmentEntity
         {
             Id = 1,
             EstablishmentRef = "testRef1",
-            OrgName = "Test 1"
+            OrgName = "Test 1",
         };
 
         submissions[1].Establishment = new EstablishmentEntity
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "Test 2"
+            OrgName = "Test 2",
         };
 
         _submissionRepository
@@ -497,13 +543,13 @@ public class GroupWorkflowTests
         var establishmentLink1 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef1",
-            EstablishmentName = "testName1"
+            EstablishmentName = "testName1",
         };
 
         var establishmentLink2 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef2",
-            EstablishmentName = "testName2"
+            EstablishmentName = "testName2",
         };
 
         var establishmentLinks = new List<SqlEstablishmentLinkDto>()
@@ -516,13 +562,13 @@ public class GroupWorkflowTests
         {
             Id = 1,
             EstablishmentRef = "testRef1",
-            OrgName = "testName1"
+            OrgName = "testName1",
         };
         var establishment2 = new SqlEstablishmentDto()
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "testName2"
+            OrgName = "testName2",
         };
 
         var establishmentIds = EstablishmentIdsOneAndTwo;
@@ -548,7 +594,7 @@ public class GroupWorkflowTests
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "testName2"
+            OrgName = "testName2",
         };
 
         _submissionRepository
@@ -559,10 +605,7 @@ public class GroupWorkflowTests
             .Returns(submissions);
 
         _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(
-                establishmentIds,
-                sectionId
-            )
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
             .Returns(submissions);
 
         var result = await sut.GetGroupSubmissionInformationForSection(
@@ -603,13 +646,13 @@ public class GroupWorkflowTests
         var establishmentLink1 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef1",
-            EstablishmentName = "Test 1"
+            EstablishmentName = "Test 1",
         };
 
         var establishmentLink2 = new SqlEstablishmentLinkDto()
         {
             Urn = "testRef2",
-            EstablishmentName = "Test 2"
+            EstablishmentName = "Test 2",
         };
 
         var establishmentLinks = new List<SqlEstablishmentLinkDto>()
@@ -622,14 +665,14 @@ public class GroupWorkflowTests
         {
             Id = 1,
             EstablishmentRef = "testRef1",
-            OrgName = "Test 1"
+            OrgName = "Test 1",
         };
 
         var establishment2 = new SqlEstablishmentDto()
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "Test 2"
+            OrgName = "Test 2",
         };
 
         var establishmentIds = EstablishmentIdsOneAndTwo;
@@ -654,14 +697,14 @@ public class GroupWorkflowTests
                 establishmentId: 2,
                 sectionId,
                 status: SubmissionStatus.CompleteReviewed
-            )
+            ),
         };
 
         submissions[0].Establishment = new EstablishmentEntity
         {
             Id = 1,
             EstablishmentRef = "testRef1",
-            OrgName = "Test 1"
+            OrgName = "Test 1",
         };
         submissions[0].DateCreated = new DateTime(2025, 1, 1);
         submissions[0].DateLastUpdated = new DateTime(2025, 2, 1);
@@ -670,7 +713,7 @@ public class GroupWorkflowTests
         {
             Id = 2,
             EstablishmentRef = "testRef2",
-            OrgName = "Test 2"
+            OrgName = "Test 2",
         };
         submissions[1].DateCreated = new DateTime(2025, 3, 1);
         submissions[1].DateLastUpdated = new DateTime(2025, 4, 1);
@@ -735,60 +778,92 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_SubmissionRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = Record.Exception(() =>
             new GroupWorkflow(
                 null!,
                 _establishmentService,
                 _recommendationHistoryRepository,
-                _establishmentGroupRepository
+                _giasRepository,
+                _recommendationWorkflow
             )
         );
 
-        Assert.Equal("submissionRepository", exception.ParamName);
+        Assert.Equal(
+            "submissionRepository",
+            Assert.IsType<ArgumentNullException>(exception).ParamName
+        );
     }
 
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_EstablishmentService_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = Record.Exception(() =>
             new GroupWorkflow(
                 _submissionRepository,
                 null!,
                 _recommendationHistoryRepository,
-                _establishmentGroupRepository
+                _giasRepository,
+                _recommendationWorkflow
             )
         );
 
-        Assert.Equal("establishmentService", exception.ParamName);
+        Assert.Equal(
+            "establishmentService",
+            Assert.IsType<ArgumentNullException>(exception).ParamName
+        );
     }
 
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_RecommendationHistoryRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = Record.Exception(() =>
             new GroupWorkflow(
                 _submissionRepository,
                 _establishmentService,
                 null!,
-                _establishmentGroupRepository
+                _giasRepository,
+                _recommendationWorkflow
             )
         );
 
-        Assert.Equal("recommendationHistoryRepository", exception.ParamName);
+        Assert.Equal(
+            "recommendationHistoryRepository",
+            Assert.IsType<ArgumentNullException>(exception).ParamName
+        );
     }
 
     [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_EstablishmentGroupRepository_Is_Null()
+    public void Constructor_Throws_ArgumentNullException_When_GiasRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = Record.Exception(() =>
             new GroupWorkflow(
                 _submissionRepository,
                 _establishmentService,
                 _recommendationHistoryRepository,
+                null!,
+                _recommendationWorkflow
+            )
+        );
+
+        Assert.Equal("giasRepository", Assert.IsType<ArgumentNullException>(exception).ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Throws_ArgumentNullException_When_RecommendationWorkflow_Is_Null()
+    {
+        var exception = Record.Exception(() =>
+            new GroupWorkflow(
+                _submissionRepository,
+                _establishmentService,
+                _recommendationHistoryRepository,
+                _giasRepository,
                 null!
             )
         );
 
-        Assert.Equal("establishmentGroupRepository", exception.ParamName);
+        Assert.Equal(
+            "recommendationWorkflow",
+            Assert.IsType<ArgumentNullException>(exception).ParamName
+        );
     }
 }

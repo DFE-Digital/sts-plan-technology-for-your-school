@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -22,8 +24,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using System.Text;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -53,7 +53,6 @@ public class GroupsViewBuilderTests
         submission ??= Substitute.For<ISubmissionService>();
         recommendation ??= Substitute.For<IRecommendationService>();
         microcopyProvider ??= Substitute.For<IMicrocopyProvider>();
-
 
         currentUser ??= Substitute.For<ICurrentUserProvider>();
         logger ??= NullLogger<GroupsViewBuilder>.Instance;
@@ -104,10 +103,7 @@ public class GroupsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = $"Sec {id}",
-            InterstitialPage = new PageEntry
-            {
-                Slug = $"sec-{id.ToLowerInvariant()}"
-            },
+            InterstitialPage = new PageEntry { Slug = $"sec-{id.ToLowerInvariant()}" },
             Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList(),
             CoreRecommendations = Enumerable
                 .Repeat(new RecommendationChunkEntry(), countAnswers)
@@ -208,7 +204,10 @@ public class GroupsViewBuilderTests
             .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
         var est = Substitute.For<IEstablishmentService>();
-        est.GetEstablishmentLinksWithRecommendationCounts(100)
+
+        var group = Substitute.For<IGroupService>();
+        group
+            .GetGroupSchoolsAsync(100, Arg.Any<bool>())
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
@@ -227,7 +226,7 @@ public class GroupsViewBuilderTests
                 }
             );
 
-        var sut = CreateServiceUnderTest(contentful: contentful, est: est);
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
         var controller = new TestController();
 
         // Act
@@ -249,7 +248,7 @@ public class GroupsViewBuilderTests
         Assert.Equal(2, vm.GroupEstablishments.Count);
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         await contentful.Received(1).GetLinkByIdAsync("contact-123");
-        await est.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
+        await group.Received(1).GetGroupSchoolsAsync(100, true);
     }
 
     [Fact]
@@ -275,7 +274,8 @@ public class GroupsViewBuilderTests
             .GetLinkByIdAsync("contact-123")
             .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
-        est.GetEstablishmentLinksWithRecommendationCounts(100)
+        group
+            .GetGroupSchoolsAsync(100, Arg.Any<bool>())
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
@@ -283,14 +283,14 @@ public class GroupsViewBuilderTests
                     {
                         Id = 10,
                         Urn = "URN-1",
-                        EstablishmentName = "School A"
+                        EstablishmentName = "School A",
                     },
                     new()
                     {
                         Id = 20,
                         Urn = "URN-2",
-                        EstablishmentName = "School B"
-                    }
+                        EstablishmentName = "School B",
+                    },
                 }
             );
 
@@ -299,11 +299,12 @@ public class GroupsViewBuilderTests
                 new List<SqlEstablishmentDto>
                 {
                     new() { Id = 10 },
-                    new() { Id = 20 }
+                    new() { Id = 20 },
                 }
             );
 
-        group.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+        group
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
             .Returns(
                 new List<SqlSubmissionDto>
                 {
@@ -311,28 +312,24 @@ public class GroupsViewBuilderTests
                     {
                         Id = 1,
                         EstablishmentId = 10,
-                        SectionId = "SEC-1"
+                        SectionId = "SEC-1",
                     },
                     new()
                     {
                         Id = 2,
                         EstablishmentId = 20,
-                        SectionId = "SEC-1"
+                        SectionId = "SEC-1",
                     },
                     new()
                     {
                         Id = 3,
                         EstablishmentId = 10,
-                        SectionId = "SEC-2"
-                    }
+                        SectionId = "SEC-2",
+                    },
                 }
             );
 
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            est: est,
-            group: group
-        );
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
 
         var controller = new TestController();
 
@@ -369,7 +366,8 @@ public class GroupsViewBuilderTests
             .GetLinkByIdAsync("contact-123")
             .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
-        est.GetEstablishmentLinksWithRecommendationCounts(100)
+        group
+            .GetGroupSchoolsAsync(100, Arg.Any<bool>())
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
@@ -377,14 +375,14 @@ public class GroupsViewBuilderTests
                     {
                         Id = 10,
                         Urn = "URN-1",
-                        EstablishmentName = "School A"
+                        EstablishmentName = "School A",
                     },
                     new()
                     {
                         Id = 20,
                         Urn = "URN-2",
-                        EstablishmentName = "School B"
-                    }
+                        EstablishmentName = "School B",
+                    },
                 }
             );
 
@@ -393,11 +391,12 @@ public class GroupsViewBuilderTests
                 new List<SqlEstablishmentDto>
                 {
                     new() { Id = 10 },
-                    new() { Id = 20 }
+                    new() { Id = 20 },
                 }
             );
 
-        group.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+        group
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
             .Returns(
                 new List<SqlSubmissionDto>
                 {
@@ -405,34 +404,30 @@ public class GroupsViewBuilderTests
                     {
                         Id = 1,
                         EstablishmentId = 10,
-                        SectionId = "SEC-1"
+                        SectionId = "SEC-1",
                     },
                     new()
                     {
                         Id = 2,
                         EstablishmentId = 20,
-                        SectionId = "SEC-1"
+                        SectionId = "SEC-1",
                     },
                     new()
                     {
                         Id = 3,
                         EstablishmentId = 10,
-                        SectionId = "SEC-2"
+                        SectionId = "SEC-2",
                     },
                     new()
                     {
                         Id = 4,
                         EstablishmentId = 20,
-                        SectionId = "SEC-2"
-                    }
+                        SectionId = "SEC-2",
+                    },
                 }
             );
 
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            est: est,
-            group: group
-        );
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
 
         var controller = new TestController();
 
@@ -472,22 +467,14 @@ public class GroupsViewBuilderTests
 
         contentful
             .GetPageBySlugAsync("home")
-            .Returns(
-                new PageEntry
-                {
-                    Content = new List<ContentfulEntry> { categoryTwo },
-                }
-            );
+            .Returns(new PageEntry { Content = new List<ContentfulEntry> { categoryTwo } });
 
         var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
         var controller = new TestController
         {
             ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    Session = session,
-                },
+                HttpContext = new DefaultHttpContext { Session = session },
             },
         };
 
@@ -510,9 +497,7 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var session = Substitute.For<ISession>();
 
-        contentful
-            .GetAllCategoriesAsync()
-            .Returns(new List<QuestionnaireCategoryEntry>());
+        contentful.GetAllCategoriesAsync().Returns(new List<QuestionnaireCategoryEntry>());
 
         contentful
             .GetPageBySlugAsync("home")
@@ -523,10 +508,7 @@ public class GroupsViewBuilderTests
         {
             ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    Session = session,
-                },
+                HttpContext = new DefaultHttpContext { Session = session },
             },
         };
 
@@ -591,7 +573,8 @@ public class GroupsViewBuilderTests
             .GetAllCategoriesAsync()
             .Returns(new List<QuestionnaireCategoryEntry> { category });
 
-        est.GetEstablishmentLinks(100)
+        group
+            .GetGroupSchoolsAsync(100)
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
@@ -678,7 +661,7 @@ public class GroupsViewBuilderTests
             }
         );
 
-        await est.Received(1).GetEstablishmentLinks(100);
+        await group.Received(1).GetGroupSchoolsAsync(100);
 
         await est.Received(1)
             .GetEstablishmentsByReferencesAsync(
@@ -809,7 +792,7 @@ public class GroupsViewBuilderTests
             .GetAllCategoriesAsync()
             .Returns(new List<QuestionnaireCategoryEntry> { category });
 
-        est.GetEstablishmentLinks(100).Returns(new List<SqlEstablishmentLinkDto>());
+        group.GetGroupSchoolsAsync(100).Returns(new List<SqlEstablishmentLinkDto>());
 
         est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
             .Returns(new List<SqlEstablishmentDto>());
@@ -865,7 +848,7 @@ public class GroupsViewBuilderTests
             new() { Urn = "testRef30", EstablishmentName = "Test 30" },
         };
 
-        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
+        group.GetGroupSchoolsAsync(100).Returns(establishmentLinks);
 
         var establishment10 = new SqlEstablishmentDto()
         {
@@ -946,16 +929,7 @@ public class GroupsViewBuilderTests
         var action = await sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug);
 
         // Assert
-        await est.Received(1).GetEstablishmentLinks(100);
-
-        await group
-            .Received(1)
-            .GetGroupSubmissionInformationForSection(
-                Arg.Is<List<SqlEstablishmentLinkDto>>(urns =>
-                    urns.SequenceEqual(establishmentLinks)
-                ),
-                section.Id
-            );
+        await group.Received(1).GetGroupSchoolsAsync(100);
 
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal("GroupSelectSchoolsToAssess", view.ViewName);
@@ -1015,7 +989,7 @@ public class GroupsViewBuilderTests
             new SqlEstablishmentLinkDto() { Id = 2 },
         };
 
-        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
+        group.GetGroupSchoolsAsync(100).Returns(establishmentLinks);
 
         contentful.GetSectionBySlugAsync(sectionSlug).Returns((QuestionnaireSectionEntry?)null!);
 
@@ -1054,7 +1028,46 @@ public class GroupsViewBuilderTests
 
         contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
-        est.GetEstablishmentLinks(100).Returns(new List<SqlEstablishmentLinkDto>());
+        group
+            .GetGroupSchoolsAsync(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "00001", Id = 1 },
+                    new() { Urn = "00002", Id = 2 },
+                    new() { Urn = "00003", Id = 3 },
+                }
+            );
+
+        est.GetEstablishmentByReferenceAsync("00001")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 1,
+                    EstablishmentRef = "00001",
+                    OrgName = "School 1",
+                }
+            );
+        est.GetEstablishmentByReferenceAsync("00002")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 2,
+                    EstablishmentRef = "00002",
+                    OrgName = "School 2",
+                }
+            );
+        est.GetEstablishmentByReferenceAsync("00003")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 3,
+                    EstablishmentRef = "00003",
+                    OrgName = "School 3",
+                }
+            );
+
+        group.GetGroupSchoolsAsync(100).Returns(new List<SqlEstablishmentLinkDto>());
 
         var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
             sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug)
@@ -1095,7 +1108,7 @@ public class GroupsViewBuilderTests
             new SqlEstablishmentLinkDto() { Id = 2 },
         };
 
-        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
+        group.GetGroupSchoolsAsync(100).Returns(establishmentLinks);
 
         contentful.GetSectionBySlugAsync(sectionSlug).Returns((QuestionnaireSectionEntry?)null!);
 
@@ -1218,7 +1231,7 @@ public class GroupsViewBuilderTests
         est.GetEstablishmentByReferenceAsync("00002").Returns(school2);
         est.GetEstablishmentByReferenceAsync("00003").Returns(school3);
 
-        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
+        group.GetGroupSchoolsAsync(100).Returns(establishmentLinks);
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
@@ -1237,6 +1250,45 @@ public class GroupsViewBuilderTests
         controller.RouteData.Values["categorySlug"] = categorySlug;
 
         contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        group
+            .GetGroupSchoolsAsync(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "00001", Id = 1 },
+                    new() { Urn = "00002", Id = 2 },
+                    new() { Urn = "00003", Id = 3 },
+                }
+            );
+
+        est.GetEstablishmentByReferenceAsync("00001")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 1,
+                    EstablishmentRef = "00001",
+                    OrgName = "School 1",
+                }
+            );
+        est.GetEstablishmentByReferenceAsync("00002")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 2,
+                    EstablishmentRef = "00002",
+                    OrgName = "School 2",
+                }
+            );
+        est.GetEstablishmentByReferenceAsync("00003")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 3,
+                    EstablishmentRef = "00003",
+                    OrgName = "School 3",
+                }
+            );
 
         group
             .GetGroupSubmissionInformationForSection(
@@ -1323,14 +1375,42 @@ public class GroupsViewBuilderTests
 
         contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
-        est.GetEstablishmentLinks(100)
+        group
+            .GetGroupSchoolsAsync(100)
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
                     new() { Urn = "00001", Id = 1 },
                     new() { Urn = "00002", Id = 2 },
                     new() { Urn = "00003", Id = 3 },
-                    new() { Urn = "00004", Id = 4 },
+                }
+            );
+
+        est.GetEstablishmentByReferenceAsync("00001")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 1,
+                    EstablishmentRef = "00001",
+                    OrgName = "School 1",
+                }
+            );
+        est.GetEstablishmentByReferenceAsync("00002")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 2,
+                    EstablishmentRef = "00002",
+                    OrgName = "School 2",
+                }
+            );
+        est.GetEstablishmentByReferenceAsync("00003")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 3,
+                    EstablishmentRef = "00003",
+                    OrgName = "School 3",
                 }
             );
 
@@ -1343,7 +1423,7 @@ public class GroupsViewBuilderTests
 
         await sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, sectionSlug, viewModel);
 
-        await est.Received(1).GetEstablishmentLinks(100);
+        await group.Received(1).GetGroupSchoolsAsync(100);
     }
 
     [Fact]
@@ -1353,6 +1433,7 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
         var session = Substitute.For<ISession>();
 
         var httpContext = new DefaultHttpContext();
@@ -1400,7 +1481,7 @@ public class GroupsViewBuilderTests
             new SqlEstablishmentLinkDto() { Id = 3, Urn = "00003" },
         };
 
-        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
+        group.GetGroupSchoolsAsync(100).Returns(establishmentLinks);
 
         var establishment1 = new SqlEstablishmentDto
         {
@@ -1456,7 +1537,10 @@ public class GroupsViewBuilderTests
 
         session
             .When(x => x.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(call => { storedBytes = call.ArgAt<byte[]>(1); });
+            .Do(call =>
+            {
+                storedBytes = call.ArgAt<byte[]>(1);
+            });
 
         // Act
         await sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, sectionSlug, viewModel);
@@ -1520,7 +1604,8 @@ public class GroupsViewBuilderTests
             SelectedSchoolsRefs = ["00001", "00002"],
         };
 
-        est.GetEstablishmentLinks(100)
+        group
+            .GetGroupSchoolsAsync(100)
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
@@ -1619,7 +1704,8 @@ public class GroupsViewBuilderTests
             SelectedSchoolsRefs = ["00001", "00002"],
         };
 
-        est.GetEstablishmentLinks(100)
+        group
+            .GetGroupSchoolsAsync(100)
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
@@ -1758,7 +1844,7 @@ public class GroupsViewBuilderTests
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails { Id = "sec-9" },
-            Questions = new List<QuestionnaireQuestionEntry>() { new() { Slug = "question" } },
+            Questions = new List<QuestionnaireQuestionEntry> { new() { Slug = "question" } },
         };
 
         var schoolSubmissions = new List<SubmissionInformationModel>
@@ -1775,7 +1861,7 @@ public class GroupsViewBuilderTests
             new() { Id = 3, Urn = "00003" },
         };
 
-        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
+        group.GetGroupSchoolsAsync(100).Returns(establishmentLinks);
 
         var establishment1 = new SqlEstablishmentDto
         {
@@ -1814,7 +1900,10 @@ public class GroupsViewBuilderTests
 
         session
             .When(x => x.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(call => { storedBytes = call.ArgAt<byte[]>(1); });
+            .Do(call =>
+            {
+                storedBytes = call.ArgAt<byte[]>(1);
+            });
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
@@ -1827,8 +1916,8 @@ public class GroupsViewBuilderTests
         {
             ControllerContext = new ControllerContext
             {
-                HttpContext = httpContext,
                 RouteData = new RouteData(),
+                HttpContext = httpContext,
             },
         };
         controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -1848,945 +1937,14 @@ public class GroupsViewBuilderTests
     }
 
     [Fact]
-    public async Task RouteToSelectASelfAssessmentViewModelAsync_Populates_Section_Slugs()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var est = Substitute.For<IEstablishmentService>();
-        var group = Substitute.For<IGroupService>();
-
-        var section = MakeSection("SEC-1");
-        var category = new QuestionnaireCategoryEntry
-        {
-            Sys = new SystemDetails("cat-1"),
-            Header = new ComponentHeaderEntry { Text = "Header" },
-            LandingPage = new PageEntry { Slug = "category-landing" },
-            Sections = [section],
-        };
-
-        contentful
-            .GetAllCategoriesAsync()
-            .Returns(new List<QuestionnaireCategoryEntry> { category });
-
-        est.GetEstablishmentLinks(100).Returns(new List<SqlEstablishmentLinkDto>());
-
-        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
-            .Returns(new List<SqlEstablishmentDto>());
-
-        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
-        var controller = new TestController();
-
-        var action = await sut.RouteToSelectASelfAssessmentViewModelAsync(controller);
-
-        var view = Assert.IsType<ViewResult>(action);
-        var vm = Assert.IsType<GroupSelectAssessmentViewModel>(view.Model);
-
-        var categoryVm = Assert.Single(vm.Categories);
-        var sectionVm = Assert.Single(categoryVm.Sections);
-
-        Assert.Equal("category-landing", sectionVm.CategorySlug);
-        Assert.Equal("sec-sec-1", sectionVm.SectionSlug);
-    }
-
-    [Fact]
-    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenSingleSchoolSelected_SetsSelectedSchoolAndSession()
-    {
-        // Arrange
-        var contentful = Substitute.For<IContentfulService>();
-        var est = Substitute.For<IEstablishmentService>();
-        var group = Substitute.For<IGroupService>();
-        var submission = Substitute.For<ISubmissionService>();
-        var currentUser = Substitute.For<ICurrentUserProvider>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var categorySlug = "category-5";
-        var sectionSlug = "section-5";
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails { Id = "sec-5" },
-            Questions = new List<QuestionnaireQuestionEntry>
-            {
-                new() { Slug = "first-question" }
-            },
-        };
-
-        var school = new SqlEstablishmentDto
-        {
-            Id = 1,
-            EstablishmentRef = "00001",
-            OrgName = "School 1",
-        };
-
-        var viewModel = new GroupsSelectSchoolsToAssessViewModel
-        {
-            Section = section,
-            SelectedSchoolsRefs = ["00001"],
-        };
-
-        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
-
-        est.GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Id = 1, Urn = "00001" },
-                }
-            );
-
-        est.GetEstablishmentByReferenceAsync("00001").Returns(school);
-
-        submission
-            .GetLatestSubmissionResponsesModel(1, section, (SubmissionStatus?)null)
-            .Returns((SubmissionResponsesModel?)null);
-
-        byte[]? storedBytes = null;
-
-        session
-            .When(x => x.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(call => { storedBytes = call.ArgAt<byte[]>(1); });
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            est: est,
-            group: group,
-            submission: submission,
-            currentUser: currentUser
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext,
-                RouteData = new RouteData(),
-            },
-        };
-
-        controller.RouteData.Values["categorySlug"] = categorySlug;
-
-        // Act
-        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
-            controller,
-            sectionSlug,
-            viewModel
-        );
-
-        // Assert
-        currentUser
-            .Received(1)
-            .SetGroupSelectedSchool("00001", "School 1");
-
-        Assert.NotNull(storedBytes);
-
-        var json = Encoding.UTF8.GetString(storedBytes!);
-        var ids = JsonSerializer.Deserialize<IEnumerable<int>>(json);
-
-        Assert.NotNull(ids);
-        Assert.Equal(new[] { 1 }, ids);
-    }
-
-    // --- RouteToSelectSchoolsToUpdateStatusViewModelAsync -----------------------
-
-    [Fact]
-    public void Ctor_Null_RecommendationService_Throws()
-    {
-        var opts = Opt();
-        var contentful = Substitute.For<IContentfulService>();
-        var current = Substitute.For<ICurrentUserProvider>();
-        var est = Substitute.For<IEstablishmentService>();
-        var group = Substitute.For<IGroupService>();
-        var submissionService = Substitute.For<ISubmissionService>();
-        var microcopyProvider = Substitute.For<IMicrocopyProvider>();
-
-        Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(
-                NullLogger<GroupsViewBuilder>.Instance,
-                opts,
-                contentful,
-                current,
-                est,
-                group,
-                submissionService,
-                null!,
-                microcopyProvider
-            )
-        );
-    }
-
-    [Fact]
     public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Builds_View_With_Expected_Model()
     {
         // Arrange
         var contentful = Substitute.For<IContentfulService>();
-        var group = Substitute.For<IGroupService>();
-        var recommendationService = Substitute.For<IRecommendationService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var categorySlug = "category-one";
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-one";
-
-        var recommendationChunk = new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            Name = "Section One",
-            InterstitialPage = new PageEntry
-            {
-                Slug = sectionSlug
-            },
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        var dbRecommendations = new List<SqlRecommendationDto>
-        {
-            new()
-            {
-                Id = 10
-            },
-            new()
-            {
-                Id = 20
-            }
-        };
-
-        recommendationService
-            .GetRecommendationsByContentfulReferencesAsync(
-                Arg.Is<IEnumerable<string>>(refs =>
-                    refs.SequenceEqual(new[] { recommendationChunk.Id })
-                )
-            )
-            .Returns(dbRecommendations);
-
-        var establishment1 = new EstablishmentEntity
-        {
-            Id = 1,
-            EstablishmentRef = "000001",
-            OrgName = "School One"
-        };
-
-        var establishment2 = new EstablishmentEntity
-        {
-            Id = 2,
-            EstablishmentRef = "000002",
-            OrgName = "School Two"
-        };
-
-        var history1 = new EstablishmentRecommendationHistoryEntity
-        {
-            Id = 100,
-            EstablishmentId = 1,
-            RecommendationId = 20,
-            DateCreated = new DateTime(2026, 9, 1),
-            NewStatus = RecommendationStatus.InProgress
-        };
-
-        var history2 = new EstablishmentRecommendationHistoryEntity
-        {
-            Id = 200,
-            EstablishmentId = 2,
-            RecommendationId = 20,
-            DateCreated = new DateTime(2026, 9, 2),
-            NewStatus = RecommendationStatus.Complete
-        };
-
-        group
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                20
-            )
-            .Returns(
-                new List<(
-                    EstablishmentEntity establishment,
-                    EstablishmentRecommendationHistoryEntity? recommendationHistory)>
-                {
-                    (establishment1, history1),
-                    (establishment2, history2)
-                }
-            );
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            group: group,
-            recommendation: recommendationService
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        controller.RouteData.Values["categorySlug"] = categorySlug;
-
-        // Act
-        var action =
-            await sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug
-            );
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(action);
-
-        Assert.Equal("GroupsSelectSchoolsToUpdateStatus", view.ViewName);
-
-        var vm =
-            Assert.IsType<GroupsSelectSchoolsToUpdateStatusViewModel>(
-                view.Model
-            );
-
-        Assert.Equal(categorySlug, vm.CategorySlug);
-        Assert.Equal(section, vm.Section);
-        Assert.Equal(recommendationChunk, vm.RecommendationChunk);
-
-        Assert.Collection(
-            vm.EstablishmentsRecommendation!,
-            establishment =>
-            {
-                Assert.Equal(1, establishment.EstablishmentId);
-                Assert.Equal("School One", establishment.EstablishmentName);
-                Assert.Equal("000001", establishment.EstablishmentRef);
-                Assert.Equal(section.Id, establishment.SectionId);
-                Assert.Equal(100, establishment.EstablishmentRecommendationHistoryId);
-                Assert.Equal(RecommendationStatus.InProgress, establishment.Status);
-            },
-            establishment =>
-            {
-                Assert.Equal(2, establishment.EstablishmentId);
-                Assert.Equal("School Two", establishment.EstablishmentName);
-                Assert.Equal("000002", establishment.EstablishmentRef);
-                Assert.Equal(section.Id, establishment.SectionId);
-                Assert.Equal(200, establishment.EstablishmentRecommendationHistoryId);
-                Assert.Equal(RecommendationStatus.Complete, establishment.Status);
-            }
-        );
-
-        await group
-            .Received(1)
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                20
-            );
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Uses_Latest_Recommendation()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var group = Substitute.For<IGroupService>();
-        var recommendationService = Substitute.For<IRecommendationService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-one";
-
-        var recommendationChunk = new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        recommendationService
-            .GetRecommendationsByContentfulReferencesAsync(
-                Arg.Any<IEnumerable<string>>()
-            )
-            .Returns(
-                new List<SqlRecommendationDto>
-                {
-                    new() { Id = 10 },
-                    new() { Id = 30 },
-                    new() { Id = 20 }
-                }
-            );
-
-        group
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                30
-            )
-            .Returns(
-                new List<(
-                    EstablishmentEntity establishment,
-                    EstablishmentRecommendationHistoryEntity? recommendationHistory)>()
-            );
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            group: group,
-            recommendation: recommendationService
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        // Act
-        await sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-            controller,
-            sectionSlug,
-            recommendationSlug
-        );
-
-        // Assert
-        await group
-            .Received(1)
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                30
-            );
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Filters_Establishments_With_No_History()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var group = Substitute.For<IGroupService>();
-        var recommendationService = Substitute.For<IRecommendationService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-one";
-
-        var recommendationChunk = new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        recommendationService
-            .GetRecommendationsByContentfulReferencesAsync(
-                Arg.Any<IEnumerable<string>>()
-            )
-            .Returns(
-                new List<SqlRecommendationDto>
-                {
-                    new() { Id = 20 }
-                }
-            );
-
-        var establishment1 = new EstablishmentEntity
-        {
-            Id = 1,
-            EstablishmentRef = "000001",
-            OrgName = "School One"
-        };
-
-        var establishment2 = new EstablishmentEntity
-        {
-            Id = 2,
-            EstablishmentRef = "000002",
-            OrgName = "School Two"
-        };
-
-        var history = new EstablishmentRecommendationHistoryEntity
-        {
-            Id = 100,
-            EstablishmentId = 1,
-            RecommendationId = 20,
-            DateCreated = new DateTime(2026, 9, 1),
-            NewStatus = RecommendationStatus.InProgress
-        };
-
-        group
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                20
-            )
-            .Returns(
-                new List<(
-                    EstablishmentEntity establishment,
-                    EstablishmentRecommendationHistoryEntity? recommendationHistory)>
-                {
-                    (establishment1, history),
-                    (establishment2, null)
-                }
-            );
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            group: group,
-            recommendation: recommendationService
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        // Act
-        var action =
-            await sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug
-            );
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(action);
-
-        var vm =
-            Assert.IsType<GroupsSelectSchoolsToUpdateStatusViewModel>(
-                view.Model
-            );
-
-        var establishment = Assert.Single(vm.EstablishmentsRecommendation!);
-
-        Assert.Equal(1, establishment.EstablishmentId);
-        Assert.Equal("School One", establishment.EstablishmentName);
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Uses_NotStarted_When_Status_Is_Null()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var group = Substitute.For<IGroupService>();
-        var recommendationService = Substitute.For<IRecommendationService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-one";
-
-        var recommendationChunk = new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        recommendationService
-            .GetRecommendationsByContentfulReferencesAsync(
-                Arg.Any<IEnumerable<string>>()
-            )
-            .Returns(
-                new List<SqlRecommendationDto>
-                {
-                    new() { Id = 20 }
-                }
-            );
-
-        var establishment = new EstablishmentEntity
-        {
-            Id = 1,
-            EstablishmentRef = "000001",
-            OrgName = "School One"
-        };
-
-        var history = new EstablishmentRecommendationHistoryEntity
-        {
-            Id = 100,
-            EstablishmentId = 1,
-            RecommendationId = 20,
-            DateCreated = new DateTime(2026, 9, 1),
-            NewStatus = null
-        };
-
-        group
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                20
-            )
-            .Returns(
-                new List<(
-                    EstablishmentEntity establishment,
-                    EstablishmentRecommendationHistoryEntity? recommendationHistory)>
-                {
-                    (establishment, history)
-                }
-            );
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            group: group,
-            recommendation: recommendationService
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        // Act
-        var action =
-            await sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug
-            );
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(action);
-
-        var vm =
-            Assert.IsType<GroupsSelectSchoolsToUpdateStatusViewModel>(
-                view.Model
-            );
-
-        var result = Assert.Single(vm.EstablishmentsRecommendation!);
-
-        Assert.Equal(RecommendationStatus.NotStarted, result.Status);
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Throws_When_No_Section_Found()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var sectionSlug = "section-two";
-        var recommendationSlug = "recommendation-two";
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns((QuestionnaireSectionEntry?)null!);
-
-        var sut = CreateServiceUnderTest(contentful: contentful);
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        // Act / Assert
-        var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug
-            )
-        );
-
-        Assert.Equal(
-            $"Could not find section for slug {sectionSlug}",
-            ex.Message
-        );
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Throws_When_No_Recommendation_Found()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-missing";
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                new RecommendationChunkEntry
-                {
-                    Sys = new SystemDetails("contentful-rec-1"),
-                    Slug = "different-recommendation"
-                }
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        var sut = CreateServiceUnderTest(contentful: contentful);
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        // Act / Assert
-        var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug
-            )
-        );
-
-        Assert.Equal(
-            $"Could not find recommendation for slug {recommendationSlug}",
-            ex.Message
-        );
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Throws_When_No_Database_Recommendation_Found()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var recommendationService = Substitute.For<IRecommendationService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-one";
-
-        var recommendationChunk = new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        recommendationService
-            .GetRecommendationsByContentfulReferencesAsync(
-                Arg.Any<IEnumerable<string>>()
-            )
-            .Returns(new List<SqlRecommendationDto>());
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            recommendation: recommendationService
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        // Act / Assert
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
-            sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug
-            )
-        );
-
-        Assert.Equal("Could not find recommendation", ex.Message);
-    }
-
-    [Fact]
-    public async Task RouteToSelectSchoolsToUpdateStatusViewModelAsync_Uses_Existing_ViewModel_And_Populates_Errors()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        var group = Substitute.For<IGroupService>();
-        var recommendationService = Substitute.For<IRecommendationService>();
-        var session = Substitute.For<ISession>();
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Session = session;
-
-        var categorySlug = "category-one";
-        var sectionSlug = "section-one";
-        var recommendationSlug = "recommendation-one";
-
-        var recommendationChunk = new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
-        };
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
-        };
-
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
-
-        recommendationService
-            .GetRecommendationsByContentfulReferencesAsync(
-                Arg.Any<IEnumerable<string>>()
-            )
-            .Returns(
-                new List<SqlRecommendationDto>
-                {
-                    new() { Id = 20 }
-                }
-            );
-
-        group
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                100,
-                20
-            )
-            .Returns(
-                new List<(
-                    EstablishmentEntity establishment,
-                    EstablishmentRecommendationHistoryEntity? recommendationHistory)>()
-            );
-
-        var existingViewModel = new GroupsSelectSchoolsToUpdateStatusViewModel
-        {
-            SelectedSchoolsRefs =
-            [
-                "000001"
-            ]
-        };
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            group: group,
-            recommendation: recommendationService
-        );
-
-        var controller = new TestController
-        {
-            ControllerContext = new ControllerContext
-            {
-                RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
-        };
-
-        controller.RouteData.Values["categorySlug"] = categorySlug;
-
-        controller.ModelState.AddModelError(
-            "SelectedSchoolsRefs",
-            "Select at least one school"
-        );
-
-        // Act
-        var action =
-            await sut.RouteToSelectSchoolsToUpdateStatusViewModelAsync(
-                controller,
-                sectionSlug,
-                recommendationSlug,
-                existingViewModel
-            );
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(action);
-
-        var vm =
-            Assert.IsType<GroupsSelectSchoolsToUpdateStatusViewModel>(
-                view.Model
-            );
-
-        Assert.Same(existingViewModel, vm);
-        Assert.Contains("000001", vm.SelectedSchoolsRefs!);
-        Assert.Contains("Select at least one school", vm.ErrorMessages!);
-        Assert.Equal(categorySlug, vm.CategorySlug);
-        Assert.Equal(section, vm.Section);
-        Assert.Equal(recommendationChunk, vm.RecommendationChunk);
-    }
-
-    [Fact]
-    public async Task RouteToSelectStatusToUpdateViewModelAsync_Builds_View_With_Expected_Model()
-    {
-        var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
         var submission = Substitute.For<ISubmissionService>();
+        var recommendationService = Substitute.For<IRecommendationService>();
         var session = Substitute.For<ISession>();
 
         var httpContext = new DefaultHttpContext();
@@ -2799,16 +1957,13 @@ public class GroupsViewBuilderTests
         var recommendationChunk = new RecommendationChunkEntry
         {
             Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
+            Slug = recommendationSlug,
         };
 
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
+            CoreRecommendations = [recommendationChunk],
         };
 
         var schools = new List<SqlEstablishmentDto>
@@ -2817,61 +1972,48 @@ public class GroupsViewBuilderTests
             {
                 Id = 1,
                 EstablishmentRef = "000001",
-                OrgName = "School One"
+                OrgName = "School One",
             },
             new()
             {
                 Id = 2,
                 EstablishmentRef = "000002",
-                OrgName = "School Two"
-            }
+                OrgName = "School Two",
+            },
         };
 
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        group
+            .GetGroupSchoolsAsync(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "000001" },
+                    new() { Urn = "000002" },
+                }
+            );
 
         est.GetEstablishmentsByReferencesAsync(
                 Arg.Is<string[]>(refs => refs.SequenceEqual(new[] { "000001", "000002" }))
             )
             .Returns(schools);
 
-        est.GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Urn = "000001" },
-                    new() { Urn = "000002" }
-                }
-            );
-
         est.GetEstablishmentByReferenceAsync("000001").Returns(schools[0]);
         est.GetEstablishmentByReferenceAsync("000002").Returns(schools[1]);
 
         submission
-            .GetLatestSubmissionResponsesModel(
-                1,
-                section,
-                (SubmissionStatus?)null
-            )
-            .Returns(
-                new SubmissionResponsesModel(1, [])
-                {
-                    Status = SubmissionStatus.InProgress
-                }
-            );
+            .GetLatestSubmissionResponsesModel(1, section, (SubmissionStatus?)null)
+            .Returns(new SubmissionResponsesModel(1, []) { Status = SubmissionStatus.InProgress });
 
         submission
-            .GetLatestSubmissionResponsesModel(
-                2,
-                section,
-                (SubmissionStatus?)null
-            )
+            .GetLatestSubmissionResponsesModel(2, section, (SubmissionStatus?)null)
             .Returns((SubmissionResponsesModel?)null);
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
             est: est,
+            group: group,
             submission: submission
         );
 
@@ -2880,8 +2022,8 @@ public class GroupsViewBuilderTests
             ControllerContext = new ControllerContext
             {
                 RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
+                HttpContext = httpContext,
+            },
         };
 
         controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -2889,7 +2031,7 @@ public class GroupsViewBuilderTests
         var viewModel = new GroupsSelectStatusToUpdateViewModel
         {
             SelectedSchoolsRefs = ["000001", "000002"],
-            SelectedStatusKey = RecommendationStatus.NotStarted
+            SelectedStatusKey = RecommendationStatus.NotStarted,
         };
 
         var result = await sut.RouteToSelectStatusToUpdateViewModelAsync(
@@ -2910,14 +2052,7 @@ public class GroupsViewBuilderTests
         Assert.Equal(section, model.Section);
         Assert.Equal(recommendationChunk, model.CurrentChunk);
         Assert.Equal(new[] { "School One", "School Two" }, model.SelectedSchoolNames);
-        Assert.Equal(
-            Enum.GetValues<RecommendationStatus>(),
-            model.StatusOptions.Keys
-        );
-
-        await submission
-            .Received(1)
-            .SetSubmissionInaccessibleAsync(1, section.Id);
+        Assert.Equal(Enum.GetValues<RecommendationStatus>(), model.StatusOptions.Keys);
     }
 
     [Fact]
@@ -2936,16 +2071,13 @@ public class GroupsViewBuilderTests
         var recommendationChunk = new RecommendationChunkEntry
         {
             Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
+            Slug = recommendationSlug,
         };
 
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
+            CoreRecommendations = [recommendationChunk],
         };
 
         var schools = new List<SqlEstablishmentDto>
@@ -2954,15 +2086,13 @@ public class GroupsViewBuilderTests
             {
                 Id = 1,
                 EstablishmentRef = "000001",
-                OrgName = "School One"
-            }
+                OrgName = "School One",
+            },
         };
 
         currentUser.UserId.Returns(123);
 
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
         est.GetEstablishmentsByReferencesAsync(
                 Arg.Is<string[]>(refs => refs.SequenceEqual(new[] { "000001" }))
@@ -2972,9 +2102,7 @@ public class GroupsViewBuilderTests
         microcopyProvider
             .GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.GroupsUpdateStatusSuccessPanelText,
-                Arg.Is<Dictionary<string, string>>(values =>
-                    values["schoolCount"] == "1"
-                )
+                Arg.Is<Dictionary<string, string>>(values => values["schoolCount"] == "1")
             )
             .Returns("Updated 1 schools");
 
@@ -2992,8 +2120,8 @@ public class GroupsViewBuilderTests
             ControllerContext = new ControllerContext
             {
                 RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
+                HttpContext = httpContext,
+            },
         };
 
         controller.TempData = new TempDataDictionary(
@@ -3006,7 +2134,7 @@ public class GroupsViewBuilderTests
         {
             SelectedSchoolsRefs = ["000001"],
             SelectedStatus = RecommendationStatus.Complete.ToString(),
-            Notes = "Test note"
+            Notes = "Test note",
         };
 
         var result = await sut.UpdateSchoolsRecommendationStatusAsync(
@@ -3041,10 +2169,7 @@ public class GroupsViewBuilderTests
                 100
             );
 
-        Assert.Equal(
-            "Updated 1 school",
-            controller.TempData["StatusUpdateSuccessTitle"]
-        );
+        Assert.Equal("Updated 1 school", controller.TempData["StatusUpdateSuccessTitle"]);
     }
 
     [Fact]
@@ -3052,6 +2177,7 @@ public class GroupsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
         var recommendationService = Substitute.For<IRecommendationService>();
         var submission = Substitute.For<ISubmissionService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
@@ -3067,16 +2193,13 @@ public class GroupsViewBuilderTests
         var recommendationChunk = new RecommendationChunkEntry
         {
             Sys = new SystemDetails("contentful-rec-1"),
-            Slug = recommendationSlug
+            Slug = recommendationSlug,
         };
 
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("section-1"),
-            CoreRecommendations =
-            [
-                recommendationChunk
-            ]
+            CoreRecommendations = [recommendationChunk],
         };
 
         var schools = new List<SqlEstablishmentDto>
@@ -3085,45 +2208,37 @@ public class GroupsViewBuilderTests
             {
                 Id = 1,
                 EstablishmentRef = "000001",
-                OrgName = "School One"
+                OrgName = "School One",
             },
             new()
             {
                 Id = 2,
                 EstablishmentRef = "000002",
-                OrgName = "School Two"
-            }
+                OrgName = "School Two",
+            },
         };
 
         currentUser.UserId.Returns(123);
 
-        contentful
-            .GetSectionBySlugAsync(sectionSlug)
-            .Returns(section);
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
-        est.GetEstablishmentsByReferencesAsync(
-                Arg.Any<string[]>()
-            )
-            .Returns(schools);
-
-        est.GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Urn = "000001" },
-                    new() { Urn = "000002" }
-                }
-            );
+        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>()).Returns(schools);
 
         est.GetEstablishmentByReferenceAsync("000001").Returns(schools[0]);
         est.GetEstablishmentByReferenceAsync("000002").Returns(schools[1]);
 
+        group
+            .GetGroupSchoolsAsync(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "000001" },
+                    new() { Urn = "000002" },
+                }
+            );
+
         submission
-            .GetLatestSubmissionResponsesModel(
-                Arg.Any<int>(),
-                section,
-                (SubmissionStatus?)null
-            )
+            .GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, (SubmissionStatus?)null)
             .Returns((SubmissionResponsesModel?)null);
 
         recommendationService
@@ -3140,6 +2255,7 @@ public class GroupsViewBuilderTests
         var sut = CreateServiceUnderTest(
             contentful: contentful,
             est: est,
+            group: group,
             submission: submission,
             recommendation: recommendationService,
             currentUser: currentUser
@@ -3150,8 +2266,8 @@ public class GroupsViewBuilderTests
             ControllerContext = new ControllerContext
             {
                 RouteData = new RouteData(),
-                HttpContext = httpContext
-            }
+                HttpContext = httpContext,
+            },
         };
 
         controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -3160,7 +2276,7 @@ public class GroupsViewBuilderTests
         {
             SelectedSchoolsRefs = ["000001", "000002"],
             SelectedStatus = RecommendationStatus.Complete.ToString(),
-            Notes = "Test note"
+            Notes = "Test note",
         };
 
         var result = await sut.UpdateSchoolsRecommendationStatusAsync(
@@ -3181,5 +2297,4 @@ public class GroupsViewBuilderTests
             model.StatusErrorMessage
         );
     }
-
 }

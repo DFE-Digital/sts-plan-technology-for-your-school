@@ -21,10 +21,9 @@ public class ReviewAnswersViewBuilder(
     IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
-        matEstablishmentProvider
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = matEstablishmentProvider
         ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
@@ -41,8 +40,7 @@ public class ReviewAnswersViewBuilder(
     {
         var establishmentId = await GetRoutingEstablishmentId();
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -87,8 +85,7 @@ public class ReviewAnswersViewBuilder(
     )
     {
         var establishmentId = await GetRoutingEstablishmentId();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -148,8 +145,7 @@ public class ReviewAnswersViewBuilder(
             var groupEstablishmentId = CurrentUser.IsMat ? CurrentUser.UserOrganisationId : null;
             var userId = GetUserIdOrThrowException();
 
-            var section =
-                await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
                 ?? throw new ContentfulDataUnavailableException(
                     $"Could not find section for slug {sectionSlug}"
                 );
@@ -257,8 +253,10 @@ public class ReviewAnswersViewBuilder(
             .ToList();
 
         // Get ordered retired responses from section questions and select out the responses from the submission
-        var orderedRetiredResponses =
-            submissionModel.Submission?.Responses?.OrderBy(r => r.Order).ToList() ?? [];
+        var orderedRetiredResponses = submissionModel
+            .Submission?.Responses?.OrderBy(r => r.Order)
+            .ToList()
+            ?? [];
 
         //Join the two lists together with core first so we only rely on the order columnn for the retired responses
         List<QuestionWithAnswerModel> responses =
@@ -283,7 +281,9 @@ public class ReviewAnswersViewBuilder(
             QuestionsAnswered = responses.Count,
             TotalQuestions = section.Questions.Count(),
             ShowInProgressDisclaimer = isMatInProgressView,
-            BackLinkHref = isMatInProgressView ? $"/school/{categorySlug}" : $"/{categorySlug}",
+            BackLinkHref = isMatInProgressView
+                ? $"/{categorySlug}/{sectionSlug}/self-assessment"
+                : $"/{categorySlug}",
             BackButtonText = isMatInProgressView
                 ? $"Back to {section.Name.ToLowerInvariant()}"
                 : "Back to recommendations",
@@ -350,8 +350,7 @@ public class ReviewAnswersViewBuilder(
             CurrentUser
         );
 
-        var sectionId =
-            routingData.QuestionnaireSection.Sys?.Id
+        var sectionId = routingData.QuestionnaireSection.Sys?.Id
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section id for slug {sectionSlug}"
             );
@@ -362,8 +361,7 @@ public class ReviewAnswersViewBuilder(
             c.Sections?.Any(s => s.Id == sectionId) == true
         );
 
-        var categoryName =
-            category?.Header?.Text
+        var categoryName = category?.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for section {sectionSlug}"
             );

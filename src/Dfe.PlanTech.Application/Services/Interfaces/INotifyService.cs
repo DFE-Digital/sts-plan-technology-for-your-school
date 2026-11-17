@@ -25,16 +25,20 @@ public interface INotifyService
         string establishmentName
     );
 
-    List<NotifySendResult> SendMatStandardEmail(
-        ShareByEmailModel model,
-        List<QuestionnaireSectionEntry> sections,
-        string categoryName
-    );
-
     List<NotifySendResult> SendMatSingleRecommendationEmail(
         ShareByEmailModel model,
         ComponentTextBodyEntry textBody,
+        string matName,
         string recommendationHeader,
+        string categoryName,
+        string topic,
+        string schoolsList
+    );
+
+    List<NotifySendResult> SendMatStandardEmail(
+        ShareByEmailModel model,
+        List<QuestionnaireSectionEntry> sections,
+        string matName,
         string categoryName
     );
 }

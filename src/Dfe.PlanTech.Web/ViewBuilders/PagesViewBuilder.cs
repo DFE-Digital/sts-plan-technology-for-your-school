@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -14,7 +15,6 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -25,6 +25,7 @@ public class PagesViewBuilder(
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     IEstablishmentService establishmentService,
+    IGroupService groupService,
     INotifyService notifyService,
     ISubmissionService submissionService,
     IRecommendationService recommendationService
@@ -35,16 +36,16 @@ public class PagesViewBuilder(
     public const string CategoryLandingPagePrintView =
         "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
 
-    private readonly ContactOptionsConfiguration _contactOptions =
-        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ErrorPagesConfiguration _errorPages =
-        errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly INotifyService _notifyService =
-        notifyService ?? throw new ArgumentNullException(nameof(notifyService));
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IRecommendationService _recommendationService =
-        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value
+        ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value
+        ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly INotifyService _notifyService = notifyService
+        ?? throw new ArgumentNullException(nameof(notifyService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IRecommendationService _recommendationService = recommendationService
+        ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -75,14 +76,12 @@ public class PagesViewBuilder(
         if (hasSelectedASchool)
         {
             // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
-            var groupId =
-                CurrentUser.UserOrganisationId
+            var groupId = CurrentUser.UserOrganisationId
                 ?? throw new InvalidDataException(
                     "User is a MAT user but does not have an organisation ID (for the group)"
                 );
 
-            var groupSchools =
-                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
+            var groupSchools = await groupService.GetGroupSchoolsAsync(groupId, true);
 
             var selectedSchoolIsValid = groupSchools.Any(s =>
                 s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
@@ -156,18 +155,15 @@ public class PagesViewBuilder(
             context: context
         );
 
-        return controller.View(
-            CategoryLandingPagePrintView,
-            landingPageViewModel
-        );
+        return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
     public async Task<IActionResult> RouteToShareStandardPageAsync(
-       Controller controller,
-       string categorySlug,
-       ShareByEmailInputViewModel? inputModel = null,
-       CategoryLandingContext context = CategoryLandingContext.School
-   )
+        Controller controller,
+        string categorySlug,
+        ShareByEmailInputViewModel? inputModel = null,
+        CategoryLandingContext context = CategoryLandingContext.School
+    )
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
 
@@ -199,9 +195,13 @@ public class PagesViewBuilder(
 
         if (isMat)
         {
+            var matName = CurrentUser.UserOrganisationName
+                ?? throw new InvalidDataException("Cannot send an email without a MAT name");
+
             var matNotifyResults = _notifyService.SendMatStandardEmail(
                 inputModel.ToModel(),
                 category.Sections,
+                matName,
                 category.Header.Text
             );
 
@@ -211,19 +211,14 @@ public class PagesViewBuilder(
                 linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
                 routeValues: new Dictionary<string, string>
                 {
-            { nameof(categorySlug), categorySlug }
+                    { nameof(categorySlug), categorySlug },
                 }
             );
 
-            return HandleNotifyShareResults(
-                controller,
-                matNotifyResults,
-                matReturnToModel
-            );
+            return HandleNotifyShareResults(controller, matNotifyResults, matReturnToModel);
         }
 
-        var establishmentName =
-            await CurrentUser.GetActiveEstablishmentNameAsync()
+        var establishmentName = await CurrentUser.GetActiveEstablishmentNameAsync()
             ?? throw new InvalidDataException(
                 "Cannot send an email without an active establishment name"
             );
@@ -231,17 +226,14 @@ public class PagesViewBuilder(
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         var recommendationStatuses =
-            await _recommendationService.GetLatestRecommendationStatusesAsync(
-                establishmentId
-            );
+            await _recommendationService.GetLatestRecommendationStatusesAsync(establishmentId);
 
         var sectionIds = category.Sections.Select(s => s.Id).ToList();
 
-        var sectionStatuses =
-            await _submissionService.GetSectionStatusesForSchoolAsync(
-                establishmentId,
-                sectionIds
-            );
+        var sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
+            establishmentId,
+            sectionIds
+        );
 
         var notifyResults = _notifyService.SendStandardEmail(
             inputModel.ToModel(),
@@ -256,17 +248,10 @@ public class PagesViewBuilder(
             actionName: nameof(PagesController.GetByRoute),
             controllerName: nameof(PagesController),
             linkText: $"Back to {category.Header.Text.ToLowerInvariant()}",
-            routeValues: new Dictionary<string, string>
-            {
-            { "route", categorySlug }
-            }
+            routeValues: new Dictionary<string, string> { { "route", categorySlug } }
         );
 
-        return HandleNotifyShareResults(
-            controller,
-            notifyResults,
-            returnToModel
-        );
+        return HandleNotifyShareResults(controller, notifyResults, returnToModel);
     }
 
     private static CategoryLandingPageViewModel BuildLandingPageViewModel(
@@ -277,15 +262,14 @@ public class PagesViewBuilder(
         CategoryLandingContext context = CategoryLandingContext.School
     )
     {
-        var relatedActionsViewModels =
-            relatedActions
-                ?.Where(x => x is not null)
-                .Select(x => new RelatedActionViewModel
-                {
-                    Text = x.Title ?? string.Empty,
-                    Url = x.Url ?? string.Empty,
-                })
-                .ToList()
+        var relatedActionsViewModels = relatedActions
+            ?.Where(x => x is not null)
+            .Select(x => new RelatedActionViewModel
+            {
+                Text = x.Title ?? string.Empty,
+                Url = x.Url ?? string.Empty,
+            })
+            .ToList()
             ?? [];
 
         return new CategoryLandingPageViewModel
@@ -354,8 +338,7 @@ public class PagesViewBuilder(
 
     private async Task<IActionResult> RouteToLandingPageView(Controller controller, PageEntry page)
     {
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4)
+        var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category at {controller.Request.Path.Value}"
             );

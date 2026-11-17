@@ -10,11 +10,12 @@ public class EstablishmentWorkflow(
     IEstablishmentLinkRepository establishmentLinkRepository
 ) : IEstablishmentWorkflow
 {
-    private readonly IEstablishmentRepository _establishmentRepository =
-        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository
+        ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
+
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
     )
@@ -61,14 +62,6 @@ public class EstablishmentWorkflow(
             establishmentReferences
         );
         return establishments.Select(e => e.AsDto());
-    }
-
-    public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
-    {
-        var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(
-            establishmentId
-        );
-        return links.Select(l => l.AsDto()).ToList();
     }
 
     public Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
