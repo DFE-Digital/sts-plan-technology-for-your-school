@@ -18,7 +18,7 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        DbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
+        DbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
             .WithPassword(TestContainerPassword)
             .Build();
         await DbContainer.StartAsync();
@@ -29,17 +29,14 @@ public class DatabaseFixture : IAsyncLifetime
         EnsureDatabase.For.SqlDatabase(ConnectionString);
         var upgrader = DeployChanges
             .To.SqlDatabase(ConnectionString)
-            .WithScriptsEmbeddedInAssembly(
-                typeof(DatabaseUpgrader.Options).Assembly,
-                s =>
-                {
-                    filterOutput.Add(s);
-                    return s.StartsWith(
-                        "Dfe.PlanTech.DatabaseUpgrader.Scripts",
-                        StringComparison.Ordinal
-                    );
-                }
-            )
+            .WithScriptsEmbeddedInAssembly(typeof(DatabaseUpgrader.Options).Assembly, s =>
+            {
+                filterOutput.Add(s);
+                return s.StartsWith(
+                    "Dfe.PlanTech.DatabaseUpgrader.Scripts",
+                    StringComparison.Ordinal
+                );
+            })
             .LogToConsole()
             .Build();
         var result = upgrader.PerformUpgrade();
@@ -48,10 +45,7 @@ public class DatabaseFixture : IAsyncLifetime
             throw new Exception($"DbUp migration failed: {result.Error}");
         }
 
-        await SeedGiasReferenceDataAsync(
-            CreateDbContext(),
-            TestContext.Current.CancellationToken
-        );
+        await SeedGiasReferenceDataAsync(CreateDbContext(), TestContext.Current.CancellationToken);
     }
 
     /// <summary>
@@ -79,7 +73,8 @@ public class DatabaseFixture : IAsyncLifetime
 
     private static async Task SeedGiasReferenceDataAsync(
         DbContext dbContext,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         try
         {
