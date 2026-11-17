@@ -93,7 +93,7 @@ public class RecommendationWorkflow(
                 recommendationContentfulReference,
             ]);
 
-        var recommendation = recommendations.FirstOrDefault()
+        var recommendation = recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault()
             ?? throw new InvalidOperationException(
                 $"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found"
             );

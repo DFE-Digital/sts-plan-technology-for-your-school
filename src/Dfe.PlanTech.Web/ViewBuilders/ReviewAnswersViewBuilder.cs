@@ -142,7 +142,8 @@ public class ReviewAnswersViewBuilder(
         try
         {
             var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-            var groupEstablishmentId = CurrentUser.IsMat ? CurrentUser.UserOrganisationId : null;
+            var isGroupUser = CurrentUser.IsMat || CurrentUser.IsSatOrSSat;
+            var groupEstablishmentId = isGroupUser ? CurrentUser.UserOrganisationId : null;
             var userId = GetUserIdOrThrowException();
 
             var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -150,7 +151,7 @@ public class ReviewAnswersViewBuilder(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            var selectedEstablishmentIds = CurrentUser.IsMat
+            var selectedEstablishmentIds = isGroupUser
                 ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession()
                 : [];
 

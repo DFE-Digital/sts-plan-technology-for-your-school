@@ -821,6 +821,75 @@ public class ReviewAnswersViewBuilderTests
     }
 
     [Fact]
+    public async Task ConfirmCheckAnswers_WhenSatOrSSatHasSelectedEstablishments_ConfirmsEachSubmissionWithGroupId()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(false);
+        _currentUser.IsSatOrSSat.Returns(true);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+
+        _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([101, 102]);
+
+        var section = MakeSection("S1", "sec", "My Section");
+
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+
+        _submissions
+            .GetLatestSubmissionResponsesModel(101, section, SubmissionStatus.InProgress)
+            .Returns(new SubmissionResponsesModel(11, []));
+
+        _submissions
+            .GetLatestSubmissionResponsesModel(102, section, SubmissionStatus.InProgress)
+            .Returns(new SubmissionResponsesModel(12, []));
+
+        var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "My Section", 42);
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(101, 999, 11, 1, section);
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(102, 999, 12, 1, section);
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+        Assert.Equal(
+            nameof(ReviewAnswersController.GetSchoolSelfAssessmentSummary),
+            redirect.ActionName
+        );
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswers_WhenSatOrSSatHasNoSelectedEstablishments_UsesActiveSubmissionWithGroupId()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(false);
+        _currentUser.IsSatOrSSat.Returns(true);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
+
+        _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().Returns([]);
+
+        var section = MakeSection("S1", "sec", "My Section");
+
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+
+        await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "My Section", 42);
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndCreateRecommendationHistoriesAsync(2, 999, 42, 1, section);
+    }
+
+    [Fact]
     public async Task ConfirmCheckAnswers_WhenSelectedSubmissionMissing_SetsErrorAndRedirectsToCheckAnswers()
     {
         var sut = CreateSut();
