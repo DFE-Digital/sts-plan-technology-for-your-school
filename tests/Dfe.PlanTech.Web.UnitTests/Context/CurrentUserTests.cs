@@ -33,8 +33,9 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = ctx };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
         return (sut, ctx);
     }
 
@@ -46,9 +47,10 @@ public class CurrentUserTests
     public void Ctor_Throws_When_ContextAccessor_Null()
     {
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         Assert.Throws<ArgumentNullException>(() =>
-            new CurrentUserProvider(null!, establishmentService, logger)
+            new CurrentUserProvider(null!, establishmentService, groupService, logger)
         );
     }
 
@@ -56,9 +58,10 @@ public class CurrentUserTests
     public void Ctor_Throws_When_EstablishmentService_Null()
     {
         var accessor = new HttpContextAccessor();
+        var groupService = Substitute.For<IGroupService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         Assert.Throws<ArgumentNullException>(() =>
-            new CurrentUserProvider(accessor, null!, logger)
+            new CurrentUserProvider(accessor, null!, groupService, logger)
         );
     }
 
@@ -145,21 +148,12 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(
-                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
-                {
-                    new()
-                    {
-                        Urn = "999888",
-                        EstablishmentName = "Selected Academy",
-                        Id = 42,
-                    },
-                }
-            );
+        groupService
+            .IsSchoolWithinGroupAsync(100, "999888")
+            .Returns(true);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
@@ -173,7 +167,7 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentIdAsync();
@@ -417,6 +411,7 @@ public class CurrentUserTests
         var sut = new CurrentUserProvider(
             accessor,
             Substitute.For<IEstablishmentService>(),
+            Substitute.For<IGroupService>(),
             Substitute.For<ILogger<CurrentUserProvider>>()
         );
 
@@ -511,7 +506,7 @@ public class CurrentUserTests
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(httpContextAccessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(httpContextAccessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act & Assert
         var ex = Assert.Throws<InvalidDataException>(() =>
@@ -601,21 +596,12 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(
-                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
-                {
-                    new()
-                    {
-                        Urn = "999888",
-                        EstablishmentName = "Selected Academy",
-                        Id = 42,
-                    },
-                }
-            );
+        groupService
+            .IsSchoolWithinGroupAsync(100, "999888")
+            .Returns(true);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
@@ -629,7 +615,7 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -675,7 +661,7 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -765,18 +751,12 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns([
-                new()
-                {
-                    Urn = "999888",
-                    EstablishmentName = "Selected Academy",
-                    Id = 42,
-                },
-            ]);
+        groupService
+            .IsSchoolWithinGroupAsync(100, "999888")
+            .Returns(true);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
@@ -790,7 +770,7 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentUrnAsync();
@@ -878,7 +858,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var result = sut.GetActiveEstablishmentUkprn();
@@ -966,7 +946,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var result = sut.GetActiveEstablishmentUid();
@@ -1050,7 +1030,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var result = sut.GetActiveEstablishmentDsiId();
@@ -1135,7 +1115,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var result = sut.GetActiveEstablishmentReference();
@@ -1267,7 +1247,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1333,30 +1313,14 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
-        // Setup: The MAT only has schools with URNs 111222 and 333444
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new()
-                    {
-                        Urn = "111222",
-                        EstablishmentName = "My School 1",
-                        Id = 1,
-                    },
-                    new()
-                    {
-                        Urn = "333444",
-                        EstablishmentName = "My School 2",
-                        Id = 2,
-                    },
-                }
-            );
+        groupService
+            .IsSchoolWithinGroupAsync(100, "888777")
+            .Returns(false);
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1369,7 +1333,7 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify validation was attempted
-        await establishmentService.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
+        await groupService.Received(1).IsSchoolWithinGroupAsync(100, "888777");
 
         // Verify the cookie was cleared (warning logged)
         logger
@@ -1404,7 +1368,8 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var groupService = Substitute.For<IGroupService>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1419,7 +1384,7 @@ public class CurrentUserTests
         // Verify we never called the establishment service
         await establishmentService
             .DidNotReceive()
-            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
         await establishmentService
             .DidNotReceive()
             .GetEstablishmentByReferenceAsync(Arg.Any<string>());
@@ -1459,27 +1424,11 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
-        // Setup: The MAT has this school
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new()
-                    {
-                        Urn = "111222",
-                        EstablishmentName = "My School 1",
-                        Id = 42,
-                    },
-                    new()
-                    {
-                        Urn = "333444",
-                        EstablishmentName = "My School 2",
-                        Id = 43,
-                    },
-                }
-            );
+        groupService
+            .IsSchoolWithinGroupAsync(100, "111222")
+            .Returns(true);
 
         // Setup: Return the school details from the database
         establishmentService
@@ -1494,7 +1443,7 @@ public class CurrentUserTests
             );
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1507,7 +1456,7 @@ public class CurrentUserTests
         Assert.Equal("My School 1 (Full Name)", activeEstablishmentName); // Name from database
 
         // Verify validation was performed
-        await establishmentService.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
+        await groupService.Received(1).IsSchoolWithinGroupAsync(100, "111222");
 
         // Verify the school was loaded from database
         await establishmentService.Received(1).GetEstablishmentByReferenceAsync("111222");
@@ -1557,18 +1506,15 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         // Setup: Service throws an exception during validation
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(
-                Task.FromException<List<SqlEstablishmentLinkDto>>(
-                    new Exception("Database connection failed")
-                )
-            );
+        groupService
+            .IsSchoolWithinGroupAsync(100, "111222")
+            .Returns(Task.FromException<bool>(new Exception("Database connection failed")));
 
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1631,7 +1577,8 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var groupService = Substitute.For<IGroupService>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1657,7 +1604,7 @@ public class CurrentUserTests
         // Verify we never called the establishment service
         await establishmentService
             .DidNotReceive()
-            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
     // ---------- Cookie corruption and validation tests ----------
@@ -1696,7 +1643,8 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var groupService = Substitute.For<IGroupService>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1724,7 +1672,7 @@ public class CurrentUserTests
         // Verify we never tried to validate or load the school
         await establishmentService
             .DidNotReceive()
-            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
         await establishmentService
             .DidNotReceive()
             .GetEstablishmentByReferenceAsync(Arg.Any<string>());
@@ -1765,7 +1713,8 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var groupService = Substitute.For<IGroupService>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, groupService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1793,7 +1742,7 @@ public class CurrentUserTests
         // Verify we never tried to validate or load the school
         await establishmentService
             .DidNotReceive()
-            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
         await establishmentService
             .DidNotReceive()
             .GetEstablishmentByReferenceAsync(Arg.Any<string>());
@@ -1834,7 +1783,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1894,7 +1843,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1954,7 +1903,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -2015,7 +1964,7 @@ public class CurrentUserTests
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
+        var sut = new CurrentUserProvider(accessor, establishmentService, Substitute.For<IGroupService>(), logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();

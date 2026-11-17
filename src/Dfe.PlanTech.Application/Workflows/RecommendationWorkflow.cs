@@ -92,8 +92,7 @@ public class RecommendationWorkflow(
             await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
                 new[] { recommendationContentfulReference }
             );
-        var recommendation =
-            recommendations.FirstOrDefault()
+        var recommendation = recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault()
             ?? throw new InvalidOperationException(
                 $"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found"
             );
@@ -143,7 +142,7 @@ public class RecommendationWorkflow(
             );
 
         var recommendation =
-            recommendations.FirstOrDefault()
+            recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault()
             ?? throw new InvalidOperationException(
                 $"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found"
             );

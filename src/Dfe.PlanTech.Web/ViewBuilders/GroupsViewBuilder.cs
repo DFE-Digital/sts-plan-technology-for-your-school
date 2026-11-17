@@ -85,10 +85,8 @@ public class GroupsViewBuilder(
                 sections
             );
 
-        var groupSchools =
-            await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
-                establishmentId
-            );
+        var groupSchools = await _groupService.GetGroupSchoolsAsync(
+            establishmentId, includeRecommendationCounts: true);
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
@@ -244,9 +242,7 @@ public class GroupsViewBuilder(
 
         var userEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(
-            userEstablishmentId
-        );
+        var establishmentLinks = await _groupService.GetGroupSchoolsAsync(userEstablishmentId);
 
         if (establishmentLinks == null || establishmentLinks.Count == 0)
         {
@@ -257,40 +253,10 @@ public class GroupsViewBuilder(
 
         var selectedSchoolIds = new List<int>();
 
-        foreach (var schoolRef in viewModel.SelectedSchoolsRefs)
-        {
-            var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
-            if (isGroupSchool)
-            {
-                var school = await _establishmentService.GetEstablishmentByReferenceAsync(
-                    schoolRef
-                );
+        if (viewModel.SelectedSchoolsRefs.Any(s => !VerifyGroupSchoolMembership(s, establishmentLinks)))
+            throw new InvalidDataException("One or more selected schools are not within the user's group");
 
-                if (school != null)
-                {
-                    var latestSubmissionForRef =
-                        await _submissionService.GetLatestSubmissionResponsesModel(
-                            school.Id,
-                            section,
-                            (SubmissionStatus?)null
-                        );
-
-                    if (
-                        latestSubmissionForRef != null
-                        && latestSubmissionForRef.Status == SubmissionStatus.InProgress
-                    )
-                    {
-                        await _submissionService.SetSubmissionInaccessibleAsync(
-                            school.Id,
-                            section.Id
-                        );
-                    }
-
-                    selectedSchoolIds.Add(school.Id);
-                }
-            }
-        }
-
+        await AddSelectedSchoolsForStatusUpdateAsync(viewModel.SelectedSchoolsRefs, establishmentLinks, section, selectedSchoolIds);
         controller.HttpContext.Session.SetValue<IEnumerable<int>>(
             SessionConstants.SelectedEstablishmentsKey,
             selectedSchoolIds
@@ -340,8 +306,7 @@ public class GroupsViewBuilder(
         }
 
         // establishments for the MAT
-        var matEstablishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(establishmentId) ?? [];
+        var matEstablishmentLinks = await _groupService.GetGroupSchoolsAsync(establishmentId);
 
         // Get urn's from links (filter for distinct, white spaces).
         var matEstablishmentUrns = matEstablishmentLinks
@@ -421,7 +386,7 @@ public class GroupsViewBuilder(
 
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
+        var establishmentLinks = await _groupService.GetGroupSchoolsAsync(establishmentId);
 
         if (establishmentLinks == null || establishmentLinks.Count == 0)
         {
@@ -480,9 +445,7 @@ public class GroupsViewBuilder(
 
         var userEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(
-            userEstablishmentId
-        );
+        var establishmentLinks = await _groupService.GetGroupSchoolsAsync(userEstablishmentId);
 
         if (establishmentLinks == null || establishmentLinks.Count == 0)
         {
@@ -495,103 +458,22 @@ public class GroupsViewBuilder(
             ? viewModel.PresentedSchoolRefs.ToArray()
             : viewModel.SelectedSchoolsRefs.ToArray();
 
+        if (selectedRefs.Length == 0 || selectedRefs.Any(s => !VerifyGroupSchoolMembership(s, establishmentLinks)))
+            throw new InvalidDataException("One or more selected schools are not within the user's group");
         if (selectedRefs.Length == 1)
         {
-            var isGroupSchool = VerifyGroupSchoolMembership(selectedRefs[0], establishmentLinks);
-            if (!isGroupSchool)
+            var shouldContinue = await PrepareSingleSchoolAssessmentAsync(controller, selectedRefs[0], section);
+            if (shouldContinue)
             {
-                throw new InvalidDataException(
-                    $"Selected school with ref {selectedRefs[0]} not linked to user's group"
+                return controller.RedirectToRoute(
+                    QuestionsController.GetContinueSelfAssessmentAction,
+                    new { categorySlug, sectionSlug }
                 );
-            }
-            else
-            {
-                var school =
-                    await _establishmentService.GetEstablishmentByReferenceAsync(selectedRefs[0])
-                    ?? throw new InvalidDataException(
-                        $"School with ref {selectedRefs[0]} not found"
-                    );
-
-                if (
-                    string.IsNullOrWhiteSpace(school.EstablishmentRef)
-                    || string.IsNullOrWhiteSpace(school.OrgName)
-                )
-                {
-                    throw new InvalidDataException(
-                        $"School with ref {selectedRefs[0]} is missing required data"
-                    );
-                }
-
-                // This has to remain due to user-action requiring it for the continue self-assessment page
-                CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
-
-                // This has been added, so that we know it has come through as a bulk assessment
-                controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-                    SessionConstants.SelectedEstablishmentsKey,
-                    new List<int> { school.Id }
-                );
-
-                var latestSubmissionForRef =
-                    await _submissionService.GetLatestSubmissionResponsesModel(
-                        school.Id,
-                        section,
-                        (SubmissionStatus?)null
-                    );
-
-                if (
-                    latestSubmissionForRef != null
-                    && latestSubmissionForRef.Status == SubmissionStatus.InProgress
-                )
-                {
-                    return controller.RedirectToRoute(
-                        QuestionsController.GetContinueSelfAssessmentAction,
-                        new { categorySlug, sectionSlug }
-                    );
-                }
             }
         }
         else if (selectedRefs.Length > 1)
         {
-            var selectedSchoolIds = new List<int>();
-
-            foreach (var schoolRef in selectedRefs)
-            {
-                var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
-                if (isGroupSchool)
-                {
-                    var school = await _establishmentService.GetEstablishmentByReferenceAsync(
-                        schoolRef
-                    );
-
-                    if (school != null)
-                    {
-                        var latestSubmissionForRef =
-                            await _submissionService.GetLatestSubmissionResponsesModel(
-                                school.Id,
-                                section,
-                                (SubmissionStatus?)null
-                            );
-
-                        if (
-                            latestSubmissionForRef != null
-                            && latestSubmissionForRef.Status == SubmissionStatus.InProgress
-                        )
-                        {
-                            await _submissionService.SetSubmissionInaccessibleAsync(
-                                school.Id,
-                                section.Id
-                            );
-                        }
-
-                        selectedSchoolIds.Add(school.Id);
-                    }
-                }
-            }
-
-            controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-                SessionConstants.SelectedEstablishmentsKey,
-                selectedSchoolIds
-            );
+            await PrepareMultipleSchoolAssessmentsAsync(controller, selectedRefs, establishmentLinks, section);
         }
 
         var questionSlug = section.Questions.First().Slug;
@@ -607,6 +489,82 @@ public class GroupsViewBuilder(
         );
     }
 
+
+    private async Task AddSelectedSchoolsForStatusUpdateAsync(
+        IEnumerable<string> selectedSchoolRefs,
+        List<SqlEstablishmentLinkDto> establishmentLinks,
+        QuestionnaireSectionEntry section,
+        List<int> selectedSchoolIds)
+    {
+        foreach (var schoolRef in selectedSchoolRefs)
+        {
+            if (!VerifyGroupSchoolMembership(schoolRef, establishmentLinks))
+                continue;
+
+            var school = await _establishmentService.GetEstablishmentByReferenceAsync(schoolRef);
+            if (school == null)
+                continue;
+
+            var latestSubmission = await _submissionService.GetLatestSubmissionResponsesModel(
+                school.Id, section, (SubmissionStatus?)null);
+            if (latestSubmission?.Status == SubmissionStatus.InProgress)
+            {
+                await _submissionService.SetSubmissionInaccessibleAsync(school.Id, section.Id);
+            }
+            selectedSchoolIds.Add(school.Id);
+        }
+    }
+
+    private async Task<bool> PrepareSingleSchoolAssessmentAsync(
+        Controller controller, string schoolRef, QuestionnaireSectionEntry section)
+    {
+        var school = await _establishmentService.GetEstablishmentByReferenceAsync(schoolRef)
+            ?? throw new InvalidDataException($"School with ref {schoolRef} not found");
+
+        if (string.IsNullOrWhiteSpace(school.EstablishmentRef) ||
+            string.IsNullOrWhiteSpace(school.OrgName))
+        {
+            throw new InvalidDataException($"School with ref {schoolRef} is missing required data");
+        }
+
+        // Required for the continue self-assessment page.
+        CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey, new List<int> { school.Id });
+
+        var latestSubmission = await _submissionService.GetLatestSubmissionResponsesModel(
+            school.Id, section, (SubmissionStatus?)null);
+        return latestSubmission?.Status == SubmissionStatus.InProgress;
+    }
+
+    private async Task PrepareMultipleSchoolAssessmentsAsync(
+        Controller controller,
+        IEnumerable<string> selectedRefs,
+        List<SqlEstablishmentLinkDto> establishmentLinks,
+        QuestionnaireSectionEntry section)
+    {
+        var selectedSchoolIds = new List<int>();
+        foreach (var schoolRef in selectedRefs)
+        {
+            if (!VerifyGroupSchoolMembership(schoolRef, establishmentLinks))
+                continue;
+
+            var school = await _establishmentService.GetEstablishmentByReferenceAsync(schoolRef);
+            if (school == null)
+                continue;
+
+            var latestSubmission = await _submissionService.GetLatestSubmissionResponsesModel(
+                school.Id, section, (SubmissionStatus?)null);
+            if (latestSubmission?.Status == SubmissionStatus.InProgress)
+            {
+                await _submissionService.SetSubmissionInaccessibleAsync(school.Id, section.Id);
+            }
+            selectedSchoolIds.Add(school.Id);
+        }
+
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey, selectedSchoolIds);
+    }
 
     private bool VerifyGroupSchoolMembership(
         string schoolRef,
@@ -664,8 +622,7 @@ public class GroupsViewBuilder(
         IEnumerable<QuestionnaireSectionEntry> sections
     )
     {
-        var matEstablishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+        var matEstablishmentLinks = await _groupService.GetGroupSchoolsAsync(matEstablishmentId);
 
         var matEstablishmentUrns = matEstablishmentLinks
             .Select(e => e.Urn)
