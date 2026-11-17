@@ -26,6 +26,7 @@ public class QuestionsViewBuilder(
     IQuestionService questionService,
     ISubmissionService submissionService,
     IEstablishmentService establishmentService,
+    IGroupService groupService,
     IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
@@ -199,7 +200,7 @@ public class QuestionsViewBuilder(
             );
 
             viewModel.TrustSchoolAssessmentContinueHref =
-                $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
+                $"/trust/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
         }
 
         return controller.View(InterstitialPagePath, viewModel);
@@ -274,7 +275,7 @@ public class QuestionsViewBuilder(
             );
 
         var schools =
-            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
+            await groupService.GetGroupSchoolsAsync(groupId, true) ?? [];
 
         var rows = new List<TrustSchoolAssessmentRowViewModel>();
 

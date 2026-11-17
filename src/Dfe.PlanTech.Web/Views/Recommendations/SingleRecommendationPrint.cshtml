@@ -16,9 +16,11 @@
     <div class="recommendation-piece-content">
         <span class="govuk-caption-l">Recommendation @Model.CurrentChunkCount of @Model.TotalChunks</span>
             <h1 class="govuk-heading-l">@chunk.HeaderText</h1>
+        @if (!Model.IsMat)
+        {
 
-        <div class="dfe-table-scroll" tabindex="0">
-            <table class="govuk-table">
+            <div class="dfe-table-scroll" tabindex="0">
+                <table class="govuk-table">
                 <thead class="govuk-table__head">
                     <tr class="govuk-table__row">
                         <th scope="col" class="govuk-table__header">Status</th>
@@ -37,6 +39,7 @@
                 </tbody>
             </table>
         </div>
+        }
 
         <hr class="govuk-section-break govuk-section-break--m">
 

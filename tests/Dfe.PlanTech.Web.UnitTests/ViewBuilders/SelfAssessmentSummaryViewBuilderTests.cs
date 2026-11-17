@@ -199,7 +199,7 @@ public class SelfAssessmentSummaryViewBuilderTests
         Assert.Equal("Digital leadership and governance", model.CategoryName);
         Assert.Equal(2, model.CompletedSchoolCount);
         Assert.Equal(
-            $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
+            $"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
             model.SubmitAnotherSelfAssessmentHref
         );
 
@@ -210,14 +210,14 @@ public class SelfAssessmentSummaryViewBuilderTests
                 Assert.Equal("School One", link.LinkText);
                 Assert.Equal("School One", link.SchoolName);
                 Assert.Equal("100001", link.SchoolUrn);
-                Assert.Equal("/groups/leadership-governance-standard", link.Href);
+                Assert.Equal("/trust/leadership-governance-standard", link.Href);
             },
             link =>
             {
                 Assert.Equal("School Two", link.LinkText);
                 Assert.Equal("School Two", link.SchoolName);
                 Assert.Equal("100002", link.SchoolUrn);
-                Assert.Equal("/groups/leadership-governance-standard", link.Href);
+                Assert.Equal("/trust/leadership-governance-standard", link.Href);
             }
         );
     }

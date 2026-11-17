@@ -35,14 +35,16 @@ public interface IRecommendationsViewBuilder
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        string chunkSlug
+        string chunkSlug,
+        CategoryLandingContext context = CategoryLandingContext.School
     );
 
     Task<IActionResult> RouteToPrintAll(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        string chunkSlug
+        string chunkSlug,
+        CategoryLandingContext context = CategoryLandingContext.School
     );
 
     Task<IActionResult> RouteToShareRecommendationAsync(
@@ -50,6 +52,7 @@ public interface IRecommendationsViewBuilder
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        ShareByEmailInputViewModel? inputModel = null
+        ShareByEmailInputViewModel? inputModel = null,
+        CategoryLandingContext context = CategoryLandingContext.School
     );
 }

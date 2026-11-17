@@ -35,6 +35,7 @@ public class PagesViewBuilderTests
     private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
     private readonly IEstablishmentService _establishmentService =
         Substitute.For<IEstablishmentService>();
+    private readonly IGroupService _groupService = Substitute.For<IGroupService>();
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
@@ -58,6 +59,7 @@ public class PagesViewBuilderTests
         IContentfulService? contentful = null,
         ICurrentUserProvider? currentUser = null,
         IEstablishmentService? establishmentService = null,
+        IGroupService? groupService = null,
         INotifyService? notifyService = null,
         ISubmissionService? submissionService = null,
         IRecommendationService? recommendationService = null,
@@ -71,6 +73,7 @@ public class PagesViewBuilderTests
         contentful ??= _contentfulService;
         currentUser ??= _currentUser;
         establishmentService ??= _establishmentService;
+        groupService ??= _groupService;
         notifyService ??= _notifyService;
         submissionService ??= _submissionService;
         recommendationService ??= _recommendationService;
@@ -91,6 +94,7 @@ public class PagesViewBuilderTests
             contentful,
             currentUser,
             establishmentService,
+            groupService,
             notifyService,
             submissionService,
             recommendationService
@@ -147,6 +151,7 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var notifyService = Substitute.For<INotifyService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var reocmmendationService = Substitute.For<IRecommendationService>();
@@ -159,6 +164,7 @@ public class PagesViewBuilderTests
                 contentful,
                 currentUser,
                 establishmentService,
+                groupService,
                 notifyService,
                 submissionService,
                 reocmmendationService
@@ -173,6 +179,7 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var notifyService = Substitute.For<INotifyService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var reocmmendationService = Substitute.For<IRecommendationService>();
@@ -185,6 +192,7 @@ public class PagesViewBuilderTests
                 contentful,
                 currentUser,
                 establishmentService,
+                groupService,
                 notifyService,
                 submissionService,
                 reocmmendationService
@@ -234,11 +242,13 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
             currentUser: currentUser,
-            establishmentService: establishmentService
+            establishmentService: establishmentService,
+            groupService: groupService
         );
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
@@ -248,7 +258,7 @@ public class PagesViewBuilderTests
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(654321).Returns([]);
+        groupService.GetGroupSchoolsAsync(654321, true).Returns([]);
 
         var controller = new TestController();
 
@@ -271,11 +281,12 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
 
         // Setup establishmentService to return a list containing the selected school
         // (needed to verify that the user has access to the selected school)
-        establishmentService
-            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>())
+        groupService
+            .GetGroupSchoolsAsync(Arg.Any<int>(), true)
             .Returns(
                 new List<SqlEstablishmentLinkDto> { new SqlEstablishmentLinkDto { Urn = "123456" } }
             );
@@ -283,7 +294,8 @@ public class PagesViewBuilderTests
         var sut = CreateServiceUnderTest(
             contentful: contentful,
             currentUser: currentUser,
-            establishmentService: establishmentService
+            establishmentService: establishmentService,
+            groupService: groupService
         );
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
@@ -497,6 +509,31 @@ public class PagesViewBuilderTests
         var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
     }
 
+    [Fact]
+    public async Task RouteToCategoryLandingPrintPageAsync_WhenMatContext_ReturnsViewWithMatContext()
+    {
+        var category = CreateCategory("Networking");
+        var contentful = Substitute.For<IContentfulService>();
+        var slug = "networking";
+
+        contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+
+        var action = await sut.RouteToCategoryLandingPrintPageAsync(
+            controller,
+            slug,
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPagePrintView, view.ViewName);
+
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+    }
+
     // ---------- RouteToShareStandardPageAsync ----------
 
     [Fact]
@@ -521,6 +558,36 @@ public class PagesViewBuilderTests
         Assert.Equal("Category", model.Caption);
         Assert.Equal("Share list of recommendations by email", model.Heading);
         Assert.Null(model.InputModel);
+    }
+
+    [Fact]
+    public async Task RouteToShareStandardPageAsync_WhenMatContextAndInputModelIsNull_ReturnsMatShareView()
+    {
+        var controller = CreateController();
+        var category = CreateCategory("Category");
+
+        _contentfulService.GetCategoryBySlugAsync("category", 4).Returns(category);
+
+        var sut = CreateServiceUnderTest(useCurrentUserDefaults: false);
+
+        var result = await sut.RouteToShareStandardPageAsync(
+            controller,
+            "category",
+            null,
+            CategoryLandingContext.MAT
+        );
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Shared/Email/ShareByEmail.cshtml", viewResult.ViewName);
+
+        var model = Assert.IsType<ShareByEmailViewModel>(viewResult.Model);
+        Assert.Equal("Pages", model.PostController);
+        Assert.Equal(nameof(PagesController.ShareMatStandard), model.PostAction);
+        Assert.Equal("category", model.CategorySlug);
+        Assert.Equal("Category", model.Caption);
+        Assert.Equal("Share list of recommendations by email", model.Heading);
+        Assert.Null(model.InputModel);
+        Assert.True(model.IsMat);
     }
 
     [Fact]
@@ -710,6 +777,86 @@ public class PagesViewBuilderTests
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(expected.ActionName, redirect.ActionName);
         Assert.Equal(expected.ControllerName, redirect.ControllerName);
+    }
+
+    [Fact]
+    public async Task RouteToShareStandardPageAsync_WhenMatContextAndNotifySendSucceeds_UsesMatShareFlow()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+        var category = CreateCategory("Category");
+
+        _contentfulService.GetCategoryBySlugAsync("category", 4).Returns(category);
+        _currentUser.UserOrganisationName.Returns("Test MAT");
+
+        _notifyService
+            .SendMatStandardEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<List<QuestionnaireSectionEntry>>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()
+            )
+            .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
+
+        var sut = CreateServiceUnderTest(useCurrentUserDefaults: false);
+
+        var result = await sut.RouteToShareStandardPageAsync(
+            controller,
+            "category",
+            inputModel,
+            CategoryLandingContext.MAT
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(
+            nameof(GroupsController.GetMatRecommendationsLanding),
+            redirect.ActionName
+        );
+        Assert.Equal(
+            nameof(GroupsController).GetControllerNameSlug(),
+            redirect.ControllerName
+        );
+
+        var routeValues = Assert.IsType<IDictionary<string, object>>(
+            redirect.RouteValues!,
+            exactMatch: false
+        );
+        Assert.Equal("category", routeValues["categorySlug"]);
+
+        _notifyService
+            .Received(1)
+            .SendMatStandardEmail(
+                Arg.Is<ShareByEmailModel>(m =>
+                    m.NameOfUser == inputModel.NameOfUser
+                    && m.EmailAddresses.SequenceEqual(inputModel.EmailAddresses)
+                    && m.UserMessage == inputModel.UserMessage
+                ),
+                category.Sections,
+                "Test MAT",
+                "Category"
+            );
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentNameAsync();
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>());
+        await _submissionService
+            .DidNotReceive()
+            .GetSectionStatusesForSchoolAsync(
+                Arg.Any<int>(),
+                Arg.Any<List<string>>()
+            );
+        _notifyService
+            .DidNotReceive()
+            .SendStandardEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<List<QuestionnaireSectionEntry>>(),
+                Arg.Any<List<SqlSectionStatusDto>>(),
+                Arg.Any<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()
+            );
     }
 
     [Fact]

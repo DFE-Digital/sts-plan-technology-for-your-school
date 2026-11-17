@@ -188,39 +188,20 @@ public class EstablishmentWorkflowTests
         );
     }
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // GetGroupEstablishments
-    // ────────────────────────────────────────────────────────────────────────────
-
     [Fact]
-    public async Task GetGroupEstablishments_Maps_Links()
+    public async Task GetEstablishmentByReference_Returns_Null_When_No_Matches_Found()
     {
         var serviceUnderTest = CreateServiceUnderTest();
-        var establishments = new[]
-        {
-            MakeLink(100, "URN-1", "Child 1"),
-            MakeLink(200, "URN-2", "Child 2"),
-        }.ToList();
 
-        _linkRepo.GetGroupEstablishmentsByEstablishmentIdAsync(42).Returns(establishments);
+        _estRepo
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(r => r.Single() == "MISSING")
+            )
+            .Returns([]);
 
-        var links = await serviceUnderTest.GetGroupEstablishments(42);
+        var result = await serviceUnderTest.GetEstablishmentByReferenceAsync("MISSING");
 
-        Assert.Collection(
-            links,
-            l =>
-            {
-                Assert.Equal(100, l.Id);
-                Assert.Equal("URN-1", l.Urn);
-                Assert.Equal("Child 1", l.EstablishmentName);
-            },
-            l =>
-            {
-                Assert.Equal(200, l.Id);
-                Assert.Equal("URN-2", l.Urn);
-                Assert.Equal("Child 2", l.EstablishmentName);
-            }
-        );
+        Assert.Null(result);
     }
 
     // ────────────────────────────────────────────────────────────────────────────

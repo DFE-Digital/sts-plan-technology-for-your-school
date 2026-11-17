@@ -29,7 +29,7 @@
 }
 
 <div class="dfe-table-scroll">
-    <table class="govuk-table">
+    <table class="govuk-table group-recommendation-progress">
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">
@@ -38,11 +38,12 @@
                 <th scope="col" class="govuk-table__header">
                     @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressLastUpdatedHeading)
                 </th>
-                <th scope="col" class="govuk-table__header">
+                <th scope="col" class="govuk-table__header group-recommendation-progress__status">
                     @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupRecommendationProgressStatusHeading)
                 </th>
             </tr>
         </thead>
+
         <tbody class="govuk-table__body">
             @foreach (var school in Model.Schools)
             {
@@ -53,19 +54,22 @@
 
                     @if (school.RequiresSelfAssessment)
                     {
-                        <td class="govuk-table__cell">
-                            -
+                        <td class="govuk-table__cell custom-height">
                         </td>
-                        <td class="govuk-table__cell">
+
+                        <td class="govuk-table__cell govuk-!-font-size-16 custom-height group-recommendation-progress__status">
                             Self-assessment required
                         </td>
                     }
                     else
                     {
-                        <td class="govuk-table__cell">
-                            @school.LastUpdatedFormatted
+                        <td class="govuk-table__cell custom-height">
+                            <span class="govuk-!-font-size-16 group-recommendation-progress__last-updated">
+                                @school.LastUpdatedFormatted
+                            </span>
                         </td>
-                        <td class="govuk-table__cell">
+
+                        <td class="govuk-table__cell custom-height group-recommendation-progress__status">
                             <strong class="govuk-tag @school.StatusTagClass">
                                 @school.StatusText
                             </strong>
@@ -79,12 +83,12 @@
 
 <a class="govuk-button"
    href="@Url.RouteUrl(
-        GroupsController.GetSelectASchoolToUpdateStatusAction,
-        new
-        {
-            categorySlug = Model.CategorySlug,
-            sectionSlug = Model.SectionSlug,
-            recommendationSlug = Model.CurrentChunk.Slug
-        })">
+          GroupsController.GetSelectASchoolToUpdateStatusAction,
+          new
+          {
+              categorySlug = Model.CategorySlug,
+              sectionSlug = Model.SectionSlug,
+              recommendationSlug = Model.CurrentChunk.Slug
+          })">
     Update recommendation status
 </a>

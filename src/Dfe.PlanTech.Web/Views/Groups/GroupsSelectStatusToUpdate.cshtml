@@ -6,7 +6,7 @@
     var recommendation = Model.CurrentChunk;
     var categorySlug = Model.CategorySlug;
     var sectionSlug = Model.SectionSlug;
-    var backLinkHref = $"/groups/{categorySlug}/{sectionSlug}/{recommendation.Slug}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}";
+    var backLinkHref = $"/trust/{categorySlug}/{sectionSlug}/{recommendation.Slug}/{UrlConstants.GroupsSelectSchoolsToUpdateStatusSlug}";
     var schoolCount = @Model.SelectedSchoolsRefs!.Count;
 
     var dynamicValues = new Dictionary<string, string>()
@@ -16,10 +16,7 @@
 }
 
 @section NavButton {
-    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
-        Home
-    </govuk-back-link>
-    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
+    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint">
         @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectStatusBackLink)
     </govuk-back-link>
 
@@ -68,7 +65,7 @@
                         <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
                             <h1 class="govuk-fieldset__heading govuk-!-margin-bottom-5 govuk-heading-xl">
                                 @await Microcopy.GetTextByKeyAsync(
-                                ContentfulMicrocopyConstants.GroupsSelectStatusHeader);
+                                ContentfulMicrocopyConstants.GroupsSelectStatusHeader)
                             </h1>
 
                         </govuk-radios-fieldset-legend>
