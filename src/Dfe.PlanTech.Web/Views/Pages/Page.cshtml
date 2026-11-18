@@ -11,7 +11,7 @@
 
     var isSelectedSchoolHomePage =
         CurrentUser.IsMat &&
-        !string.IsNullOrWhiteSpace(CurrentUser.GetFocusedSchool().Name) &&
+        !string.IsNullOrWhiteSpace((await CurrentUser.GetFocusedEstablishmentAsync()).Name) &&
         Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
 
     var useBreadcrumbs = isTopicStartPage || isSelectedSchoolHomePage;
@@ -21,7 +21,7 @@
 
     var dsiOrganisation = CurrentUser.DsiOrganisation;
 
-    var focusedSchool = CurrentUser.GetFocusedSchool();
+    var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
 
     var breadcrumbs = new List<BreadcrumbItemViewModel>
     {

@@ -37,4 +37,6 @@ public static class ClaimConstants
 
     public const string DB_USER_ID = "db_user_id";
     public const string DB_ESTABLISHMENT_ID = "db_establishment_id";
+    public const string DB_FOCUSED_ESTABLISHMENT_ID = "db_focused_establishment_id";
+    public const string DB_TRUST_ESTABLISHMENT_ID = "db_trust_establishment_id";
 }

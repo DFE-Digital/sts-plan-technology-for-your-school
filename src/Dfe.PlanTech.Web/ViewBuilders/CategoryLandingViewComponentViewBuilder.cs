@@ -77,7 +77,9 @@ public class CategoryLandingViewComponentViewBuilder(
         bool print
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
@@ -216,8 +218,7 @@ public class CategoryLandingViewComponentViewBuilder(
     {
         try
         {
-            var groupEstablishmentIds = CurrentUser
-                .GetGroupSchools()
+            var groupEstablishmentIds = (await CurrentUser.GetGroupSchoolsAsync())
                 .Select(s => s.EstablishmentId)
                 .ToArray();
 

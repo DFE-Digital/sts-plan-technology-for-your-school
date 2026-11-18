@@ -102,10 +102,11 @@ public class GiasService(IEstablishmentWorkflow establishmentWorkflow, IGiasWork
             return [];
         }
 
-        // Now we know the user is from a group that can select schools, find the group's corresponding schools.
+        // Now that we know the user is from a group that can select schools,
+        // find the group's corresponding schools.
         IEnumerable<SqlGiasEstablishmentDto>? schools = null;
 
-        // Handle DSI TEST Multi-Academy Trust (010) not having a UID
+        // Tiny hack: handle the devs' DSI TEST Multi-Academy Trust (010) not having a UID
         if (dsiOrganisation.Ukprn == DsiConstants.DsiTestMultiAcademyTrustUkprn)
         {
             dsiOrganisation.Uid = "99999";

@@ -58,7 +58,7 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var establishmentId = CurrentUser.GetFocusedSchool()!.EstablishmentId;
+        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -192,8 +192,7 @@ public class QuestionsViewBuilder(
 
         if (isMatWithoutSelectedSchool)
         {
-            var groupSchools = CurrentUser.GetGroupSchools();
-
+            var groupSchools = await CurrentUser.GetGroupSchoolsAsync();
             viewModel.TrustSchoolAssessments = await BuildTrustSchoolAssessments(
                 categorySlug,
                 sectionSlug,
@@ -225,7 +224,7 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var establishmentId = CurrentUser.GetFocusedSchool()!.EstablishmentId;
+        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId;
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
         try
@@ -316,7 +315,9 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -374,7 +375,9 @@ public class QuestionsViewBuilder(
         bool isObsoleteSubmissionFlow
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -403,7 +406,9 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -433,7 +438,7 @@ public class QuestionsViewBuilder(
     {
         var selectedEstablishmentIds = CurrentUser.CanSelectSchools
             ? CurrentUser.GetSelectedSchoolEstablishmentIds()
-            : [CurrentUser.GetFocusedSchool()!.EstablishmentId];
+            : [(await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId];
 
         if (selectedEstablishmentIds!.Count == 0)
         {
@@ -473,7 +478,7 @@ public class QuestionsViewBuilder(
         {
             await SubmitAnswerForSelectedEstablishments(
                 CurrentUser.UserId,
-                CurrentUser.Establishment.Id,
+                (await CurrentUser.GetUserEstablishmentAsync()).Id,
                 answerViewModel,
                 selectedEstablishmentIds.ToArray()
             );

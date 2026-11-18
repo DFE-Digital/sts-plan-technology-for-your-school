@@ -56,21 +56,30 @@ public static class OnUserInformationReceivedEvent
 
         var establishmentService =
             context.HttpContext.RequestServices.GetRequiredService<IEstablishmentService>();
-        var sqlEstablishment = await establishmentService.GetOrCreateEstablishmentAsync(
-            dsiOrganisation
+        var sqlEstablishment = await establishmentService.GetEstablishmentByIdAsync(
+            signIn!.EstablishmentId!.Value
         );
+
+        signIn.EstablishmentId = sqlEstablishment.Id;
 
         var currentUser =
             context.HttpContext.RequestServices.GetRequiredService<ICurrentUserProvider>();
-        currentUser.SetEstablishment(sqlEstablishment);
+        currentUser.SetUserEstablishment(sqlEstablishment);
 
+        AdditionalClaimIdsModel additionalClaimIds;
         if (dsiOrganisation.Category.Id == DsiConstants.EstablishmentCategoryId)
         {
-            await ProcessSchoolLoginAsync(logger, currentUser, dsiOrganisation, dsiUserReference);
+            additionalClaimIds = ProcessSchoolLoginAsync(
+                logger,
+                currentUser,
+                dsiOrganisation,
+                dsiUserReference,
+                sqlEstablishment.Id
+            );
         }
         else if (DsiConstants.SatOrganisationCategoryIds.Contains(dsiOrganisation.Category.Id))
         {
-            await ProcessSatLoginAsync(
+            additionalClaimIds = await ProcessSatLoginAsync(
                 logger,
                 context,
                 currentUser,
@@ -79,43 +88,47 @@ public static class OnUserInformationReceivedEvent
                 dsiUserReference
             );
         }
-        else if (
-            DsiConstants.SelectASchoolOrganisationCategoryIds.Contains(dsiOrganisation.Category.Id)
-        )
+        else
         {
-            await ProcessGroupLogin(
+            // Group user
+            additionalClaimIds = await ProcessGroupLogin(
                 logger,
                 context,
                 currentUser,
                 dsiOrganisation,
-                dsiUserReference
+                dsiUserReference,
+                sqlEstablishment.Id
             );
         }
 
-        // Break here to check that signIn has correct establishmentId for SATs.
-        AddClaimsToPrincipal(context, signIn);
+        AddClaimsToPrincipal(context, signIn, additionalClaimIds);
     }
 
-    private static async Task ProcessSchoolLoginAsync(
+    private static AdditionalClaimIdsModel ProcessSchoolLoginAsync(
         ILogger<IDfeSignIn> logger,
         ICurrentUserProvider currentUser,
         EstablishmentModel dsiOrganisation,
-        string dsiUserReference
+        string dsiUserReference,
+        int establishmentId
     )
     {
         if (string.IsNullOrWhiteSpace(dsiOrganisation.Urn))
         {
             logger.LogWarning(
-                "No URN found in DSI data for school {SchoolName} when user with nameidentifier {DsiReference} signed in",
-                dsiOrganisation.Name,
-                dsiUserReference
+                "No URN found in DSI data on sign-in for user {DsiReference} at school {SchoolName}",
+                dsiUserReference,
+                dsiOrganisation.Name
             );
         }
 
-        await currentUser.SetFocusedSchoolAsync(dsiOrganisation.Reference, dsiOrganisation.Name);
+        return new AdditionalClaimIdsModel
+        {
+            FocusedEstablishmentId = establishmentId,
+            TrustEstablishmentId = null,
+        };
     }
 
-    private static async Task ProcessSatLoginAsync(
+    private static async Task<AdditionalClaimIdsModel> ProcessSatLoginAsync(
         ILogger<IDfeSignIn> logger,
         UserInformationReceivedContext context,
         ICurrentUserProvider currentUser,
@@ -127,11 +140,11 @@ public static class OnUserInformationReceivedEvent
         // SATs and SSATs:
         // Attempt to find single school within trust. Warn if not found.
         // Set focused school.
-        var satEstablishment = await GetSingleAcademySchoolEstablishmentAsync(
+        var schoolEstablishment = await GetSingleAcademySchoolEstablishmentAsync(
             context,
             dsiOrganisation
         );
-        if (satEstablishment is null)
+        if (schoolEstablishment is null)
         {
             var additionalWordSecure = dsiOrganisation.Category!.Id switch
             {
@@ -148,25 +161,33 @@ public static class OnUserInformationReceivedEvent
                 dsiUserReference,
                 dsiOrganisation.GroupUid
             );
+
+            return new AdditionalClaimIdsModel
+            {
+                FocusedEstablishmentId = signIn.EstablishmentId,
+                TrustEstablishmentId = signIn.EstablishmentId,
+            };
         }
         else
         {
             // If we found the (S)SAT's school, override the establishmentId in the claims.
             // We recorded the SAT in the sign-in record, but we will treat the user as being from
             // a school from now so we need to store the school establishment ID in the claims.
-            signIn.EstablishmentId = satEstablishment.EstablishmentId;
-            await currentUser.SetFocusedSchoolAsync(satEstablishment.Urn, satEstablishment.Name);
+            return new AdditionalClaimIdsModel
+            {
+                FocusedEstablishmentId = schoolEstablishment.EstablishmentId,
+                TrustEstablishmentId = signIn.EstablishmentId,
+            };
         }
-
-        await currentUser.SetFocusedSchoolAsync(dsiOrganisation.Reference, dsiOrganisation.Name);
     }
 
-    private static async Task ProcessGroupLogin(
+    private static async Task<AdditionalClaimIdsModel> ProcessGroupLogin(
         ILogger<IDfeSignIn> logger,
         UserInformationReceivedContext context,
         ICurrentUserProvider currentUser,
         EstablishmentModel dsiOrganisation,
-        string dsiUserReference
+        string dsiUserReference,
+        int establishmentId
     )
     {
         if (string.IsNullOrWhiteSpace(dsiOrganisation.GroupUid))
@@ -178,10 +199,11 @@ public static class OnUserInformationReceivedEvent
             );
         }
 
-        var giasService = context.HttpContext.RequestServices.GetRequiredService<IGiasService>();
-        var groupSchools = await giasService.GetSchoolsForMatAsync(dsiOrganisation);
-
-        await currentUser.SetGroupSchools(groupSchools);
+        return new AdditionalClaimIdsModel
+        {
+            FocusedEstablishmentId = null,
+            TrustEstablishmentId = establishmentId,
+        };
     }
 
     private static async Task<SelectedEstablishmentDataModel?> GetSingleAcademySchoolEstablishmentAsync(
@@ -210,7 +232,8 @@ public static class OnUserInformationReceivedEvent
 
     private static void AddClaimsToPrincipal(
         UserInformationReceivedContext context,
-        SqlSignInDto signin
+        SqlSignInDto signin,
+        AdditionalClaimIdsModel additionalClaimIds
     )
     {
         var principal = context.Principal;
@@ -220,9 +243,30 @@ public static class OnUserInformationReceivedEvent
         }
 
         ClaimsIdentity claimsIdentity = new([
-            new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
             new Claim(ClaimConstants.SessionId, Guid.NewGuid().ToString()),
+            new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
+            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, signin.EstablishmentId.ToString()),
         ]);
+
+        if (additionalClaimIds.FocusedEstablishmentId is not null)
+        {
+            claimsIdentity.AddClaim(
+                new(
+                    ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID,
+                    additionalClaimIds.FocusedEstablishmentId.ToString()
+                )
+            );
+        }
+
+        if (additionalClaimIds.TrustEstablishmentId is not null)
+        {
+            claimsIdentity.AddClaim(
+                new(
+                    ClaimConstants.DB_TRUST_ESTABLISHMENT_ID,
+                    additionalClaimIds.TrustEstablishmentId.ToString()
+                )
+            );
+        }
 
         principal.AddIdentity(claimsIdentity);
     }

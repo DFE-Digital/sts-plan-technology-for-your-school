@@ -56,11 +56,15 @@ public class BaseViewBuilder(
         };
     }
 
-    protected IEnumerable<SelectedEstablishmentDataModel> GetFocusedOrSelectedSchools()
+    protected async Task<List<SelectedEstablishmentDataModel>> GetFocusedOrSelectedSchoolsAsync()
     {
-        return CurrentUser.CanSelectSchools
-            ? CurrentUser.GetSelectedSchools()!
-            : [CurrentUser.GetFocusedSchool()!];
+        if (CurrentUser.CanSelectSchools)
+        {
+            return CurrentUser.GetSelectedSchools()!;
+        }
+
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        return [focusedEstablishment!];
     }
 
     protected static RedirectToActionResult HandleNotifyShareResults(

@@ -57,19 +57,11 @@ public class PagesViewBuilder(
 
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
+            && !isMatTopicStartPage
             && CurrentUser.CanSelectSchools
-            && CurrentUser.GetSelectedSchools()!.Count == 0
-            && !isMatTopicStartPage;
+            && (await GetFocusedOrSelectedSchoolsAsync()).Count == 0;
 
         if (shouldRedirectToSchoolSelection)
-        {
-            return controller.Redirect(UrlConstants.SelectASchoolPage);
-        }
-
-        var selectedSchools = GetFocusedOrSelectedSchools().ToList();
-
-        // If the user can select schools and hasn't done so, redirect them to the select a school page.
-        if (CurrentUser.CanSelectSchools && selectedSchools.Count == 0)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
@@ -101,7 +93,7 @@ public class PagesViewBuilder(
             }
             else
             {
-                var focusedSchool = CurrentUser.GetFocusedSchool();
+                var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
                 viewModel.ActiveEstablishmentName = focusedSchool.Name;
                 viewModel.ActiveEstablishmentUrn = focusedSchool.Urn;
             }
@@ -176,7 +168,7 @@ public class PagesViewBuilder(
         if (isMat)
         {
             var matName =
-                CurrentUser.Establishment.OrgName
+                (await CurrentUser.GetUserEstablishmentAsync()).OrgName
                 ?? throw new InvalidDataException("Cannot send an email without a MAT name");
 
             var matNotifyResults = _notifyService.SendMatStandardEmail(
@@ -199,7 +191,7 @@ public class PagesViewBuilder(
             return HandleNotifyShareResults(controller, matNotifyResults, matReturnToModel);
         }
 
-        var focusedSchool = CurrentUser.GetFocusedSchool();
+        var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
 
         var recommendationStatuses =
             await _recommendationService.GetLatestRecommendationStatusesAsync(

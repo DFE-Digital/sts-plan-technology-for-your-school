@@ -35,7 +35,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = GetFocusedOrSelectedSchools().First().EstablishmentId;
+        var establishmentId = (await GetFocusedOrSelectedSchoolsAsync()).First().EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -48,6 +48,7 @@ public class ReviewAnswersViewBuilder(
             section,
             status: SubmissionStatus.InProgress
         );
+
         ReviewAnswersViewModel viewModel;
 
         switch (submissionRoutingData.Status)
@@ -82,7 +83,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = GetFocusedOrSelectedSchools().First().EstablishmentId;
+        var establishmentId = (await GetFocusedOrSelectedSchoolsAsync()).First().EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -145,12 +146,14 @@ public class ReviewAnswersViewBuilder(
             var selectedEstablishmentIds = new List<int>();
             if (CurrentUser.CanSelectSchools)
             {
-                var selectedSchools = CurrentUser.GetSelectedSchools();
+                var selectedSchools = CurrentUser.GetSelectedSchools()!;
                 selectedEstablishmentIds.AddRange(selectedSchools.Select(s => s.EstablishmentId));
             }
             else
             {
-                selectedEstablishmentIds.Add(CurrentUser.GetFocusedSchool()!.EstablishmentId);
+                selectedEstablishmentIds.Add(
+                    (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId
+                );
             }
 
             if (selectedEstablishmentIds.Count == 0)
@@ -166,7 +169,7 @@ public class ReviewAnswersViewBuilder(
                     $"Could not find section for slug {sectionSlug}"
                 );
 
-            var userEstablishmentId = CurrentUser.Establishment.Id;
+            var userEstablishmentId = (await CurrentUser.GetUserEstablishmentAsync()).Id;
 
             foreach (var establishmentId in selectedEstablishmentIds)
             {

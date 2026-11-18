@@ -9,7 +9,7 @@
         ViewData[StatePassingMechanismConstants.Title] = $"{Model.CategoryName} - print view";
     }
 
-    var focusedSchool = CurrentUser.GetFocusedSchool();
+    var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
 }
 
 @if (Model.IsMat)

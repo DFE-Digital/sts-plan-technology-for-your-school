@@ -37,6 +37,24 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateSchoolAsync(establishmentUrn, establishmentName);
     }
 
+    public async Task<List<SqlEstablishmentDto>> GetOrCreateSchoolsAsync(
+        IEnumerable<SelectedEstablishmentDataModel> schoolsData
+    )
+    {
+        var establishments = new List<SqlEstablishmentDto>();
+
+        foreach (var school in schoolsData)
+        {
+            var establishment = await _establishmentWorkflow.GetOrCreateSchoolAsync(
+                school.Urn,
+                school.Name
+            );
+            establishments.Add(establishment);
+        }
+
+        return establishments;
+    }
+
     public Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId)
     {
         return _establishmentWorkflow.GetGroupEstablishments(establishmentId);

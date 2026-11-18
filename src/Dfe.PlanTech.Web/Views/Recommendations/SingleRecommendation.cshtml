@@ -14,7 +14,7 @@
     };
 
     var dsiOrganisation = CurrentUser.DsiOrganisation;
-    var focusedSchool = CurrentUser.GetFocusedSchool();
+    var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
 }
 
 @{

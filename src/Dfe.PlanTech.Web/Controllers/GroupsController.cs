@@ -161,7 +161,7 @@ public class GroupsController : BaseController<GroupsController>
             Name = schoolName,
             Urn = schoolUrn,
         };
-        _currentUser.SetSelectedSchools([selectedEstablishment]);
+        await _currentUser.SetSelectedSchoolsAsync([selectedEstablishment]);
 
         return RedirectToAction(nameof(GetMatRecommendationsLanding), new { categorySlug });
     }
@@ -292,9 +292,9 @@ public class GroupsController : BaseController<GroupsController>
     [HttpPost($"{UrlConstants.TrustSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
     public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
     {
-        await _currentUser.SetFocusedSchoolAsync(schoolUrn, schoolName);
+        await _currentUser.SetFocusedEstablishmentAsync(schoolUrn, schoolName);
 
-        var focusedSchool = _currentUser.GetFocusedSchool()!;
+        var focusedSchool = (await _currentUser.GetFocusedEstablishmentAsync())!;
 
         await _groupsViewBuilder.RecordGroupSelectionAsync(
             focusedSchool.EstablishmentId,

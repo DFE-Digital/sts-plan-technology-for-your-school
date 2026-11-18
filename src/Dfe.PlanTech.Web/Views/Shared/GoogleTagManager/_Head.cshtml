@@ -20,7 +20,7 @@
         string establishmentType = "Unknown";
         try
         {
-            establishment = CurrentUser.Establishment;
+            establishment = (await CurrentUser.GetUserEstablishmentAsync());
             establishmentId = establishment.Id.ToString();
             establishmentType = establishment.EstablishmentType ?? "Unknown";
         }

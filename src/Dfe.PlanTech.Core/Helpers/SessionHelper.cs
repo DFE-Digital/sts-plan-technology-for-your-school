@@ -105,14 +105,12 @@ public static class SessionHelper
         session.Remove(SessionConstants.GroupEstablishmentsKey);
     }
 
-    public static IReadOnlyList<SelectedEstablishmentDataModel> GetGroupSchools(
-        this ISession session
-    )
+    public static List<SelectedEstablishmentDataModel> GetGroupSchools(this ISession session)
     {
         return
             session.GetValue(SessionConstants.GroupEstablishmentsKey)
                 is IEnumerable<SelectedEstablishmentDataModel> groupSchools
-            ? groupSchools.ToArray()
+            ? groupSchools.ToList()
             : [];
     }
 

@@ -58,12 +58,12 @@ public class UserActionTrackingService(
 
         httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
 
-        int? establishmentId = _currentUser.Establishment.Id;
+        int? establishmentId = (await _currentUser.GetUserEstablishmentAsync()).Id;
         int? matEstablishmentId = null;
         if (_currentUser.IsTrust)
         {
-            establishmentId = _currentUser.GetFocusedSchool()?.EstablishmentId;
-            matEstablishmentId = _currentUser.Establishment.Id;
+            establishmentId = (await _currentUser.GetFocusedEstablishmentAsync())?.EstablishmentId;
+            matEstablishmentId = (await _currentUser.GetUserEstablishmentAsync()).Id;
         }
 
         var userAction = new UserActionEntity

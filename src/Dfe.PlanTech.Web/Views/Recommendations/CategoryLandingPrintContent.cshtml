@@ -2,7 +2,9 @@
 @inject ICurrentUserProvider CurrentUser
 
 @{
-    var schoolName = CurrentUser.GetFocusedSchool().Name;
+
+    var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+    var schoolName = focusedEstablishment?.Name ?? "Unknown establishment";
 
     if (Model.Category.Header.Text != null)
     {

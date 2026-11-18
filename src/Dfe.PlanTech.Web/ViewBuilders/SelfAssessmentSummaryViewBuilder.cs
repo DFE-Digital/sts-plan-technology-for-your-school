@@ -109,7 +109,9 @@ public class SelfAssessmentSummaryViewBuilder(
 
     private async Task<List<SqlSubmissionDto>> GetSubmittedSubmissions(string sectionId)
     {
-        var establishmentIds = GetFocusedOrSelectedSchools()!.Select(s => s.EstablishmentId);
+        var establishmentIds = (await GetFocusedOrSelectedSchoolsAsync())!.Select(s =>
+            s.EstablishmentId
+        );
 
         var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
             establishmentIds.ToArray()

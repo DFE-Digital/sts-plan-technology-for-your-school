@@ -80,7 +80,9 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
 
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -221,10 +223,11 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
-        var matEstablishment = CurrentUser.Establishment;
-        var groupSchools = CurrentUser
-            .GetGroupSchools()
-            .OrderBy(e => e.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+        var matEstablishment = await CurrentUser.GetUserEstablishmentAsync();
+        var groupSchools = (await CurrentUser.GetGroupSchoolsAsync() ?? []).OrderBy(
+            e => e.Name ?? string.Empty,
+            StringComparer.OrdinalIgnoreCase
+        );
         var groupSchoolEstablishmentIds = groupSchools.Select(s => s.EstablishmentId).ToArray();
 
         var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
@@ -331,7 +334,9 @@ public class RecommendationsViewBuilder(
         string? originatingSlug
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
 
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -487,7 +492,9 @@ public class RecommendationsViewBuilder(
         SingleRecommendationInputViewModel inputModel
     )
     {
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -540,7 +547,7 @@ public class RecommendationsViewBuilder(
 
         defaultNoteText = string.IsNullOrWhiteSpace(defaultNoteText) ? null : defaultNoteText;
 
-        var userOrganisationId = CurrentUser.Establishment.Id;
+        var userOrganisationId = (await CurrentUser.GetUserEstablishmentAsync()).Id;
 
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
@@ -675,11 +682,11 @@ public class RecommendationsViewBuilder(
 
         if (isMat)
         {
-            var matEstablishment = CurrentUser.Establishment;
+            var matEstablishment = (await CurrentUser.GetUserEstablishmentAsync());
             var matName =
                 matEstablishment.OrgName
                 ?? throw new InvalidDataException("Cannot send an email without a MAT name");
-            var matSchools = CurrentUser.GetGroupSchools();
+            var matSchools = await CurrentUser.GetGroupSchoolsAsync();
             var matSchoolIds = matSchools.Select(s => s.EstablishmentId).ToArray();
 
             var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
@@ -739,7 +746,7 @@ public class RecommendationsViewBuilder(
             return HandleNotifyShareResults(controller, notifySendResults, returnToModel);
         }
 
-        var focusedSchool = CurrentUser.GetFocusedSchool();
+        var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
 
         var latestRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
@@ -792,7 +799,9 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var focusedEstablishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var focusedEstablishmentId = (
+            await CurrentUser.GetFocusedEstablishmentAsync()
+        ).EstablishmentId;
 
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
 

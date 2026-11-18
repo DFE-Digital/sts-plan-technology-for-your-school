@@ -6,7 +6,10 @@ namespace Dfe.PlanTech.Application.Providers.Interfaces;
 public interface ICurrentUserProvider
 {
     string DsiReference { get; }
+    int? FocusedEstablishmentId { get; }
     Guid? SessionId { get; }
+    int? TrustEstablishmentId { get; }
+    int UserEstablishmentId { get; }
     int UserId { get; }
 
     // User Organisation - the organisation the currently logged in user is linked to (from OIDC claims)
@@ -16,25 +19,25 @@ public interface ICurrentUserProvider
 
     bool IsAuthenticated { get; }
     bool IsSchool { get; }
-    bool IsTrust { get; }
     bool IsMat { get; }
     bool IsSatOrSSat { get; }
+    bool IsTrust { get; }
     bool CanSelectSchools { get; }
 
-    public SqlEstablishmentDto Establishment { get; }
-    void SetEstablishment(SqlEstablishmentDto establishment);
+    public void ClearFocusedEstablishment();
+    Task<SelectedEstablishmentDataModel?> GetFocusedEstablishmentAsync();
+    Task SetFocusedEstablishmentAsync(string urn, string name);
 
-    public void ClearFocusedSchool();
-    SelectedEstablishmentDataModel? GetFocusedSchool();
-    Task SetFocusedSchoolAsync(string selectedSchoolUrn, string selectedSchoolName);
-
-    List<SelectedEstablishmentDataModel>? GetGroupSchools();
-    Task SetGroupSchools(IEnumerable<SelectedEstablishmentDataModel> schools);
+    Task<List<SelectedEstablishmentDataModel>> GetGroupSchoolsAsync();
+    Task SetGroupSchoolsAsync(IEnumerable<SelectedEstablishmentDataModel> schools);
 
     void ClearSelectedSchools();
     List<int>? GetSelectedSchoolEstablishmentIds();
     List<string>? GetSelectedSchoolNames();
     List<SelectedEstablishmentDataModel>? GetSelectedSchools();
-    void SetSelectedSchools(SelectedEstablishmentDataModel establishment);
-    void SetSelectedSchools(IEnumerable<SelectedEstablishmentDataModel> establishments);
+    Task SetSelectedSchoolsAsync(SelectedEstablishmentDataModel establishment);
+    Task SetSelectedSchoolsAsync(IEnumerable<SelectedEstablishmentDataModel> establishments);
+
+    public Task<SqlEstablishmentDto> GetUserEstablishmentAsync();
+    void SetUserEstablishment(SqlEstablishmentDto establishment);
 }

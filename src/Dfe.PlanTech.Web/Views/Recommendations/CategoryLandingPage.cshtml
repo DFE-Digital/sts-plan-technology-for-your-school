@@ -13,6 +13,7 @@
         }
     };
 
+    var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
     if (Model.Context == CategoryLandingContext.MAT)
     {
         breadcrumbs.Add(new BreadcrumbItemViewModel
@@ -21,11 +22,11 @@
             Href = UrlConstants.GroupStandards
         });
     }
-    else if (CurrentUser.IsMat && CurrentUser.GetFocusedSchool() is not null)
+    else if (CurrentUser.IsMat && focusedEstablishment is not null)
     {
         breadcrumbs.Add(new BreadcrumbItemViewModel
         {
-            Text = CurrentUser.GetFocusedSchool().Name,
+            Text = focusedEstablishment.Name,
             Href = UrlConstants.HomePage
         });
     }

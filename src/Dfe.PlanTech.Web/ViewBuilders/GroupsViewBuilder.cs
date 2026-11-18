@@ -63,7 +63,7 @@ public class GroupsViewBuilder(
         // Get the user's organisation ID (the MAT/group), not the active establishment
         // At this point, the user hasn't selected a school yet
 
-        var establishment = CurrentUser.Establishment;
+        var establishment = (await CurrentUser.GetUserEstablishmentAsync());
 
         var selectASchoolPageContent =
             await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
@@ -84,7 +84,7 @@ public class GroupsViewBuilder(
         );
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
-        var groupSchools = CurrentUser.GetGroupSchools();
+        var groupSchools = await CurrentUser.GetGroupSchoolsAsync();
 
         var schoolEstablishmentIds = groupSchools.Select(s => s.EstablishmentId);
         var inProgressOrCompletedRecommendationCounts =
@@ -169,7 +169,7 @@ public class GroupsViewBuilder(
     {
         CurrentUser.ClearSelectedSchools();
 
-        var matEstablishmentId = CurrentUser.Establishment.Id;
+        var matEstablishmentId = (await CurrentUser.GetUserEstablishmentAsync()).Id;
 
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
 
@@ -270,7 +270,7 @@ public class GroupsViewBuilder(
             viewModel.SelectedSchoolsRefs
         );
 
-        var selectedSchools = CurrentUser.GetSelectedSchools();
+        var selectedSchools = CurrentUser.GetSelectedSchools() ?? [];
 
         foreach (var selectedSchool in selectedSchools)
         {
@@ -282,8 +282,6 @@ public class GroupsViewBuilder(
                 );
             }
         }
-
-        CurrentUser.SetSelectedSchools(selectedSchools);
 
         viewModel.StatusOptions = Enum.GetValues<RecommendationStatus>()
             .ToDictionary(key => key, key => EnumExtensions.GetDisplayName(key));
@@ -326,8 +324,7 @@ public class GroupsViewBuilder(
             );
         }
 
-        var matEstablishmentIds = CurrentUser
-            .GetGroupSchools()
+        var matEstablishmentIds = (await CurrentUser.GetGroupSchoolsAsync())
             .Select(gs => gs.EstablishmentId)
             .ToArray();
 
@@ -345,7 +342,8 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupSelectAssessmentViewModel()
         {
-            GroupName = CurrentUser.Establishment.OrgName ?? "Your organisation",
+            GroupName =
+                (await CurrentUser.GetUserEstablishmentAsync()).OrgName ?? "Your organisation",
             Categories = categories
                 .Select(c => new CategorySectionViewModel
                 {
@@ -391,8 +389,7 @@ public class GroupsViewBuilder(
                 $"Could not find topic for slug '{sectionSlug}'"
             );
 
-        var groupSchools = CurrentUser.GetGroupSchools();
-
+        var groupSchools = await CurrentUser.GetGroupSchoolsAsync();
         var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(
             groupSchools,
             section.Id
@@ -467,8 +464,6 @@ public class GroupsViewBuilder(
             }
         }
 
-        CurrentUser.SetSelectedSchools(selectedSchools);
-
         var questionSlug = section.Questions.First().Slug;
 
         return controller.RedirectToRoute(
@@ -490,7 +485,7 @@ public class GroupsViewBuilder(
     {
         await _establishmentService.RecordGroupSelection(
             CurrentUser.UserId,
-            CurrentUser.Establishment.Id,
+            (await CurrentUser.GetUserEstablishmentAsync()).Id,
             selectedEstablishmentId,
             selectedEstablishmentUrn,
             selectedEstablishmentName
@@ -523,7 +518,8 @@ public class GroupsViewBuilder(
 
         var viewModel = new MatStandardsListViewModel
         {
-            GroupName = CurrentUser.Establishment.OrgName ?? "Your organisation",
+            GroupName =
+                (await CurrentUser.GetUserEstablishmentAsync()).OrgName ?? "Your organisation",
             Categories = categories,
         };
 
@@ -544,7 +540,7 @@ public class GroupsViewBuilder(
             ?? throw new InvalidDataException("Missing category slug");
 
         var userId = CurrentUser.UserId;
-        var matEstablishmentId = CurrentUser.Establishment.Id;
+        var matEstablishmentId = (await CurrentUser.GetUserEstablishmentAsync()).Id;
         var selectedSchoolIds = CurrentUser.GetSelectedSchoolEstablishmentIds();
         var newStatus = viewModel.SelectedStatus.ToRecommendationStatus();
         if (newStatus is null)
@@ -664,7 +660,7 @@ public class GroupsViewBuilder(
         List<SelectedEstablishmentDataModel>
     > GetSelectedSchoolsWithSubmissionStatuses(QuestionnaireSectionEntry section)
     {
-        var selectedSchools = CurrentUser.GetSelectedSchools();
+        var selectedSchools = CurrentUser.GetSelectedSchools() ?? [];
 
         foreach (var school in selectedSchools)
         {

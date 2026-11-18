@@ -37,7 +37,7 @@ public class UserJourneyMissingContentExceptionHandler(
         );
 
         await _submissionService.SetSubmissionInaccessibleAsync(
-            _currentUser.GetFocusedSchool().EstablishmentId,
+            (await _currentUser.GetFocusedEstablishmentAsync()).EstablishmentId,
             exception.Section.Id
         );
 

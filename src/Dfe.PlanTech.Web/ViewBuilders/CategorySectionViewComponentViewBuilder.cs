@@ -46,7 +46,7 @@ public class CategorySectionViewComponentViewBuilder(
         QuestionnaireCategoryEntry category
     )
     {
-        var establishmentId = CurrentUser.GetFocusedSchool().EstablishmentId;
+        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync()).EstablishmentId;
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
@@ -89,8 +89,7 @@ public class CategorySectionViewComponentViewBuilder(
         QuestionnaireCategoryEntry category
     )
     {
-        var groupEstablishmentIds = CurrentUser
-            .GetGroupSchools()
+        var groupEstablishmentIds = (await CurrentUser.GetGroupSchoolsAsync())
             .Select(s => s.EstablishmentId)
             .ToArray();
 
