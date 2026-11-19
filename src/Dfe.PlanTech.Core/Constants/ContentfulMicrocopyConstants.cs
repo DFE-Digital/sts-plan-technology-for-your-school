@@ -155,7 +155,8 @@ public static class ContentfulMicrocopyConstants
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
 
-    private const string GroupsSelectHeaderFallback = "Select a school";
+    private const string GroupsSelectHeaderFallback =
+        "Submit self-assessments and view recommendations";
 
     private const string GroupsSelectBodyFallback =
         "You can submit self-assessments and update recommendation statuses for one or more schools at a time.";
@@ -230,7 +231,7 @@ public static class ContentfulMicrocopyConstants
         "Have your schools completed this recommendation?";
     private const string GroupsSelectStatusPreContinueButtonTextFallback =
         "You're updating the recommendation status for these schools:";
-    private const string GroupsSelectStatusContinueFallback = "Save";
+    private const string GroupsSelectStatusContinueFallback = "Update Status";
 
     private const string GroupsSelectViewRecommendationsFallback = "Your schools";
     private const string GroupsSelectSelectSelfAssessmentAllSubmittedFallback =
