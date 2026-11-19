@@ -5,13 +5,12 @@
 
 @{
 
-
-
     var isTopicStartPage = !string.IsNullOrWhiteSpace(Model.CategorySlug);
+    var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
 
     var isSelectedSchoolHomePage =
         CurrentUser.IsMat &&
-        !string.IsNullOrWhiteSpace((await CurrentUser.GetFocusedEstablishmentAsync()).Name) &&
+        !string.IsNullOrWhiteSpace(focusedEstablishment?.Name) &&
         Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
 
     var useBreadcrumbs = isTopicStartPage || isSelectedSchoolHomePage;
