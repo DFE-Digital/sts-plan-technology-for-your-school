@@ -95,7 +95,7 @@ public class GroupsViewBuilder(
         var viewModel = new GroupsSelectorViewModel
         {
             GroupName = groupName,
-            GroupEstablishments = groupSchools.ToList(),
+            GroupEstablishments = groupSchools,
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(groupName),
             Content = content,
