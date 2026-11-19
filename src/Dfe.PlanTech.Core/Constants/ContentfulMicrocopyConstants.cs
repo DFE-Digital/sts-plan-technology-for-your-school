@@ -89,7 +89,8 @@ public static class ContentfulMicrocopyConstants
     public const string msmTopicStartText2 = "msmTopicStartText2";
 
     public const string GroupsSelectSchoolsToAssessHeader = "msmSelectHeader";
-    public const string GroupsSelectSchoolsToAssessBackLink = "msmSelectBack";
+    public const string GroupsSelectSchoolsToAssessBackLink =
+        "msmSeGroupsSelectViewRecommendationslectBack";
     public const string GroupsSelectSchoolsToAssessHint = "msmSelectHint";
     public const string GroupsSelectSchoolsToAssessSchoolHint = "msmSelectSchoolHint";
     public const string GroupsSelectSchoolsToAssessCheckboxAll = "msmSelectCheckboxAll";
@@ -129,6 +130,7 @@ public static class ContentfulMicrocopyConstants
 
     public const string GroupsSelectViewRecommendations = "mssSelectViewRecommendations";
 
+    public const string GroupsSelectSchoolRecsHeader = "mssGroupsSelectSchoolRecsHeader";
     public const string GroupsSelectSelectSelfAssessmentAllSubmitted =
         "mssSelectSelectSelfAssessmentAllSubmitted";
 
@@ -157,6 +159,7 @@ public static class ContentfulMicrocopyConstants
 
     private const string GroupsSelectBodyFallback =
         "You can submit self-assessments and update recommendation statuses for one or more schools at a time.";
+    private const string GroupsSelectSchoolRecsHeaderFallback = "Your schools";
 
     private const string PrintSectionIncompleteFallback =
         "The self-assessment must be completed before recommendations are available.";
@@ -350,6 +353,7 @@ public static class ContentfulMicrocopyConstants
             GroupsSelectSchoolsToAssessConflictErrorFallback
         },
         { GroupsSelectViewRecommendations, GroupsSelectViewRecommendationsFallback },
+        { GroupsSelectSchoolRecsHeader, GroupsSelectSchoolRecsHeaderFallback },
         {
             GroupsSelectSelectSelfAssessmentAllSubmitted,
             GroupsSelectSelectSelfAssessmentAllSubmittedFallback
