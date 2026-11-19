@@ -30,7 +30,7 @@ public static class ContentComponentJsonExtensions
 
         var options = new JsonPolymorphismOptions
         {
-            TypeDiscriminatorPropertyName = $"${typeof(TType).Name.ToLower()}",
+            TypeDiscriminatorPropertyName = $"${typeof(TType).Name.ToLowerInvariant()}",
             IgnoreUnrecognizedTypeDiscriminators = true,
             UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
         };

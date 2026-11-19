@@ -9,12 +9,7 @@ public interface IEstablishmentService
         string establishmentUrn,
         string establishmentName
     );
-    Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
-        int establishmentId
-    );
-    Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(
-        int establishmentId
-    );
+
     Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     );
@@ -22,7 +17,7 @@ public interface IEstablishmentService
     Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference);
 
     Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id);
-    
+
     Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,

@@ -108,7 +108,10 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         }
         catch (ContentfulDataUnavailableException e)
         {
-            // Pages which do not have corresponding Contentful entries do not require authorisation(?)
+            // Pages which do not have corresponding Contentful entries are handled by other
+            // controllers. See above at if (!ControllerIsPagesController(httpContext))...
+            // If we get to this point the page then there is no content and we'll likely be
+            // showing an error page (usually from Contentful) so will not require authorisation.
             logger.LogWarning(
                 e,
                 "Could not retrieve page from Contentful for slug {Slug} (not found) therefore unable to determine authorisation requirements, defaulting to allowing access",
@@ -121,7 +124,8 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         }
         catch (Exception e)
         {
-            // Every other error should allow access(?)
+            // If we get to this point we'll be serving back an error page or other public page,
+            // so don't require authorisation.
             logger.LogError(
                 e,
                 "Could not retrieve page from Contentful for slug {Slug}, unable to determine authorisation requirements, defaulting to allowing access",
@@ -147,7 +151,6 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         var contentfulService = scope.ServiceProvider.GetRequiredService<IContentfulService>();
         var page = await contentfulService.GetPageBySlugAsync(slug);
         httpContext.Items.Add(nameof(PageEntry), page);
-
         return page;
     }
 

@@ -102,7 +102,7 @@ jobs:
       - name: Save bacpac
         run: |
           az storage blob upload \
-          --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
+          --account-name ${{ steps.backup-names.outputs.account-name }} \
           --container-name ${{ env.SQL_BACKUP_CONTAINER_NAME }} \
           --name db-$(date +%F).bacpac \
           --file db-$(date +%F).bacpac \
@@ -112,16 +112,16 @@ jobs:
         uses: ./.github/actions/whitelist-sql
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.backup-names.outputs.resource-group }}
-          account-name: ${{ steps.backup-names.outputs.account-name }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
           verb: 'remove'
 
       - name: De-Whitelist Runner for backup storage
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup
-          account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-backup//-/}
+          resource-group: ${{ steps.backup-names.outputs.resource-group }}
+          account-name: ${{ steps.backup-names.outputs.account-name }}
           verb: remove
 
   backup-secrets:
@@ -175,7 +175,7 @@ jobs:
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf
             keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf-kv
             verb: 'add'
 
@@ -184,7 +184,7 @@ jobs:
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
             resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
-            keyvault-name: ${{ ENV.SOURCE_KV }}
+            keyvault-name: ${{ env.SOURCE_KV }}
             verb: 'add'
 
         - name: Whitelist Runner for backup storage
@@ -291,7 +291,7 @@ jobs:
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
             resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
-            keyvault-name: ${{ ENV.SOURCE_KV }}
+            keyvault-name: ${{ env.SOURCE_KV }}
             verb: 'remove'
 
         - name: De-Whitelist Runner for backup storage
@@ -307,6 +307,6 @@ jobs:
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf
             keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-tf-kv
             verb: 'remove'

@@ -1,3 +1,4 @@
+using System.Data;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -12,9 +13,10 @@ using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Data;
+using EnumExtensions = Dfe.PlanTech.Core.Extensions.EnumExtensions;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -25,27 +27,37 @@ public class GroupsViewBuilder(
     ICurrentUserProvider currentUser,
     IEstablishmentService establishmentService,
     IGroupService groupService,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IRecommendationService recommendationService,
+    IMicrocopyProvider microcopyProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IEstablishmentService _establishmentService = establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
 
-    private readonly IGroupService _groupService =
-        groupService ?? throw new ArgumentNullException(nameof(groupService));
+    private readonly IGroupService _groupService = groupService
+        ?? throw new ArgumentNullException(nameof(groupService));
 
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private readonly ContactOptionsConfiguration _contactOptions =
-        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly IRecommendationService _recommendationService = recommendationService
+        ?? throw new ArgumentNullException(nameof(recommendationService));
 
-    private readonly ILogger<BaseViewBuilder> _logger =
-        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value
+        ?? throw new ArgumentNullException(nameof(contactOptions));
+
+    private readonly IMicrocopyProvider _microcopyProvider = microcopyProvider
+        ?? throw new ArgumentNullException(nameof(microcopyProvider));
+
+    private readonly ILogger<BaseViewBuilder> _logger = logger
+        ?? throw new ArgumentNullException(nameof(logger));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
     private const string SelectSchoolsToAssessViewName = "GroupSelectSchoolsToAssess";
+    private const string SelectSchoolsToUpdateStatusViewName = "GroupsSelectSchoolsToUpdateStatus";
+    private const string SelectStatusToUpdateViewName = "GroupsSelectStatusToUpdate";
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
@@ -53,8 +65,9 @@ public class GroupsViewBuilder(
         // At this point, the user hasn't selected a school yet
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
-        var selectASchoolPageContent =
-            await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+        var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(
+            UrlConstants.GroupsSelectionPageSlug
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'"
             );
@@ -66,16 +79,15 @@ public class GroupsViewBuilder(
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
-        var showSelectSelfAssessmentToSubmit =
-            await HasOutstandingSelfAssessmentsAsync(
-                establishmentId,
-                sections
-            );
+        var showSelectSelfAssessmentToSubmit = await HasOutstandingSelfAssessmentsAsync(
+            establishmentId,
+            sections
+        );
 
-        var groupSchools =
-            await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
-                establishmentId
-            );
+        var groupSchools = await _groupService.GetGroupSchoolsAsync(
+            establishmentId,
+            includeRecommendationCounts: true
+        );
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
@@ -114,8 +126,7 @@ public class GroupsViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -139,13 +150,168 @@ public class GroupsViewBuilder(
                     schoolName: schoolEstablishment.OrgName
                 );
 
-                viewModel.BackLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
-
                 return controller.View(ReviewAnswersViewBuilder.ViewAnswersViewName, viewModel);
 
             default:
                 return controller.RedirectToHomePage();
         }
+    }
+
+    public async Task<IActionResult> RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+        Controller controller,
+        string sectionSlug,
+        string recommendationSlug,
+        GroupsSelectSchoolsToUpdateStatusViewModel? viewModel = null
+    )
+    {
+        CurrentUser.ClearSelectedGroupSchool();
+        controller.HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+
+        //Get the MAT ID
+        var establishmentId = GetUserOrganisationIdOrThrowException();
+
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
+
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+        )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find recommendation for slug {recommendationSlug}"
+            );
+
+        var dbRecommendation =
+            await _recommendationService.GetRecommendationsByContentfulReferencesAsync([
+                recommendationChunk.Id,
+            ]);
+
+        var recommendation = dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault()
+            ?? throw new ArgumentException("Could not find recommendation");
+
+        var latestEstRecHistory =
+            await _groupService.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+                establishmentId,
+                recommendation.Id
+            );
+
+        var latestEstRecHistoryWithRecs = latestEstRecHistory
+            .Where(d => d.recommendationHistory is not null)
+            .ToList();
+
+        var establishmentsRecommendations = latestEstRecHistoryWithRecs
+            .Select(d => new EstablishmentRecommendationInfoModel()
+            {
+                EstablishmentId = d.establishment.Id,
+                EstablishmentName = d.establishment.OrgName ?? string.Empty,
+                EstablishmentRef = d.establishment.EstablishmentRef,
+                SectionId = section.Id,
+                EstablishmentRecommendationHistoryId = d.recommendationHistory!.Id,
+                DateLastUpdated = DateTimeHelper.FormattedDateShort(
+                    d.recommendationHistory.DateCreated
+                ),
+                Status = d.recommendationHistory.NewStatus ?? RecommendationStatus.NotStarted,
+            })
+            .ToList();
+
+        viewModel ??= new GroupsSelectSchoolsToUpdateStatusViewModel();
+
+        viewModel.Section = section;
+        viewModel.EstablishmentsRecommendation = establishmentsRecommendations;
+        viewModel.CategorySlug = categorySlug;
+        viewModel.RecommendationChunk = recommendationChunk;
+
+        viewModel.ErrorMessages = controller
+            .ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage))
+            .ToArray();
+
+        return controller.View(SelectSchoolsToUpdateStatusViewName, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToSelectStatusToUpdateViewModelAsync(
+        Controller controller,
+        string sectionSlug,
+        string recommendationSlug,
+        GroupsSelectStatusToUpdateViewModel? viewModel = null
+    )
+    {
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
+
+        if (viewModel?.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
+        {
+            return await RouteToSelectSchoolsToUpdateStatusViewModelAsync(
+                controller,
+                sectionSlug,
+                recommendationSlug,
+                new GroupsSelectSchoolsToUpdateStatusViewModel()
+            );
+        }
+
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+        )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find recommendation for slug {recommendationSlug}"
+            );
+
+        var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(
+            viewModel.SelectedSchoolsRefs.ToArray()
+        );
+
+        var userEstablishmentId = GetUserOrganisationIdOrThrowException();
+
+        var establishmentLinks = await _groupService.GetGroupSchoolsAsync(userEstablishmentId);
+
+        if (establishmentLinks == null || establishmentLinks.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"Could not find linked establishments for group ID: {userEstablishmentId}"
+            );
+        }
+
+        var selectedSchoolIds = new List<int>();
+
+        if (
+            viewModel.SelectedSchoolsRefs.Any(s =>
+                !VerifyGroupSchoolMembership(s, establishmentLinks)
+            )
+        )
+            throw new InvalidDataException(
+                "One or more selected schools are not within the user's group"
+            );
+
+        await AddSelectedSchoolsForStatusUpdateAsync(
+            viewModel.SelectedSchoolsRefs,
+            establishmentLinks,
+            section,
+            selectedSchoolIds
+        );
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedSchoolIds
+        );
+
+        viewModel.StatusOptions = Enum.GetValues<RecommendationStatus>()
+            .ToDictionary<RecommendationStatus, RecommendationStatus, string>(
+                key => key,
+                key => EnumExtensions.GetDisplayName(key)
+            );
+        viewModel.CurrentChunk = recommendationChunk;
+        viewModel.Section = section;
+        viewModel.SectionSlug = sectionSlug;
+        viewModel.CategorySlug = categorySlug;
+        viewModel.SelectedSchoolNames = schools.Select(s => s.OrgName).ToList();
+
+        controller.ViewData[StatePassingMechanismConstants.Title] =
+            "Select status for recommendation";
+
+        return controller.View(SelectStatusToUpdateViewName, viewModel);
     }
 
     public async Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(
@@ -160,14 +326,16 @@ public class GroupsViewBuilder(
         var allCategories = await ContentfulService.GetAllCategoriesAsync() ?? [];
 
         //Get ordered categories from home page
-        var orderedCategories = ((await ContentfulService.GetPageBySlugAsync("home"))?.Content ?? [])
+        var orderedCategories = (
+            (await ContentfulService.GetPageBySlugAsync("home"))?.Content ?? []
+        )
             .OfType<QuestionnaireCategoryEntry>()
             .ToList();
 
         var categories = orderedCategories
-            .Concat(allCategories.ExceptBy(
-                orderedCategories.Select(x => x.Sys?.Id),
-                x => x.Sys?.Id))
+            .Concat(
+                allCategories.ExceptBy(orderedCategories.Select(x => x.Sys?.Id), x => x.Sys?.Id)
+            )
             .ToList();
 
         if (categories.Count == 0)
@@ -178,8 +346,7 @@ public class GroupsViewBuilder(
         }
 
         // establishments for the MAT
-        var matEstablishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(establishmentId) ?? [];
+        var matEstablishmentLinks = await _groupService.GetGroupSchoolsAsync(establishmentId);
 
         // Get urn's from links (filter for distinct, white spaces).
         var matEstablishmentUrns = matEstablishmentLinks
@@ -189,9 +356,9 @@ public class GroupsViewBuilder(
             .ToArray();
 
         // Retrieve the actual establishments.
-        var matEstablishments =
-            await _establishmentService.GetEstablishmentsByReferencesAsync(matEstablishmentUrns)
-            ?? [];
+        var matEstablishments = await _establishmentService.GetEstablishmentsByReferencesAsync(
+            matEstablishmentUrns
+        ) ?? [];
 
         // Get the ids of the establishments.
         var matEstablishmentIds = matEstablishments.Select(e => e.Id).Distinct().ToArray();
@@ -200,7 +367,7 @@ public class GroupsViewBuilder(
         var completedSubmissions =
             matEstablishmentIds.Length != 0
                 ? await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds)
-                  ?? []
+                    ?? []
                 : [];
 
         var completedCountBySectionId = completedSubmissions
@@ -228,7 +395,7 @@ public class GroupsViewBuilder(
                             return new GroupSelectAssessmentSectionViewModel()
                             {
                                 SectionName = ccs.Name,
-                                CategorySlug = c.Header?.Text?.Slugify(),
+                                CategorySlug = c.LandingPage?.Slug,
                                 SectionSlug = ccs.InterstitialPage.Slug,
                                 UncompletedGroupSubmissions = uncompletedCount,
                             };
@@ -251,15 +418,14 @@ public class GroupsViewBuilder(
         controller.HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
 
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find topic for slug '{sectionSlug}'"
             );
 
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
+        var establishmentLinks = await _groupService.GetGroupSchoolsAsync(establishmentId);
 
         if (establishmentLinks == null || establishmentLinks.Count == 0)
         {
@@ -306,21 +472,17 @@ public class GroupsViewBuilder(
         if (viewModel.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
             throw new InvalidDataException("No schools have been selected");
 
-        var categorySlug =
-            controller.RouteData.Values["categorySlug"]?.ToString()
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString()
             ?? throw new InvalidDataException("Missing category slug");
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find topic for slug '{sectionSlug}'"
             );
 
         var userEstablishmentId = GetUserOrganisationIdOrThrowException();
 
-        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(
-            userEstablishmentId
-        );
+        var establishmentLinks = await _groupService.GetGroupSchoolsAsync(userEstablishmentId);
 
         if (establishmentLinks == null || establishmentLinks.Count == 0)
         {
@@ -333,102 +495,35 @@ public class GroupsViewBuilder(
             ? viewModel.PresentedSchoolRefs.ToArray()
             : viewModel.SelectedSchoolsRefs.ToArray();
 
+        if (
+            selectedRefs.Length == 0
+            || selectedRefs.Any(s => !VerifyGroupSchoolMembership(s, establishmentLinks))
+        )
+            throw new InvalidDataException(
+                "One or more selected schools are not within the user's group"
+            );
         if (selectedRefs.Length == 1)
         {
-            var isGroupSchool = VerifyGroupSchoolMembership(selectedRefs[0], establishmentLinks);
-            if (!isGroupSchool)
+            var shouldContinue = await PrepareSingleSchoolAssessmentAsync(
+                controller,
+                selectedRefs[0],
+                section
+            );
+            if (shouldContinue)
             {
-                throw new InvalidDataException(
-                    $"Selected school with ref {selectedRefs[0]} not linked to user's group"
+                return controller.RedirectToRoute(
+                    QuestionsController.GetContinueSelfAssessmentAction,
+                    new { categorySlug, sectionSlug }
                 );
-            }
-            else
-            {
-                var school =
-                    await _establishmentService.GetEstablishmentByReferenceAsync(selectedRefs[0])
-                    ?? throw new InvalidDataException(
-                        $"School with ref {selectedRefs[0]} not found"
-                    );
-
-                if (
-                    string.IsNullOrWhiteSpace(school.EstablishmentRef)
-                    || string.IsNullOrWhiteSpace(school.OrgName)
-                )
-                {
-                    throw new InvalidDataException(
-                        $"School with ref {selectedRefs[0]} is missing required data"
-                    );
-                }
-
-                // This has to remain due to user-action requiring it for the continue self-assessment page
-                CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
-
-                // This has been added, so that we know it has come through as a bulk assessment
-                controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-                    SessionConstants.SelectedEstablishmentsKey,
-                    new List<int> { school.Id }
-                );
-
-                var latestSubmissionForRef =
-                    await _submissionService.GetLatestSubmissionResponsesModel(
-                        school.Id,
-                        section,
-                        (SubmissionStatus?)null
-                    );
-
-                if (
-                    latestSubmissionForRef != null
-                    && latestSubmissionForRef.Status == SubmissionStatus.InProgress
-                )
-                {
-                    return controller.RedirectToRoute(
-                        QuestionsController.GetContinueSelfAssessmentAction,
-                        new { categorySlug, sectionSlug }
-                    );
-                }
             }
         }
         else if (selectedRefs.Length > 1)
         {
-            var selectedSchoolIds = new List<int>();
-
-            foreach (var schoolRef in selectedRefs)
-            {
-                var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
-                if (isGroupSchool)
-                {
-                    var school = await _establishmentService.GetEstablishmentByReferenceAsync(
-                        schoolRef
-                    );
-
-                    if (school != null)
-                    {
-                        var latestSubmissionForRef =
-                            await _submissionService.GetLatestSubmissionResponsesModel(
-                                school.Id,
-                                section,
-                                (SubmissionStatus?)null
-                            );
-
-                        if (
-                            latestSubmissionForRef != null
-                            && latestSubmissionForRef.Status == SubmissionStatus.InProgress
-                        )
-                        {
-                            await _submissionService.SetSubmissionInaccessibleAsync(
-                                school.Id,
-                                section.Id
-                            );
-                        }
-
-                        selectedSchoolIds.Add(school.Id);
-                    }
-                }
-            }
-
-            controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-                SessionConstants.SelectedEstablishmentsKey,
-                selectedSchoolIds
+            await PrepareMultipleSchoolAssessmentsAsync(
+                controller,
+                selectedRefs,
+                establishmentLinks,
+                section
             );
         }
 
@@ -445,6 +540,101 @@ public class GroupsViewBuilder(
         );
     }
 
+    private async Task AddSelectedSchoolsForStatusUpdateAsync(
+        IEnumerable<string> selectedSchoolRefs,
+        List<SqlEstablishmentLinkDto> establishmentLinks,
+        QuestionnaireSectionEntry section,
+        List<int> selectedSchoolIds
+    )
+    {
+        foreach (var schoolRef in selectedSchoolRefs)
+        {
+            if (!VerifyGroupSchoolMembership(schoolRef, establishmentLinks))
+                continue;
+
+            var school = await _establishmentService.GetEstablishmentByReferenceAsync(schoolRef);
+            if (school == null)
+                continue;
+
+            var latestSubmission = await _submissionService.GetLatestSubmissionResponsesModel(
+                school.Id,
+                section,
+                (SubmissionStatus?)null
+            );
+            if (latestSubmission?.Status == SubmissionStatus.InProgress)
+            {
+                await _submissionService.SetSubmissionInaccessibleAsync(school.Id, section.Id);
+            }
+            selectedSchoolIds.Add(school.Id);
+        }
+    }
+
+    private async Task<bool> PrepareSingleSchoolAssessmentAsync(
+        Controller controller,
+        string schoolRef,
+        QuestionnaireSectionEntry section
+    )
+    {
+        var school = await _establishmentService.GetEstablishmentByReferenceAsync(schoolRef)
+            ?? throw new InvalidDataException($"School with ref {schoolRef} not found");
+
+        if (
+            string.IsNullOrWhiteSpace(school.EstablishmentRef)
+            || string.IsNullOrWhiteSpace(school.OrgName)
+        )
+        {
+            throw new InvalidDataException($"School with ref {schoolRef} is missing required data");
+        }
+
+        // Required for the continue self-assessment page.
+        CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey,
+            new List<int> { school.Id }
+        );
+
+        var latestSubmission = await _submissionService.GetLatestSubmissionResponsesModel(
+            school.Id,
+            section,
+            (SubmissionStatus?)null
+        );
+        return latestSubmission?.Status == SubmissionStatus.InProgress;
+    }
+
+    private async Task PrepareMultipleSchoolAssessmentsAsync(
+        Controller controller,
+        IEnumerable<string> selectedRefs,
+        List<SqlEstablishmentLinkDto> establishmentLinks,
+        QuestionnaireSectionEntry section
+    )
+    {
+        var selectedSchoolIds = new List<int>();
+        foreach (var schoolRef in selectedRefs)
+        {
+            if (!VerifyGroupSchoolMembership(schoolRef, establishmentLinks))
+                continue;
+
+            var school = await _establishmentService.GetEstablishmentByReferenceAsync(schoolRef);
+            if (school == null)
+                continue;
+
+            var latestSubmission = await _submissionService.GetLatestSubmissionResponsesModel(
+                school.Id,
+                section,
+                (SubmissionStatus?)null
+            );
+            if (latestSubmission?.Status == SubmissionStatus.InProgress)
+            {
+                await _submissionService.SetSubmissionInaccessibleAsync(school.Id, section.Id);
+            }
+            selectedSchoolIds.Add(school.Id);
+        }
+
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedSchoolIds
+        );
+    }
 
     private bool VerifyGroupSchoolMembership(
         string schoolRef,
@@ -481,8 +671,7 @@ public class GroupsViewBuilder(
             Urn = CurrentUser.UserOrganisationUrn,
             Ukprn = CurrentUser.UserOrganisationUkprn,
             Uid = CurrentUser.UserOrganisationUid,
-            GroupUid = CurrentUser
-                .UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
+            GroupUid = CurrentUser.UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
             Type = CurrentUser.UserOrganisationTypeName is null
                 ? null
                 : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName },
@@ -502,8 +691,7 @@ public class GroupsViewBuilder(
         IEnumerable<QuestionnaireSectionEntry> sections
     )
     {
-        var matEstablishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+        var matEstablishmentLinks = await _groupService.GetGroupSchoolsAsync(matEstablishmentId);
 
         var matEstablishmentUrns = matEstablishmentLinks
             .Select(e => e.Urn)
@@ -511,30 +699,22 @@ public class GroupsViewBuilder(
             .Distinct()
             .ToArray();
 
-        var matEstablishments =
-            await _establishmentService.GetEstablishmentsByReferencesAsync(
-                matEstablishmentUrns
-            ) ?? [];
+        var matEstablishments = await _establishmentService.GetEstablishmentsByReferencesAsync(
+            matEstablishmentUrns
+        ) ?? [];
 
-        var matEstablishmentIds = matEstablishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
+        var matEstablishmentIds = matEstablishments.Select(e => e.Id).Distinct().ToArray();
 
         if (matEstablishmentIds.Length == 0)
         {
             return false;
         }
 
-        var completedSubmissions =
-            await _groupService.GetGroupCompletedSubmissionsBySections(
-                matEstablishmentIds
-            ) ?? [];
+        var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
+            matEstablishmentIds
+        ) ?? [];
 
-        var requiredSectionIds = sections
-            .Select(s => s.Id)
-            .Distinct()
-            .ToHashSet();
+        var requiredSectionIds = sections.Select(s => s.Id).Distinct().ToHashSet();
 
         var completedSchoolSections = completedSubmissions
             .Where(s => requiredSectionIds.Contains(s.SectionId))
@@ -542,9 +722,135 @@ public class GroupsViewBuilder(
             .Distinct()
             .Count();
 
-        var totalRequiredSchoolSections =
-            matEstablishmentIds.Length * requiredSectionIds.Count;
+        var totalRequiredSchoolSections = matEstablishmentIds.Length * requiredSectionIds.Count;
 
         return completedSchoolSections < totalRequiredSchoolSections;
+    }
+
+    public async Task<IActionResult> RouteToMatStandardsListAsync(Controller controller)
+    {
+        CurrentUser.ClearSelectedGroupSchool();
+
+        controller.HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+
+        var allCategories = await ContentfulService.GetAllCategoriesAsync() ?? [];
+
+        var homePage = await ContentfulService.GetPageBySlugAsync("home");
+
+        var orderedCategories = (homePage?.Content ?? [])
+            .OfType<QuestionnaireCategoryEntry>()
+            .ToList();
+
+        var categories = orderedCategories
+            .Concat(
+                allCategories.ExceptBy(orderedCategories.Select(x => x.Sys?.Id), x => x.Sys?.Id)
+            )
+            .ToList();
+
+        if (categories.Count == 0)
+        {
+            throw new ContentfulDataUnavailableException(
+                "No categories found on MAT standards list page."
+            );
+        }
+
+        var viewModel = new MatStandardsListViewModel
+        {
+            GroupName = CurrentUser.UserOrganisationName ?? "Your organisation",
+            Categories = categories,
+        };
+
+        controller.ViewData[StatePassingMechanismConstants.Title] = "Select a standard";
+
+        return controller.View("MatStandardsList", viewModel);
+    }
+
+    public async Task<IActionResult> UpdateSchoolsRecommendationStatusAsync(
+        Controller controller,
+        string sectionSlug,
+        string recommendationSlug,
+        GroupRecommendationInputViewModel viewModel
+    )
+    {
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString()
+            ?? throw new InvalidDataException("Missing category slug");
+
+        var userId = CurrentUser.UserId!.Value;
+        var matEstablishmentId = GetUserOrganisationIdOrThrowException();
+        var newStatus = viewModel.SelectedStatus.ToRecommendationStatus();
+        if (newStatus is null)
+        {
+            throw new ArgumentException("Invalid status selected.");
+        }
+
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+        )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find recommendation for slug {recommendationSlug}"
+            );
+
+        var schools = await _establishmentService.GetEstablishmentsByReferencesAsync(
+            viewModel.SelectedSchoolsRefs.ToArray()
+        );
+
+        var schoolEstablishmentDtos = schools.ToList();
+        var schoolsCount = schoolEstablishmentDtos.Count();
+
+        try
+        {
+            await _recommendationService.UpdateEstablishmentsRecommendationStatusAsync(
+                recommendationChunk.Id,
+                schoolEstablishmentDtos.Select(s => s.Id).ToArray(),
+                userId,
+                newStatus.Value,
+                viewModel.Notes,
+                matEstablishmentId
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update recommendation status for selected schools");
+
+            return await RouteToSelectStatusToUpdateViewModelAsync(
+                controller,
+                sectionSlug,
+                recommendationSlug,
+                new GroupsSelectStatusToUpdateViewModel
+                {
+                    SelectedStatusKey = newStatus.Value,
+                    SelectedSchoolsRefs = viewModel.SelectedSchoolsRefs,
+                    StatusErrorMessage =
+                        "There was a problem updating the recommendation status. Try again.",
+                }
+            );
+        }
+
+        var dynamicValues = new Dictionary<string, string>()
+        {
+            ["schoolCount"] = schoolsCount.ToString(),
+        };
+
+        var microcopySuccessBodyText = await _microcopyProvider.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.GroupsUpdateStatusSuccessPanelText,
+            dynamicValues
+        );
+
+        microcopySuccessBodyText =
+            schoolsCount == 1
+                ? microcopySuccessBodyText.Replace("schools", "school")
+                : microcopySuccessBodyText;
+
+        controller.TempData["StatusUpdateSuccessTitle"] = microcopySuccessBodyText;
+
+        return controller.RedirectToGetMatSingleRecommendation(
+            categorySlug,
+            sectionSlug,
+            recommendationSlug
+        );
     }
 }

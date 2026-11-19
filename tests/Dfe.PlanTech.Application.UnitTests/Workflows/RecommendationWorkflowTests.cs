@@ -10,8 +10,10 @@ public class RecommendationWorkflowTests
 {
     private readonly IEstablishmentRecommendationHistoryRepository _establishmentRecommendationHistoryRepository =
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
+
     private readonly IRecommendationRepository _recommendationRepository =
         Substitute.For<IRecommendationRepository>();
+
     private readonly IStoredProcedureRepository _storedProcedureRepository =
         Substitute.For<IStoredProcedureRepository>();
 
@@ -527,19 +529,18 @@ public class RecommendationWorkflowTests
             establishmentId,
             userId,
             newStatus,
-            noteText,
-            matEstablishmentId
+            noteText: noteText,
+            matEstablishmentId: matEstablishmentId
         );
 
         // Assert - Verify correct status transition: current status becomes previous status
         await _establishmentRecommendationHistoryRepository
             .Received(1)
-            .CreateRecommendationHistoryAsync(
+            .UpdateRecommendationStatusAsync(
                 establishmentId,
                 1,
                 userId,
                 matEstablishmentId,
-                null,
                 RecommendationStatus.InProgress, // Should use current status as previous
                 newStatus,
                 noteText
@@ -590,13 +591,12 @@ public class RecommendationWorkflowTests
         // Assert - Verify initial history entry has null previous status and converts null noteText
         await _establishmentRecommendationHistoryRepository
             .Received(1)
-            .CreateRecommendationHistoryAsync(
+            .UpdateRecommendationStatusAsync(
                 establishmentId,
                 1,
                 userId,
                 null,
                 null,
-                null, // Should be null for initial entry
                 newStatus,
                 string.Empty // Should convert null noteText to empty string
             );
@@ -672,21 +672,112 @@ public class RecommendationWorkflowTests
             establishmentId,
             userId,
             newStatus,
-            null // Explicitly null noteText
+            noteText: null // Explicitly null noteText
         );
 
         // Assert - Verify that a null noteText is converted to empty string (database has non-nulllable column)
         await _establishmentRecommendationHistoryRepository
             .Received(1)
-            .CreateRecommendationHistoryAsync(
+            .UpdateRecommendationStatusAsync(
                 Arg.Any<int>(),
                 Arg.Any<int>(),
                 Arg.Any<int>(),
-                Arg.Any<int?>(),
                 Arg.Any<int?>(),
                 Arg.Any<RecommendationStatus?>(),
                 Arg.Any<RecommendationStatus>(),
                 string.Empty // Confirms null noteText becomes empty string
+            );
+    }
+
+    [Fact]
+    public async Task GetRecommendationsByContentfulReferencesAsync_WhenCalled_ThenReturnsMappedDtos()
+    {
+        // Arrange
+        var recommendationContentfulReferences = new[] { "rec-001", "rec-002" };
+
+        var recommendations = new[]
+        {
+            new RecommendationEntity
+            {
+                Id = 1,
+                ContentfulRef = "rec-001",
+                RecommendationText = "Recommendation One",
+                QuestionId = 10,
+            },
+            new RecommendationEntity
+            {
+                Id = 2,
+                ContentfulRef = "rec-002",
+                RecommendationText = "Recommendation Two",
+                QuestionId = 20,
+            },
+        };
+
+        _recommendationRepository
+            .GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences)
+            .Returns(recommendations);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result = await workflow.GetRecommendationsByContentfulReferencesAsync(
+            recommendationContentfulReferences
+        );
+
+        // Assert
+        var resultList = result.ToList();
+
+        Assert.Equal(2, resultList.Count);
+
+        Assert.Collection(
+            resultList,
+            recommendation =>
+            {
+                Assert.Equal(1, recommendation.Id);
+                Assert.Equal("rec-001", recommendation.ContentfulSysId);
+            },
+            recommendation =>
+            {
+                Assert.Equal(2, recommendation.Id);
+                Assert.Equal("rec-002", recommendation.ContentfulSysId);
+            }
+        );
+
+        await _recommendationRepository
+            .Received(1)
+            .GetRecommendationsByContentfulReferencesAsync(
+                Arg.Is<IEnumerable<string>>(references =>
+                    references.SequenceEqual(recommendationContentfulReferences)
+                )
+            );
+    }
+
+    [Fact]
+    public async Task GetRecommendationsByContentfulReferencesAsync_WhenRepositoryReturnsEmpty_ThenReturnsEmpty()
+    {
+        // Arrange
+        var recommendationContentfulReferences = new[] { "rec-001", "rec-002" };
+
+        _recommendationRepository
+            .GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences)
+            .Returns([]);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result = await workflow.GetRecommendationsByContentfulReferencesAsync(
+            recommendationContentfulReferences
+        );
+
+        // Assert
+        Assert.Empty(result);
+
+        await _recommendationRepository
+            .Received(1)
+            .GetRecommendationsByContentfulReferencesAsync(
+                Arg.Is<IEnumerable<string>>(references =>
+                    references.SequenceEqual(recommendationContentfulReferences)
+                )
             );
     }
 }

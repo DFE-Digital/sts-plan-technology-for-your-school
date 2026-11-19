@@ -9,7 +9,7 @@
 
     var dynamicValues = new Dictionary<string, string>
     {
-        ["topic"] = topic.Name.ToLower().Trim(),
+        ["topic"] = topic.Name.ToLowerInvariant().Trim(),
         ["dateUpdated"] = topic.DateUpdated ?? "",
         ["dateCompleted"] = topic.LastCompletionDate ?? ""
     };

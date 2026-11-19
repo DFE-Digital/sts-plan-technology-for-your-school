@@ -36,11 +36,15 @@ public static partial class StringExtensions
         return WebUtility.HtmlDecode(text.Replace("-", NonBreakingHyphen));
     }
 
-    public static string FirstCharToLower(this string input) => char.ToLower(input[0]) + input[1..];
+    public static string FirstCharToLower(this string input) =>
+        char.ToLowerInvariant(input[0]) + input[1..];
 
     // Extension method to slugify a string by removing non-alphanumeric characters (except hyphens to preserve hyphenated words), replacing spaces with hyphens, and converting to lowercase.
     public static string Slugify(this string text) =>
-        text.Trim().ReplaceWhitespaceCharacters("-").ReplaceNonSlugCharacters("").ToLower();
+        text.Trim()
+            .ReplaceWhitespaceCharacters("-")
+            .ReplaceNonSlugCharacters("")
+            .ToLowerInvariant();
 
     private static string ReplaceWhitespaceCharacters(this string text, string replacement) =>
         MatchWhitespaceCharactersPattern().Replace(text, replacement);

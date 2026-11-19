@@ -45,17 +45,35 @@
 
 <ul class="govuk-list govuk-list--bullet">
     <li>your name and message</li>
-    <li>the name of your school</li>
-    @if (Model.ChunkSlug is null)
+
+    @if (!Model.IsMat)
     {
-        <li>the list of recommendations for your chosen standard and their current status</li>
+        <li>the name of your school</li>
+    }
+
+    @if (Model.IsMat && Model.ChunkSlug is null)
+    {
+        <li>the list of recommendations for your chosen standard</li>
+    }
+    else if (Model.ChunkSlug is null)
+    {
+        <li>
+            the list of recommendations for your chosen standard
+            and their current status
+        </li>
+    }
+    else if (Model.IsMat)
+    {
+        <li>the chosen recommendation</li>
     }
     else
     {
         <li>the chosen recommendation and its current status</li>
     }
+
     <li>a link to sign into the service, or register for a DfE Sign-in</li>
 </ul>
+
 <p>Email addresses and messages will not be saved.</p>
 
 <hr class="govuk-section-break govuk-section-break--l">

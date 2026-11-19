@@ -1,8 +1,5 @@
 using System.Linq.Expressions;
-using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -17,7 +14,9 @@ public class SubmissionRepository(
 {
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    private readonly IUserActionIdProvider _userActionIdProvider = userActionIdProvider;
+
+    private readonly IUserActionIdProvider _userActionIdProvider =
+        userActionIdProvider ?? throw new ArgumentNullException(nameof(userActionIdProvider));
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
@@ -52,103 +51,6 @@ public class SubmissionRepository(
         await _db.SaveChangesAsync();
 
         return newSubmission;
-    }
-
-    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-        int establishmentId,
-        int? matEstablishmentId,
-        int submissionId,
-        int userId,
-        QuestionnaireSectionEntry section
-    )
-    {
-        var submission = await GetSubmissionByIdWithResponsesAsync(submissionId);
-
-        if (submission is null)
-        {
-            throw new InvalidOperationException(
-                $"Could not find submission with ID {submissionId} in database"
-            );
-        }
-
-        var sectionQuestions = await GetQuestionsForSection(section);
-
-        var recommendationDtos = section
-            .CoreRecommendations.Where(r => r.Question is not null)
-            .Select(r =>
-            {
-                var question = sectionQuestions.FirstOrDefault(q =>
-                    string.Equals(q.ContentfulRef, r.Question.Id)
-                );
-
-                if (question is null)
-                {
-                    throw new InvalidOperationException(
-                        "Could not find the question identified in the submission"
-                    );
-                }
-
-                return new SqlRecommendationDto
-                {
-                    RecommendationText = r.Header,
-                    ContentfulSysId = r.Id,
-                    QuestionId = question.Id,
-                    QuestionContentfulRef = question.ContentfulRef,
-                };
-            });
-
-        var recommendations = await UpsertRecommendations(recommendationDtos);
-
-        var responses = submission.Responses.Select(r => r.Answer.ContentfulRef).ToHashSet();
-
-        var answerStatusDictionary = section
-            .CoreRecommendations.Select(r =>
-            {
-                if (r.CompletingAnswers.Any(ca => responses.Contains(ca.Id)))
-                {
-                    return new { r.Id, Status = RecommendationStatus.Complete };
-                }
-
-                if (r.InProgressAnswers.Any(ca => responses.Contains(ca.Id)))
-                {
-                    return new { r.Id, Status = RecommendationStatus.InProgress };
-                }
-
-                return new { r.Id, Status = RecommendationStatus.NotStarted };
-            })
-            .Where(x => x is not null)
-            .ToDictionary(x => x!.Id, x => x.Status);
-
-        var previousStatuses = await _db
-            .EstablishmentRecommendationHistories.Where(erh =>
-                erh.EstablishmentId == establishmentId
-                && erh.MatEstablishmentId == matEstablishmentId
-            )
-            .GroupBy(erh => erh.RecommendationId, erh => erh)
-            .ToDictionaryAsync(
-                group => group.Key,
-                group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus
-            );
-
-        var recommendationStatuses = recommendations.Select(
-            r => new EstablishmentRecommendationHistoryEntity
-            {
-                EstablishmentId = establishmentId,
-                MatEstablishmentId = matEstablishmentId,
-                RecommendationId = r.Id,
-                UserId = userId,
-                PreviousStatus = previousStatuses.TryGetValue(r.Id, out var previousStatus)
-                    ? previousStatus
-                    : null,
-                NewStatus = answerStatusDictionary[r.ContentfulRef],
-            }
-        );
-
-        await _db.EstablishmentRecommendationHistories.AddRangeAsync(recommendationStatuses);
-
-        await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
-            submissionId
-        );
     }
 
     public Task<SubmissionEntity?> GetLatestCompletedSubmissionBySectionIdAsync(
@@ -253,12 +155,11 @@ public class SubmissionRepository(
         int submissionId
     )
     {
-        var submission = await GetSubmissionByIdAsync(submissionId);
-        if (submission is null)
-        {
-            throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
-        }
-
+        var submission =
+            await GetSubmissionByIdAsync(submissionId)
+            ?? throw new InvalidOperationException(
+                $"Could not find submission with ID '{submissionId}'"
+            );
         var userActionId = _userActionIdProvider.GetUserActionId();
 
         submission.DateCompleted = DateTime.UtcNow;
@@ -413,83 +314,6 @@ public class SubmissionRepository(
         return query;
     }
 
-    public async Task<List<QuestionEntity>> GetQuestionsForSection(
-        QuestionnaireSectionEntry section
-    )
-    {
-        var sectionQuestionRefs = section.Questions.Select(q => q.Sys?.Id).ToList();
-
-        var sectionQuestions = await _db
-            .Questions.Where(question => sectionQuestionRefs.Contains(question.ContentfulRef))
-            .ToListAsync();
-
-        return sectionQuestions;
-    }
-
-    private async Task<List<RecommendationEntity>> UpsertRecommendations(
-        IEnumerable<SqlRecommendationDto> recommendationDtos
-    )
-    {
-        var contentfulRefs = recommendationDtos.Select(r => r.ContentfulSysId);
-        var existingRecommendations = await _db
-            .Recommendations.Where(recommendation =>
-                contentfulRefs.Contains(recommendation.ContentfulRef)
-            )
-            .Where(recommendation => recommendation != null)
-            .GroupBy(recommendation => recommendation.ContentfulRef)
-            .Select(group => group.OrderByDescending(g => g.DateCreated).First())
-            .ToListAsync();
-
-        var existingRecommendationContentfulRefs = existingRecommendations
-            .Select(r => r.ContentfulRef)
-            .ToList();
-
-        var recommendationEntitiesToInsert = recommendationDtos
-            .Where(rm => !existingRecommendationContentfulRefs.Contains(rm.ContentfulSysId))
-            .Select(BuildRecommendationEntity)
-            .ToList();
-
-        var recommendationDtoDictionary = recommendationDtos.ToDictionary(
-            r => r.ContentfulSysId,
-            r => r
-        );
-        var recommendationsWithNoChanges = new List<RecommendationEntity>();
-
-        foreach (var existingRecommendation in existingRecommendations)
-        {
-            recommendationDtoDictionary.TryGetValue(
-                existingRecommendation.ContentfulRef,
-                out var recommendationDto
-            );
-            if (recommendationDto is null)
-            {
-                continue;
-            }
-
-            if (
-                !string.Equals(
-                    recommendationDto.RecommendationText,
-                    existingRecommendation.RecommendationText
-                )
-            )
-            {
-                recommendationEntitiesToInsert.Add(BuildRecommendationEntity(recommendationDto));
-            }
-            else
-            {
-                recommendationsWithNoChanges.Add(BuildRecommendationEntity(recommendationDto));
-            }
-        }
-
-        _db.AddRange(recommendationEntitiesToInsert);
-
-        await _db.SaveChangesAsync();
-
-        return await _db
-            .Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef))
-            .ToListAsync();
-    }
-
     public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
         string sectionIds,
         int establishmentId
@@ -499,31 +323,25 @@ public class SubmissionRepository(
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissionsRaw = await _db
-            .Submissions.Where(s =>
-                !s.Deleted
-                && s.EstablishmentId == establishmentId
-                && sectionIdList.Contains(s.SectionId)
-            )
-            .ToListAsync();
+        var submissionsQuery = _db.Submissions.Where(s =>
+            !s.Deleted
+            && s.EstablishmentId == establishmentId
+            && sectionIdList.Contains(s.SectionId)
+        );
 
-        var currentSubmissions = currentSubmissionsRaw
-            .GroupBy(s => s.SectionId)
-            .Select(g => g.OrderByDescending(s => s.DateCreated).First());
-
-        var lastCompleteSubmissions = await _db
-            .Submissions.Where(s =>
-                !s.Deleted
-                && s.EstablishmentId == establishmentId
-                && sectionIdList.Contains(s.SectionId)
-                && (s.Status == SubmissionStatus.CompleteReviewed)
-            )
+        var submissions = await submissionsQuery
             .GroupBy(s => s.SectionId)
             .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
-        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
-        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+        var completedSubmissions = await submissionsQuery
+            .Where(s => s.Status == SubmissionStatus.CompleteReviewed)
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var sectionIdSubmissions = submissions.ToDictionary(s => s.SectionId, s => s);
+        var sectionIdCompletedSubmissions = completedSubmissions.ToDictionary(
             s => s.SectionId,
             s => s
         );
@@ -531,8 +349,11 @@ public class SubmissionRepository(
         var result = sectionIdList
             .Select(sectionId =>
             {
-                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
-                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+                sectionIdSubmissions.TryGetValue(sectionId, out var currentSubmission);
+                sectionIdCompletedSubmissions.TryGetValue(
+                    sectionId,
+                    out var lastCompleteSubmission
+                );
 
                 return new SectionStatusEntity
                 {
@@ -540,18 +361,27 @@ public class SubmissionRepository(
                     Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
                     DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
                     DateUpdated =
-                        currentSubmission?.DateLastUpdated
-                        ?? currentSubmission?.DateCreated
-                        ?? DateTime.UtcNow,
+                        currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
                     CreatedUserActionId = currentSubmission?.CreatedUserActionId,
+                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
                     CompletedUserActionId = lastCompleteSubmission?.CompletedUserActionId,
                 };
             })
             .ToList();
 
         return result;
+    }
+
+    public async Task UpdateSubmissionDatesAsync(int submissionId, Guid userActionId)
+    {
+        await _db
+            .Submissions.Where(s => s.Id == submissionId)
+            .ExecuteUpdateAsync(setters =>
+                setters
+                    .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                    .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
+            );
     }
 
     public async Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
@@ -583,68 +413,7 @@ public class SubmissionRepository(
             );
     }
 
-    public async Task<int> SubmitResponse(AssessmentResponseModel response)
-    {
-        ArgumentNullException.ThrowIfNull(response);
-
-        if (response.Answer is null)
-        {
-            throw new InvalidDataException($"{nameof(response.Answer)} cannot be null");
-        }
-
-        if (response.Question is null)
-        {
-            throw new InvalidDataException($"{nameof(response.Question)} cannot be null");
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(response.SectionId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(response.SectionName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(response.Question.Id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(response.Question.Text);
-        ArgumentException.ThrowIfNullOrWhiteSpace(response.Answer.Id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(response.Answer.Text);
-
-        var submissionId = await SelectOrInsertSubmissionIdAsync(
-            response.SectionId,
-            response.SectionName,
-            response.EstablishmentId
-        );
-
-        var answerId = await GetOrCreateAnswerIdAsync(response.Answer.Id, response.Answer.Text);
-
-        var questionId = await GetOrCreateQuestionIdAsync(
-            response.Question.Id,
-            response.Question.Text
-        );
-
-        var responseEntity = new ResponseEntity
-        {
-            UserId = response.UserId,
-            UserEstablishmentId = response.UserEstablishmentId,
-            SubmissionId = submissionId,
-            QuestionId = questionId,
-            AnswerId = answerId,
-            DateCreated = DateTime.UtcNow,
-        };
-
-        var userActionId = _userActionIdProvider.GetUserActionId();
-
-        await _db.Responses.AddAsync(responseEntity);
-
-        await _db
-            .Submissions.Where(s => s.Id == submissionId)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
-                    .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
-            );
-
-        await _db.SaveChangesAsync();
-
-        return responseEntity.Id;
-    }
-
-    private async Task<int> SelectOrInsertSubmissionIdAsync(
+    public async Task<int> SelectOrInsertSubmissionAsync(
         string sectionId,
         string sectionName,
         int establishmentId
@@ -689,59 +458,6 @@ public class SubmissionRepository(
             .FirstOrDefaultAsync();
     }
 
-    private async Task<int> GetOrCreateAnswerIdAsync(string answerContentfulId, string answerText)
-    {
-        var answerId = await _db
-            .Answers.Where(a => a.AnswerText == answerText && a.ContentfulRef == answerContentfulId)
-            .Select(a => (int?)a.Id)
-            .FirstOrDefaultAsync();
-
-        if (answerId.HasValue)
-        {
-            return answerId.Value;
-        }
-
-        var answer = new AnswerEntity
-        {
-            AnswerText = answerText,
-            ContentfulRef = answerContentfulId,
-        };
-
-        await _db.Answers.AddAsync(answer);
-        await _db.SaveChangesAsync();
-
-        return answer.Id;
-    }
-
-    private async Task<int> GetOrCreateQuestionIdAsync(
-        string questionContentfulId,
-        string questionText
-    )
-    {
-        var questionId = await _db
-            .Questions.Where(q =>
-                q.QuestionText == questionText && q.ContentfulRef == questionContentfulId
-            )
-            .Select(q => (int?)q.Id)
-            .FirstOrDefaultAsync();
-
-        if (questionId.HasValue)
-        {
-            return questionId.Value;
-        }
-
-        var question = new QuestionEntity
-        {
-            QuestionText = questionText,
-            ContentfulRef = questionContentfulId,
-        };
-
-        await _db.Questions.AddAsync(question);
-        await _db.SaveChangesAsync();
-
-        return question.Id;
-    }
-
     public async Task<
         List<SubmissionEntity>
     > GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds)
@@ -749,8 +465,7 @@ public class SubmissionRepository(
         var establishmentIdList = establishmentIds.Distinct().ToList();
 
         var results = await _db
-            .Submissions
-            .Include(s => s.Establishment)
+            .Submissions.Include(s => s.Establishment)
             .Where(s =>
                 establishmentIdList.Contains(s.EstablishmentId)
                 && s.Status == SubmissionStatus.CompleteReviewed
@@ -802,17 +517,5 @@ public class SubmissionRepository(
             .ToListAsync();
 
         return results;
-    }
-
-    private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)
-    {
-        return new RecommendationEntity
-        {
-            ContentfulRef = recommendationDto.ContentfulSysId,
-            RecommendationText = recommendationDto.RecommendationText,
-            QuestionId = recommendationDto.QuestionId,
-            QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
-            Archived = recommendationDto.Archived,
-        };
     }
 }

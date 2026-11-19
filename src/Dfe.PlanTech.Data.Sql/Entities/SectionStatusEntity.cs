@@ -7,11 +7,11 @@ public class SectionStatusEntity
 {
     public string SectionId { get; set; } = null!;
 
-    public DateTime DateCreated { get; set; }
-
-    public DateTime DateUpdated { get; set; }
-
     public SubmissionStatus Status { get; set; }
+
+    public DateTime? DateCreated { get; set; }
+
+    public DateTime? DateUpdated { get; set; }
 
     public DateTime? LastCompletionDate { get; set; }
 

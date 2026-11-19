@@ -12,4 +12,5 @@ public class ShareByEmailViewModel
     public required string Caption { get; set; }
     public required string Heading { get; set; }
     public ShareByEmailInputViewModel? InputModel { get; set; }
+    public bool IsMat { get; set; }
 }

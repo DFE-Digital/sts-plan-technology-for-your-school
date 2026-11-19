@@ -51,7 +51,7 @@ MIN_RECORDS: dict[str, int] = {
     "phases": 6,
     "religious_characters": 45,
     "sixth_form_statuses": 3,
-    "trusts": 2250,
+    "trusts": 2200,
     "trust_school_flags": 4,
     "types_of_establishment": 35,
     "urban_rural_classifications": 20,

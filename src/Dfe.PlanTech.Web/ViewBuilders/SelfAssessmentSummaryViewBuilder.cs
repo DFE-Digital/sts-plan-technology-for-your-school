@@ -33,22 +33,14 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionSlug
     )
     {
-        var viewModel = await BuildSelfAssessmentSummaryViewModel(
-            categorySlug,
-            sectionSlug
-        );
+        var viewModel = await BuildSelfAssessmentSummaryViewModel(categorySlug, sectionSlug);
 
         if (CurrentUser.IsMat && viewModel.CompletedSchoolCount == 0)
         {
-            return controller.Redirect(
-                $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
-            );
+            return controller.Redirect($"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}");
         }
 
-        return controller.View(
-            SelfAssessmentSummaryViewName,
-            viewModel
-        );
+        return controller.View(SelfAssessmentSummaryViewName, viewModel);
     }
 
     private async Task<SelfAssessmentSummaryViewModel> BuildSelfAssessmentSummaryViewModel(
@@ -91,7 +83,7 @@ public class SelfAssessmentSummaryViewBuilder(
             RecommendationLinks = submittedSubmissions.Select(BuildRecommendationLink).ToList(),
             ShowSubmitAnotherSelfAssessment = true,
             SubmitAnotherSelfAssessmentHref = CurrentUser.IsMat
-                ? $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
+                ? $"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
                 : $"/{recommendationCategorySlug}",
             BackToHomeHref = UrlConstants.HomePage,
         };
@@ -106,13 +98,15 @@ public class SelfAssessmentSummaryViewBuilder(
             {
                 LinkText = CurrentUser.IsMat
                     ? organisationName
-                    : $"View the recommendations for {section.Name!.ToLower()}",
+                    : $"View the recommendations for {section.Name.ToLowerInvariant()}",
 
                 SchoolUrn = CurrentUser.IsMat ? submission.Establishment!.EstablishmentRef : null,
 
                 SchoolName = CurrentUser.IsMat ? submission.Establishment!.OrgName : null,
 
-                Href = $"/{recommendationCategorySlug}",
+                Href = CurrentUser.IsMat
+                    ? $"/trust/{recommendationCategorySlug}"
+                    : $"/{recommendationCategorySlug}",
             };
         }
     }

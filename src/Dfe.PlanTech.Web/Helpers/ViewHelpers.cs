@@ -12,7 +12,7 @@ public static partial class ViewHelpers
             .Replace(text, "")
             .Trim()
             .Replace(" ", "-")
-            .ToLower();
+            .ToLowerInvariant();
 
         while (slugifiedString.Contains("--"))
         {

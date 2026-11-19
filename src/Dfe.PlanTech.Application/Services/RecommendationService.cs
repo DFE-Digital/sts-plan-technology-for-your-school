@@ -44,8 +44,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null,
-        int? responseId = null
+        int? matEstablishmentId = null
     )
     {
         return recommendationWorkflow.UpdateRecommendationStatusAsync(
@@ -54,8 +53,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             userId,
             newStatus,
             noteText,
-            matEstablishmentId,
-            responseId
+            matEstablishmentId
         );
     }
 
@@ -67,6 +65,38 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendationAsync(
             establishmentId,
             recommendationContentfulReference
+        );
+    }
+
+    public async Task<
+        IEnumerable<SqlRecommendationDto>
+    > GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences
+    )
+    {
+        return await recommendationWorkflow.GetRecommendationsByContentfulReferencesAsync(
+            recommendationContentfulReferences
+        );
+    }
+
+    public Task UpdateEstablishmentsRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        IEnumerable<int> establishmentIds,
+        int userId,
+        RecommendationStatus newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null,
+        int? responseId = null
+    )
+    {
+        return recommendationWorkflow.UpdateEstablishmentsRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentIds,
+            userId,
+            newStatus,
+            noteText,
+            matEstablishmentId,
+            responseId
         );
     }
 }

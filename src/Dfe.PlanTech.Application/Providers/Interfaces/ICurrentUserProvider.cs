@@ -28,10 +28,12 @@ public interface ICurrentUserProvider
     string? UserOrganisationReference { get; }
     string? UserOrganisationTypeName { get; }
     string? UserOrganisationCategoryName { get; }
-    bool UserOrganisationIsGroup { get; }
+    bool UserOrganisationSelectsSchools { get; }
 
     bool IsAuthenticated { get; }
+    bool IsGroup { get; }
     bool IsMat { get; }
+    bool IsSatOrSSat { get; }
     int? UserId { get; }
     bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds);
     (string Urn, string Name)? GetGroupSelectedSchool();

@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Application.Rendering.Contentful.Models
         public CustomAttachmentModel(RichTextContentDataEntry content)
         {
             var contentType = content?.Asset?.File.ContentType;
-            var fileExtension = contentType?.Split('/')[^1].ToLower();
+            var fileExtension = contentType?.Split('/')[^1].ToLowerInvariant();
 
             if (fileExtension == FileExtensionConstants.XLSXSPREADSHEET)
             {

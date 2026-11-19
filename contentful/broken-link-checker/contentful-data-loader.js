@@ -7,8 +7,6 @@ const ContentfulDataPath = './export/contentful-data.json';
 
 mkdirSync(path.dirname(ContentfulDataPath), { recursive: true });
 
-let exportProcessor;
-
 /**
  * Exports data from Contentful and writes to files for use by the dynamic-page-validator.cy.js tests
  * @param {*} config

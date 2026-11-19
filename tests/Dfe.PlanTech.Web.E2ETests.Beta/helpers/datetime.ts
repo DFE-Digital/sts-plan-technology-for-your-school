@@ -1,10 +1,12 @@
-export function getCurrentShortDate(): string {
+export function getCurrentShortDate(normalise: boolean = true): string {
   const today = new Date();
   const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
   const formattedDate = today.toLocaleDateString('en-GB', options).replace(',', '');
   const normalisedDate = normaliseMonth(formattedDate);
-  return normalisedDate;
+  return normalise ? normalisedDate : formattedDate;
 }
+
+
 
 function normaliseMonth(text: string): string {
   return text.replace(/\bSept\b/, 'Sep');

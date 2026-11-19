@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
+    <ProjectReference Include="..\..\src\Dfe.PlanTech.Data.Sql\Dfe.PlanTech.Data.Sql.csproj" />
   </ItemGroup>
 
 </Project>

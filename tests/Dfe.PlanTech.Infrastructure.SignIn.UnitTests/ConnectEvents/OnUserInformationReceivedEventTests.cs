@@ -26,17 +26,17 @@ public class OnUserInformationReceivedEventTests
         UserInformationReceivedContext ctx,
         ISignInWorkflow wf,
         IGiasRepository gias,
-        IDsiOrganisationProvider dsiProvider,
+        ICurrentUserProvider user,
         ILogger<IDfeSignIn> logger
     ) BuildContext(ClaimsPrincipal principal)
     {
         var services = new ServiceCollection();
         var signIn = Substitute.For<ISignInWorkflow>();
         var gias = Substitute.For<IGiasRepository>();
-        var dsiProvider = Substitute.For<IDsiOrganisationProvider>();
+        var user = Substitute.For<ICurrentUserProvider>();
         services.AddSingleton(signIn);
         services.AddSingleton(gias);
-        services.AddSingleton(dsiProvider);
+        services.AddSingleton(user);
 
         var sp = services.BuildServiceProvider();
 
@@ -58,7 +58,7 @@ public class OnUserInformationReceivedEventTests
         );
 
         var logger = Substitute.For<ILogger<IDfeSignIn>>();
-        return (ctx, signIn, gias, dsiProvider, logger);
+        return (ctx, signIn, gias, user, logger);
     }
 
     private static ClaimsPrincipal AuthenticatedPrincipal(params Claim[] claims)
@@ -174,7 +174,7 @@ public class OnUserInformationReceivedEventTests
             OrganisationClaim(establishment)
         );
 
-        var (ctx, signIn, gias, dsiProvider, logger) = BuildContext(principal);
+        var (ctx, signIn, gias, _, logger) = BuildContext(principal);
 
         var signInDto = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
         signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
@@ -188,9 +188,6 @@ public class OnUserInformationReceivedEventTests
             .RecordSignIn("dsi-ref-123", Arg.Is<EstablishmentModel>(e => e.Urn == "111111"));
         await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnly(default!);
         await gias.DidNotReceiveWithAnyArgs().GetSingleAcademySchool(default);
-        await dsiProvider
-            .DidNotReceiveWithAnyArgs()
-            .GetOrganisationForUserAsync(default!, default!);
 
         Assert.True(ctx.Result is null);
 
@@ -199,65 +196,6 @@ public class OnUserInformationReceivedEventTests
         );
         Assert.NotNull(userIdClaim);
         Assert.Equal("1", userIdClaim!.Value);
-
-        // No single-academy claim should be added outside the SAT/SSAT path
-        var satClaim = ctx.Principal.Claims.FirstOrDefault(c =>
-            c.Type == ClaimConstants.SINGLE_ACADEMY_ORGANISATION
-        );
-        Assert.Null(satClaim);
-    }
-
-    [Fact]
-    public async Task RecordUserSignIn_WhenSatOrganisation_AndReplacementFound_UsesReplacement_AndAddsSingleAcademyClaim()
-    {
-        // Arrange: a SAT-category organisation whose Uid resolves to a GIAS school,
-        // which in turn resolves to a replacement establishment via the DSI API.
-        var originalOrg = CreateEstablishment(
-            uid: "555",
-            categoryId: DsiConstants.SatOrganisationCategoryId
-        );
-        var originalOrgClaim = OrganisationClaim(originalOrg);
-        var principal = AuthenticatedPrincipal(
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-456"),
-            originalOrgClaim
-        );
-
-        var (ctx, signIn, gias, dsiProvider, logger) = BuildContext(principal);
-
-        var school = CreateSchool(777777);
-        gias.GetSingleAcademySchool(555).Returns(school);
-
-        var replacementOrg = CreateEstablishment(
-            urn: "777777",
-            categoryId: DsiConstants.EstablishmentCategoryId
-        );
-        dsiProvider.GetOrganisationForUserAsync("dsi-ref-456", "777777").Returns(replacementOrg);
-
-        var signInDto = new SqlSignInDto { UserId = 10, EstablishmentId = 20 };
-        signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
-
-        // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
-
-        // Assert
-        await signIn
-            .Received(1)
-            .RecordSignIn(
-                "dsi-ref-456",
-                Arg.Is<EstablishmentModel>(e =>
-                    e.Uid == "555" && e.Category!.Id == DsiConstants.SatOrganisationCategoryId
-                )
-            );
-        await gias.Received(1).GetSingleAcademySchool(555);
-        await dsiProvider.Received(1).GetOrganisationForUserAsync("dsi-ref-456", "777777");
-
-        var satClaim = ctx.Principal!.Claims.FirstOrDefault(c =>
-            c.Type == ClaimConstants.SINGLE_ACADEMY_ORGANISATION
-        );
-        Assert.NotNull(satClaim);
-
-        var deserialised = JsonSerializer.Deserialize<EstablishmentModel>(satClaim!.Value);
-        Assert.Equal("777777", deserialised!.Urn);
     }
 
     [Fact]
@@ -273,7 +211,7 @@ public class OnUserInformationReceivedEventTests
             OrganisationClaim(org)
         );
 
-        var (ctx, signIn, gias, _, logger) = BuildContext(principal);
+        var (ctx, signIn, gias, user, logger) = BuildContext(principal);
 
         var signInDto = new SqlSignInDto
         {
@@ -308,7 +246,7 @@ public class OnUserInformationReceivedEventTests
             OrganisationClaim(org)
         );
 
-        var (ctx, signIn, gias, _, logger) = BuildContext(principal);
+        var (ctx, signIn, gias, user, logger) = BuildContext(principal);
 
         var signInDto = new SqlSignInDto
         {
@@ -343,12 +281,9 @@ public class OnUserInformationReceivedEventTests
             OrganisationClaim(originalOrg)
         );
 
-        var (ctx, signIn, gias, dsiProvider, logger) = BuildContext(principal);
+        var (ctx, signIn, gias, user, logger) = BuildContext(principal);
 
         gias.GetSingleAcademySchool(99).Returns(CreateSchool(888888));
-        dsiProvider
-            .GetOrganisationForUserAsync(Arg.Any<string>(), Arg.Any<string>())
-            .Returns((EstablishmentModel?)null);
 
         var signInDto = new SqlSignInDto { UserId = 5, EstablishmentId = 6 };
         signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
@@ -361,11 +296,6 @@ public class OnUserInformationReceivedEventTests
         await signIn
             .Received(1)
             .RecordSignIn("dsi-ref-fallback", Arg.Is<EstablishmentModel>(e => e.Urn == "888888"));
-
-        var satClaim = ctx.Principal!.Claims.FirstOrDefault(c =>
-            c.Type == ClaimConstants.SINGLE_ACADEMY_ORGANISATION
-        );
-        Assert.Null(satClaim);
     }
 
     // The rest of the behavior (adding DB_USER_ID and DB_ESTABLISHMENT_ID) is in a private method.
@@ -385,7 +315,7 @@ public class OnUserInformationReceivedEventTests
         );
         Assert.NotNull(mi);
 
-        mi!.Invoke(null, new object[] { ctx, signIn });
+        mi!.Invoke(null, [ctx, signIn]);
 
         // Assert
         var userIdClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.DB_USER_ID);

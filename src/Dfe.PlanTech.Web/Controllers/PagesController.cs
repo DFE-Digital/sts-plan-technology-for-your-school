@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
@@ -36,7 +37,7 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
 
         return _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(this, page);
     }
-        
+
     [HttpGet("{categorySlug}/print", Name = "GetStandardChecklist")]
     public async Task<IActionResult> GetStandardChecklist(string categorySlug)
     {
@@ -44,7 +45,7 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
 
         return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(this, categorySlug);
     }
-        
+
     [HttpGet("{categorySlug}/share", Name = "ShareStandard")]
     public async Task<IActionResult> ShareStandard(string categorySlug)
     {
@@ -65,6 +66,56 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
             this,
             categorySlug,
             inputModel
+        );
+    }
+
+    [HttpGet(
+        "groups/{categorySlug}/print",
+        Name = nameof(PrintMatStandard)
+    )]
+    public async Task<IActionResult> PrintMatStandard(string categorySlug)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(
+            this,
+            categorySlug,
+            CategoryLandingContext.MAT
+        );
+    }
+
+    [HttpGet(
+        "groups/{categorySlug}/share",
+        Name = nameof(ShareMatStandard)
+    )]
+    public async Task<IActionResult> ShareMatStandard(string categorySlug)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToShareStandardPageAsync(
+            this,
+            categorySlug,
+            inputModel: null,
+            context: CategoryLandingContext.MAT
+        );
+    }
+
+    [HttpPost(
+        "groups/{categorySlug}/share",
+        Name = nameof(PostShareMatStandard)
+    )]
+    public async Task<IActionResult> PostShareMatStandard(
+        string categorySlug,
+        [FromForm] ShareByEmailInputViewModel inputModel
+    )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToShareStandardPageAsync(
+            this,
+            categorySlug,
+            inputModel,
+            CategoryLandingContext.MAT
         );
     }
 

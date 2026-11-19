@@ -1,6 +1,6 @@
 import { Then, When } from "@cucumber/cucumber";
 import { expect } from "@playwright/test";
-import { getCurrentShortDate } from "../../helpers/datetime";
+import { getCurrentShortDate, normaliseShortDateTimeText } from "../../helpers/datetime";
 
 Then(
   'I should see the select schools self-assessment page',
@@ -173,9 +173,8 @@ Then(
       exact: true,
     });
 
-    var currentDate = getCurrentShortDate();
+    var currentDate = getCurrentShortDate(false);
     
-
     await expect(checkbox).toBeVisible();
 
     const checkboxItem = checkbox.locator('xpath=..');

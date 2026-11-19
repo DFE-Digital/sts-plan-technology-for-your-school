@@ -130,8 +130,15 @@ public class SelfAssessmentSummaryViewBuilderTests
             Name = "Cyber security",
         };
 
+        var category = new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry { Text = "Digital leadership and governance" },
+            LandingPage = new PageEntry { Slug = "leadership-governance-standard" },
+            Sections = [section],
+        };
+
         _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
-        _contentful.GetAllCategoriesAsync().Returns([]);
+        _contentful.GetAllCategoriesAsync().Returns([category]);
 
         _groupService
             .GetGroupCompletedSubmissionsBySections(
@@ -189,10 +196,10 @@ public class SelfAssessmentSummaryViewBuilderTests
 
         Assert.True(model.IsMatSummary);
         Assert.Equal("Cyber security", model.SectionName);
-        Assert.Equal("digital leadership", model.CategoryName);
+        Assert.Equal("Digital leadership and governance", model.CategoryName);
         Assert.Equal(2, model.CompletedSchoolCount);
         Assert.Equal(
-            $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
+            $"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
             model.SubmitAnotherSelfAssessmentHref
         );
 
@@ -203,14 +210,14 @@ public class SelfAssessmentSummaryViewBuilderTests
                 Assert.Equal("School One", link.LinkText);
                 Assert.Equal("School One", link.SchoolName);
                 Assert.Equal("100001", link.SchoolUrn);
-                Assert.Equal("/digital-leadership", link.Href);
+                Assert.Equal("/trust/leadership-governance-standard", link.Href);
             },
             link =>
             {
                 Assert.Equal("School Two", link.LinkText);
                 Assert.Equal("School Two", link.SchoolName);
                 Assert.Equal("100002", link.SchoolUrn);
-                Assert.Equal("/digital-leadership", link.Href);
+                Assert.Equal("/trust/leadership-governance-standard", link.Href);
             }
         );
     }

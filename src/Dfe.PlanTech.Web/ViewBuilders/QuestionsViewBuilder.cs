@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -18,7 +17,7 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<QuestionsViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
@@ -27,23 +26,23 @@ public class QuestionsViewBuilder(
     IQuestionService questionService,
     ISubmissionService submissionService,
     IEstablishmentService establishmentService,
+    IGroupService groupService,
     IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
-    private readonly IQuestionService _questionService =
-        questionService ?? throw new ArgumentNullException(nameof(questionService));
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IEstablishmentService establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly ContactOptionsConfiguration _contactOptions =
-        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ErrorMessagesConfiguration _errorMessages =
-        errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
-    private readonly ContentfulOptionsConfiguration _contentfulOptions =
-        contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
-        matEstablishmentProvider
+    private readonly IQuestionService _questionService = questionService
+        ?? throw new ArgumentNullException(nameof(questionService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IEstablishmentService establishmentService = establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value
+        ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorMessagesConfiguration _errorMessages = errorMessages?.Value
+        ?? throw new ArgumentNullException(nameof(errorMessages));
+    private readonly ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions
+        ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = matEstablishmentProvider
         ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     private const string QuestionView = "Question";
@@ -61,8 +60,7 @@ public class QuestionsViewBuilder(
     {
         var establishmentId = await GetRoutingEstablishmentId();
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -73,8 +71,8 @@ public class QuestionsViewBuilder(
             status: SubmissionStatus.InProgress
         );
 
-        var isSlugForNextQuestion =
-            submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
+        var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug)
+            ?? false;
 
         if (isSlugForNextQuestion)
         {
@@ -128,8 +126,7 @@ public class QuestionsViewBuilder(
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.InProgress))
         {
-            var nextQuestionSlug =
-                submissionRoutingData.NextQuestion?.Slug
+            var nextQuestionSlug = submissionRoutingData.NextQuestion?.Slug
                 ?? throw new InvalidDataException("NextQuestion is null");
 
             return await RouteBySlugAndQuestionAsync(
@@ -150,8 +147,7 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var interstitialPage =
-            await ContentfulService.GetPageBySlugAsync(sectionSlug)
+        var interstitialPage = await ContentfulService.GetPageBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
@@ -166,13 +162,24 @@ public class QuestionsViewBuilder(
                 .ToList();
         }
 
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
+
+        var categoryName = category.Header?.Text
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category header text for slug {categorySlug}"
+            );
+
         var viewModel = new PageViewModel(interstitialPage)
         {
             ShowTrustSchoolAssessmentTable = isMatWithoutSelectedSchool,
+            CategoryName = categoryName,
+            CategorySlug = categorySlug,
         };
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -186,7 +193,7 @@ public class QuestionsViewBuilder(
             );
 
             viewModel.TrustSchoolAssessmentContinueHref =
-                $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
+                $"/trust/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
         }
 
         return controller.View(InterstitialPagePath, viewModel);
@@ -238,7 +245,8 @@ public class QuestionsViewBuilder(
             // Remove the current invalid submission and redirect to self-assessment page
             await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
 
-            controller.TempData["SubtopicError"] = await BuildErrorMessage();
+            controller.TempData[StatePassingMechanismConstants.SubtopicError] =
+                await BuildErrorMessage();
             return controller.RedirectToAction(
                 nameof(PagesController.GetByRoute),
                 nameof(PagesController).GetControllerNameSlug(),
@@ -253,14 +261,12 @@ public class QuestionsViewBuilder(
         QuestionnaireSectionEntry section
     )
     {
-        var groupId =
-            CurrentUser.UserOrganisationId
+        var groupId = CurrentUser.UserOrganisationId
             ?? throw new InvalidDataException(
                 "User is a MAT user but does not have an organisation ID"
             );
 
-        var schools =
-            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
+        var schools = await groupService.GetGroupSchoolsAsync(groupId, true) ?? [];
 
         var rows = new List<TrustSchoolAssessmentRowViewModel>();
 
@@ -314,8 +320,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -344,7 +349,7 @@ public class QuestionsViewBuilder(
         }
         ;
 
-        var establishment =await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+        var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {
@@ -370,8 +375,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
@@ -396,8 +400,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
@@ -420,21 +423,19 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var selectedEstablishmentIds = CurrentUser.IsMat
+        var selectedEstablishmentIds = CurrentUser.IsGroup
             ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().ToArray()
             : [];
 
         var userId = GetUserIdOrThrowException();
         var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
 
-        var userOrganisationId =
-            CurrentUser.UserOrganisationId
+        var userOrganisationId = CurrentUser.UserOrganisationId
             ?? throw new InvalidOperationException(
                 "User organisation ID is null - user needs to be logged in to submit an answer"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -494,7 +495,7 @@ public class QuestionsViewBuilder(
         }
 
         var routingEstablishmentId =
-            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+            CurrentUser.IsGroup && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds[0]
                 : activeEstablishmentId;
 
@@ -540,7 +541,7 @@ public class QuestionsViewBuilder(
     )
     {
         var establishmentIds =
-            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+            CurrentUser.IsGroup && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds
                 : [activeEstablishmentId];
 
@@ -576,11 +577,10 @@ public class QuestionsViewBuilder(
             return activeEstablishmentId;
         }
 
-        var selectedEstablishmentId = _matEstablishmentProvider
-            .GetSelectedEstablishmentIdsFromSession()
-            .FirstOrDefault();
+        var selectedEstablishmentIds =
+            _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
 
-        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
+        return selectedEstablishmentIds.Any() ? selectedEstablishmentIds[0] : activeEstablishmentId;
     }
 
     private async Task<string> BuildErrorMessage()

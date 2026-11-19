@@ -14,14 +14,14 @@ public class EstablishmentService(
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
 {
-    private readonly IEstablishmentWorkflow _establishmentWorkflow =
-        establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly IRecommendationWorkflow _recommendationWorkflow =
-        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly IUserWorkflow _userWorkflow =
-        userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
-    private readonly IEstablishmentRepository _establishmentRepository =
-        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow
+        ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow
+        ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly IUserWorkflow _userWorkflow = userWorkflow
+        ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository
+        ?? throw new ArgumentNullException(nameof(establishmentRepository));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
@@ -35,15 +35,15 @@ public class EstablishmentService(
         string establishmentName
     )
     {
-        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentUrn, establishmentName);
+        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(
+            establishmentUrn,
+            establishmentName
+        );
     }
 
-    public Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId)
-    {
-        return _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-    }
-
-    public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
+    public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
+        IEnumerable<string> establishmentReferences
+    )
     {
         return _establishmentWorkflow.GetEstablishmentsByReferencesAsync(establishmentReferences);
     }
@@ -69,47 +69,6 @@ public class EstablishmentService(
         return establishmentEntity.AsDto();
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
-        int establishmentId
-    )
-    {
-        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(
-            establishmentId
-        );
-
-        var linkUrns = establishmentLinks.Select(s => s.Urn);
-        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(
-            linkUrns
-        );
-
-        var establishmentLinkMap = establishments
-            .Where(e => e.EstablishmentRef is not null)
-            .ToDictionary(e => e.EstablishmentRef!, e => e.Id);
-
-        foreach (var establishmentLink in establishmentLinks)
-        {
-            if (!establishmentLinkMap.ContainsKey(establishmentLink.Urn))
-            {
-                establishmentLink.InProgressOrCompletedRecommendationsCount = 0;
-                continue;
-            }
-
-            var schoolEstablishmentId = establishmentLinkMap[establishmentLink.Urn];
-            var recommendations =
-                await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
-                    schoolEstablishmentId
-                );
-
-            establishmentLink.InProgressOrCompletedRecommendationsCount =
-                recommendations.Values.Count(r =>
-                    r.NewStatus == RecommendationStatus.Complete
-                    || r.NewStatus == RecommendationStatus.InProgress
-                );
-        }
-
-        return establishmentLinks.ToList();
-    }
-
     public async Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,
@@ -118,8 +77,7 @@ public class EstablishmentService(
         string selectedEstablishmentName
     )
     {
-        var user =
-            await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
+        var user = await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
             ?? throw new InvalidDataException("User does not exist");
 
         if (userEstablishmentId is null)

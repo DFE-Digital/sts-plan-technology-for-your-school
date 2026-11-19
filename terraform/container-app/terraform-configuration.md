@@ -39,14 +39,14 @@ in `/backups/terraform-*.tfvars`.
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
 | <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | ~> 2.11 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.37 |
-| <a name="requirement_null"></a> [null](#requirement\_null) | 3.3.1 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | 3.3.2 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | = 3.6.3 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.12.0 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.13.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.81.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 

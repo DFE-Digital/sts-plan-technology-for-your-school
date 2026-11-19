@@ -32,10 +32,22 @@ public class RecommendationEntity : IUserActionEntity
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
             QuestionId = QuestionId,
-            Question = Question.AsDto(),
+            Question = Question?.AsDto(),
             Archived = Archived,
             QuestionContentfulRef = QuestionContentfulRef,
             UserActionId = UserActionId,
+        };
+    }
+
+    public static RecommendationEntity BuildEntity(SqlRecommendationDto recommendationDto)
+    {
+        return new RecommendationEntity
+        {
+            ContentfulRef = recommendationDto.ContentfulSysId,
+            RecommendationText = recommendationDto.RecommendationText,
+            QuestionId = recommendationDto.QuestionId,
+            QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
+            Archived = recommendationDto.Archived,
         };
     }
 }
