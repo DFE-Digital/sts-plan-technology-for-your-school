@@ -131,6 +131,10 @@ public static class ContentfulMicrocopyConstants
 
     public const string GroupsSelectSelectSelfAssessmentAllSubmitted =
         "mssSelectSelectSelfAssessmentAllSubmitted";
+
+    public const string GroupsStandardsListHeader = "mssStandardsListHeader";
+    public const string GroupsStandardsListBody = "mssStandardsListBody";
+    public const string GroupsStandardsListCategoriesHeader = "mssStandardsListCategoriesHeader";
     public const string MatLandingPageInsetIntro = "mssLandingInsetIntro";
     public const string MatLandingPageInsetOutstanding = "mssLandingInsetOutstanding";
     public const string MatLandingPageTopicOutstanding = "mssLandingTopicOutstanding";
@@ -229,6 +233,11 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSelectSelfAssessmentAllSubmittedFallback =
         "All self-assessments submitted";
 
+    private const string GroupsStandardsListHeaderFallback = "Plan technology for your school";
+    private const string GroupsStandardsListBodyFallback =
+        "Submit self-assessments to get recommendations and track your progress towards meeting the core standards";
+    private const string GroupsStandardsListCategoriesHeaderFallback =
+        "View recommendations and track progress";
     private const string GroupRecommendationProgressHeadingFallback = "Your schools' progress";
     private const string GroupRecommendationProgressSchoolHeadingFallback = "School";
     private const string GroupRecommendationProgressLastUpdatedHeadingFallback = "Last updated";
@@ -345,6 +354,9 @@ public static class ContentfulMicrocopyConstants
             GroupsSelectSelectSelfAssessmentAllSubmitted,
             GroupsSelectSelectSelfAssessmentAllSubmittedFallback
         },
+        { GroupsStandardsListHeader, GroupsStandardsListHeaderFallback },
+        { GroupsStandardsListBody, GroupsStandardsListBodyFallback },
+        { GroupsStandardsListCategoriesHeader, GroupsStandardsListCategoriesHeaderFallback },
         { GroupRecommendationProgressHeading, GroupRecommendationProgressHeadingFallback },
         {
             GroupRecommendationProgressSchoolHeading,
