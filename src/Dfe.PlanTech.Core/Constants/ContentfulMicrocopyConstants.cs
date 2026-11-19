@@ -129,6 +129,8 @@ public static class ContentfulMicrocopyConstants
 
     public const string GroupsSelectViewRecommendations = "mssSelectViewRecommendations";
 
+    public const string GroupsSelectSelectSelfAssessmentAllSubmitted =
+        "mssSelectSelectSelfAssessmentAllSubmitted";
     public const string MatLandingPageInsetIntro = "mssLandingInsetIntro";
     public const string MatLandingPageInsetOutstanding = "mssLandingInsetOutstanding";
     public const string MatLandingPageTopicOutstanding = "mssLandingTopicOutstanding";
@@ -224,6 +226,8 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectStatusContinueFallback = "Save";
 
     private const string GroupsSelectViewRecommendationsFallback = "Your schools";
+    private const string GroupsSelectSelectSelfAssessmentAllSubmittedFallback =
+        "All self-assessments submitted";
 
     private const string GroupRecommendationProgressHeadingFallback = "Your schools' progress";
     private const string GroupRecommendationProgressSchoolHeadingFallback = "School";
@@ -337,6 +341,10 @@ public static class ContentfulMicrocopyConstants
             GroupsSelectSchoolsToAssessConflictErrorFallback
         },
         { GroupsSelectViewRecommendations, GroupsSelectViewRecommendationsFallback },
+        {
+            GroupsSelectSelectSelfAssessmentAllSubmitted,
+            GroupsSelectSelectSelfAssessmentAllSubmittedFallback
+        },
         { GroupRecommendationProgressHeading, GroupRecommendationProgressHeadingFallback },
         {
             GroupRecommendationProgressSchoolHeading,
