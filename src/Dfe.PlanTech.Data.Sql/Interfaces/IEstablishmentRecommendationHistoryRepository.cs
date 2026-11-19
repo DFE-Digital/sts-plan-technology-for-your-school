@@ -11,14 +11,14 @@ public interface IEstablishmentRecommendationHistoryRepository
 
     Task<
         IEnumerable<EstablishmentRecommendationHistoryEntity>
-    > GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(
+    > GetRecommendationHistoryByEstablishmentIdAndRecommendationRefAsync(
         int establishmentId,
-        int recommendationId
+        string recommendationRef
     );
 
     Task<EstablishmentRecommendationHistoryEntity?> GetLatestRecommendationHistoryAsync(
         int establishmentId,
-        int recommendationId
+        string recommendationRef
     );
 
     Task CreateRecommendationHistoryAsync(
@@ -32,18 +32,17 @@ public interface IEstablishmentRecommendationHistoryRepository
         string noteText
     );
 
-    Task<List<(
-            EstablishmentEntity Establishment,
-            EstablishmentRecommendationHistoryEntity? History)>>
-        GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
-            int establishmentId,
-            int recommendationId);
+    Task<
+        List<(EstablishmentEntity Establishment, EstablishmentRecommendationHistoryEntity? History)>
+    > GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
+        int establishmentId,
+        string recommendationRef
+    );
 
-    Task<List<EstablishmentRecommendationHistoryEntity>>
-        GetLatestRecommendationHistoriesAsync(
-            IEnumerable<int> establishmentIds,
-            int recommendationId
-        );
+    Task<List<EstablishmentRecommendationHistoryEntity>> GetLatestRecommendationHistoriesAsync(
+        IEnumerable<int> establishmentIds,
+        string recommendationRef
+    );
 
     Task CreateRecommendationHistoriesAsync(
         IEnumerable<EstablishmentRecommendationHistoryEntity> histories

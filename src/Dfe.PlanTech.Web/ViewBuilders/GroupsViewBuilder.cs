@@ -196,9 +196,9 @@ public class GroupsViewBuilder(
             ?? throw new ArgumentException("Could not find recommendation");
 
         var latestEstRecHistory =
-            await _groupService.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+            await _groupService.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRef(
                 matEstablishmentId,
-                recommendation.Id
+                recommendation.ContentfulSysId
             );
 
         var latestEstRecHistoryWithRecs = latestEstRecHistory

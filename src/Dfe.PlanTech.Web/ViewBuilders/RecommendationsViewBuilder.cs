@@ -82,7 +82,7 @@ public class RecommendationsViewBuilder(
     {
         var focusedEstablishmentId = (
             await CurrentUser.GetFocusedEstablishmentAsync()
-        ).EstablishmentId;
+        )!.EstablishmentId;
 
         var category =
             await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -494,7 +494,7 @@ public class RecommendationsViewBuilder(
     {
         var focusedEstablishmentId = (
             await CurrentUser.GetFocusedEstablishmentAsync()
-        ).EstablishmentId;
+        )!.EstablishmentId;
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)

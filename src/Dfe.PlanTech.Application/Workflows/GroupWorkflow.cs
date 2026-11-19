@@ -100,15 +100,15 @@ public class GroupWorkflow(
             EstablishmentEntity establishment,
             EstablishmentRecommendationHistoryEntity? recommendationHistory
         )>
-    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRefAsync(
         int establishmentId,
-        int recommendationId
+        string recommendationRef
     )
     {
         var results =
-            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+            await _recommendationHistoryRepository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
                 establishmentId,
-                recommendationId
+                recommendationRef
             );
 
         return results;

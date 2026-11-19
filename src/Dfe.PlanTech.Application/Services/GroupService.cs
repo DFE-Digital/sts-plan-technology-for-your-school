@@ -31,14 +31,14 @@ public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
             EstablishmentEntity establishment,
             EstablishmentRecommendationHistoryEntity? recommendationHistory
         )>
-    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRef(
         int establishmentId,
-        int recommendationId
+        string recommendationRef
     )
     {
-        return _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+        return _groupWorkflow.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRefAsync(
             establishmentId,
-            recommendationId
+            recommendationRef
         );
     }
 }

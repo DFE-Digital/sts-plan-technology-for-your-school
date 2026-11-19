@@ -17,8 +17,8 @@ public interface IGroupService
             EstablishmentEntity establishment,
             EstablishmentRecommendationHistoryEntity? recommendationHistory
         )>
-    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRef(
         int establishmentId,
-        int recommendationId
+        string recommendationRef
     );
 }

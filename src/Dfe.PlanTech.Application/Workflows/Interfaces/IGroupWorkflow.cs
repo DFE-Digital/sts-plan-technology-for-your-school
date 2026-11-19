@@ -17,9 +17,8 @@ public interface IGroupWorkflow
             EstablishmentEntity establishment,
             EstablishmentRecommendationHistoryEntity? recommendationHistory
         )>
-    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
+    > GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRefAsync(
         int establishmentId,
-        int recommendationId
+        string recommendationRef
     );
-    //Task<GroupEstablishmentModel> GetGroupEstablishmentContextAsync(int groupEstablishmentId);
 }
