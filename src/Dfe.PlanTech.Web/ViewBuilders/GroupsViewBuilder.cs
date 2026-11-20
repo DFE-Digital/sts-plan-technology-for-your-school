@@ -63,7 +63,7 @@ public class GroupsViewBuilder(
         // Get the user's organisation ID (the MAT/group), not the active establishment
         // At this point, the user hasn't selected a school yet
 
-        var establishment = (await CurrentUser.GetUserEstablishmentAsync());
+        var establishment = await CurrentUser.GetUserEstablishmentAsync();
 
         var selectASchoolPageContent =
             await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
@@ -78,13 +78,16 @@ public class GroupsViewBuilder(
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
+        var groupSchools = await CurrentUser.GetGroupSchoolsAsync();
+        var establishmentIds =
+            groupSchools?.Select(school => school.EstablishmentId).ToArray() ?? [];
+
         var showSelectSelfAssessmentToSubmit = await HasOutstandingSelfAssessmentsAsync(
-            establishment.Id,
+            establishmentIds,
             sections
         );
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
-        var groupSchools = await CurrentUser.GetGroupSchoolsAsync();
 
         var schoolEstablishmentIds = groupSchools.Select(s => s.EstablishmentId);
         var inProgressOrCompletedRecommendationCounts =
@@ -616,32 +619,17 @@ public class GroupsViewBuilder(
     }
 
     private async Task<bool> HasOutstandingSelfAssessmentsAsync(
-        int matEstablishmentId,
+        int[] establishmentIds,
         IEnumerable<QuestionnaireSectionEntry> sections
     )
     {
-        var matEstablishmentLinks =
-            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
-
-        var matEstablishmentUrns = matEstablishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        var matEstablishments =
-            await _establishmentService.GetEstablishmentsByReferencesAsync(matEstablishmentUrns)
-            ?? [];
-
-        var matEstablishmentIds = matEstablishments.Select(e => e.Id).Distinct().ToArray();
-
-        if (matEstablishmentIds.Length == 0)
+        if (establishmentIds.Length == 0)
         {
             return false;
         }
 
         var completedSubmissions =
-            await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds) ?? [];
+            await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? [];
 
         var requiredSectionIds = sections.Select(s => s.Id).Distinct().ToHashSet();
 
@@ -651,7 +639,7 @@ public class GroupsViewBuilder(
             .Distinct()
             .Count();
 
-        var totalRequiredSchoolSections = matEstablishmentIds.Length * requiredSectionIds.Count;
+        var totalRequiredSchoolSections = establishmentIds.Length * requiredSectionIds.Count;
 
         return completedSchoolSections < totalRequiredSchoolSections;
     }

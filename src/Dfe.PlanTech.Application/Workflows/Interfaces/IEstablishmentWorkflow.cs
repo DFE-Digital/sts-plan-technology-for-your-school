@@ -10,7 +10,6 @@ public interface IEstablishmentWorkflow
     Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     );
-    Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId);
     Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
     Task<SqlEstablishmentDto> GetOrCreateSchoolAsync(
         string establishmentUrn,
@@ -19,5 +18,5 @@ public interface IEstablishmentWorkflow
     Task<List<SqlEstablishmentDto>> GetOrCreateEstablishmentsAsync(
         IEnumerable<EstablishmentModel> establishmentModels
     );
-    Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel);
+    Task<int> RecordGroupSelectionAsync(UserGroupSelectionModel userGroupSelectionModel);
 }

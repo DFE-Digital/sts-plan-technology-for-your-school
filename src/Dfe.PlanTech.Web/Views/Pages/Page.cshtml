@@ -5,9 +5,10 @@
 
 @{
 
-    var isTopicStartPage = !string.IsNullOrWhiteSpace(Model.CategorySlug);
+    var dsiOrganisation = CurrentUser.DsiOrganisation;
     var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
 
+    var isTopicStartPage = !string.IsNullOrWhiteSpace(Model.CategorySlug);
     var isSelectedSchoolHomePage =
         CurrentUser.IsMat &&
         !string.IsNullOrWhiteSpace(focusedEstablishment?.Name) &&
@@ -17,10 +18,6 @@
 
     ViewData["UseBreadcrumbs"] = useBreadcrumbs;
     ViewData["UseOrganisationContextHeader"] = isTopicStartPage && Model.ShowTrustSchoolAssessmentTable;
-
-    var dsiOrganisation = CurrentUser.DsiOrganisation;
-
-    var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
 
     var breadcrumbs = new List<BreadcrumbItemViewModel>
     {
@@ -49,7 +46,7 @@
             {
                 breadcrumbs.Add(new BreadcrumbItemViewModel
                 {
-                    Text = focusedSchool.Name,
+                    Text = focusedEstablishment?.Name,
                     Href = UrlConstants.HomePage
                 });
             }

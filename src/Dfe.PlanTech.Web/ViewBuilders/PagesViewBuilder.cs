@@ -55,11 +55,13 @@ public class PagesViewBuilder(
             && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
                 == true;
 
+        var focusedSchool = await CurrentUser.GetFocusedEstablishmentAsync();
+
         var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
             && !isMatTopicStartPage
             && CurrentUser.CanSelectSchools
-            && (await GetFocusedOrSelectedSchoolsAsync()).Count == 0;
+            && focusedSchool is null;
 
         if (shouldRedirectToSchoolSelection)
         {
@@ -91,9 +93,15 @@ public class PagesViewBuilder(
                     page.Title?.Text ?? page.Id
                 );
             }
+            else if (focusedSchool is null)
+            {
+                Logger.LogWarning(
+                    "Tried to display establishment on {PageTitle} but user does not have a focused school",
+                    page.Title?.Text ?? page.Id
+                );
+            }
             else
             {
-                var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
                 viewModel.ActiveEstablishmentName = focusedSchool.Name;
                 viewModel.ActiveEstablishmentUrn = focusedSchool.Urn;
             }

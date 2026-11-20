@@ -2,13 +2,11 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
     IEstablishmentWorkflow establishmentWorkflow,
-    IEstablishmentRepository establishmentRepository,
     IRecommendationWorkflow recommendationWorkflow,
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
@@ -19,8 +17,6 @@ public class EstablishmentService(
         recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
     private readonly IUserWorkflow _userWorkflow =
         userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
-    private readonly IEstablishmentRepository _establishmentRepository =
-        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
@@ -55,11 +51,6 @@ public class EstablishmentService(
         return establishments;
     }
 
-    public Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId)
-    {
-        return _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-    }
-
     public Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     )
@@ -78,14 +69,11 @@ public class EstablishmentService(
 
     public async Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id)
     {
-        var establishmentEntity = await _establishmentRepository.GetEstablishmentByIdAsync(id);
+        var establishmentEntity =
+            await _establishmentWorkflow.GetEstablishmentByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Establishment with ID {id} not found");
 
-        if (establishmentEntity is null)
-        {
-            throw new KeyNotFoundException($"Establishment with id {id} not found");
-        }
-
-        return establishmentEntity.AsDto();
+        return establishmentEntity;
     }
 
     public async Task RecordGroupSelection(
@@ -112,6 +100,6 @@ public class EstablishmentService(
             UserId = userId,
         };
 
-        await _establishmentWorkflow.RecordGroupSelection(selectionModel);
+        await _establishmentWorkflow.RecordGroupSelectionAsync(selectionModel);
     }
 }

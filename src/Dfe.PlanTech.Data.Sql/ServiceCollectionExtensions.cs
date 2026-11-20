@@ -41,13 +41,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
-            .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
             .AddScoped<
                 IEstablishmentRecommendationHistoryRepository,
                 EstablishmentRecommendationHistoryRepository
             >()
             .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<IGiasRepository, GiasRepository>()
+            .AddScoped<IGroupReadActivityRepository, GroupReadActivityRepository>()
             .AddScoped<IRecommendationRepository, RecommendationRepository>()
             .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()

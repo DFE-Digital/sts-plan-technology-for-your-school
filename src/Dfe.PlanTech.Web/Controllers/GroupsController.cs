@@ -293,13 +293,12 @@ public class GroupsController : BaseController<GroupsController>
     public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
     {
         await _currentUser.SetFocusedEstablishmentAsync(schoolUrn, schoolName);
-
-        var focusedSchool = (await _currentUser.GetFocusedEstablishmentAsync())!;
+        var focusedSchool = await _currentUser.GetFocusedEstablishmentAsync();
 
         await _groupsViewBuilder.RecordGroupSelectionAsync(
-            focusedSchool.EstablishmentId,
-            focusedSchool.Urn,
-            focusedSchool.Name
+            focusedSchool!.EstablishmentId,
+            focusedSchool!.Urn,
+            focusedSchool!.Name
         );
 
         return Redirect(UrlConstants.HomePage);

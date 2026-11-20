@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Application.Workflows;
 public class EstablishmentWorkflow(
     ILogger<EstablishmentWorkflow> logger,
     IEstablishmentRepository establishmentRepository,
-    IEstablishmentLinkRepository establishmentLinkRepository,
+    IGroupReadActivityRepository establishmentLinkRepository,
     IGiasRepository giasRepository
 ) : IEstablishmentWorkflow
 {
@@ -18,7 +18,7 @@ public class EstablishmentWorkflow(
 
     private readonly IEstablishmentRepository _establishmentRepository =
         establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
-    private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
+    private readonly IGroupReadActivityRepository _groupReadActivityRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
     private readonly IGiasRepository _giasRepository =
@@ -140,16 +140,8 @@ public class EstablishmentWorkflow(
         return establishments.Select(e => e.AsDto());
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
+    public Task<int> RecordGroupSelectionAsync(UserGroupSelectionModel userGroupSelectionModel)
     {
-        var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(
-            establishmentId
-        );
-        return links.Select(l => l.AsDto()).ToList();
-    }
-
-    public Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
-    {
-        return _establishmentLinkRepository.RecordGroupSelection(userGroupSelectionModel);
+        return _groupReadActivityRepository.RecordGroupSelectionAsync(userGroupSelectionModel);
     }
 }

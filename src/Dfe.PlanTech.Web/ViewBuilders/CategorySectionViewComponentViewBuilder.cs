@@ -46,7 +46,7 @@ public class CategorySectionViewComponentViewBuilder(
         QuestionnaireCategoryEntry category
     )
     {
-        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync()).EstablishmentId;
+        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId;
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;

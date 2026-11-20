@@ -58,6 +58,17 @@ public static class UserClaimsHelper
             _jsonSerialiserOptions
         );
 
+        // Tiny hack: handle DSI TEST Multi-Academy Trust not having a UID
+        if (
+            organisation is not null
+            && organisation.Ukprn == DsiConstants.DsiTestMultiAcademyTrustUkprn
+            && organisation.Name == DsiConstants.DsiTestMultiAcademyTrustName
+        )
+        {
+            organisation.GroupUid = "99999";
+            organisation.Uid = "99999";
+        }
+
         return organisation;
     }
 }

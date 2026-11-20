@@ -6,14 +6,16 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 public interface IEstablishmentService
 {
     Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
+
     Task<SqlEstablishmentDto> GetOrCreateSchoolAsync(
         string establishmentUrn,
         string establishmentName
     );
+
     Task<List<SqlEstablishmentDto>> GetOrCreateSchoolsAsync(
         IEnumerable<SelectedEstablishmentDataModel> schoolsData
     );
-    Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId);
+
     Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     );
