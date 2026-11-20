@@ -19,18 +19,17 @@ public class ContentfulWorkflow(
     public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
 
-    private readonly IContentfulRepository _contentfulRepository =
-        contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
-    private readonly GetPageFromContentfulOptions _getPageOptions =
-        getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
+    private readonly IContentfulRepository _contentfulRepository = contentfulRepository
+        ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions
+        ?? throw new ArgumentNullException(nameof(getPageOptions));
 
     public async Task<TEntry> GetEntryByIdAsync<TEntry>(string entryId)
         where TEntry : ContentfulEntry
     {
         try
         {
-            var entry =
-                await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
+            var entry = await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
                 ?? throw new ContentfulDataUnavailableException(
                     $"Could not find entry with ID '{entryId}'"
                 );
@@ -232,14 +231,9 @@ public class ContentfulWorkflow(
 
     public async Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
     {
-        var options = new GetEntriesOptions
-        {
-            Limit = 500,
-            Page = 1,
-        };
+        var options = new GetEntriesOptions { Limit = 500, Page = 1 };
 
-        var entries = await _contentfulRepository
-            .GetPaginatedEntriesAsync<MicrocopyEntry>(options);
+        var entries = await _contentfulRepository.GetPaginatedEntriesAsync<MicrocopyEntry>(options);
 
         if (!entries.Any())
         {

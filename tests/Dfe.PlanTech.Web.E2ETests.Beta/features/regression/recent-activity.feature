@@ -5,13 +5,13 @@ Feature: Recommendation recent activity
   Background:
     @clear-data-school
 
-    Scenario: Completing an assessment shows the correct initial recent activity 
+    Scenario: Completing an assessment shows the correct initial recent activity
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1"
       And I click the link to view the recommendations for "Category One Section One"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page
-      
+
       When I click the recommendation link "Recommendation Header - C1 - S1 - Q1" on the category landing page
       Then I should see the page heading "Recommendation Header - C1 - S1 - Q1"
 
@@ -30,7 +30,7 @@ Feature: Recommendation recent activity
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page
-      
+
       When I click the recommendation link "Recommendation Header - C1 - S1 - Q1" on the category landing page
       Then I should see the page heading "Recommendation Header - C1 - S1 - Q1"
 
@@ -42,7 +42,3 @@ Feature: Recommendation recent activity
 
       Then I set the recommendation status to "Complete" with note "I have updated the status to complete." and submit
       Then the section should show a status change to "Complete" with note "I have updated the status to complete." dated today
-
-
-
-

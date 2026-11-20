@@ -86,6 +86,7 @@ public class QuestionsViewBuilderTests
             _questionSvc,
             _submissionSvc,
             _establishmentSvc,
+            _groupSvc,
             _matEstablishmentProvider
         );
 
@@ -155,6 +156,7 @@ public class QuestionsViewBuilderTests
                 _questionSvc,
                 _submissionSvc,
                 _establishmentSvc,
+                _groupSvc,
                 null!
             )
         );
@@ -387,8 +389,8 @@ public class QuestionsViewBuilderTests
         // Assert
         await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(987, "S99");
 
-        Assert.True(controller.TempData.ContainsKey("SubtopicError"));
-        var msg = controller.TempData["SubtopicError"] as string;
+        Assert.True(controller.TempData.ContainsKey(StatePassingMechanismConstants.SubtopicError));
+        var msg = controller.TempData[StatePassingMechanismConstants.SubtopicError] as string;
         Assert.Contains("<a href=\"https://example.org/contact\"", msg);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
@@ -1325,8 +1327,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1388,8 +1390,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1454,8 +1456,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1515,8 +1517,8 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
@@ -1569,20 +1571,22 @@ public class QuestionsViewBuilderTests
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
-        _establishmentSvc
-            .GetEstablishmentLinks(999)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { EstablishmentName = "Test School", Urn = "900006" },
-                }
-            );
-
-        _establishmentSvc
-            .GetEstablishmentLinksWithRecommendationCounts(999)
+        _groupSvc
+            .GetGroupSchoolsAsync(999, true)
             .Returns([
                 new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
             ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
 
         _submissionSvc
             .GetLatestSubmissionResponsesModel(
@@ -1699,9 +1703,8 @@ public class QuestionsViewBuilderTests
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<PageViewModel>(view.Model);
 
-        Assert.DoesNotContain(
-            model.Page.Content!,
-            content => content is ComponentButtonWithEntryReferenceEntry
+        Assert.DoesNotContain(model.Page.Content!, content =>
+            content is ComponentButtonWithEntryReferenceEntry
         );
 
         Assert.Contains(remainingContent, model.Page.Content!);

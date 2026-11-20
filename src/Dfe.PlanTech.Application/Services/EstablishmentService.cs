@@ -11,12 +11,12 @@ public class EstablishmentService(
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
 {
-    private readonly IEstablishmentWorkflow _establishmentWorkflow =
-        establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly IRecommendationWorkflow _recommendationWorkflow =
-        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly IUserWorkflow _userWorkflow =
-        userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow
+        ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow
+        ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly IUserWorkflow _userWorkflow = userWorkflow
+        ?? throw new ArgumentNullException(nameof(userWorkflow));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
@@ -69,8 +69,7 @@ public class EstablishmentService(
 
     public async Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id)
     {
-        var establishmentEntity =
-            await _establishmentWorkflow.GetEstablishmentByIdAsync(id)
+        var establishmentEntity = await _establishmentWorkflow.GetEstablishmentByIdAsync(id)
             ?? throw new KeyNotFoundException($"Establishment with ID {id} not found");
 
         return establishmentEntity;

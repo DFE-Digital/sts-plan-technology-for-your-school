@@ -14,8 +14,8 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
 {
-    private readonly INotifyWorkflow _notifyWorkflow =
-        notifyWorkflow ?? throw new ArgumentNullException(nameof(notifyWorkflow));
+    private readonly INotifyWorkflow _notifyWorkflow = notifyWorkflow
+        ?? throw new ArgumentNullException(nameof(notifyWorkflow));
 
     private const string NameOfUserPersonalisation = "name of user";
     private const string SchoolPersonalisation = "school";
@@ -175,17 +175,13 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         return userMessage.Trim();
     }
 
-    private static string BuildMatStandardMarkdown(
-        List<QuestionnaireSectionEntry> sections
-    )
+    private static string BuildMatStandardMarkdown(List<QuestionnaireSectionEntry> sections)
     {
         var stringBuilder = new StringBuilder();
 
         foreach (var section in sections)
         {
-            stringBuilder.AppendLine(
-                $"## Recommendations for {section.Name.ToLowerInvariant()}"
-            );
+            stringBuilder.AppendLine($"## Recommendations for {section.Name.ToLowerInvariant()}");
             stringBuilder.AppendLine();
 
             var recommendations = section.CoreRecommendations.ToList();
@@ -194,9 +190,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             {
                 var recommendation = recommendations[i];
 
-                stringBuilder.AppendLine(
-                    $"{i + 1}. {recommendation.HeaderText}"
-                );
+                stringBuilder.AppendLine($"{i + 1}. {recommendation.HeaderText}");
             }
 
             stringBuilder.AppendLine();
@@ -264,10 +258,9 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
             for (var i = 0; i < recommendationChunks.Count; i++)
             {
                 var recommendationEntry = recommendationChunks[i];
-                var recommendationStatus =
-                    recommendationStatuses
-                        .FirstOrDefault(rs => rs.Key.Equals(recommendationEntry.Id))
-                        .Value
+                var recommendationStatus = recommendationStatuses
+                    .FirstOrDefault(rs => rs.Key.Equals(recommendationEntry.Id))
+                    .Value
                     ?? throw new InvalidOperationException(
                         "Cannot prepare markdown for a recommendation that does not exist in the database."
                     );

@@ -8,8 +8,8 @@ namespace Dfe.PlanTech.Application.Services;
 public class RecommendationService(IRecommendationWorkflow recommendationWorkflow)
     : IRecommendationService
 {
-    private readonly IRecommendationWorkflow _recommendationWorkflow =
-        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow
+        ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
 
     public Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
         int establishmentId,
@@ -47,8 +47,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null,
-        int? responseId = null
+        int? matEstablishmentId = null
     )
     {
         return _recommendationWorkflow.UpdateRecommendationStatusAsync(
@@ -57,8 +56,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             userId,
             newStatus,
             noteText,
-            matEstablishmentId,
-            responseId
+            matEstablishmentId
         );
     }
 

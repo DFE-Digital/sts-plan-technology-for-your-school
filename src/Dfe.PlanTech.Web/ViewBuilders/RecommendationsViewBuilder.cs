@@ -29,16 +29,16 @@ public class RecommendationsViewBuilder(
     IGroupService groupService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
-    private readonly INotifyService _notifyService =
-        notifyService ?? throw new ArgumentNullException(nameof(notifyService));
-    private readonly IRecommendationService _recommendationService =
-        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IMicrocopyProvider _microcopyProvider =
-        microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
-    private readonly IGroupService _groupService =
-        groupService ?? throw new ArgumentNullException(nameof(groupService));
+    private readonly INotifyService _notifyService = notifyService
+        ?? throw new ArgumentNullException(nameof(notifyService));
+    private readonly IRecommendationService _recommendationService = recommendationService
+        ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IMicrocopyProvider _microcopyProvider = microcopyProvider
+        ?? throw new ArgumentNullException(nameof(microcopyProvider));
+    private readonly IGroupService _groupService = groupService
+        ?? throw new ArgumentNullException(nameof(groupService));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -84,28 +84,26 @@ public class RecommendationsViewBuilder(
             await CurrentUser.GetFocusedEstablishmentAsync()
         )!.EstablishmentId;
 
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for slug {categorySlug}"
             );
 
-        var categoryHeaderText =
-            category.Header?.Text
+        var categoryHeaderText = category.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category header text for slug {categorySlug}"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
 
         var recommendationChunks = section.CoreRecommendations.ToList();
 
-        var currentRecommendationChunk =
-            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk =>
+            chunk.Slug == chunkSlug
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
@@ -157,8 +155,8 @@ public class RecommendationsViewBuilder(
             NextChunk = nextRecommendationChunk,
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
-            SelectedStatusKey =
-                currentRecommendationHistory?.NewStatus ?? RecommendationStatus.NotStarted,
+            SelectedStatusKey = currentRecommendationHistory?.NewStatus
+                ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistory?.DateCreated,
             SuccessMessageTitle =
                 controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle]
@@ -170,15 +168,14 @@ public class RecommendationsViewBuilder(
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
-            RelatedActions =
-                currentRecommendationChunk
-                    .RelatedActions?.Where(x => x is not null)
-                    .Select(x => new RelatedActionViewModel
-                    {
-                        Text = x.Title ?? string.Empty,
-                        Url = x.Url ?? string.Empty,
-                    })
-                    .ToList()
+            RelatedActions = currentRecommendationChunk
+                .RelatedActions?.Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList()
                 ?? [],
         };
 
@@ -197,28 +194,26 @@ public class RecommendationsViewBuilder(
             throw new InvalidOperationException("Non-group users cannot be routed to a MAT page.");
         }
 
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for slug {categorySlug}"
             );
 
-        var categoryHeaderText =
-            category.Header?.Text
+        var categoryHeaderText = category.Header?.Text
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category header text for slug {categorySlug}"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
 
         var recommendationChunks = section.CoreRecommendations.ToList();
 
-        var currentRecommendationChunk =
-            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk =>
+            chunk.Slug == chunkSlug
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
@@ -304,21 +299,22 @@ public class RecommendationsViewBuilder(
             NextChunk = nextRecommendationChunk,
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
-            SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
+            SuccessMessageTitle =
+                controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle]
+                as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key, key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
             IsMat = true,
             Schools = schools,
-            RelatedActions =
-                currentRecommendationChunk
-                    .RelatedActions?.Where(x => x is not null)
-                    .Select(x => new RelatedActionViewModel
-                    {
-                        Text = x.Title ?? string.Empty,
-                        Url = x.Url ?? string.Empty,
-                    })
-                    .ToList()
+            RelatedActions = currentRecommendationChunk
+                .RelatedActions?.Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList()
                 ?? [],
         };
 
@@ -338,14 +334,12 @@ public class RecommendationsViewBuilder(
             await CurrentUser.GetFocusedEstablishmentAsync()
         ).EstablishmentId;
 
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for slug {categorySlug}"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -391,8 +385,9 @@ public class RecommendationsViewBuilder(
 
                 if (!string.IsNullOrWhiteSpace(singleChunkSlug))
                 {
-                    var selectedChunk =
-                        viewModel.Chunks.FirstOrDefault(c => c.Slug == singleChunkSlug)
+                    var selectedChunk = viewModel.Chunks.FirstOrDefault(c =>
+                        c.Slug == singleChunkSlug
+                    )
                         ?? throw new ContentfulDataUnavailableException(
                             $"No recommendation chunk found with slug matching: {singleChunkSlug}"
                         );
@@ -433,14 +428,12 @@ public class RecommendationsViewBuilder(
         string originatingSlug
     )
     {
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for slug {categorySlug}"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -496,16 +489,16 @@ public class RecommendationsViewBuilder(
             await CurrentUser.GetFocusedEstablishmentAsync()
         )!.EstablishmentId;
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
 
         var recommendationChunks = section.CoreRecommendations.ToList();
 
-        var currentRecommendationChunk =
-            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk =>
+            chunk.Slug == chunkSlug
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
@@ -560,7 +553,7 @@ public class RecommendationsViewBuilder(
                 : null
         );
 
-        controller.TempData["StatusUpdateSuccessTitle"] =
+        controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle] =
             await _microcopyProvider.GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
                 dynamicValues
@@ -631,22 +624,19 @@ public class RecommendationsViewBuilder(
         CategoryLandingContext context = CategoryLandingContext.School
     )
     {
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category for slug {categorySlug}"
             );
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
 
-        var recommendationChunk =
-            section.CoreRecommendations.FirstOrDefault(r =>
-                r.Slug.Equals(chunkSlug, StringComparison.OrdinalIgnoreCase)
-            )
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(chunkSlug, StringComparison.OrdinalIgnoreCase)
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find chunk for slug {chunkSlug}"
             );
@@ -674,8 +664,7 @@ public class RecommendationsViewBuilder(
 
         var textBodyId = recommendationChunk.Content[0].Id;
 
-        var textBody =
-            await ContentfulService.GetTextBodyByIdAsync(textBodyId)
+        var textBody = await ContentfulService.GetTextBodyByIdAsync(textBodyId)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find text body entry for id {textBodyId}"
             );
@@ -683,8 +672,7 @@ public class RecommendationsViewBuilder(
         if (isMat)
         {
             var matEstablishment = (await CurrentUser.GetUserEstablishmentAsync());
-            var matName =
-                matEstablishment.OrgName
+            var matName = matEstablishment.OrgName
                 ?? throw new InvalidDataException("Cannot send an email without a MAT name");
             var matSchools = await CurrentUser.GetGroupSchoolsAsync();
             var matSchoolIds = matSchools.Select(s => s.EstablishmentId).ToArray();

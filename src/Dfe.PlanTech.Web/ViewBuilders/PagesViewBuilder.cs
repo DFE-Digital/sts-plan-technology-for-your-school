@@ -34,16 +34,16 @@ public class PagesViewBuilder(
     public const string CategoryLandingPagePrintView =
         "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
 
-    private readonly ContactOptionsConfiguration _contactOptions =
-        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ErrorPagesConfiguration _errorPages =
-        errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly INotifyService _notifyService =
-        notifyService ?? throw new ArgumentNullException(nameof(notifyService));
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IRecommendationService _recommendationService =
-        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value
+        ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value
+        ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly INotifyService _notifyService = notifyService
+        ?? throw new ArgumentNullException(nameof(notifyService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IRecommendationService _recommendationService = recommendationService
+        ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -175,8 +175,7 @@ public class PagesViewBuilder(
 
         if (isMat)
         {
-            var matName =
-                (await CurrentUser.GetUserEstablishmentAsync()).OrgName
+            var matName = (await CurrentUser.GetUserEstablishmentAsync()).OrgName
                 ?? throw new InvalidDataException("Cannot send an email without a MAT name");
 
             var matNotifyResults = _notifyService.SendMatStandardEmail(
@@ -240,15 +239,14 @@ public class PagesViewBuilder(
         CategoryLandingContext context = CategoryLandingContext.School
     )
     {
-        var relatedActionsViewModels =
-            relatedActions
-                ?.Where(x => x is not null)
-                .Select(x => new RelatedActionViewModel
-                {
-                    Text = x.Title ?? string.Empty,
-                    Url = x.Url ?? string.Empty,
-                })
-                .ToList()
+        var relatedActionsViewModels = relatedActions
+            ?.Where(x => x is not null)
+            .Select(x => new RelatedActionViewModel
+            {
+                Text = x.Title ?? string.Empty,
+                Url = x.Url ?? string.Empty,
+            })
+            .ToList()
             ?? [];
 
         return new CategoryLandingPageViewModel
@@ -257,7 +255,7 @@ public class PagesViewBuilder(
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData["SectionName"] as string,
+            SectionName = controller.TempData[StatePassingMechanismConstants.SectionName] as string,
             SortOrder = controller.Request.Query["sort"],
             HasBanner = category.HasBanner,
             AfterContentContent = category.AfterContentContent,
@@ -317,8 +315,7 @@ public class PagesViewBuilder(
 
     private async Task<IActionResult> RouteToLandingPageView(Controller controller, PageEntry page)
     {
-        var category =
-            await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4)
+        var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find category at {controller.Request.Path.Value}"
             );

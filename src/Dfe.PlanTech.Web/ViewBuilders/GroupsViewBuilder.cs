@@ -31,26 +31,26 @@ public class GroupsViewBuilder(
     IMicrocopyProvider microcopyProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IEstablishmentService _establishmentService = establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
 
-    private readonly IGroupService _groupService =
-        groupService ?? throw new ArgumentNullException(nameof(groupService));
+    private readonly IGroupService _groupService = groupService
+        ?? throw new ArgumentNullException(nameof(groupService));
 
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private readonly IRecommendationService _recommendationService =
-        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly IRecommendationService _recommendationService = recommendationService
+        ?? throw new ArgumentNullException(nameof(recommendationService));
 
-    private readonly ContactOptionsConfiguration _contactOptions =
-        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value
+        ?? throw new ArgumentNullException(nameof(contactOptions));
 
-    private readonly IMicrocopyProvider _microcopyProvider =
-        microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
+    private readonly IMicrocopyProvider _microcopyProvider = microcopyProvider
+        ?? throw new ArgumentNullException(nameof(microcopyProvider));
 
-    private readonly ILogger<BaseViewBuilder> _logger =
-        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<BaseViewBuilder> _logger = logger
+        ?? throw new ArgumentNullException(nameof(logger));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
@@ -65,8 +65,9 @@ public class GroupsViewBuilder(
 
         var establishment = await CurrentUser.GetUserEstablishmentAsync();
 
-        var selectASchoolPageContent =
-            await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+        var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(
+            UrlConstants.GroupsSelectionPageSlug
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'"
             );
@@ -79,8 +80,8 @@ public class GroupsViewBuilder(
         string totalRecommendations = allRecommendations.Count().ToString();
 
         var groupSchools = await CurrentUser.GetGroupSchoolsAsync();
-        var establishmentIds =
-            groupSchools?.Select(school => school.EstablishmentId).ToArray() ?? [];
+        var establishmentIds = groupSchools?.Select(school => school.EstablishmentId).ToArray()
+            ?? [];
 
         var showSelectSelfAssessmentToSubmit = await HasOutstandingSelfAssessmentsAsync(
             establishmentIds,
@@ -131,8 +132,7 @@ public class GroupsViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
@@ -176,15 +176,13 @@ public class GroupsViewBuilder(
 
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
-        var recommendationChunk =
-            section.CoreRecommendations.FirstOrDefault(r =>
-                r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
-            )
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find recommendation for slug {recommendationSlug}"
             );
@@ -194,8 +192,7 @@ public class GroupsViewBuilder(
                 recommendationChunk.Id,
             ]);
 
-        var recommendation =
-            dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault()
+        var recommendation = dbRecommendation.OrderByDescending(r => r.Id).FirstOrDefault()
             ?? throw new ArgumentException("Could not find recommendation");
 
         var latestEstRecHistory =
@@ -256,15 +253,13 @@ public class GroupsViewBuilder(
             );
         }
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
-        var recommendationChunk =
-            section.CoreRecommendations.FirstOrDefault(r =>
-                r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
-            )
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find recommendation for slug {recommendationSlug}"
             );
@@ -273,7 +268,9 @@ public class GroupsViewBuilder(
             viewModel.SelectedSchoolsRefs
         );
 
-        var selectedSchools = CurrentUser.GetSelectedSchools() ?? [];
+        await SetSelectedSchoolsFromRefsAsync(viewModel.SelectedSchoolsRefs);
+
+        var selectedSchools = await GetSelectedSchoolsWithSubmissionStatuses(section);
 
         foreach (var selectedSchool in selectedSchools)
         {
@@ -345,8 +342,8 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupSelectAssessmentViewModel()
         {
-            GroupName =
-                (await CurrentUser.GetUserEstablishmentAsync()).OrgName ?? "Your organisation",
+            GroupName = (await CurrentUser.GetUserEstablishmentAsync()).OrgName
+                ?? "Your organisation",
             Categories = categories
                 .Select(c => new CategorySectionViewModel
                 {
@@ -386,8 +383,7 @@ public class GroupsViewBuilder(
         CurrentUser.ClearSelectedSchools();
 
         var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find topic for slug '{sectionSlug}'"
             );
@@ -431,18 +427,29 @@ public class GroupsViewBuilder(
         if (viewModel.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
             throw new InvalidDataException("No schools have been selected");
 
-        var categorySlug =
-            controller.RouteData.Values["categorySlug"]?.ToString()
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString()
             ?? throw new InvalidDataException("Missing category slug");
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find topic for slug '{sectionSlug}'"
             );
 
+        var selectedRefs = viewModel.SelectedSchoolsRefs.Contains("all")
+            ? viewModel.PresentedSchoolRefs
+            : viewModel.SelectedSchoolsRefs;
+
+        await SetSelectedSchoolsFromRefsAsync(selectedRefs);
+
         List<SelectedEstablishmentDataModel> selectedSchools =
             await GetSelectedSchoolsWithSubmissionStatuses(section);
+
+        // Required for the continue self-assessment page.
+        if (selectedSchools.Count == 1)
+        {
+            var school = selectedSchools.Single();
+            await CurrentUser.SetFocusedEstablishmentAsync(school.Urn, school.Name);
+        }
 
         // If it's a single school with a submission in progress, redirect to it
         if (
@@ -521,8 +528,8 @@ public class GroupsViewBuilder(
 
         var viewModel = new MatStandardsListViewModel
         {
-            GroupName =
-                (await CurrentUser.GetUserEstablishmentAsync()).OrgName ?? "Your organisation",
+            GroupName = (await CurrentUser.GetUserEstablishmentAsync()).OrgName
+                ?? "Your organisation",
             Categories = categories,
         };
 
@@ -538,8 +545,7 @@ public class GroupsViewBuilder(
         GroupRecommendationInputViewModel viewModel
     )
     {
-        var categorySlug =
-            controller.RouteData.Values["categorySlug"]?.ToString()
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString()
             ?? throw new InvalidDataException("Missing category slug");
 
         var userId = CurrentUser.UserId;
@@ -551,15 +557,13 @@ public class GroupsViewBuilder(
             throw new ArgumentException("Invalid status selected.");
         }
 
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
-        var recommendationChunk =
-            section.CoreRecommendations.FirstOrDefault(r =>
-                r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
-            )
+        var recommendationChunk = section.CoreRecommendations.FirstOrDefault(r =>
+            r.Slug.Equals(recommendationSlug, StringComparison.OrdinalIgnoreCase)
+        )
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find recommendation for slug {recommendationSlug}"
             );
@@ -609,7 +613,8 @@ public class GroupsViewBuilder(
                 ? microcopySuccessBodyText.Replace("schools", "school")
                 : microcopySuccessBodyText;
 
-        controller.TempData["StatusUpdateSuccessTitle"] = microcopySuccessBodyText;
+        controller.TempData[StatePassingMechanismConstants.StatusUpdateSuccessTitle] =
+            microcopySuccessBodyText;
 
         return controller.RedirectToGetMatSingleRecommendation(
             categorySlug,
@@ -628,8 +633,9 @@ public class GroupsViewBuilder(
             return false;
         }
 
-        var completedSubmissions =
-            await _groupService.GetGroupCompletedSubmissionsBySections(establishmentIds) ?? [];
+        var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
+            establishmentIds
+        ) ?? [];
 
         var requiredSectionIds = sections.Select(s => s.Id).Distinct().ToHashSet();
 
@@ -642,6 +648,43 @@ public class GroupsViewBuilder(
         var totalRequiredSchoolSections = establishmentIds.Length * requiredSectionIds.Count;
 
         return completedSchoolSections < totalRequiredSchoolSections;
+    }
+
+    /// <summary>
+    /// Validates the URNs submitted from a "select schools" form against the user's group
+    /// and stores the matching schools as the user's selected schools.
+    /// </summary>
+    /// <exception cref="InvalidDataException">
+    /// No URNs were supplied, or at least one is not a school within the user's group.
+    /// </exception>
+    private async Task SetSelectedSchoolsFromRefsAsync(IEnumerable<string> selectedSchoolRefs)
+    {
+        var refs = selectedSchoolRefs
+            .Where(urn => !string.IsNullOrWhiteSpace(urn))
+            .Distinct()
+            .ToList();
+
+        var groupSchoolsByUrn = (await CurrentUser.GetGroupSchoolsAsync())
+            .GroupBy(school => school.Urn)
+            .ToDictionary(group => group.Key, group => group.First());
+
+        if (refs.Count == 0 || refs.Any(urn => !groupSchoolsByUrn.ContainsKey(urn)))
+        {
+            throw new InvalidDataException(
+                "One or more selected schools are not within the user's group"
+            );
+        }
+
+        var selectedSchools = refs.Select(urn => groupSchoolsByUrn[urn])
+            .Select(school => new SelectedEstablishmentDataModel
+            {
+                EstablishmentId = school.EstablishmentId,
+                Urn = school.Urn,
+                Name = school.Name,
+            })
+            .ToList();
+
+        await CurrentUser.SetSelectedSchoolsAsync(selectedSchools);
     }
 
     private async Task<

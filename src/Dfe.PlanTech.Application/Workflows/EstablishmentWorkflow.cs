@@ -13,16 +13,16 @@ public class EstablishmentWorkflow(
     IGiasRepository giasRepository
 ) : IEstablishmentWorkflow
 {
-    private readonly ILogger<EstablishmentWorkflow> _logger =
-        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<EstablishmentWorkflow> _logger = logger
+        ?? throw new ArgumentNullException(nameof(logger));
 
-    private readonly IEstablishmentRepository _establishmentRepository =
-        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository
+        ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IGroupReadActivityRepository _groupReadActivityRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
-    private readonly IGiasRepository _giasRepository =
-        giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
+    private readonly IGiasRepository _giasRepository = giasRepository
+        ?? throw new ArgumentNullException(nameof(giasRepository));
 
     public async Task<SqlEstablishmentDto> GetOrCreateSchoolAsync(
         string schoolUrn,

@@ -450,7 +450,6 @@ public class NotifyServiceTests
             );
     }
 
-
     [Fact]
     public void SendMatStandardEmail_WhenCalled_SendsExpectedPersonalisation()
     {
@@ -486,12 +485,7 @@ public class NotifyServiceTests
             )
             .Returns(expectedResults);
 
-        var result = sut.SendMatStandardEmail(
-            model,
-            sections,
-             "Test MAT",
-            "Digital Standards"
-        );
+        var result = sut.SendMatStandardEmail(model, sections, "Test MAT", "Digital Standards");
 
         Assert.Same(expectedResults, result);
 
@@ -508,9 +502,7 @@ public class NotifyServiceTests
                     && ((string)d["recommendations mat"]).Contains(
                         "## Recommendations for digital technology registers"
                     )
-                    && ((string)d["recommendations mat"]).Contains(
-                        "1. Assign a digital lead"
-                    )
+                    && ((string)d["recommendations mat"]).Contains("1. Assign a digital lead")
                     && !((string)d["recommendations mat"]).Contains("self-assessment")
                 ),
                 Arg.Any<string>(),

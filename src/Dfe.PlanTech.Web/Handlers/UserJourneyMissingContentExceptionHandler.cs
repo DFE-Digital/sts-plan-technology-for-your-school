@@ -15,15 +15,15 @@ public class UserJourneyMissingContentExceptionHandler(
     ICurrentUserProvider currentUser
 ) : IUserJourneyMissingContentExceptionHandler
 {
-    private readonly IConfiguration _configuration =
-        configuration ?? throw new ArgumentNullException(nameof(configuration));
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly ICurrentUserProvider _currentUser =
-        currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+    private readonly IConfiguration _configuration = configuration
+        ?? throw new ArgumentNullException(nameof(configuration));
+    private readonly ISubmissionService _submissionService = submissionService
+        ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ICurrentUserProvider _currentUser = currentUser
+        ?? throw new ArgumentNullException(nameof(currentUser));
 
     public const string ErrorMessageConfigKey = "ErrorMessages:ConcurrentUsersOrContentChange";
-    public const string ErrorMessageTempDataKey = "SubtopicError";
+    public const string ErrorMessageTempDataKey = StatePassingMechanismConstants.SubtopicError;
 
     public async Task<IActionResult> Handle(
         Controller controller,

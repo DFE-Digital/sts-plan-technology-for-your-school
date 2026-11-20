@@ -18,105 +18,119 @@ function generateJwt() {
   });
 }
 
-async function processCsv() {
-  const token = generateJwt();
+const BATCH_SIZE = 50;
 
-  console.log('Using the following JWT for API calls:', token);
-  const promises = [];
+function readInputRows() {
+  return new Promise((resolve, reject) => {
+    const rows = [];
+    fs.createReadStream('data/inputs.csv')
+      .pipe(
+        csv({
+          // Remove BOM from headers if present
+          mapHeaders: ({ header }) => header.replace(/^\uFEFF/, ''),
+        }),
+      )
+      .on('data', (row) => rows.push(row))
+      .on('end', () => resolve(rows))
+      .on('error', reject);
+  });
+}
+
+async function fetchUser(userRow, token) {
+  const { dfeSignInRef } = userRow;
+  const headers = { Authorization: `Bearer ${token}` };
+
+  try {
+    const [userResponse, orgResponse] = await Promise.all([
+      axios.get(`${process.env.API_URL}/users/${dfeSignInRef}/organisationservices`, { headers }),
+      axios.get(`${process.env.API_URL}/users/${dfeSignInRef}/v2/organisations`, { headers }),
+    ]);
+
+    const row = {
+      ...userRow,
+      email: userResponse.data['email'],
+      name: `${userResponse.data['givenName']} ${userResponse.data['familyName']}`,
+    };
+    let orgs = [];
+
+    if (!orgResponse.data.length) {
+      row.organisations = 'No organisations listed for user';
+    } else {
+      row.organisations = orgResponse.data
+        .map(
+          (org) =>
+            `${org.name} (${org.id ?? 'ID unknown'}) - ${org.GIASProviderType ?? 'Type unknown'}`,
+        )
+        .join(', ');
+
+      orgs = orgResponse.data.map((org) => ({
+        id: org.id ?? 'Unknown',
+        urn: org.urn ?? 'Unknown',
+        uid: org.uid ?? 'Unknown',
+        ukprn: org.ukprn ?? 'Unknown',
+        category: org.name,
+        giasProviderType: org.GIASProviderType ?? 'Unknown',
+        providerTypeName: org.providerTypeName ?? 'Unknown',
+        status: org.status?.name ?? 'Unknown',
+      }));
+    }
+
+    console.log(`API call succeeded for "${dfeSignInRef}"`);
+    return { row, orgs };
+  } catch (error) {
+    console.error(`API call failed for "${dfeSignInRef}":`, error.message);
+    return { row: { ...userRow, email: `Error: ${error.message}` }, orgs: [] };
+  }
+}
+
+async function processCsv() {
+  const inputRows = await readInputRows();
   const results = [];
   const organisations = [];
 
-  fs.createReadStream('data/inputs.csv')
-    .pipe(
-      csv({
-        // Remove BOM from headers if present
-        mapHeaders: ({ header }) => header.replace(/^\uFEFF/, ''),
-      }),
-    )
-    .on('data', (userRow) => {
-      const { dfeSignInRef } = userRow;
-      const userDataEndpoint = `${process.env.API_URL}/users/${dfeSignInRef}/organisationservices`;
-      const orgDataEndpoint = `${process.env.API_URL}/users/${dfeSignInRef}/v2/organisations`;
+  for (let i = 0; i < inputRows.length; i += BATCH_SIZE) {
+    const batch = inputRows.slice(i, i + BATCH_SIZE);
+    console.log();
+    console.log(
+      `Processing users ${i + 1}-${i + batch.length} of ${inputRows.length} (batch of ${batch.length})`,
+    );
 
-      const promise = Promise.all([
-        axios.get(userDataEndpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }),
-        axios.get(orgDataEndpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }),
-      ])
-        .then(([userResponse, orgResponse]) => {
-          userRow.email = userResponse.data['email'];
-          userRow.name = `${userResponse.data['givenName']} ${userResponse.data['familyName']}`;
+    // A fresh token per batch avoids expiry during long runs
+    const token = generateJwt();
+    const batchResults = await Promise.all(batch.map((userRow) => fetchUser(userRow, token)));
 
-          if (!orgResponse.data.length) {
-            userRow.organisations = 'No organisations listed for user';
-          } else {
-            const userOrgs = orgResponse.data.map(
-              (org) =>
-                `${org.name} (${org.id ?? 'ID unknown'}) - ${org.GIASProviderType ?? 'Type unknown'}`,
-            );
-            userRow.organisations = userOrgs.join(', ');
+    for (const { row, orgs } of batchResults) {
+      results.push(row);
+      organisations.push(...orgs);
+    }
+  }
 
-            const orgs = orgResponse.data.map((org) => ({
-              id: org.id ?? 'Unknown',
-              urn: org.urn ?? 'Unknown',
-              uid: org.uid ?? 'Unknown',
-              ukprn: org.ukprn ?? 'Unknown',
-              category: org.name,
-              giasProviderType: org.GIASProviderType ?? 'Unknown',
-              providerTypeName: org.providerTypeName ?? 'Unknown',
-              status: org.status?.name ?? 'Unknown',
-            }));
+  if (results.length === 0) {
+    console.error('No data to write. Check your input or API responses.');
+    return;
+  }
 
-            organisations.push(...orgs);
-          }
+  const parser = new Parser();
+  const csvOutput = parser.parse(results);
 
-          results.push(userRow);
-          console.log(`API call succeeded for "${dfeSignInRef}"`);
-        })
-        .catch((error) => {
-          console.error(`API call failed for "${dfeSignInRef}":`, error.message);
-          userRow.email = `Error: ${error.message}`;
-          results.push(userRow);
-        });
+  const now = new Date();
+  const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const timeStamp = now.toTimeString().slice(0, 5).replace(/:/g, '');
+  const outputsUsersFileName = `outputs-users-${dateStamp}T${timeStamp}.csv`;
 
-      promises.push(promise);
-    })
-    .on('end', async () => {
-      await Promise.all(promises);
+  fs.writeFileSync(`data/${outputsUsersFileName}`, csvOutput);
+  console.log(`Users CSV file successfully processed and saved as ${outputsUsersFileName}`);
 
-      if (results.length === 0) {
-        console.error('No data to write. Check your input or API responses.');
-        return;
-      }
+  // Distinct orgs
+  const distinctOrgs = Array.from(new Map(organisations.map((org) => [org.id, org])).values());
+  const orgsCsvOutput = parser.parse(distinctOrgs);
 
-      const parser = new Parser();
-      const csvOutput = parser.parse(results);
-
-      const now = new Date();
-      const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');
-      const timeStamp = now.toTimeString().slice(0, 5).replace(/:/g, '');
-      const outputsUsersFileName = `outputs-users-${dateStamp}T${timeStamp}.csv`;
-
-      fs.writeFileSync(`data/${outputsUsersFileName}`, csvOutput);
-      console.log(`Users CSV file successfully processed and saved as ${outputsUsersFileName}`);
-
-      // Distinct orgs
-      const distinctOrgs = Array.from(new Map(organisations.map((org) => [org.id, org])).values());
-      const orgsCsvOutput = parser.parse(distinctOrgs);
-
-      const outputsOrgsFileName = `outputs-orgs-${dateStamp}T${timeStamp}.csv`;
-      fs.writeFileSync(`data/${outputsOrgsFileName}`, orgsCsvOutput);
-      console.log(
-        `Organisations CSV file successfully processed and saved as ${outputsOrgsFileName}`,
-      );
-    });
+  const outputsOrgsFileName = `outputs-orgs-${dateStamp}T${timeStamp}.csv`;
+  fs.writeFileSync(`data/${outputsOrgsFileName}`, orgsCsvOutput);
+  console.log(`Organisations CSV file successfully processed and saved as ${outputsOrgsFileName}`);
 }
 
-processCsv();
+processCsv().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});

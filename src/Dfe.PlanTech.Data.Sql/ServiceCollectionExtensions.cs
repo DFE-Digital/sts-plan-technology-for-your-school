@@ -18,20 +18,17 @@ public static class ServiceCollectionExtensions
     )
     {
         void databaseOptionsAction(DbContextOptionsBuilder options) =>
-            options.UseSqlServer(
-                configuration.GetConnectionString("Database"),
-                opts =>
-                {
-                    var databaseRetryOptions = configuration
-                        .GetRequiredSection(ConfigurationConstants.Database)
-                        .Get<DatabaseConfiguration>();
-                    opts.EnableRetryOnFailure(
-                        databaseRetryOptions.MaxRetryCount,
-                        TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds),
-                        null
-                    );
-                }
-            );
+            options.UseSqlServer(configuration.GetConnectionString("Database"), opts =>
+            {
+                var databaseRetryOptions = configuration
+                    .GetRequiredSection(ConfigurationConstants.Database)
+                    .Get<DatabaseConfiguration>();
+                opts.EnableRetryOnFailure(
+                    databaseRetryOptions.MaxRetryCount,
+                    TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds),
+                    null
+                );
+            });
 
         services.AddDbContext<PlanTechDbContext>(databaseOptionsAction);
 
@@ -41,21 +38,25 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
+            .AddScoped<IAnswerRepository, AnswerRepository>()
+            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
+            .AddScoped<IEstablishmentGroupRepository, EstablishmentGroupRepository>()
             .AddScoped<
                 IEstablishmentRecommendationHistoryRepository,
                 EstablishmentRecommendationHistoryRepository
             >()
-            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<IGiasRepository, GiasRepository>()
             .AddScoped<IGroupReadActivityRepository, GroupReadActivityRepository>()
+            .AddScoped<IQuestionRepository, QuestionRepository>()
             .AddScoped<IRecommendationRepository, RecommendationRepository>()
+            .AddScoped<IResponseRepository, ResponseRepository>()
             .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
+            .AddScoped<ITransactionManager, TransactionManager>()
             .AddScoped<IUserRepository, UserRepository>()
-            .AddScoped<IUserSettingsRepository, UserSettingsRepository>()
             .AddScoped<IUserActionRepository, UserActionRepository>()
             .AddScoped<IUserContentViewRepository, UserContentViewRepository>()
-            .AddScoped<IEstablishmentGroupRepository, EstablishmentGroupRepository>();
+            .AddScoped<IUserSettingsRepository, UserSettingsRepository>();
     }
 }

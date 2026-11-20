@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Controllers;
@@ -91,7 +92,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var result = _controller.SetCookiePreference("true", isCookiesPage: true);
 
-            Assert.True(_controller.TempData.ContainsKey("UserPreferenceRecorded"));
+            Assert.True(
+                _controller.TempData.ContainsKey(CookieConstants.UserPreferenceRecordedKey)
+            );
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("GetByRoute", redirect.ActionName);
             Assert.Equal("Pages", redirect.ControllerName);

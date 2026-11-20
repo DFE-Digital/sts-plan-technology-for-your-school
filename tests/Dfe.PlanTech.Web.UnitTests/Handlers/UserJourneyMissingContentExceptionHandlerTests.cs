@@ -34,6 +34,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
         http.User = new ClaimsPrincipal(identity);
         var accessor = new HttpContextAccessor { HttpContext = http };
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var groupService = Substitute.For<IGroupService>();
         var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         return (
             new CurrentUserProvider(

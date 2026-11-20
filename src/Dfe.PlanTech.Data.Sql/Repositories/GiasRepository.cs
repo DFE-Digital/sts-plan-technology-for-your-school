@@ -6,22 +6,22 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class GiasRepository(PlanTechDbContext dbContext) : IGiasRepository
 {
-    protected readonly PlanTechDbContext _db =
-        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    protected readonly PlanTechDbContext _db = dbContext
+        ?? throw new ArgumentNullException(nameof(dbContext));
 
     public Task<GiasEstablishmentEntity?> GetSchoolByUrn(int urn)
     {
         return _db.GiasEstablishments.Where(e => e.Urn == urn).FirstOrDefaultAsync();
     }
 
-    public Task<List<GiasEstablishmentEntity>> GetSchoolsInGroup(int groupUid)
+    public Task<List<GiasEstablishmentEntity>> GetSchoolsForGroupAsync(int groupUid)
     {
         return _db
-            .GiasEstablishmentGroups.Where(eg =>
-                eg.GroupUid == groupUid && eg.GroupStatusCode.Equals("OPEN")
-            )
-            .SelectMany(eg => eg.GroupMemberships)
-            .SelectMany(gm => gm.Establishments)
+            .GiasEstablishmentGroups.AsNoTracking()
+            .Where(g => g.GroupUid == groupUid && g.GroupStatusCode == "OPEN")
+            .SelectMany(g => g.GroupMemberships)
+            .SelectMany(m => m.Establishments)
+            .Distinct()
             .ToListAsync();
     }
 

@@ -6,8 +6,8 @@ namespace Dfe.PlanTech.Application.Workflows;
 
 public class GiasWorkflow(IGiasRepository giasRepository) : IGiasWorkflow
 {
-    private readonly IGiasRepository _giasRepository =
-        giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
+    private readonly IGiasRepository _giasRepository = giasRepository
+        ?? throw new ArgumentNullException(nameof(giasRepository));
 
     public async Task<SqlGiasEstablishmentDto?> GetSchoolByUrn(string schoolUrn)
     {
@@ -24,7 +24,7 @@ public class GiasWorkflow(IGiasRepository giasRepository) : IGiasWorkflow
 
     public async Task<IEnumerable<SqlGiasEstablishmentDto>> GetSchoolsInGroup(int groupUid)
     {
-        var groupSchools = await _giasRepository.GetSchoolsInGroup(groupUid);
+        var groupSchools = await _giasRepository.GetSchoolsForGroupAsync(groupUid);
         return groupSchools.Select(gs => gs.AsDto());
     }
 
@@ -36,7 +36,7 @@ public class GiasWorkflow(IGiasRepository giasRepository) : IGiasWorkflow
 
     public async Task<bool> HasAllSchoolsInGroup(int groupUid, IEnumerable<int> schoolUrns)
     {
-        var groupSchools = await _giasRepository.GetSchoolsInGroup(groupUid);
+        var groupSchools = await _giasRepository.GetSchoolsForGroupAsync(groupUid);
         return groupSchools.Select(gs => gs.Urn).ToHashSet().IsSupersetOf(schoolUrns);
     }
 }

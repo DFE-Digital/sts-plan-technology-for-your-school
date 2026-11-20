@@ -123,7 +123,7 @@
 }
 
 @{
-    if (Model.Page.Slug == "home" && TempData.ContainsKey("SubtopicError"))
+    if (Model.Page.Slug == "home" && TempData.ContainsKey(StatePassingMechanismConstants.SubtopicError))
     {
         var error = TempData[StatePassingMechanismConstants.SubtopicError] as string;
         <div class="govuk-error-summary" data-module="govuk-error-summary">

@@ -84,8 +84,7 @@ public class RecommendationWorkflow(
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null,
-        int? responseId = null
+        int? matEstablishmentId = null
     )
     {
         // Get the recommendation by ContentfulRef to get its ID
@@ -93,8 +92,7 @@ public class RecommendationWorkflow(
             await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([
                 recommendationContentfulReference,
             ]);
-        var recommendation =
-            recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault()
+        var recommendation = recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault()
             ?? throw new InvalidOperationException(
                 $"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found"
             );
@@ -106,12 +104,11 @@ public class RecommendationWorkflow(
         );
         var previousStatus = currentStatus?.NewStatus;
 
-        await establishmentRecommendationHistoryRepository.CreateRecommendationHistoryAsync(
+        await establishmentRecommendationHistoryRepository.UpdateRecommendationStatusAsync(
             establishmentId,
             recommendation.Id,
             userId,
             matEstablishmentId,
-            responseId,
             previousStatus,
             newStatus,
             noteText ?? string.Empty
@@ -141,8 +138,7 @@ public class RecommendationWorkflow(
                 recommendationContentfulReference,
             ]);
 
-        var recommendation =
-            recommendations.FirstOrDefault()
+        var recommendation = recommendations.OrderByDescending(r => r.DateCreated).FirstOrDefault()
             ?? throw new InvalidOperationException(
                 $"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found"
             );

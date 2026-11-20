@@ -17,14 +17,14 @@ public class CurrentUserProvider(
     IGiasService giasService
 ) : ICurrentUserProvider
 {
-    private readonly ILogger<CurrentUserProvider> _logger =
-        logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly IHttpContextAccessor _contextAccessor =
-        contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-    private readonly IEstablishmentService _establishmentService =
-        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly IGiasService _giasService =
-        giasService ?? throw new ArgumentNullException(nameof(giasService));
+    private readonly ILogger<CurrentUserProvider> _logger = logger
+        ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IHttpContextAccessor _contextAccessor = contextAccessor
+        ?? throw new ArgumentNullException(nameof(contextAccessor));
+    private readonly IEstablishmentService _establishmentService = establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IGiasService _giasService = giasService
+        ?? throw new ArgumentNullException(nameof(giasService));
 
     public string DsiReference =>
         GetStringFromClaim(ClaimConstants.NameIdentifier)

@@ -8,8 +8,8 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
 {
-    private readonly IGroupWorkflow _groupWorkflow =
-        groupWorkflow ?? throw new ArgumentNullException(nameof(groupWorkflow));
+    private readonly IGroupWorkflow _groupWorkflow = groupWorkflow
+        ?? throw new ArgumentNullException(nameof(groupWorkflow));
 
     public Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(
         int[] establishmentIds

@@ -20,8 +20,8 @@ public class GroupWorkflow(
     private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
         recommendationHistoryRepository
         ?? throw new ArgumentNullException(nameof(recommendationHistoryRepository));
-    private readonly ISubmissionRepository _submissionRepository =
-        submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly ISubmissionRepository _submissionRepository = submissionRepository
+        ?? throw new ArgumentNullException(nameof(submissionRepository));
 
     public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds)
     {
