@@ -1,4 +1,5 @@
 @using Dfe.PlanTech.Core.Enums
+@inject IMicrocopyProvider Microcopy
 @model MatStandardsListViewModel
 
 @section Breadcrumbs
@@ -23,14 +24,16 @@
     <partial name="_OrganisationContext" model="Model.GroupName" />
 }
 
-<h1 class="govuk-heading-xl">Plan technology for your school</h1>
+<h1 class="govuk-heading-xl">
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsStandardsListHeader)
+    </h1>
 
 <p class="govuk-body">
-    Submit self-assessments to get recommendations and track your progress towards meeting the core standards.
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsStandardsListBody)
 </p>
 
 <h2 class="govuk-heading-l">
-    View recommendations and track progress
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsStandardsListCategoriesHeader)
 </h2>
 
 <div class="dfe-grid-container">
