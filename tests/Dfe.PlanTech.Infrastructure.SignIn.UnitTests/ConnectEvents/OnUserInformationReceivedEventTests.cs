@@ -1,15 +1,14 @@
-using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
+using Dfe.PlanTech.Tests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -33,9 +32,14 @@ public class OnUserInformationReceivedEventTests
         var signIn = Substitute.For<ISignInService>();
         var gias = Substitute.For<IGiasService>();
         var user = Substitute.For<ICurrentUserProvider>();
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        establishmentService
+            .GetEstablishmentByIdAsync(Arg.Any<int>())
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(1).Build());
         services.AddSingleton(signIn);
         services.AddSingleton(gias);
         services.AddSingleton(user);
+        services.AddSingleton(establishmentService);
 
         var sp = services.BuildServiceProvider();
 
@@ -73,7 +77,6 @@ public class OnUserInformationReceivedEventTests
     ) =>
         new()
         {
-            Id = Guid.NewGuid(),
             Urn = urn,
             Uid = uid,
             Category = categoryId is null
@@ -188,7 +191,7 @@ public class OnUserInformationReceivedEventTests
             .Received(1)
             .RecordSignInAsync("dsi-ref-123", Arg.Is<EstablishmentModel>(e => e.Urn == "111111"));
         await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
-        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentForSatAsync(default!);
+        await gias.DidNotReceiveWithAnyArgs().GetSchoolForSatAsync(default!);
 
         Assert.True(ctx.Result is null);
 
@@ -200,7 +203,7 @@ public class OnUserInformationReceivedEventTests
     }
 
     [Fact]
-    public async Task RecordUserSignIn_WhenSSatOrganisation_AndSchoolNotFound_ThrowsWithSSatMessage()
+    public async Task RecordUserSignIn_WhenSsatSchoolIsMissing_UsesTrustAsFocusedEstablishment()
     {
         // Arrange
         var org = CreateEstablishment(
@@ -224,23 +227,25 @@ public class OnUserInformationReceivedEventTests
             .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
             .Returns(signInDto);
 
-        gias.GetSchoolEstablishmentForSatAsync(Arg.Any<EstablishmentModel>())
+        gias.GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
             .Returns(default(SelectedEstablishmentDataModel?));
 
-        // Act / Assert
-        var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
-            OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx)
-        );
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
 
-        Assert.Contains("SSAT", ex.Message);
-        Assert.Contains("42", ex.Message);
+        // Assert
+        Assert.Contains(ctx.Principal!.Claims, claim =>
+            claim.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && claim.Value == "1"
+        );
+        Assert.Contains(ctx.Principal.Claims, claim =>
+            claim.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && claim.Value == "1"
+        );
     }
 
     [Fact]
-    public async Task RecordUserSignIn_WhenSatOrganisation_AndUidNotParseable_DoesNotQueryGias_AndThrows()
+    public async Task RecordUserSignIn_WhenSatUidIsNotNumeric_UsesTrustFallbackClaims()
     {
-        // Arrange: Uid isn't a valid int, so int.TryParse fails and the GIAS lookup is skipped entirely -
-        // the school remains null and the method should still throw.
+        // Arrange
         var org = CreateEstablishment(
             uid: "not-a-number",
             categoryId: DsiConstants.SatOrganisationCategoryId
@@ -263,13 +268,23 @@ public class OnUserInformationReceivedEventTests
             .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
             .Returns(signInDto);
 
-        // Act / Assert
-        var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
-            OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx)
-        );
+        gias.GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
+            .Returns(default(SelectedEstablishmentDataModel?));
 
-        Assert.Contains("SAT", ex.Message);
-        await gias.DidNotReceiveWithAnyArgs().GetSchoolEstablishmentForSatAsync(default!);
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
+
+        // Assert
+        await gias.Received(1)
+            .GetSchoolForSatAsync(
+                Arg.Is<EstablishmentModel>(organisation => organisation.Uid == "not-a-number")
+            );
+        Assert.Contains(ctx.Principal!.Claims, claim =>
+            claim.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && claim.Value == "1"
+        );
+        Assert.Contains(ctx.Principal.Claims, claim =>
+            claim.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && claim.Value == "1"
+        );
     }
 
     [Fact]
@@ -294,12 +309,12 @@ public class OnUserInformationReceivedEventTests
 
         var selectedEstablishmentDataModel = new SelectedEstablishmentDataModel
         {
-            Id = 1,
+            EstablishmentId = 1,
             Name = "Test SAT school",
             Urn = urn,
         };
 
-        gias.GetSchoolEstablishmentForSatAsync(Arg.Any<EstablishmentModel>())
+        gias.GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
             .Returns(selectedEstablishmentDataModel);
 
         var signInDto = new SqlSignInDto { UserId = 5, EstablishmentId = 6 };
@@ -318,74 +333,5 @@ public class OnUserInformationReceivedEventTests
                 "dsi-ref-fallback",
                 Arg.Is<EstablishmentModel>(e => e.Urn == "888888")
             );
-    }
-
-    // The rest of the behavior (adding DB_USER_ID and DB_ESTABLISHMENT_ID) is in a private method.
-    // We verify it directly via reflection to avoid depending on the claim-parsing extension methods.
-    [Fact]
-    public void AddClaimsToPrincipal_Adds_DbUserId_And_DbEstablishmentId()
-    {
-        // Arrange
-        var principal = AuthenticatedPrincipal();
-        var (ctx, _, _, _, _) = BuildContext(principal);
-        var signIn = new SqlSignInDto { UserId = 42, EstablishmentId = 999 };
-
-        // Invoke private static AddClaimsToPrincipal(UserInformationReceivedContext, SqlSignInDto)
-        var mi = typeof(OnUserInformationReceivedEvent).GetMethod(
-            "AddClaimsToPrincipal",
-            BindingFlags.NonPublic | BindingFlags.Static
-        );
-        Assert.NotNull(mi);
-
-        mi!.Invoke(null, [ctx, signIn]);
-
-        // Assert
-        var userIdClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.DB_USER_ID);
-        var estIdClaim = principal.Claims.FirstOrDefault(c =>
-            c.Type == ClaimConstants.DB_ESTABLISHMENT_ID
-        );
-
-        Assert.NotNull(userIdClaim);
-        Assert.Equal("42", userIdClaim!.Value);
-
-        Assert.NotNull(estIdClaim);
-        Assert.Equal("999", estIdClaim!.Value);
-    }
-
-    [Fact]
-    public void AddClaimsToPrincipal_When_PrincipalNull_DoesNothing()
-    {
-        var (ctx, _, _, _, _) = BuildContext(principal: null!);
-        var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
-
-        var mi = typeof(OnUserInformationReceivedEvent).GetMethod(
-            "AddClaimsToPrincipal",
-            BindingFlags.NonPublic | BindingFlags.Static
-        );
-        Assert.NotNull(mi);
-
-        // Should not throw
-        mi!.Invoke(null, [ctx, signIn]);
-    }
-
-    [Fact]
-    public void AddClaimsToPrincipal_When_EstablishmentIdNull_Throws()
-    {
-        var principal = AuthenticatedPrincipal();
-        var (ctx, _, _, _, _) = BuildContext(principal);
-        var signIn = new SqlSignInDto { UserId = 7, EstablishmentId = null };
-
-        var mi = typeof(OnUserInformationReceivedEvent).GetMethod(
-            "AddClaimsToPrincipal",
-            BindingFlags.NonPublic | BindingFlags.Static
-        )!;
-
-        var ex = Assert.Throws<TargetInvocationException>(() =>
-            mi.Invoke(null, new object[] { ctx, signIn })
-        );
-
-        // Inner exception should be the InvalidDataException thrown by the method
-        Assert.IsType<InvalidDataException>(ex.InnerException);
-        Assert.Equal("EstablishmentId", ex.InnerException!.Message);
     }
 }

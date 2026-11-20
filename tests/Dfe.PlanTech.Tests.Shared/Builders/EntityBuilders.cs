@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 
-namespace Dfe.PlanTech.UnitTests.Shared.Builders;
+namespace Dfe.PlanTech.Tests.Shared.Builders;
 
 public class EntityBuilders
 {

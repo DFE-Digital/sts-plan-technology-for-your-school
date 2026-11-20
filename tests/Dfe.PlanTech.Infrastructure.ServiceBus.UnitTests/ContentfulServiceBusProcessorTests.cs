@@ -3,7 +3,7 @@ using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
+using Dfe.PlanTech.Tests.Shared.Extensions;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

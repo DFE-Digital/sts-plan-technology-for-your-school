@@ -1,6 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
+using Dfe.PlanTech.Tests.Shared.Extensions;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

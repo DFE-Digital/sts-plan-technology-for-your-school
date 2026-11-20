@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
-using Dfe.PlanTech.UnitTests.Shared.Builders;
+using Dfe.PlanTech.Tests.Shared.Builders;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
@@ -170,9 +170,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
 
         // Act
         var result =
-            await _repository.GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(
+            await _repository.GetRecommendationHistoryByEstablishmentIdAndRecommendationRefAsync(
                 establishment1.Id,
-                recommendation2.Id
+                recommendation2.ContentfulRef
             );
 
         // Assert
@@ -543,7 +543,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Act
         var result = await _repository.GetLatestRecommendationHistoryAsync(
             establishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -580,7 +580,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Act
         var result = await _repository.GetLatestRecommendationHistoryAsync(
             establishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -637,7 +637,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Act - Query for recommendation2 (which has no history)
         var result = await _repository.GetLatestRecommendationHistoryAsync(
             establishment.Id,
-            recommendation2.Id
+            recommendation2.ContentfulRef
         );
 
         // Assert
@@ -692,7 +692,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Act - Query for establishment2 (which has no history for this recommendation)
         var result = await _repository.GetLatestRecommendationHistoryAsync(
             establishment2.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -741,7 +741,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Act
         var result = await _repository.GetLatestRecommendationHistoryAsync(
             establishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -793,7 +793,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Act - Query with invalid establishment ID
         var result = await _repository.GetLatestRecommendationHistoryAsync(
             99999,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -840,7 +840,10 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Query with invalid recommendation ID
-        var result = await _repository.GetLatestRecommendationHistoryAsync(establishment.Id, 99999);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            establishment.Id,
+            "missing-recommendation-ref"
+        );
 
         // Assert
         Assert.Null(result);
@@ -1376,10 +1379,10 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
 
     #endregion
 
-    #region GetGroupRecommendationHistoryByRecommendationIdAsync Tests
+    #region GetGroupRecommendationHistoryByRecommendationRefAsync Tests
 
     [Fact]
-    public async Task GetLatestGroupRecommendationHistoryByRecommendationIdAsync_WhenGroupHasMultipleEstablishments_ThenReturnsAllEstablishmentsWithLatestHistory()
+    public async Task GetLatestGroupRecommendationHistoryByRecommendationRefAsync_WhenGroupHasMultipleEstablishments_ThenReturnsAllEstablishmentsWithLatestHistory()
     {
         // Arrange
         const int groupUid = 990001;
@@ -1484,9 +1487,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
-        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
             matEstablishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -1507,7 +1510,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     }
 
     [Fact]
-    public async Task GetLatestGroupRecommendationHistoryByRecommendationIdAsync_WhenEstablishmentHasNoHistory_ThenReturnsEstablishmentWithNullHistory()
+    public async Task GetLatestGroupRecommendationHistoryByRecommendationRefAsync_WhenEstablishmentHasNoHistory_ThenReturnsEstablishmentWithNullHistory()
     {
         // Arrange
         const int groupUid = 990001;
@@ -1553,9 +1556,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
-        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
             matEstablishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -1569,7 +1572,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     }
 
     [Fact]
-    public async Task GetLatestGroupRecommendationHistoryByRecommendationIdAsync_WhenHistoryExistsForDifferentRecommendation_ThenReturnsNullHistory()
+    public async Task GetLatestGroupRecommendationHistoryByRecommendationRefAsync_WhenHistoryExistsForDifferentRecommendation_ThenReturnsNullHistory()
     {
         // Arrange
         const int groupUid = 990001;
@@ -1639,9 +1642,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
-        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
             matEstablishment.Id,
-            recommendation2.Id
+            recommendation2.ContentfulRef
         );
 
         // Assert
@@ -1655,7 +1658,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     }
 
     [Fact]
-    public async Task GetLatestGroupRecommendationHistoryByRecommendationIdAsync_WhenEstablishmentBelongsToDifferentGroup_ThenDoesNotReturnIt()
+    public async Task GetLatestGroupRecommendationHistoryByRecommendationRefAsync_WhenEstablishmentBelongsToDifferentGroup_ThenDoesNotReturnIt()
     {
         // Arrange
         const int groupUid = 990001;
@@ -1723,9 +1726,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
-        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
             matEstablishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert
@@ -1741,12 +1744,12 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     }
 
     [Fact]
-    public async Task GetLatestGroupRecommendationHistoryByRecommendationIdAsync_WhenActiveEstablishmentDoesNotExist_ThenReturnsEmpty()
+    public async Task GetLatestGroupRecommendationHistoryByRecommendationRefAsync_WhenActiveEstablishmentDoesNotExist_ThenReturnsEmpty()
     {
         // Act
-        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
             99999,
-            99999
+            "missing-recommendation-ref"
         );
 
         // Assert
@@ -1754,7 +1757,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     }
 
     [Fact]
-    public async Task GetLatestGroupRecommendationHistoryByRecommendationIdAsync_WhenHistoriesHaveSameDateCreated_ThenReturnsHighestId()
+    public async Task GetLatestGroupRecommendationHistoryByRecommendationRefAsync_WhenHistoriesHaveSameDateCreated_ThenReturnsHighestId()
     {
         // Arrange
         const int groupUid = 990001;
@@ -1835,9 +1838,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
-        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationIdAsync(
+        var result = await _repository.GetLatestGroupRecommendationHistoryByRecommendationRefAsync(
             matEstablishment.Id,
-            recommendation.Id
+            recommendation.ContentfulRef
         );
 
         // Assert

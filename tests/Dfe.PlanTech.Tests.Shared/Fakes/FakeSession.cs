@@ -2,19 +2,14 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace Dfe.PlanTech.Web.UnitTests.TestHelpers;
+namespace Dfe.PlanTech.Tests.Shared.Fakes;
 
-/// <summary>
-/// Minimal in-memory ISession for unit tests. Because it implements the real
-/// Set/TryGetValue contract, any session extension methods (SetString, GetString,
-/// or our own JSON SetValue/GetValue helpers) work against it unchanged.
-/// </summary>
-public sealed class InMemorySession : ISession
+public sealed class FakeSession : ISession
 {
     private readonly Dictionary<string, byte[]> _store = new(StringComparer.Ordinal);
 
     public bool IsAvailable => true;
-    public string Id { get; } = Guid.NewGuid().ToString();
+    public string Id => "fake-session";
     public IEnumerable<string> Keys => _store.Keys;
 
     public void Clear() => _store.Clear();
@@ -31,15 +26,11 @@ public sealed class InMemorySession : ISession
     public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 }
 
-public static class HttpContextSessionExtensions
+public static class FakeSessionExtensions
 {
-    /// <summary>
-    /// Attaches an in-memory session to the context so ctx.Session works,
-    /// and returns it so a test can seed or inspect values.
-    /// </summary>
-    public static InMemorySession AttachSession(this HttpContext context)
+    public static FakeSession AttachSession(this HttpContext context)
     {
-        var session = new InMemorySession();
+        var session = new FakeSession();
         context.Features.Set<ISessionFeature>(new TestSessionFeature { Session = session });
         return session;
     }

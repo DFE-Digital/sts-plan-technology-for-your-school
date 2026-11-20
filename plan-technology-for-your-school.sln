@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure.SignIn.UnitTests", "tests\Dfe.PlanTech.Infrastructure.SignIn.UnitTests\Dfe.PlanTech.Infrastructure.SignIn.UnitTests.csproj", "{E14020A7-B71E-4850-B562-C734590F8C2F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.UnitTests.Shared", "tests\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj", "{5D0C8F71-DD08-43AE-8791-A488DBDE2DF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Tests.Shared", "tests\Dfe.PlanTech.Tests.Shared\Dfe.PlanTech.Tests.Shared.csproj", "{5D0C8F71-DD08-43AE-8791-A488DBDE2DF7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests", "tests\Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests\Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.csproj", "{6A2698E9-2AB0-4CDB-A070-FA2DB4CA9DD4}"
 EndProject

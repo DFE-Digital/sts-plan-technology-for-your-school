@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
+using Dfe.PlanTech.Tests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -41,9 +41,8 @@ public class RedisCacheTests : RedisCacheTestsBase
     [Fact]
     public async Task GetOrCreateAsync_Succeeds_WithExistingKey()
     {
-        var result = await _cache.GetOrCreateAsync<dynamic>(
-            Key,
-            () => throw new Exception("This should not be called")
+        var result = await _cache.GetOrCreateAsync<dynamic>(Key, () =>
+            throw new Exception("This should not be called")
         );
         Assert.Equal(Value, result);
     }

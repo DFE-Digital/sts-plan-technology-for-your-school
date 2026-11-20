@@ -6,7 +6,7 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using Dfe.PlanTech.UnitTests.Shared.Builders;
+using Dfe.PlanTech.Tests.Shared.Builders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 

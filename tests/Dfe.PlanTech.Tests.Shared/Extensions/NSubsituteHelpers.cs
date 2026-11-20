@@ -3,7 +3,7 @@ using System.Reflection;
 using NSubstitute;
 using Xunit;
 
-namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
+namespace Dfe.PlanTech.Tests.Shared.Extensions;
 
 public static class NSubstituteExtensions
 {

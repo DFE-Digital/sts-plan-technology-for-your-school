@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Data.Sql.Repositories;
-using Dfe.PlanTech.UnitTests.Shared.Builders;
+using Dfe.PlanTech.Tests.Shared.Builders;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;

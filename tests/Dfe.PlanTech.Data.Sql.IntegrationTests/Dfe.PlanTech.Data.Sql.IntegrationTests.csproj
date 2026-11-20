@@ -34,7 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Data.Sql\Dfe.PlanTech.Data.Sql.csproj" />
     <ProjectReference Include="..\..\src\Dfe.PlanTech.DatabaseUpgrader\Dfe.PlanTech.DatabaseUpgrader.csproj" />
-    <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.Tests.Shared\Dfe.PlanTech.Tests.Shared.csproj" />
   </ItemGroup>
 
 </Project>

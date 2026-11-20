@@ -21,6 +21,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
     <PackageReference Include="coverlet.collector" Version="10.1.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -31,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Redis\Dfe.PlanTech.Infrastructure.Redis.csproj" />
-    <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.Tests.Shared\Dfe.PlanTech.Tests.Shared.csproj" />
   </ItemGroup>
 
 </Project>

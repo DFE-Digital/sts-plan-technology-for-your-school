@@ -439,7 +439,7 @@ public class SubmissionRepositoryTests
 
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await repo.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync([
+        var result = await repo.GetEstablishmentsLatestCompletedSubmissionsBySectionsAsync([
             1,
             1,
             2,

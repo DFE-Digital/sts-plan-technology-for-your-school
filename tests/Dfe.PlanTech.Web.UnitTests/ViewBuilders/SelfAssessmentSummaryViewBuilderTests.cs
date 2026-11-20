@@ -6,6 +6,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Tests.Shared.Fakes;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +37,7 @@ public class SelfAssessmentSummaryViewBuilderTests
     private static Controller MakeController()
     {
         var controller = new DummyController();
-        var httpContext = new DefaultHttpContext { Session = new TestSession() };
+        var httpContext = new DefaultHttpContext { Session = new FakeSession() };
 
         controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
@@ -404,31 +405,6 @@ public class SelfAssessmentSummaryViewBuilderTests
         );
 
         Assert.Equal("httpContextAccessor", ex.ParamName);
-    }
-
-    private sealed class TestSession : ISession
-    {
-        private readonly Dictionary<string, byte[]> _store = [];
-
-        public IEnumerable<string> Keys => _store.Keys;
-
-        public string Id { get; } = Guid.NewGuid().ToString();
-
-        public bool IsAvailable => true;
-
-        public void Clear() => _store.Clear();
-
-        public Task CommitAsync(CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
-
-        public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-        public void Remove(string key) => _store.Remove(key);
-
-        public void Set(string key, byte[] value) => _store[key] = value;
-
-        public bool TryGetValue(string key, out byte[] value) =>
-            _store.TryGetValue(key, out value!);
     }
 
     private sealed class DummyController : Controller { }

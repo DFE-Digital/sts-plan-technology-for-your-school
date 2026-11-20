@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Core.Caching;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
+using Dfe.PlanTech.Tests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using StackExchange.Redis;

@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
+namespace Dfe.PlanTech.Tests.Shared.Extensions;
 
 public static class ReflectionHelpers
 {

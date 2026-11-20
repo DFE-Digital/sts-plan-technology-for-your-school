@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.UnitTests.Shared.Builders;
+namespace Dfe.PlanTech.Tests.Shared.Builders;
 
 public class EntryBuilders
 {
@@ -30,15 +30,13 @@ public class EntryBuilders
         {
             Sys = new(@ref),
             Question = new() { Sys = new(questionRef) },
-            CompletingAnswers =
-                completingAnswerRefs
-                    ?.Select(answerRef => new QuestionnaireAnswerEntry() { Sys = new(answerRef) })
-                    .ToList()
+            CompletingAnswers = completingAnswerRefs
+                ?.Select(answerRef => new QuestionnaireAnswerEntry() { Sys = new(answerRef) })
+                .ToList()
                 ?? [],
-            InProgressAnswers =
-                inProgressAnswerRefs
-                    ?.Select(answerRef => new QuestionnaireAnswerEntry() { Sys = new(answerRef) })
-                    .ToList()
+            InProgressAnswers = inProgressAnswerRefs
+                ?.Select(answerRef => new QuestionnaireAnswerEntry() { Sys = new(answerRef) })
+                .ToList()
                 ?? [],
         };
 

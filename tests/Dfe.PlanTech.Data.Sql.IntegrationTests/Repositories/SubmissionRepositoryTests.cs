@@ -809,7 +809,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.ChangeTracker.Clear();
 
         // Act
-        var result = await _repository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync([
+        var result = await _repository.GetEstablishmentsLatestCompletedSubmissionsBySectionsAsync([
             establishment1.Id,
             establishment2.Id,
             establishment3.Id,
@@ -824,14 +824,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.DoesNotContain(result, s => s.Id == deletedSubmission.Id);
         Assert.DoesNotContain(result, s => s.Id == inProgressSubmission.Id);
 
-        Assert.All(
-            result,
-            submission =>
-            {
-                Assert.NotNull(submission.Establishment);
-                Assert.False(string.IsNullOrWhiteSpace(submission.Establishment.OrgName));
-            }
-        );
+        Assert.All(result, submission =>
+        {
+            Assert.NotNull(submission.Establishment);
+            Assert.False(string.IsNullOrWhiteSpace(submission.Establishment.OrgName));
+        });
     }
 
     private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider

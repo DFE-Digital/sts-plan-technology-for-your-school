@@ -3,6 +3,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Tests.Shared.Fakes;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -26,7 +27,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGroupSelectSchoolsToAssessValidator _groupSelectSchoolsToAssessValidator;
         private readonly IGroupSelectSchoolsToUpdateStatusValidator _groupSelectSchoolsToUpdateStatusValidator;
 
-        private readonly TestSession _session;
+        private readonly FakeSession _session;
 
         public GroupsControllerTests()
         {
@@ -39,7 +40,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _groupSelectSchoolsToUpdateStatusValidator =
                 Substitute.For<IGroupSelectSchoolsToUpdateStatusValidator>();
 
-            _session = new TestSession();
+            _session = new FakeSession();
 
             var httpContext = new DefaultHttpContext { Session = _session };
 
@@ -683,47 +684,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             await _pagesViewBuilder
                 .DidNotReceive()
                 .RouteToMatCategoryLandingPageAsync(Arg.Any<Controller>(), Arg.Any<string>());
-        }
-
-        private sealed class TestSession : ISession
-        {
-            private readonly Dictionary<string, byte[]> _values = [];
-
-            public IEnumerable<string> Keys => _values.Keys;
-
-            public string Id { get; } = Guid.NewGuid().ToString();
-
-            public bool IsAvailable => true;
-
-            public void Clear()
-            {
-                _values.Clear();
-            }
-
-            public Task CommitAsync(CancellationToken cancellationToken = default)
-            {
-                return Task.CompletedTask;
-            }
-
-            public Task LoadAsync(CancellationToken cancellationToken = default)
-            {
-                return Task.CompletedTask;
-            }
-
-            public void Remove(string key)
-            {
-                _values.Remove(key);
-            }
-
-            public void Set(string key, byte[] value)
-            {
-                _values[key] = value;
-            }
-
-            public bool TryGetValue(string key, out byte[] value)
-            {
-                return _values.TryGetValue(key, out value!);
-            }
         }
     }
 }

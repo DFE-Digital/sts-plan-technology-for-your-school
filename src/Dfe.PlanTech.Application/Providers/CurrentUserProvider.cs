@@ -70,7 +70,7 @@ public class CurrentUserProvider(
 
     public void ClearFocusedEstablishment()
     {
-        if (!IsMat)
+        if (!CanSelectSchools)
         {
             throw new InvalidOperationException(
                 "Non-group user attempted to clear their focused school"
@@ -195,14 +195,6 @@ public class CurrentUserProvider(
         var session = Session;
 
         var urns = schools.Select(s => s.Urn);
-        var allUrnsValid = await AllUrnsValid(urns);
-        if (!allUrnsValid)
-        {
-            _logger.LogWarning(
-                "Group user attempted to access a school that is not in their group."
-            );
-            session.ClearGroupSchools();
-        }
 
         var establishments = await _establishmentService.GetEstablishmentsByReferencesAsync(urns);
         var foundEstablishmentUrns = establishments.Select(e => e.EstablishmentRef);
@@ -279,14 +271,17 @@ public class CurrentUserProvider(
         if (!establishments.Any())
         {
             session.ClearSelectedEstablishments();
+            return;
         }
 
         var urns = establishments.Select(e => e.Urn);
         var allUrnsValid = await AllUrnsValid(urns);
         if (!allUrnsValid)
         {
-            _logger.LogInformation("Clearing selected establishments.");
             session.ClearSelectedEstablishments();
+            throw new InvalidOperationException(
+                "One or more selected establishments are not in the user's group."
+            );
         }
 
         session.SetSelectedSchools(establishments);
@@ -335,7 +330,7 @@ public class CurrentUserProvider(
             return false;
         }
 
-        var groupSchools = Session.GetGroupSchools();
+        var groupSchools = await GetGroupSchoolsAsync();
         var allSchoolsInGroup = groupSchools.Select(gs => gs.Urn).ToHashSet().IsSupersetOf(urns);
 
         if (!allSchoolsInGroup)

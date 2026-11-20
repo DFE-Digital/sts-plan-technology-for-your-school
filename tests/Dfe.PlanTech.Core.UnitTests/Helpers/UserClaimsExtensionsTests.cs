@@ -58,36 +58,9 @@ public class UserClaimsHelperTests
     }
 
     [Fact]
-    public void GetOrganisation_Should_ReturnNull_When_Organisation_Has_No_Id()
+    public void GetOrganisation_WhenOnlyUkprnIsPresent_ReturnsOrganisation()
     {
-        var organisation = new EstablishmentModel()
-        {
-            Id = Guid.Empty,
-            Urn = "testUrn",
-            Ukprn = "testUkPrn",
-        };
-
-        var organisationJson = JsonSerializer.Serialize(organisation);
-
-        var identity = new ClaimsIdentity(
-            new[] { new Claim(ClaimConstants.Organisation, organisationJson) }
-        );
-        var claimsPrincipal = new ClaimsPrincipal(identity);
-
-        var foundOrganisation = claimsPrincipal.Claims.GetOrganisation();
-
-        Assert.Null(foundOrganisation);
-    }
-
-    [Fact]
-    public void GetOrganisation_Should_Return_Organisation_When_Exists()
-    {
-        var organisation = new EstablishmentModel()
-        {
-            Id = Guid.NewGuid(),
-            Urn = "testUrn",
-            Ukprn = "testUkPrn",
-        };
+        var organisation = new EstablishmentModel() { Ukprn = "testUkPrn" };
 
         var organisationJson = JsonSerializer.Serialize(organisation);
 
@@ -99,6 +72,25 @@ public class UserClaimsHelperTests
         var foundOrganisation = claimsPrincipal.Claims.GetOrganisation();
 
         Assert.NotNull(foundOrganisation);
-        Assert.Equal(organisation.Id, foundOrganisation.Id);
+        Assert.Equal(organisation.Ukprn, foundOrganisation.Ukprn);
+    }
+
+    [Fact]
+    public void GetOrganisation_Should_Return_Organisation_When_Exists()
+    {
+        var organisation = new EstablishmentModel() { Urn = "testUrn", Ukprn = "testUkPrn" };
+
+        var organisationJson = JsonSerializer.Serialize(organisation);
+
+        var identity = new ClaimsIdentity(
+            new[] { new Claim(ClaimConstants.Organisation, organisationJson) }
+        );
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        var foundOrganisation = claimsPrincipal.Claims.GetOrganisation();
+
+        Assert.NotNull(foundOrganisation);
+        Assert.Equal(organisation.Urn, foundOrganisation.Urn);
+        Assert.Equal(organisation.Ukprn, foundOrganisation.Ukprn);
     }
 }
