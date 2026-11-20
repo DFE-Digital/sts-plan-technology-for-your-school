@@ -37,8 +37,7 @@ public class RecommendationsController(
             this,
             categorySlug,
             sectionSlug,
-            chunkSlug,
-            false
+            chunkSlug
         );
     }
 
@@ -150,8 +149,7 @@ public class RecommendationsController(
                 this,
                 categorySlug,
                 sectionSlug,
-                chunkSlug,
-                false
+                chunkSlug
             );
         }
 
@@ -164,7 +162,10 @@ public class RecommendationsController(
         );
     }
 
-    [HttpGet($"trust/{{categorySlug}}/{{sectionSlug}}/recommendations/{{chunkSlug}}", Name = "GetMatSingleRecommendation")]
+    [HttpGet(
+        $"trust/{{categorySlug}}/{{sectionSlug}}/recommendations/{{chunkSlug}}",
+        Name = "GetMatSingleRecommendation"
+    )]
     public async Task<IActionResult> GetMatSingleRecommendation(
         string categorySlug,
         string sectionSlug,
@@ -180,20 +181,19 @@ public class RecommendationsController(
             categorySlug,
             sectionSlug,
             chunkSlug,
-            false,
             CategoryLandingContext.MAT
         );
     }
 
     [HttpGet(
-    "trust/{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print",
-    Name = "PrintMatSingleRecommendation"
-)]
+        "trust/{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print",
+        Name = "PrintMatSingleRecommendation"
+    )]
     public async Task<IActionResult> PrintMatSingleRecommendation(
-    string categorySlug,
-    string sectionSlug,
-    string chunkSlug
-)
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);

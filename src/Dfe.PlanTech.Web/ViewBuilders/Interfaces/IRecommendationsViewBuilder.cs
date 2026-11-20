@@ -11,7 +11,6 @@ public interface IRecommendationsViewBuilder
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        bool useChecklist,
         CategoryLandingContext context = CategoryLandingContext.School
     );
     Task<IActionResult> RouteBySectionAndRecommendation(

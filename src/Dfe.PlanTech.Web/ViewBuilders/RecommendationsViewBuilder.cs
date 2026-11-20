@@ -49,7 +49,6 @@ public class RecommendationsViewBuilder(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        bool useChecklist,
         CategoryLandingContext context = CategoryLandingContext.School
     )
     {
@@ -65,8 +64,7 @@ public class RecommendationsViewBuilder(
                 controller,
                 categorySlug,
                 sectionSlug,
-                chunkSlug,
-                useChecklist
+                chunkSlug
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(context), context, null),
         };
@@ -76,13 +74,11 @@ public class RecommendationsViewBuilder(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        string chunkSlug,
-        bool useChecklist
+        string chunkSlug
     )
     {
-        var focusedEstablishmentId = (
-            await CurrentUser.GetFocusedEstablishmentAsync()
-        )!.EstablishmentId;
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        var focusedEstablishmentId = focusedEstablishment!.EstablishmentId;
 
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -330,9 +326,8 @@ public class RecommendationsViewBuilder(
         string? originatingSlug
     )
     {
-        var focusedEstablishmentId = (
-            await CurrentUser.GetFocusedEstablishmentAsync()
-        ).EstablishmentId;
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        var focusedEstablishmentId = focusedEstablishment!.EstablishmentId;
 
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -485,9 +480,8 @@ public class RecommendationsViewBuilder(
         SingleRecommendationInputViewModel inputModel
     )
     {
-        var focusedEstablishmentId = (
-            await CurrentUser.GetFocusedEstablishmentAsync()
-        )!.EstablishmentId;
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        var focusedEstablishmentId = focusedEstablishment!.EstablishmentId;
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
@@ -520,8 +514,7 @@ public class RecommendationsViewBuilder(
                 controller,
                 categorySlug,
                 sectionSlug,
-                chunkSlug,
-                false
+                chunkSlug
             );
         }
 
@@ -734,11 +727,12 @@ public class RecommendationsViewBuilder(
             return HandleNotifyShareResults(controller, notifySendResults, returnToModel);
         }
 
-        var focusedSchool = (await CurrentUser.GetFocusedEstablishmentAsync());
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        var focusedEstablishmentId = focusedEstablishment!.EstablishmentId;
 
         var latestRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                focusedSchool.EstablishmentId,
+                focusedEstablishmentId,
                 recommendationChunk.Id
             );
 
@@ -750,7 +744,7 @@ public class RecommendationsViewBuilder(
         var schoolNotifySendResults = _notifyService.SendSingleRecommendationEmail(
             inputModel.ToModel(),
             textBody,
-            focusedSchool.Name,
+            focusedEstablishment.Name,
             recommendationChunk.HeaderText,
             category.Header.Text,
             latestRecommendationHistory.NewStatus.Value
@@ -787,16 +781,14 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var focusedEstablishmentId = (
-            await CurrentUser.GetFocusedEstablishmentAsync()
-        ).EstablishmentId;
-
-        var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        var focusedEstablishmentId = focusedEstablishment!.EstablishmentId;
 
         var details = await _recommendationService.GetLatestRecommendationStatusesAsync(
             focusedEstablishmentId
         );
 
+        var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
         var chunkViewModels = section
             .CoreRecommendations.Select(cr => new RecommendationChunkViewModel
             {

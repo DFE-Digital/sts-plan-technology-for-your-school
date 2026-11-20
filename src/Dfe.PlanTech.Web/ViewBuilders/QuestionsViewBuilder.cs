@@ -58,7 +58,8 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId;
+        var selectedEstablishments = await GetFocusedOrSelectedSchoolsAsync();
+        var establishmentId = selectedEstablishments.First().EstablishmentId;
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(

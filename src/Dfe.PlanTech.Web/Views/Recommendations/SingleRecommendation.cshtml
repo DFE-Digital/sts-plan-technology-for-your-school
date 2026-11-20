@@ -319,7 +319,9 @@
                                                 new Dictionary<string, string>
                                                 {
                                                     ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
-                                                    ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty
+                                                    ["establishment"] = Model.FirstActivity?.GroupName
+                                                        ?? Model.FirstActivity?.SchoolName
+                                                        ?? string.Empty
                                                 })
                                     </p>
 
