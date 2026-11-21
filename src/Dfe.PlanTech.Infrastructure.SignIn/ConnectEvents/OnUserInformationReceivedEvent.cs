@@ -148,7 +148,7 @@ public static class OnUserInformationReceivedEvent
         {
             var additionalWordSecure = dsiOrganisation.Category!.Id switch
             {
-                DsiConstants.SatOrganisationCategoryId => " ",
+                DsiConstants.SatOrganisationCategoryId => "",
                 DsiConstants.SSatOrganisationCategoryId => "secure ",
                 _ => throw new InvalidDataException(
                     "Should not be able to reach this code without being a SAT or SSAT"

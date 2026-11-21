@@ -1,199 +1,262 @@
-using System.Text;
-using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Helpers;
-using Microsoft.AspNetCore.Http;
-using NSubstitute;
+using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
+using Dfe.PlanTech.Tests.Shared.Fakes;
 
 namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 
 public class SessionHelperTests
 {
-    private readonly ISession _session;
-
-    public SessionHelperTests()
-    {
-        _session = Substitute.For<ISession>();
-    }
+    private readonly FakeSession _session = new();
 
     [Fact]
-    public void SetValue_StoresSerializedValue_WhenKeyAndTypeAreValid_ForInt()
+    public void GetValue_WhenKeyIsUnrecognised_ThrowsInvalidOperationException()
     {
-        var value = 42;
-        byte[]? storedBytes = null;
-        _session
-            .When(s => s.Set(SessionConstants.FocusedEstablishmentKey, Arg.Any<byte[]>()))
-            .Do(c => storedBytes = c.ArgAt<byte[]>(1));
-
-        _session.SetValue(SessionConstants.FocusedEstablishmentKey, value);
-
-        Assert.NotNull(storedBytes);
-        var storedValue = Encoding.UTF8.GetString(storedBytes);
-        Assert.Equal(JsonSerializer.Serialize(value), storedValue);
-    }
-
-    [Fact]
-    public void SetValue_StoresSerializedValue_WhenKeyAndTypeAreValid_ForEnumerable()
-    {
-        var value = new List<int> { 1, 2, 3 };
-        byte[]? storedBytes = null;
-        _session
-            .When(s => s.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(c => storedBytes = c.ArgAt<byte[]>(1));
-
-        _session.SetValue<IEnumerable<int>>(SessionConstants.SelectedEstablishmentsKey, value);
-
-        Assert.NotNull(storedBytes);
-        var storedValue = Encoding.UTF8.GetString(storedBytes);
-        Assert.Equal(JsonSerializer.Serialize(value), storedValue);
-    }
-
-    [Fact]
-    public void SetValue_Throws_WhenKeyIsUnrecognised()
-    {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            _session.SetValue("unknown_key", 42)
+        // Act & Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            _session.GetValue("unknown-key")
         );
-
-        Assert.Contains("does not expect that key", ex.Message);
-    }
-
-    [Theory]
-    [InlineData(SessionConstants.FocusedEstablishmentKey)]
-    [InlineData(SessionConstants.SelectedEstablishmentsKey)]
-    public void SetValue_Throws_WhenValueTypeIsWrongForKey(string key)
-    {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            _session.SetValue(key, "wrong-type-value")
-        );
-
-        Assert.Contains("wrong type", ex.Message);
+        Assert.Equal("Session does not expect that key", exception.Message);
     }
 
     [Fact]
-    public void GetValue_ReturnsDeserializedValue_WhenKeyExistsAndValueIsPresent_ForInt()
+    public void GetValue_WhenNothingIsStoredForKey_ReturnsNull()
     {
-        var expected = 99;
-        SetupSessionValue(
-            SessionConstants.FocusedEstablishmentKey,
-            JsonSerializer.Serialize(expected)
-        );
-
+        // Act
         var result = _session.GetValue(SessionConstants.FocusedEstablishmentKey);
 
-        Assert.NotNull(result);
-        Assert.Equal(expected, (int)result);
-    }
-
-    [Fact]
-    public void GetValue_ReturnsDeserializedValue_WhenKeyExistsAndValueIsPresent_ForEnumerable()
-    {
-        var expected = new List<int> { 10, 20, 30 };
-        SetupSessionValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            JsonSerializer.Serialize(expected)
-        );
-
-        var result = _session.GetValue(SessionConstants.SelectedEstablishmentsKey);
-
-        Assert.NotNull(result);
-        Assert.Equal(expected, Assert.IsAssignableFrom<IEnumerable<int>>(result));
-    }
-
-    [Fact]
-    public void GetValue_ReturnsNull_WhenKeyExistsButNoValueStored()
-    {
-        SetupSessionValue(SessionConstants.FocusedEstablishmentKey, null);
-
-        var result = _session.GetValue(SessionConstants.FocusedEstablishmentKey);
-
+        // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetValue_Throws_WhenKeyIsUnrecognised()
+    public void SetValue_WhenKeyIsUnrecognised_ThrowsInvalidOperationException()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() => _session.GetValue("unknown_key"));
+        // Act & Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            _session.SetValue("unknown-key", "northfield-value")
+        );
+        Assert.Equal(
+            "Session does not expect that key or value is of wrong type for key",
+            exception.Message
+        );
+    }
 
-        Assert.Contains("does not expect that key", ex.Message);
+    [Theory]
+    [InlineData(SessionConstants.FocusedEstablishmentKey)]
+    [InlineData(SessionConstants.GroupEstablishmentsKey)]
+    [InlineData(SessionConstants.SelectedEstablishmentsKey)]
+    [InlineData(SessionConstants.UserEstablishmentKey)]
+    public void SetValue_WhenValueTypeIsWrongForKey_ThrowsInvalidOperationException(string key)
+    {
+        // Act & Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            _session.SetValue(key, "northfield-value")
+        );
+        Assert.Equal(
+            "Session does not expect that key or value is of wrong type for key",
+            exception.Message
+        );
+        Assert.Empty(_session.Keys);
     }
 
     [Fact]
-    public void GetValue_DoesNotCallTryGetValue_WhenKeyIsUnrecognised()
+    public void SetFocusedEstablishment_WhenCalled_StoresEstablishmentDetails()
     {
-        try
-        {
-            _session.GetValue("unknown_key");
-        }
-        catch (InvalidOperationException) { }
+        // Act
+        _session.SetFocusedEstablishment(701, "100701", "Northfield Primary");
 
-        _session.DidNotReceive().TryGetValue(Arg.Any<string>(), out Arg.Any<byte[]?>());
-    }
-
-    [Fact]
-    public void SetValue_ThenGetValue_RoundTrips_FocusedEstablishment()
-    {
-        var value = 7;
-        byte[]? stored = null;
-
-        _session
-            .When(s => s.Set(SessionConstants.FocusedEstablishmentKey, Arg.Any<byte[]>()))
-            .Do(c => stored = c.ArgAt<byte[]>(1));
-
-        _session
-            .TryGetValue(SessionConstants.FocusedEstablishmentKey, out Arg.Any<byte[]?>())
-            .Returns(call =>
-            {
-                call[1] = stored;
-                return stored is not null;
-            });
-
-        _session.SetValue(SessionConstants.FocusedEstablishmentKey, value);
-        var result = _session.GetValue(SessionConstants.FocusedEstablishmentKey);
-
-        Assert.Equal(value, (int)result!);
-    }
-
-    [Fact]
-    public void SetValue_ThenGetValue_RoundTrips_SelectedEstablishments()
-    {
-        var value = new List<int> { 3, 6, 9 };
-        byte[]? stored = null;
-
-        _session
-            .When(s => s.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(c => stored = c.ArgAt<byte[]>(1));
-
-        _session
-            .TryGetValue(SessionConstants.SelectedEstablishmentsKey, out Arg.Any<byte[]?>())
-            .Returns(call =>
-            {
-                call[1] = stored;
-                return stored is not null;
-            });
-
-        _session.SetValue<IEnumerable<int>>(SessionConstants.SelectedEstablishmentsKey, value);
-        var result = _session.GetValue(SessionConstants.SelectedEstablishmentsKey);
-
+        // Assert
+        var result = _session.GetFocusedEstablishment();
         Assert.NotNull(result);
-        Assert.Equal(value, Assert.IsAssignableFrom<IEnumerable<int>>(result));
+        Assert.Equal(701, result.EstablishmentId);
+        Assert.Equal("100701", result.Urn);
+        Assert.Equal("Northfield Primary", result.Name);
     }
 
-    private void SetupSessionValue(string key, string? serializedValue)
+    [Fact]
+    public void GetFocusedEstablishment_WhenNothingIsStored_ReturnsNull()
     {
-        if (serializedValue is null)
-        {
-            _session.TryGetValue(key, out Arg.Any<byte[]?>()).Returns(false);
-            return;
-        }
+        // Act
+        var result = _session.GetFocusedEstablishment();
 
-        var bytes = Encoding.UTF8.GetBytes(serializedValue);
-        _session
-            .TryGetValue(key, out Arg.Any<byte[]?>())
-            .Returns(call =>
-            {
-                call[1] = bytes;
-                return true;
-            });
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ClearFocusedEstablishment_WhenEstablishmentIsStored_RemovesIt()
+    {
+        // Arrange
+        _session.SetFocusedEstablishment(701, "100701", "Northfield Primary");
+
+        // Act
+        _session.ClearFocusedEstablishment();
+
+        // Assert
+        Assert.Null(_session.GetFocusedEstablishment());
+    }
+
+    [Fact]
+    public void SetUserEstablishment_WhenCalled_StoresEstablishment()
+    {
+        // Arrange
+        var expectedEstablishment = new SqlEstablishmentDtoBuilder()
+            .WithId(301)
+            .WithEstablishmentRef("100301")
+            .WithOrgName("Northfield Academy Trust")
+            .WithGroupUid("group-301")
+            .Build();
+
+        // Act
+        _session.SetUserEstablishment(expectedEstablishment);
+
+        // Assert
+        Assert.Equivalent(expectedEstablishment, _session.GetUserEstablishment());
+    }
+
+    [Fact]
+    public void GetUserEstablishment_WhenNothingIsStored_ReturnsNull()
+    {
+        // Act
+        var result = _session.GetUserEstablishment();
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void SetGroupSchools_WhenCalled_StoresSchoolsInOrder()
+    {
+        // Arrange
+        var firstSchool = new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(701)
+            .WithUrn("100701")
+            .WithName("Northfield Primary")
+            .Build();
+        var secondSchool = new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(702)
+            .WithUrn("100702")
+            .WithName("Southfield Primary")
+            .Build();
+
+        // Act
+        _session.SetGroupSchools([firstSchool, secondSchool]);
+
+        // Assert
+        Assert.Equal(["100701", "100702"], _session.GetGroupSchools().Select(s => s.Urn).ToArray());
+    }
+
+    [Fact]
+    public void GetGroupSchools_WhenNothingIsStored_ReturnsEmptyList()
+    {
+        // Act
+        var result = _session.GetGroupSchools();
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void ClearGroupSchools_WhenSchoolsAreStored_RemovesThem()
+    {
+        // Arrange
+        _session.SetGroupSchools([new SelectedEstablishmentDataModelBuilder().Build()]);
+
+        // Act
+        _session.ClearGroupSchools();
+
+        // Assert
+        Assert.Empty(_session.GetGroupSchools());
+    }
+
+    [Fact]
+    public void SetSelectedEstablishments_WhenGivenSingleSchoolDetails_StoresThatSchoolOnly()
+    {
+        // Act
+        _session.SetSelectedEstablishments(701, "100701", "Northfield Primary");
+
+        // Assert
+        var school = Assert.Single(_session.GetSelectedSchools());
+        Assert.Equal(701, school.EstablishmentId);
+        Assert.Equal("100701", school.Urn);
+        Assert.Equal("Northfield Primary", school.Name);
+    }
+
+    [Fact]
+    public void SetSelectedSchools_WhenGivenValidSchools_StoresAllSchools()
+    {
+        // Arrange
+        var schools = new List<SelectedEstablishmentDataModel>
+        {
+            new SelectedEstablishmentDataModelBuilder()
+                .WithEstablishmentId(701)
+                .WithUrn("100701")
+                .Build(),
+            new SelectedEstablishmentDataModelBuilder()
+                .WithEstablishmentId(702)
+                .WithUrn("100702")
+                .Build(),
+        };
+
+        // Act
+        _session.SetSelectedSchools(schools);
+
+        // Assert
+        Assert.Equal(
+            ["100701", "100702"],
+            _session.GetSelectedSchools().Select(s => s.Urn).ToArray()
+        );
+    }
+
+    [Theory]
+    [InlineData(0, "100701", "Northfield Primary", "Establishment ID cannot be less than 1")] // Boundary: IDs start at 1
+    [InlineData(701, "100701", " ", "Name cannot be empty")]
+    [InlineData(701, "", "Northfield Primary", "URN cannot be empty")]
+    public void SetSelectedSchools_WhenASchoolIsInvalid_ThrowsInvalidDataExceptionAndStoresNothing(
+        int establishmentId,
+        string urn,
+        string name,
+        string expectedMessage
+    )
+    {
+        // Arrange
+        var invalidSchool = new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(establishmentId)
+            .WithUrn(urn)
+            .WithName(name)
+            .Build();
+
+        // Act & Assert
+        var exception = Assert.Throws<InvalidDataException>(() =>
+            _session.SetSelectedSchools([invalidSchool])
+        );
+        Assert.Equal(expectedMessage, exception.Message);
+        Assert.Empty(_session.GetSelectedSchools());
+    }
+
+    [Fact]
+    public void GetSelectedSchools_WhenNothingIsStored_ReturnsEmptyList()
+    {
+        // Act
+        var result = _session.GetSelectedSchools();
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void ClearSelectedEstablishments_WhenSchoolsAreStored_RemovesThem()
+    {
+        // Arrange
+        _session.SetSelectedEstablishments(701, "100701", "Northfield Primary");
+
+        // Act
+        _session.ClearSelectedEstablishments();
+
+        // Assert
+        Assert.Empty(_session.GetSelectedSchools());
     }
 }

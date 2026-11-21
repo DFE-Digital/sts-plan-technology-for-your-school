@@ -4,334 +4,385 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
 using Dfe.PlanTech.Tests.Shared.Builders.Sql;
-using Dfe.PlanTech.Tests.Shared.Extensions;
+using Dfe.PlanTech.Tests.Shared.Fakes;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests.ConnectEvents;
 
 public class OnUserInformationReceivedEventTests
 {
-    private static (
-        UserInformationReceivedContext ctx,
-        ISignInService signIn,
-        IGiasService gias,
-        ICurrentUserProvider user,
-        ILogger<IDfeSignIn> logger
-    ) BuildContext(ClaimsPrincipal principal)
+    private const string DsiReference = "dsi-user-42";
+
+    private readonly FakeLogger<IDfeSignIn> _logger = new();
+    private readonly ISignInService _signInService = Substitute.For<ISignInService>();
+    private readonly IEstablishmentService _establishmentService =
+        Substitute.For<IEstablishmentService>();
+    private readonly IGiasService _giasService = Substitute.For<IGiasService>();
+    private readonly ICurrentUserProvider _currentUserProvider =
+        Substitute.For<ICurrentUserProvider>();
+
+    private UserInformationReceivedContext CreateContext(ClaimsPrincipal principal)
     {
         var services = new ServiceCollection();
-        var signIn = Substitute.For<ISignInService>();
-        var gias = Substitute.For<IGiasService>();
-        var user = Substitute.For<ICurrentUserProvider>();
-        var establishmentService = Substitute.For<IEstablishmentService>();
-        establishmentService
-            .GetEstablishmentByIdAsync(Arg.Any<int>())
-            .Returns(new SqlEstablishmentDtoBuilder().WithId(1).Build());
-        services.AddSingleton(signIn);
-        services.AddSingleton(gias);
-        services.AddSingleton(user);
-        services.AddSingleton(establishmentService);
+        services.AddSingleton(_signInService);
+        services.AddSingleton(_establishmentService);
+        services.AddSingleton(_giasService);
+        services.AddSingleton(_currentUserProvider);
 
-        var sp = services.BuildServiceProvider();
-
-        var httpContext = new DefaultHttpContext { RequestServices = sp };
+        var httpContext = new DefaultHttpContext
+        {
+            RequestServices = services.BuildServiceProvider(),
+        };
         var scheme = new AuthenticationScheme(
             OpenIdConnectDefaults.AuthenticationScheme,
             null,
             typeof(OpenIdConnectHandler)
         );
-        var options = new OpenIdConnectOptions();
-        var properties = new AuthenticationProperties();
 
-        var ctx = Substitute.For<UserInformationReceivedContext>(
+        return new UserInformationReceivedContext(
             httpContext,
             scheme,
-            options,
+            new OpenIdConnectOptions(),
             principal,
-            properties
+            new AuthenticationProperties()
+        );
+    }
+
+    private static ClaimsPrincipal CreatePrincipal(EstablishmentModel? organisation = null)
+    {
+        var builder = new ClaimsPrincipalBuilder().WithClaim(
+            ClaimConstants.NameIdentifier,
+            DsiReference
         );
 
-        var logger = Substitute.For<ILogger<IDfeSignIn>>();
-        return (ctx, signIn, gias, user, logger);
-    }
-
-    private static ClaimsPrincipal AuthenticatedPrincipal(params Claim[] claims)
-    {
-        var identity = new ClaimsIdentity(claims, authenticationType: "cookies");
-        return new ClaimsPrincipal(identity);
-    }
-
-    private static EstablishmentModel CreateEstablishment(
-        string? urn = null,
-        string? uid = null,
-        string? categoryId = null
-    ) =>
-        new()
+        if (organisation is not null)
         {
-            Urn = urn,
-            Uid = uid,
-            Category = categoryId is null
-                ? null
-                : new IdWithNameModel { Id = categoryId, Name = "Category" },
-        };
+            builder.WithClaim(ClaimConstants.Organisation, JsonSerializer.Serialize(organisation));
+        }
 
-    private static Claim OrganisationClaim(EstablishmentModel establishment) =>
-        new(ClaimConstants.Organisation, JsonSerializer.Serialize(establishment));
-
-    private static GiasEstablishmentEntity CreateSchool(int urn) =>
-        new()
-        {
-            Urn = urn,
-            EstablishmentName = "Test School",
-            EstablishmentStatusCode = 1,
-            LocalAuthorityCode = 1,
-            PhaseCode = 1,
-            TypeOfEstablishmentCode = 1,
-            SyncedAt = DateTime.UtcNow,
-        };
-
-    [Fact]
-    public async Task RecordUserSignIn_When_NotAuthenticated_FailsContext()
-    {
-        // Arrange: no principal OR unauthenticated identity
-        var (ctx, signIn, _, _, logger) = BuildContext(
-            principal: new ClaimsPrincipal(new ClaimsIdentity())
-        ); // IsAuthenticated = false
-
-        // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
-
-        // Assert
-        Assert.NotNull(ctx.Result);
-        Assert.False(ctx.Result!.Succeeded);
-        Assert.NotNull(ctx.Result.Failure);
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignInAsync(default!, default!);
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
+        return builder.Build();
     }
 
     [Fact]
-    public async Task RecordUserSignIn_When_DsiReferencecIsNull_LogsError_And_Fails()
+    public async Task RecordUserSignIn_WhenUserIsNotAuthenticated_FailsTheContext()
     {
-        // Arrange: authenticated principal but no establishment-related claims
-        var principal = AuthenticatedPrincipal([]);
-        var (ctx, signIn, _, _, logger) = BuildContext(principal);
+        // Arrange
+        var context = CreateContext(new ClaimsPrincipalBuilder().Unauthenticated().Build());
 
         // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
 
         // Assert
-        var logMessage = logger.ReceivedLogMessages().FirstOrDefault();
-        Assert.NotNull(logMessage);
-        Assert.Equal(LogLevel.Error, logMessage.LogLevel);
+        Assert.NotNull(context.Result);
+        Assert.Equal("User is not authenticated.", context.Result.Failure!.Message);
+        await _signInService.DidNotReceiveWithAnyArgs().RecordSignInAsync(default!, default!);
+        await _signInService.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenNameIdentifierClaimIsMissing_LogsErrorAndFailsTheContext()
+    {
+        // Arrange
+        var context = CreateContext(new ClaimsPrincipalBuilder().Build());
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Error, logRecord.Level);
+        Assert.Contains("no nameidentifier claim", logRecord.Message);
         Assert.Equal(
-            "Authentication failed: no nameidentifier claim found for user.",
-            logMessage.Message
+            "No nameidentifier claim present in user principal.",
+            context.Result!.Failure!.Message
         );
-
-        ctx.Received(1).Fail("No nameidentifier claim present in user principal.");
-
-        // Context failed
-        Assert.NotNull(ctx.Result.Failure);
     }
 
     [Fact]
-    public async Task RecordUserSignIn_When_EstablishmentMissing_LogsWarning_And_RecordsUserOnly()
-    {
-        // Arrange: authenticated principal but no establishment-related claims
-        var principal = AuthenticatedPrincipal(
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-123")
-        );
-        var (ctx, signIn, _, _, logger) = BuildContext(principal);
-
-        // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
-
-        // Assert: since GetOrganisation() returns null with no org claims, we should call the user-only workflow
-        await signIn.Received(1).RecordSignInUserOnlyAsync(Arg.Any<string>());
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignInAsync(default!, default!);
-
-        // Context not failed
-        Assert.True(ctx.Result is null);
-    }
-
-    [Fact]
-    public async Task RecordUserSignIn_WhenNonSatOrganisationPresent_RecordsSignIn_AndAddsDbClaims()
-    {
-        // Arrange: authenticated principal with a non-SAT/SSAT organisation claim
-        var establishment = CreateEstablishment(
-            urn: "111111",
-            categoryId: DsiConstants.EstablishmentCategoryId
-        );
-        var principal = AuthenticatedPrincipal(
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-123"),
-            OrganisationClaim(establishment)
-        );
-
-        var (ctx, signIn, gias, _, logger) = BuildContext(principal);
-
-        var signInDto = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
-        signIn
-            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
-            .Returns(signInDto);
-
-        // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
-
-        // Assert: normal establishments never go through the SAT replacement lookup
-        await signIn
-            .Received(1)
-            .RecordSignInAsync("dsi-ref-123", Arg.Is<EstablishmentModel>(e => e.Urn == "111111"));
-        await signIn.DidNotReceiveWithAnyArgs().RecordSignInUserOnlyAsync(default!);
-        await gias.DidNotReceiveWithAnyArgs().GetSchoolForSatAsync(default!);
-
-        Assert.True(ctx.Result is null);
-
-        var userIdClaim = ctx.Principal!.Claims.FirstOrDefault(c =>
-            c.Type == ClaimConstants.DB_USER_ID
-        );
-        Assert.NotNull(userIdClaim);
-        Assert.Equal("1", userIdClaim!.Value);
-    }
-
-    [Fact]
-    public async Task RecordUserSignIn_WhenSsatSchoolIsMissing_UsesTrustAsFocusedEstablishment()
+    public async Task RecordUserSignIn_WhenUserHasNoOrganisation_LogsWarningAndRecordsUserOnly()
     {
         // Arrange
-        var org = CreateEstablishment(
-            uid: "42",
-            categoryId: DsiConstants.SSatOrganisationCategoryId
-        );
-        var principal = AuthenticatedPrincipal(
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-ssat"),
-            OrganisationClaim(org)
-        );
-
-        var (ctx, signIn, gias, user, logger) = BuildContext(principal);
-
-        var signInDto = new SqlSignInDto
-        {
-            Id = 1,
-            UserId = 1,
-            EstablishmentId = 1,
-        };
-        signIn
-            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
-            .Returns(signInDto);
-
-        gias.GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
-            .Returns(default(SelectedEstablishmentDataModel?));
+        var context = CreateContext(CreatePrincipal());
 
         // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
 
         // Assert
-        Assert.Contains(ctx.Principal!.Claims, claim =>
-            claim.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && claim.Value == "1"
-        );
-        Assert.Contains(ctx.Principal.Claims, claim =>
-            claim.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && claim.Value == "1"
-        );
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Warning, logRecord.Level);
+        Assert.Contains(DsiReference, logRecord.Message);
+        await _signInService.Received(1).RecordSignInUserOnlyAsync(DsiReference);
+        await _signInService.DidNotReceiveWithAnyArgs().RecordSignInAsync(default!, default!);
+        Assert.Null(context.Result);
     }
 
     [Fact]
-    public async Task RecordUserSignIn_WhenSatUidIsNotNumeric_UsesTrustFallbackClaims()
+    public async Task RecordUserSignIn_WhenOrganisationIsASchool_AddsUserAndFocusedEstablishmentClaims()
     {
         // Arrange
-        var org = CreateEstablishment(
-            uid: "not-a-number",
-            categoryId: DsiConstants.SatOrganisationCategoryId
-        );
-        var principal = AuthenticatedPrincipal(
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-bad-uid"),
-            OrganisationClaim(org)
-        );
-
-        var (ctx, signIn, gias, user, logger) = BuildContext(principal);
-
-        var signInDto = new SqlSignInDto
-        {
-            Id = 1,
-            UserId = 1,
-            EstablishmentId = 1,
-        };
-
-        signIn
-            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
-            .Returns(signInDto);
-
-        gias.GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
-            .Returns(default(SelectedEstablishmentDataModel?));
+        var organisation = new EstablishmentModelBuilder()
+            .AsSchool()
+            .WithUrn("100701")
+            .WithName("Northfield Primary")
+            .Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Is<EstablishmentModel>(o => o.Urn == "100701"))
+            .Returns(new SqlSignInDtoBuilder().WithUserId(42).WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
 
         // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
 
         // Assert
-        await gias.Received(1)
-            .GetSchoolForSatAsync(
-                Arg.Is<EstablishmentModel>(organisation => organisation.Uid == "not-a-number")
-            );
-        Assert.Contains(ctx.Principal!.Claims, claim =>
-            claim.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && claim.Value == "1"
+        var claims = context.Principal!.Claims.ToList();
+        Assert.Contains(claims, c => c.Type == ClaimConstants.DB_USER_ID && c.Value == "42");
+        Assert.Contains(claims, c =>
+            c.Type == ClaimConstants.DB_ESTABLISHMENT_ID && c.Value == "301"
         );
-        Assert.Contains(ctx.Principal.Claims, claim =>
-            claim.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && claim.Value == "1"
+        Assert.Contains(claims, c =>
+            c.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && c.Value == "301"
+        );
+        Assert.DoesNotContain(claims, c => c.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID);
+        var sessionIdClaim = Assert.Single(claims, c => c.Type == ClaimConstants.SessionId);
+        Assert.True(Guid.TryParse(sessionIdClaim.Value, out _));
+        Assert.Null(context.Result);
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenOrganisationIsPresent_SavesUserEstablishmentToSession()
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder().AsSchool().WithUrn("100701").Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        var userEstablishment = new SqlEstablishmentDtoBuilder().WithId(301).Build();
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService.GetEstablishmentByIdAsync(301).Returns(userEstablishment);
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        _currentUserProvider.Received(1).SetUserEstablishment(userEstablishment);
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenSignInEstablishmentDiffersFromDatabaseRecord_UsesDatabaseEstablishmentId()
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder().AsSchool().WithUrn("100701").Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(2).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(2)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        Assert.Contains(context.Principal!.Claims, c =>
+            c.Type == ClaimConstants.DB_ESTABLISHMENT_ID && c.Value == "301"
         );
     }
 
     [Fact]
-    public async Task RecordUserSignIn_WhenSatOrganisation_AndDsiProviderReturnsNull_DoesNotWriteAdditionalClaim()
+    public async Task RecordUserSignIn_WhenSchoolOrganisationHasNoUrn_LogsWarning()
     {
-        // Arrange: GIAS finds the school, but the DSI API has no matching organisation for the user -
-        // the code should fall back to the original SAT organisation rather than fail.
-        var urn = "888888";
-        var uid = "99";
-
-        var originalOrg = CreateEstablishment(
-            urn: urn,
-            uid: uid,
-            categoryId: DsiConstants.SatOrganisationCategoryId
-        );
-        var principal = AuthenticatedPrincipal(
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-fallback"),
-            OrganisationClaim(originalOrg)
-        );
-
-        var (ctx, signIn, gias, user, logger) = BuildContext(principal);
-
-        var selectedEstablishmentDataModel = new SelectedEstablishmentDataModel
-        {
-            EstablishmentId = 1,
-            Name = "Test SAT school",
-            Urn = urn,
-        };
-
-        gias.GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
-            .Returns(selectedEstablishmentDataModel);
-
-        var signInDto = new SqlSignInDto { UserId = 5, EstablishmentId = 6 };
-        signIn
-            .RecordSignInAsync(Arg.Any<string>(), Arg.Any<EstablishmentModel>())
-            .Returns(signInDto);
+        // Arrange
+        var organisation = new EstablishmentModelBuilder()
+            .AsSchool()
+            .WithUrn(null)
+            .WithName("Northfield Primary")
+            .Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
 
         // Act
-        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
 
-        // Assert: RecordSignIn is called with the original org, and the single-academy claim
-        // still gets added (it's set whenever the SAT branch runs, even on fallback).
-        await signIn
-            .Received(1)
-            .RecordSignInAsync(
-                "dsi-ref-fallback",
-                Arg.Is<EstablishmentModel>(e => e.Urn == "888888")
+        // Assert
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Warning, logRecord.Level);
+        Assert.Contains("No URN found", logRecord.Message);
+        Assert.Contains("Northfield Primary", logRecord.Message);
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenSatSchoolIsFound_FocusesSchoolAndRecordsTrust()
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder()
+            .AsSingleAcademyTrust()
+            .WithUid("42")
+            .Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+        _giasService
+            .GetSchoolForSatAsync(Arg.Is<EstablishmentModel>(o => o.Uid == "42"))
+            .Returns(
+                new SelectedEstablishmentDataModel
+                {
+                    EstablishmentId = 701,
+                    Urn = "100701",
+                    Name = "Northfield Primary",
+                }
             );
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        var claims = context.Principal!.Claims.ToList();
+        Assert.Contains(claims, c =>
+            c.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && c.Value == "701"
+        );
+        Assert.Contains(claims, c =>
+            c.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && c.Value == "301"
+        );
+        Assert.Empty(_logger.Collector.GetSnapshot());
+    }
+
+    [Theory]
+    [InlineData(DsiConstants.SatOrganisationCategoryId, "for single-academy login")]
+    [InlineData(DsiConstants.SSatOrganisationCategoryId, "for secure single-academy login")]
+    public async Task RecordUserSignIn_WhenSatSchoolIsNotFound_LogsWarningAndFocusesTrust(
+        string categoryId,
+        string expectedLogFragment
+    )
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder()
+            .WithCategory(categoryId, "Trust")
+            .WithGroupUid("group-42")
+            .Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+        _giasService
+            .GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
+            .Returns((SelectedEstablishmentDataModel?)null);
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Warning, logRecord.Level);
+        Assert.Contains(expectedLogFragment, logRecord.Message);
+        Assert.Contains("group-42", logRecord.Message);
+        Assert.Contains(context.Principal!.Claims, c =>
+            c.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID && c.Value == "301"
+        );
+        Assert.Contains(context.Principal.Claims, c =>
+            c.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && c.Value == "301"
+        );
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenGiasCannotResolveSatSchool_ThrowsInvalidGiasDataException()
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder().AsSecureSingleAcademyTrust().Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+        _giasService
+            .GetSchoolForSatAsync(Arg.Any<EstablishmentModel>())
+            .ThrowsAsync(new InvalidGiasDataException("School not found for SSAT"));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
+            OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context)
+        );
+        Assert.Equal("School not found for SSAT", exception.Message);
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenOrganisationIsAMat_AddsTrustClaimWithoutFocusedEstablishment()
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder().AsMultiAcademyTrust().Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        var claims = context.Principal!.Claims.ToList();
+        Assert.Contains(claims, c =>
+            c.Type == ClaimConstants.DB_TRUST_ESTABLISHMENT_ID && c.Value == "301"
+        );
+        Assert.DoesNotContain(claims, c => c.Type == ClaimConstants.DB_FOCUSED_ESTABLISHMENT_ID);
+        await _giasService.DidNotReceive().GetSchoolForSatAsync(Arg.Any<EstablishmentModel>());
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_WhenMatHasNoGroupUid_LogsWarning()
+    {
+        // Arrange
+        var organisation = new EstablishmentModelBuilder()
+            .AsMultiAcademyTrust()
+            .WithName("Northfield Academy Trust")
+            .WithGroupUid(null)
+            .Build();
+        var context = CreateContext(CreatePrincipal(organisation));
+        _signInService
+            .RecordSignInAsync(DsiReference, Arg.Any<EstablishmentModel>())
+            .Returns(new SqlSignInDtoBuilder().WithEstablishmentId(301).Build());
+        _establishmentService
+            .GetEstablishmentByIdAsync(301)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(_logger, context);
+
+        // Assert
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Warning, logRecord.Level);
+        Assert.Contains("No group UID found", logRecord.Message);
+        Assert.Contains("Northfield Academy Trust", logRecord.Message);
     }
 }

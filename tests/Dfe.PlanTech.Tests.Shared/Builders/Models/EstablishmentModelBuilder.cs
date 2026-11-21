@@ -1,15 +1,28 @@
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Tests.Shared.Builders.Models;
 
 public sealed class EstablishmentModelBuilder
 {
-    private string _categoryId = "001";
-    private string _categoryName = "School";
-    private string _groupUid = "group-uid";
+    private string _categoryId = DsiConstants.EstablishmentCategoryId;
+    private string _categoryName = "Establishment";
+    private string? _groupUid = "group-uid";
     private string _name = "Springfield Academy Trust";
-    private string _uid = "trust-uid";
+    private string? _uid = "trust-uid";
     private string? _urn;
+
+    public EstablishmentModelBuilder AsSchool() =>
+        WithCategory(DsiConstants.EstablishmentCategoryId, "Establishment");
+
+    public EstablishmentModelBuilder AsMultiAcademyTrust() =>
+        WithCategory(DsiConstants.MatOrganisationCategoryId, "Multi-Academy Trust");
+
+    public EstablishmentModelBuilder AsSingleAcademyTrust() =>
+        WithCategory(DsiConstants.SatOrganisationCategoryId, "Single Academy Trust");
+
+    public EstablishmentModelBuilder AsSecureSingleAcademyTrust() =>
+        WithCategory(DsiConstants.SSatOrganisationCategoryId, "Secure Single Academy Trust");
 
     public EstablishmentModelBuilder WithCategory(string id, string name)
     {
@@ -18,7 +31,7 @@ public sealed class EstablishmentModelBuilder
         return this;
     }
 
-    public EstablishmentModelBuilder WithGroupUid(string groupUid)
+    public EstablishmentModelBuilder WithGroupUid(string? groupUid)
     {
         _groupUid = groupUid;
         return this;
@@ -30,7 +43,7 @@ public sealed class EstablishmentModelBuilder
         return this;
     }
 
-    public EstablishmentModelBuilder WithUid(string uid)
+    public EstablishmentModelBuilder WithUid(string? uid)
     {
         _uid = uid;
         return this;
