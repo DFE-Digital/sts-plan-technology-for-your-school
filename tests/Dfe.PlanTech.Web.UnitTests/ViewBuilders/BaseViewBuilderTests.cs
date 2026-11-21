@@ -1,183 +1,84 @@
-using System.Security.Authentication;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class BaseViewBuilderTests
 {
-    private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
+    private const string Recipient = "recipient@example.com";
+    private const string CategoryHeader = "Category heading";
+    private const string CategorySlug = "category-slug";
+    private const string SectionSlug = "section-slug";
+
+    private readonly FakeLogger<BaseViewBuilder> _logger = new();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
     private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
 
-    private const string DefaultRecipient = "test@test.com";
-
-    private TestableBaseViewBuilder CreateSut() => new(_logger, _contentfulService, _currentUser);
-
-    private static TestController CreateController() => new TestController();
+    private TestableBaseViewBuilder CreateSystemUnderTest() =>
+        new(_logger, _contentfulService, _currentUser);
 
     [Fact]
     public void Constructor_WhenContentfulServiceIsNull_ThrowsArgumentNullException()
     {
-        var act = () => new TestableBaseViewBuilder(_logger, null!, _currentUser);
-
-        var exception = Assert.Throws<ArgumentNullException>(act);
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new TestableBaseViewBuilder(_logger, null!, _currentUser)
+        );
         Assert.Equal("contentfulService", exception.ParamName);
     }
 
     [Fact]
     public void Constructor_WhenCurrentUserIsNull_ThrowsArgumentNullException()
     {
-        var act = () => new TestableBaseViewBuilder(_logger, _contentfulService, null!);
-
-        var exception = Assert.Throws<ArgumentNullException>(act);
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new TestableBaseViewBuilder(_logger, _contentfulService, null!)
+        );
         Assert.Equal("currentUser", exception.ParamName);
-    }
-
-    [Fact]
-    public void GetDsiReferenceOrThrowException_WhenDsiReferenceExists_ReturnsDsiReference()
-    {
-        _currentUser.DsiReference.Returns("dsi-123");
-
-        var sut = CreateSut();
-
-        var result = sut.CallGetDsiReferenceOrThrowException();
-
-        Assert.Equal("dsi-123", result);
-    }
-
-    [Fact]
-    public void GetDsiReferenceOrThrowException_WhenDsiReferenceIsNull_ThrowsAuthenticationException()
-    {
-        _currentUser.DsiReference.Returns((string?)null);
-
-        var sut = CreateSut();
-
-        var act = () => sut.CallGetDsiReferenceOrThrowException();
-
-        var exception = Assert.Throws<AuthenticationException>(act);
-        Assert.Equal("User is not authenticated", exception.Message);
-    }
-
-    [Fact]
-    public void GetUserIdOrThrowException_WhenUserIdExists_ReturnsUserId()
-    {
-        _currentUser.UserId.Returns(123);
-
-        var sut = CreateSut();
-
-        var result = sut.CallGetUserIdOrThrowException();
-
-        Assert.Equal(123, result);
-    }
-
-    [Fact]
-    public void GetUserIdOrThrowException_WhenUserIdIsNull_ThrowsAuthenticationException()
-    {
-        _currentUser.UserId.Returns((int?)null);
-
-        var sut = CreateSut();
-
-        var act = () =>
-        {
-            sut.CallGetUserIdOrThrowException();
-        };
-
-        var exception = Assert.Throws<AuthenticationException>(act);
-        Assert.Equal("User is not authenticated", exception.Message);
-    }
-
-    [Fact]
-    public void GetUserOrganisationIdOrThrowException_WhenUserOrganisationIdExists_ReturnsUserOrganisationId()
-    {
-        _currentUser.UserOrganisationId.Returns(456);
-
-        var sut = CreateSut();
-
-        var result = sut.CallGetUserOrganisationIdOrThrowException();
-
-        Assert.Equal(456, result);
-    }
-
-    [Fact]
-    public void GetUserOrganisationIdOrThrowException_WhenUserOrganisationIdIsNull_ThrowsInvalidDataException()
-    {
-        _currentUser.UserOrganisationId.Returns((int?)null);
-
-        var sut = CreateSut();
-
-        var act = () =>
-        {
-            sut.CallGetUserOrganisationIdOrThrowException();
-        };
-
-        var exception = Assert.Throws<InvalidDataException>(act);
-        Assert.Equal(nameof(ICurrentUserProvider.UserOrganisationId), exception.Message);
-    }
-
-    [Fact]
-    public async Task GetActiveEstablishmentIdOrThrowException_WhenActiveEstablishmentIdExists_ReturnsId()
-    {
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(Task.FromResult<int?>(789));
-
-        var sut = CreateSut();
-
-        var result = await sut.CallGetActiveEstablishmentIdOrThrowException();
-
-        Assert.Equal(789, result);
-    }
-
-    [Fact]
-    public async Task GetActiveEstablishmentIdOrThrowException_WhenActiveEstablishmentIdIsNull_ThrowsInvalidDataException()
-    {
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(Task.FromResult<int?>(null));
-
-        var sut = CreateSut();
-
-        var act = async () => await sut.CallGetActiveEstablishmentIdOrThrowException();
-
-        var exception = await Assert.ThrowsAsync<InvalidDataException>(act);
-        Assert.Equal(nameof(ICurrentUserProvider.GetActiveEstablishmentIdAsync), exception.Message);
     }
 
     [Fact]
     public void BuildShareByEmailViewModel_WhenChunkSlugIsNull_BuildsCategoryShareModel()
     {
+        // Arrange
         var category = new QuestionnaireCategoryEntry
         {
-            Header = new ComponentHeaderEntry { Text = "Category heading" },
+            Header = new ComponentHeaderEntry { Text = CategoryHeader },
         };
-
         var inputModel = new ShareByEmailInputViewModel();
 
+        // Act
         var result = TestableBaseViewBuilder.CallBuildShareByEmailViewModel(
             controllerName: "PagesController",
             actionName: "PostShare",
             category: category,
             chunk: null,
-            categorySlug: "category-slug",
-            sectionSlug: "section-slug",
+            categorySlug: CategorySlug,
+            sectionSlug: SectionSlug,
             chunkSlug: null,
             inputModel: inputModel
         );
 
+        // Assert
         Assert.Equal("Pages", result.PostController);
         Assert.Equal("PostShare", result.PostAction);
-        Assert.Equal("category-slug", result.CategorySlug);
-        Assert.Equal("section-slug", result.SectionSlug);
+        Assert.Equal(CategorySlug, result.CategorySlug);
+        Assert.Equal(SectionSlug, result.SectionSlug);
         Assert.Null(result.ChunkSlug);
-        Assert.Equal("Category heading", result.Caption);
+        Assert.Equal(CategoryHeader, result.Caption);
         Assert.Equal("Share list of recommendations by email", result.Heading);
         Assert.Same(inputModel, result.InputModel);
         Assert.False(result.IsMat);
@@ -186,28 +87,30 @@ public class BaseViewBuilderTests
     [Fact]
     public void BuildShareByEmailViewModel_WhenChunkSlugIsProvided_BuildsChunkShareModel()
     {
+        // Arrange
         var category = new QuestionnaireCategoryEntry
         {
-            Header = new ComponentHeaderEntry { Text = "Category heading" },
+            Header = new ComponentHeaderEntry { Text = CategoryHeader },
         };
-
         var chunk = new RecommendationChunkEntry { Header = "Chunk heading" };
 
+        // Act
         var result = TestableBaseViewBuilder.CallBuildShareByEmailViewModel(
             controllerName: "PagesController",
             actionName: "PostShare",
             category: category,
             chunk: chunk,
-            categorySlug: "category-slug",
-            sectionSlug: "section-slug",
+            categorySlug: CategorySlug,
+            sectionSlug: SectionSlug,
             chunkSlug: "chunk-slug",
             inputModel: null
         );
 
+        // Assert
         Assert.Equal("Pages", result.PostController);
         Assert.Equal("PostShare", result.PostAction);
-        Assert.Equal("category-slug", result.CategorySlug);
-        Assert.Equal("section-slug", result.SectionSlug);
+        Assert.Equal(CategorySlug, result.CategorySlug);
+        Assert.Equal(SectionSlug, result.SectionSlug);
         Assert.Equal("chunk-slug", result.ChunkSlug);
         Assert.Equal("Chunk heading", result.Caption);
         Assert.Equal("Share a recommendation by email", result.Heading);
@@ -217,101 +120,202 @@ public class BaseViewBuilderTests
     [Fact]
     public void BuildShareByEmailViewModel_WhenIsMatIsTrue_SetsIsMat()
     {
+        // Arrange
         var category = new QuestionnaireCategoryEntry
         {
-            Header = new ComponentHeaderEntry { Text = "Category heading" },
+            Header = new ComponentHeaderEntry { Text = CategoryHeader },
         };
 
+        // Act
         var result = TestableBaseViewBuilder.CallBuildShareByEmailViewModel(
             controllerName: "PagesController",
             actionName: "PostShare",
             category: category,
             chunk: null,
-            categorySlug: "category-slug",
+            categorySlug: CategorySlug,
             sectionSlug: null,
             chunkSlug: null,
             inputModel: null,
             isMat: true
         );
 
+        // Assert
         Assert.True(result.IsMat);
+    }
+
+    [Fact]
+    public async Task GetFocusedOrSelectedSchoolsAsync_WhenUserCanSelectSchools_ReturnsSelectedSchools()
+    {
+        // Arrange
+        var selectedSchools = new List<SelectedEstablishmentDataModel>
+        {
+            new SelectedEstablishmentDataModelBuilder()
+                .WithEstablishmentId(1)
+                .WithName("Springfield Primary")
+                .Build(),
+            new SelectedEstablishmentDataModelBuilder()
+                .WithEstablishmentId(2)
+                .WithName("Shelbyville Primary")
+                .Build(),
+        };
+        _currentUser.CanSelectSchools.Returns(true);
+        _currentUser.GetSelectedSchools().Returns(selectedSchools);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.CallGetFocusedOrSelectedSchoolsAsync();
+
+        // Assert
+        Assert.Same(selectedSchools, result);
+    }
+
+    [Fact]
+    public async Task GetFocusedOrSelectedSchoolsAsync_WhenUserCanSelectSchoolsAndHasNoSelectedSchools_ReturnsEmptyList()
+    {
+        // Arrange
+        _currentUser.CanSelectSchools.Returns(true);
+        _currentUser.GetSelectedSchools().Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.CallGetFocusedOrSelectedSchoolsAsync();
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetFocusedOrSelectedSchoolsAsync_WhenUserCannotSelectSchools_ReturnsFocusedSchoolOnly()
+    {
+        // Arrange
+        var focusedSchool = new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(3)
+            .WithName("Ogdenville Primary")
+            .Build();
+        _currentUser.CanSelectSchools.Returns(false);
+        _currentUser.GetFocusedEstablishmentAsync().Returns(focusedSchool);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.CallGetFocusedOrSelectedSchoolsAsync();
+
+        // Assert
+        var school = Assert.Single(result);
+        Assert.Same(focusedSchool, school);
+        _currentUser.DidNotReceive().GetSelectedSchools();
     }
 
     [Fact]
     public void HandleNotifyShareResults_WhenAllResultsSucceed_StoresResultsInTempDataAndRedirectsToReturnAction()
     {
-        var controller = CreateController();
-
+        // Arrange
+        var controller = new TestController();
         var notifySendResults = new List<NotifySendResult>
         {
-            new() { Recipient = DefaultRecipient, Errors = [] },
-            new() { Recipient = DefaultRecipient, Errors = [] },
+            new() { Recipient = Recipient, Errors = [] },
+            new() { Recipient = "second@example.com", Errors = [] },
         };
-
         var returnToModel = new ActionViewModel(
             "GetByRoute",
             "PagesController",
-            "LinkText",
-            new { route = "digital-leadership-and-governance" }
+            "Back to category",
+            new Dictionary<string, object> { { "route", "digital-leadership-and-governance" } }
         );
 
+        // Act
         var result = TestableBaseViewBuilder.CallHandleNotifyShareResults(
             controller,
             notifySendResults,
             returnToModel
         );
 
-        var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("GetByRoute", redirect.ActionName);
-        Assert.Equal("Pages", redirect.ControllerName);
-
-        Assert.True(
-            controller.TempData.ContainsKey(StatePassingMechanismConstants.NotifyShareResults)
-        );
-
+        // Assert
+        Assert.Equal("GetByRoute", result.ActionName);
+        Assert.Equal("Pages", result.ControllerName);
+        Assert.Equal("digital-leadership-and-governance", result.RouteValues!["route"]);
         var json = Assert.IsType<string>(
             controller.TempData[StatePassingMechanismConstants.NotifyShareResults]
         );
-        var deserialized = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(json);
-
-        Assert.NotNull(deserialized);
-        Assert.Equal(2, deserialized.SendResults.Count);
-        Assert.Equal("GetByRoute", deserialized.ActionModel.ActionName);
-        Assert.Equal("Pages", deserialized.ActionModel.ControllerName);
+        var storedResults = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(json);
+        Assert.NotNull(storedResults);
+        Assert.Equal(2, storedResults.SendResults.Count);
+        Assert.Equal("GetByRoute", storedResults.ActionModel.ActionName);
+        Assert.Equal("Pages", storedResults.ActionModel.ControllerName);
     }
 
     [Fact]
     public void HandleNotifyShareResults_WhenAnyResultHasErrors_StoresResultsInTempDataAndRedirectsToNotifyError()
     {
-        var controller = CreateController();
-
+        // Arrange
+        var controller = new TestController();
         var notifySendResults = new List<NotifySendResult>
         {
-            new() { Recipient = DefaultRecipient, Errors = ["boom"] },
+            new() { Recipient = Recipient, Errors = [] },
+            new() { Recipient = "failed@example.com", Errors = ["send failed"] },
         };
-
         var returnToModel = new ActionViewModel(
             "GetByRoute",
-            "Pages",
-            "LinkText",
-            new { route = "digital-leadership-and-governance" }
+            "PagesController",
+            "Back to category",
+            new Dictionary<string, object> { { "route", "digital-leadership-and-governance" } }
         );
+        var expectedRedirect = PageRedirecter.RedirectToNotifyError(controller);
 
-        var expected = controller.RedirectToNotifyError();
-
+        // Act
         var result = TestableBaseViewBuilder.CallHandleNotifyShareResults(
             controller,
             notifySendResults,
             returnToModel
         );
 
-        var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(expected.ActionName, redirect.ActionName);
-        Assert.Equal(expected.ControllerName, redirect.ControllerName);
-        Assert.Equal(expected.RouteValues, redirect.RouteValues);
-
-        Assert.True(
-            controller.TempData.ContainsKey(StatePassingMechanismConstants.NotifyShareResults)
+        // Assert
+        Assert.Equal(expectedRedirect.ActionName, result.ActionName);
+        Assert.Equal(expectedRedirect.ControllerName, result.ControllerName);
+        Assert.Equal(expectedRedirect.RouteValues, result.RouteValues);
+        var json = Assert.IsType<string>(
+            controller.TempData[StatePassingMechanismConstants.NotifyShareResults]
         );
+        var storedResults = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(json);
+        Assert.NotNull(storedResults);
+        Assert.Equal(2, storedResults.SendResults.Count);
+    }
+
+    private sealed class TestableBaseViewBuilder(
+        ILogger<BaseViewBuilder> logger,
+        IContentfulService contentfulService,
+        ICurrentUserProvider currentUser
+    ) : BaseViewBuilder(logger, contentfulService, currentUser)
+    {
+        public Task<List<SelectedEstablishmentDataModel>> CallGetFocusedOrSelectedSchoolsAsync() =>
+            GetFocusedOrSelectedSchoolsAsync();
+
+        public static ShareByEmailViewModel CallBuildShareByEmailViewModel(
+            string controllerName,
+            string actionName,
+            QuestionnaireCategoryEntry category,
+            RecommendationChunkEntry? chunk,
+            string categorySlug,
+            string? sectionSlug,
+            string? chunkSlug,
+            ShareByEmailInputViewModel? inputModel,
+            bool isMat = false
+        ) =>
+            BuildShareByEmailViewModel(
+                controllerName,
+                actionName,
+                category,
+                chunk,
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+                inputModel,
+                isMat
+            );
+
+        public static RedirectToActionResult CallHandleNotifyShareResults(
+            Controller controller,
+            List<NotifySendResult> notifySendResults,
+            ActionViewModel returnToModel
+        ) => HandleNotifyShareResults(controller, notifySendResults, returnToModel);
     }
 }

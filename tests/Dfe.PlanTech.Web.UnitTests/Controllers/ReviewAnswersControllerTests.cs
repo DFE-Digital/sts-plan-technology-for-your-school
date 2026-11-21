@@ -7,271 +7,344 @@ using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
-namespace Dfe.PlanTech.Web.UnitTests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers;
+
+public class ReviewAnswersControllerTests
 {
-    public class ReviewAnswersControllerTests
+    private const string CategorySlug = "category-slug";
+    private const string SectionSlug = "section-slug";
+    private const string SectionName = "Section Name";
+    private const string ErrorMessage = "error-message";
+
+    private readonly FakeLogger<ReviewAnswersController> _logger = new();
+    private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler =
+        Substitute.For<IUserJourneyMissingContentExceptionHandler>();
+    private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder =
+        Substitute.For<IReviewAnswersViewBuilder>();
+    private readonly ISelfAssessmentSummaryViewBuilder _selfAssessmentSummaryViewBuilder =
+        Substitute.For<ISelfAssessmentSummaryViewBuilder>();
+
+    private ReviewAnswersController CreateSystemUnderTest() =>
+        new(
+            _logger,
+            _userJourneyMissingContentExceptionHandler,
+            _reviewAnswersViewBuilder,
+            _selfAssessmentSummaryViewBuilder
+        )
+        {
+            TempData = new TempDataDictionary(
+                new DefaultHttpContext(),
+                Substitute.For<ITempDataProvider>()
+            ),
+        };
+
+    [Fact]
+    public void Constructor_WhenExceptionHandlerIsNull_ThrowsArgumentNullException()
     {
-        private readonly ILogger<ReviewAnswersController> _logger = Substitute.For<
-            ILogger<ReviewAnswersController>
-        >();
-        private readonly IReviewAnswersViewBuilder _viewBuilder =
-            Substitute.For<IReviewAnswersViewBuilder>();
-        private readonly IUserJourneyMissingContentExceptionHandler _exceptionHandler =
-            Substitute.For<IUserJourneyMissingContentExceptionHandler>();
-        private readonly ISelfAssessmentSummaryViewBuilder _selfAssessmentSummaryViewBuilder =
-            Substitute.For<ISelfAssessmentSummaryViewBuilder>();
-        private readonly ReviewAnswersController _controller;
-
-        public ReviewAnswersControllerTests()
-        {
-            _controller = new ReviewAnswersController(
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new ReviewAnswersController(
                 _logger,
-                _exceptionHandler,
-                _viewBuilder,
+                null!,
+                _reviewAnswersViewBuilder,
                 _selfAssessmentSummaryViewBuilder
-            );
-            var httpContext = new DefaultHttpContext();
-            var tempDataProvider = Substitute.For<ITempDataProvider>();
-            _controller.TempData = new TempDataDictionary(httpContext, tempDataProvider);
-        }
+            )
+        );
+        Assert.Equal("userJourneyMissingContentExceptionHandler", exception.ParamName);
+    }
 
-        [Fact]
-        public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(
-                    _logger,
-                    _exceptionHandler,
-                    null!,
-                    _selfAssessmentSummaryViewBuilder
-                )
-            );
+    [Fact]
+    public void Constructor_WhenReviewAnswersViewBuilderIsNull_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new ReviewAnswersController(
+                _logger,
+                _userJourneyMissingContentExceptionHandler,
+                null!,
+                _selfAssessmentSummaryViewBuilder
+            )
+        );
+        Assert.Equal("reviewAnswersViewBuilder", exception.ParamName);
+    }
 
-            Assert.Equal("reviewAnswersViewBuilder", ex.ParamName);
-        }
+    [Fact]
+    public void Constructor_WhenSelfAssessmentSummaryViewBuilderIsNull_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new ReviewAnswersController(
+                _logger,
+                _userJourneyMissingContentExceptionHandler,
+                _reviewAnswersViewBuilder,
+                null!
+            )
+        );
+        Assert.Equal("selfAssessmentSummaryViewBuilder", exception.ParamName);
+    }
 
-        [Fact]
-        public void Constructor_WithNullExceptionHandler_ThrowsArgumentNullException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(
-                    _logger,
-                    null!,
-                    _viewBuilder,
-                    _selfAssessmentSummaryViewBuilder
-                )
-            );
+    [Fact]
+    public async Task CheckAnswers_WhenCalled_ReturnsViewBuilderResultWithTempDataErrorMessage()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        systemUnderTest.TempData[StatePassingMechanismConstants.ErrorMessage] = ErrorMessage;
+        var expectedResult = new OkResult();
+        _reviewAnswersViewBuilder
+            .RouteToCheckAnswers(systemUnderTest, CategorySlug, SectionSlug, ErrorMessage)
+            .Returns(expectedResult);
 
-            Assert.Equal("userJourneyMissingContentExceptionHandler", ex.ParamName);
-        }
+        // Act
+        var result = await systemUnderTest.CheckAnswers(CategorySlug, SectionSlug);
 
-        [Fact]
-        public void Constructor_WithNullSelfAssessmentSummaryViewBuilder_ThrowsArgumentNullException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(_logger, _exceptionHandler, _viewBuilder, null!)
-            );
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-            Assert.Equal("selfAssessmentSummaryViewBuilder", ex.ParamName);
-        }
+    [Fact]
+    public async Task CheckAnswers_WhenNoErrorMessageInTempData_PassesNullErrorMessage()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        var expectedResult = new OkResult();
+        _reviewAnswersViewBuilder
+            .RouteToCheckAnswers(systemUnderTest, CategorySlug, SectionSlug, null)
+            .Returns(expectedResult);
 
-        [Fact]
-        public async Task CheckAnswers_ReturnsExpectedResult()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
+        // Act
+        var result = await systemUnderTest.CheckAnswers(CategorySlug, SectionSlug);
 
-            _controller.TempData[StatePassingMechanismConstants.ErrorMessage] = "error";
-            _viewBuilder
-                .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error")
-                .Returns(new OkResult());
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-            var result = await _controller.CheckAnswers(categorySlug, sectionSlug);
+    [Fact]
+    public async Task CheckAnswers_WhenContentIsMissing_ReturnsExceptionHandlerResult()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        var exception = new UserJourneyMissingContentException(
+            "missing-content",
+            new QuestionnaireSectionEntry()
+        );
+        var expectedResult = new BadRequestResult();
+        _reviewAnswersViewBuilder
+            .RouteToCheckAnswers(systemUnderTest, CategorySlug, SectionSlug, null)
+            .ThrowsAsync(exception);
+        _userJourneyMissingContentExceptionHandler
+            .Handle(systemUnderTest, exception)
+            .Returns(expectedResult);
 
-            await _viewBuilder
-                .Received(1)
-                .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error");
-            Assert.IsType<OkResult>(result);
-        }
+        // Act
+        var result = await systemUnderTest.CheckAnswers(CategorySlug, SectionSlug);
 
-        [Fact]
-        public async Task CheckAnswers_WhenExceptionThrown_UsesExceptionHandler()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-            var exception = new UserJourneyMissingContentException(
-                "Missing content",
-                new QuestionnaireSectionEntry()
-            );
-            _viewBuilder
-                .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, null)
-                .Throws(exception);
+    [Theory]
+    [InlineData(null, SectionSlug)]
+    [InlineData("", SectionSlug)]
+    [InlineData(" ", SectionSlug)]
+    [InlineData(CategorySlug, null)]
+    [InlineData(CategorySlug, "")]
+    [InlineData(CategorySlug, " ")]
+    public async Task CheckAnswers_WhenSlugIsNullOrWhitespace_ThrowsArgumentException(
+        string? categorySlug,
+        string? sectionSlug
+    )
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
 
-            _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            systemUnderTest.CheckAnswers(categorySlug!, sectionSlug!)
+        );
+    }
 
-            var result = await _controller.CheckAnswers(categorySlug, sectionSlug);
+    [Fact]
+    public async Task ViewAnswers_WhenCalled_ReturnsViewBuilderResultWithTempDataErrorMessage()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        systemUnderTest.TempData[StatePassingMechanismConstants.ErrorMessage] = ErrorMessage;
+        var expectedResult = new OkResult();
+        _reviewAnswersViewBuilder
+            .RouteToViewAnswers(systemUnderTest, CategorySlug, SectionSlug, ErrorMessage)
+            .Returns(expectedResult);
 
-            await _exceptionHandler.Received(1).Handle(_controller, exception);
-            Assert.IsType<BadRequestResult>(result);
-        }
+        // Act
+        var result = await systemUnderTest.ViewAnswers(CategorySlug, SectionSlug);
 
-        [Fact]
-        public async Task ConfirmCheckAnswers_ReturnsExpectedResult()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
-            var sectionName = "Section A";
-            var submissionId = 1;
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-            _viewBuilder
-                .ConfirmCheckAnswers(
-                    _controller,
-                    categorySlug,
-                    sectionSlug,
-                    sectionName,
-                    submissionId
-                )
-                .Returns(new OkResult());
+    [Fact]
+    public async Task ViewAnswers_WhenContentIsMissing_ReturnsExceptionHandlerResult()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        var exception = new UserJourneyMissingContentException(
+            "missing-content",
+            new QuestionnaireSectionEntry()
+        );
+        var expectedResult = new BadRequestResult();
+        _reviewAnswersViewBuilder
+            .RouteToViewAnswers(systemUnderTest, CategorySlug, SectionSlug, null)
+            .ThrowsAsync(exception);
+        _userJourneyMissingContentExceptionHandler
+            .Handle(systemUnderTest, exception)
+            .Returns(expectedResult);
 
-            var result = await _controller.ConfirmCheckAnswers(
-                categorySlug,
-                sectionSlug,
-                sectionName,
-                submissionId
-            );
+        // Act
+        var result = await systemUnderTest.ViewAnswers(CategorySlug, SectionSlug);
 
-            await _viewBuilder
-                .Received(1)
-                .ConfirmCheckAnswers(
-                    _controller,
-                    categorySlug,
-                    sectionSlug,
-                    sectionName,
-                    submissionId
-                );
-            Assert.IsType<OkResult>(result);
-            Assert.Equal(
-                "Section A",
-                _controller.TempData[StatePassingMechanismConstants.SectionName]
-            );
-        }
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-        [Fact]
-        public async Task ConfirmCheckAnswers_WhenExceptionThrown_LogsErrorAndThrows()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
-            var sectionName = "Section A";
-            var submissionId = 1;
+    [Theory]
+    [InlineData(null, SectionSlug)]
+    [InlineData("", SectionSlug)]
+    [InlineData(" ", SectionSlug)]
+    [InlineData(CategorySlug, null)]
+    [InlineData(CategorySlug, "")]
+    [InlineData(CategorySlug, " ")]
+    public async Task ViewAnswers_WhenSlugIsNullOrWhitespace_ThrowsArgumentException(
+        string? categorySlug,
+        string? sectionSlug
+    )
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
 
-            var exception = new Exception("Something went wrong");
-            _viewBuilder
-                .ConfirmCheckAnswers(
-                    _controller,
-                    categorySlug,
-                    sectionSlug,
-                    sectionName,
-                    submissionId
-                )
-                .Throws(exception);
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            systemUnderTest.ViewAnswers(categorySlug!, sectionSlug!)
+        );
+    }
 
-            var ex = await Assert.ThrowsAsync<Exception>(() =>
-                _controller.ConfirmCheckAnswers(
-                    categorySlug,
-                    sectionSlug,
-                    sectionName,
-                    submissionId
-                )
-            );
+    [Fact]
+    public async Task ConfirmCheckAnswers_WhenCalled_SetsSectionNameInTempDataAndReturnsViewBuilderResult()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        var expectedResult = new OkResult();
+        _reviewAnswersViewBuilder
+            .ConfirmCheckAnswers(systemUnderTest, CategorySlug, SectionSlug, SectionName)
+            .Returns(expectedResult);
 
-            Assert.Equal("Something went wrong", ex.Message);
-        }
+        // Act
+        var result = await systemUnderTest.ConfirmCheckAnswers(
+            CategorySlug,
+            SectionSlug,
+            SectionName
+        );
 
-        [Fact]
-        public async Task ViewAnswers_ReturnsExpectedResult()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
+        // Assert
+        Assert.Same(expectedResult, result);
+        Assert.Equal(
+            SectionName,
+            systemUnderTest.TempData[StatePassingMechanismConstants.SectionName]
+        );
+    }
 
-            _controller.TempData[StatePassingMechanismConstants.ErrorMessage] = "error";
-            _viewBuilder
-                .RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error")
-                .Returns(new OkResult());
+    [Theory]
+    [InlineData(null, SectionSlug, SectionName)]
+    [InlineData(" ", SectionSlug, SectionName)]
+    [InlineData(CategorySlug, null, SectionName)]
+    [InlineData(CategorySlug, " ", SectionName)]
+    [InlineData(CategorySlug, SectionSlug, null)]
+    [InlineData(CategorySlug, SectionSlug, " ")]
+    public async Task ConfirmCheckAnswers_WhenArgumentIsNullOrWhitespace_ThrowsArgumentException(
+        string? categorySlug,
+        string? sectionSlug,
+        string? sectionName
+    )
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
 
-            var result = await _controller.ViewAnswers(categorySlug, sectionSlug);
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            systemUnderTest.ConfirmCheckAnswers(categorySlug!, sectionSlug!, sectionName!)
+        );
+    }
 
-            await _viewBuilder
-                .Received(1)
-                .RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error");
-            Assert.IsType<OkResult>(result);
-        }
+    [Fact]
+    public async Task GetSchoolSelfAssessmentSummary_WhenCalled_ReturnsViewBuilderResult()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        var expectedResult = new OkResult();
+        _selfAssessmentSummaryViewBuilder
+            .RouteToSelfAssessmentSummary(systemUnderTest, CategorySlug, SectionSlug)
+            .Returns(expectedResult);
 
-        [Fact]
-        public async Task ViewAnswers_WhenExceptionThrown_UsesExceptionHandler()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
+        // Act
+        var result = await systemUnderTest.GetSchoolSelfAssessmentSummary(
+            CategorySlug,
+            SectionSlug
+        );
 
-            var exception = new UserJourneyMissingContentException(
-                "Missing content",
-                new QuestionnaireSectionEntry()
-            );
-            _viewBuilder
-                .RouteToViewAnswers(_controller, categorySlug, sectionSlug, null)
-                .Throws(exception);
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-            _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
+    [Theory]
+    [InlineData(" ", SectionSlug)]
+    [InlineData(CategorySlug, " ")]
+    public async Task GetSchoolSelfAssessmentSummary_WhenSlugIsWhitespace_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug
+    )
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
 
-            var result = await _controller.ViewAnswers(categorySlug, sectionSlug);
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            systemUnderTest.GetSchoolSelfAssessmentSummary(categorySlug, sectionSlug)
+        );
+    }
 
-            await _exceptionHandler.Received(1).Handle(_controller, exception);
-            Assert.IsType<BadRequestResult>(result);
-        }
+    [Fact]
+    public async Task GetTrustSelfAssessmentSummary_WhenCalled_ReturnsViewBuilderResult()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+        var expectedResult = new OkResult();
+        _selfAssessmentSummaryViewBuilder
+            .RouteToSelfAssessmentSummary(systemUnderTest, CategorySlug, SectionSlug)
+            .Returns(expectedResult);
 
-        [Fact]
-        public async Task GetSchoolSelfAssessmentSummary_ReturnsExpectedResult()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
+        // Act
+        var result = await systemUnderTest.GetTrustSelfAssessmentSummary(CategorySlug, SectionSlug);
 
-            _selfAssessmentSummaryViewBuilder
-                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug)
-                .Returns(new OkResult());
+        // Assert
+        Assert.Same(expectedResult, result);
+    }
 
-            var result = await _controller.GetSchoolSelfAssessmentSummary(
-                categorySlug,
-                sectionSlug
-            );
+    [Theory]
+    [InlineData(" ", SectionSlug)]
+    [InlineData(CategorySlug, " ")]
+    public async Task GetTrustSelfAssessmentSummary_WhenSlugIsWhitespace_ThrowsArgumentException(
+        string categorySlug,
+        string sectionSlug
+    )
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
 
-            await _selfAssessmentSummaryViewBuilder
-                .Received(1)
-                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug);
-
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task GetTrustSelfAssessmentSummary_ReturnsExpectedResult()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
-
-            _selfAssessmentSummaryViewBuilder
-                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug)
-                .Returns(new OkResult());
-
-            var result = await _controller.GetTrustSelfAssessmentSummary(categorySlug, sectionSlug);
-
-            await _selfAssessmentSummaryViewBuilder
-                .Received(1)
-                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug);
-
-            Assert.IsType<OkResult>(result);
-        }
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            systemUnderTest.GetTrustSelfAssessmentSummary(categorySlug, sectionSlug)
+        );
     }
 }

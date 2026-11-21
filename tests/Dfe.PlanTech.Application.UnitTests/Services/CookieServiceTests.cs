@@ -115,14 +115,12 @@ public class CookieServiceTests
 
         var headers = GetSetCookie(httpContext);
         Assert.Equal(2, headers.Length);
-        Assert.All(
-            headers,
-            header =>
-                Assert.Contains(
-                    CookieConstants.UserCookiesPreferences,
-                    header,
-                    StringComparison.Ordinal
-                )
+        Assert.All(headers, header =>
+            Assert.Contains(
+                CookieConstants.UserCookiesPreferences,
+                header,
+                StringComparison.Ordinal
+            )
         );
 
         var last = headers.Last();
@@ -143,15 +141,21 @@ public class CookieServiceTests
     }
 
     [Fact]
-    public void SetCookieAcceptance_Throws_When_HttpContext_Null()
+    public void SetCookieAcceptance_WhenThereIsNoHttpContext_DoesNotThrow()
     {
+        // Arrange
         var accessor = Substitute.For<IHttpContextAccessor>();
         accessor.HttpContext.Returns((HttpContext?)null);
 
         var cookieWorkflow = Substitute.For<ICookieWorkflow>();
         var cookieService = new CookieService(accessor, cookieWorkflow);
 
-        Assert.Throws<InvalidOperationException>(() => cookieService.SetCookieAcceptance(true));
+        // Act
+        var exception = Record.Exception(() => cookieService.SetCookieAcceptance(true));
+
+        // Assert
+        Assert.Null(exception);
+        Assert.True(cookieService.Cookie.UserAcceptsCookies);
     }
 
     [Fact]

@@ -566,4 +566,63 @@ public class RecommendationServiceTests
                 )
             );
     }
+
+    [Fact]
+    public async Task GetInProgressOrCompletedRecommendationCounts_WhenEstablishmentsHaveStatuses_ReturnsCountOfInProgressAndCompleted()
+    {
+        // Arrange
+        _recommendationWorkflow
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(701)
+            .Returns(
+                new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+                {
+                    ["rec-001"] = new() { NewStatus = RecommendationStatus.Complete },
+                    ["rec-002"] = new() { NewStatus = RecommendationStatus.InProgress },
+                    ["rec-003"] = new() { NewStatus = RecommendationStatus.NotStarted },
+                }
+            );
+        _recommendationWorkflow
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(702)
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>());
+        var systemUnderTest = CreateServiceUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetInProgressOrCompletedRecommendationCounts([701, 702]);
+
+        // Assert
+        Assert.Equal(2, result[701]);
+        Assert.Equal(0, result[702]);
+    }
+
+    [Fact]
+    public async Task UpdateEstablishmentsRecommendationStatusAsync_WhenCalled_PassesAllValuesToWorkflow()
+    {
+        // Arrange
+        int[] establishmentIds = [701, 702];
+        var systemUnderTest = CreateServiceUnderTest();
+
+        // Act
+        await systemUnderTest.UpdateEstablishmentsRecommendationStatusAsync(
+            "rec-001",
+            establishmentIds,
+            42,
+            RecommendationStatus.InProgress,
+            "Work started",
+            301,
+            9001
+        );
+
+        // Assert
+        await _recommendationWorkflow
+            .Received(1)
+            .UpdateEstablishmentsRecommendationStatusAsync(
+                "rec-001",
+                Arg.Is<IEnumerable<int>>(ids => ids.SequenceEqual(establishmentIds)),
+                42,
+                RecommendationStatus.InProgress,
+                "Work started",
+                301,
+                9001
+            );
+    }
 }

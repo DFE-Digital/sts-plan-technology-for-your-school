@@ -1,151 +1,175 @@
-using System.Security.Claims;
-using Dfe.PlanTech.Application.Providers;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Handlers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Handlers;
 
 public class UserJourneyMissingContentExceptionHandlerTests
 {
-    private static (CurrentUserProvider currentUser, HttpContext http) MakeCurrentUser(
-        int? establishmentId = null
-    )
-    {
-        var http = new DefaultHttpContext();
-        var identity = new ClaimsIdentity(authenticationType: "test");
+    private const int FocusedEstablishmentId = 456;
+    private const string SectionId = "section-id";
+    private const string SectionName = "Section name";
+    private const string ConfiguredErrorMessage =
+        "Please try again - your answers may be out of date.";
 
-        if (establishmentId.HasValue)
-        {
-            identity.AddClaim(
-                new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId.Value.ToString())
-            );
-        }
-        http.User = new ClaimsPrincipal(identity);
-        var accessor = new HttpContextAccessor { HttpContext = http };
-        var establishmentService = Substitute.For<IEstablishmentService>();
-        var groupService = Substitute.For<IGroupService>();
-        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
-        return (
-            new CurrentUserProvider(
-                contextAccessor: accessor,
-                establishmentService: establishmentService,
-                giasService: logger
-            ),
-            http
+    private readonly FakeLogger<UserJourneyMissingContentExceptionHandler> _logger = new();
+    private readonly IConfiguration _configuration = new ConfigurationBuilder()
+        .AddInMemoryCollection(
+            new Dictionary<string, string?>
+            {
+                {
+                    UserJourneyMissingContentExceptionHandler.ErrorMessageConfigKey,
+                    ConfiguredErrorMessage
+                },
+            }
+        )
+        .Build();
+    private readonly ISubmissionService _submissionService = Substitute.For<ISubmissionService>();
+    private readonly ICurrentUserProvider _currentUserProvider =
+        Substitute.For<ICurrentUserProvider>();
+
+    private UserJourneyMissingContentExceptionHandler CreateSystemUnderTest() =>
+        new(_logger, _configuration, _submissionService, _currentUserProvider);
+
+    private static UserJourneyMissingContentException BuildException() =>
+        new(
+            "Missing content",
+            new QuestionnaireSectionEntry { Sys = new SystemDetails(SectionId), Name = SectionName }
         );
-    }
 
-    private static Controller MakeController(HttpContext http)
+    [Fact]
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
     {
-        var controller = new TestController();
-        controller.ControllerContext = new ControllerContext { HttpContext = http };
-        controller.TempData = new TempDataDictionary(http, Substitute.For<ITempDataProvider>());
-        return controller;
-    }
-
-    private static UserJourneyMissingContentException MakeException(
-        string sectionId = "sec-1",
-        string name = "Section Name"
-    )
-    {
-        var section = new QuestionnaireSectionEntry
-        {
-            // In your project, Id is a shortcut for Sys.Id
-            Sys = new SystemDetails(sectionId),
-            Name = name,
-        };
-        return new UserJourneyMissingContentException("boom", section);
-    }
-
-    private static IConfiguration MakeConfig(string value)
-    {
-        var dict = new Dictionary<string, string?>
-        {
-            { UserJourneyMissingContentExceptionHandler.ErrorMessageConfigKey, value },
-        };
-        return new ConfigurationBuilder().AddInMemoryCollection(dict!).Build();
+        // Act & Assert
+        // The logger is not null-guarded in production, so it is excluded here.
+        Assert.Throws<ArgumentNullException>("configuration", () =>
+            new UserJourneyMissingContentExceptionHandler(
+                _logger,
+                null!,
+                _submissionService,
+                _currentUserProvider
+            )
+        );
+        Assert.Throws<ArgumentNullException>("submissionService", () =>
+            new UserJourneyMissingContentExceptionHandler(
+                _logger,
+                _configuration,
+                null!,
+                _currentUserProvider
+            )
+        );
+        Assert.Throws<ArgumentNullException>("currentUser", () =>
+            new UserJourneyMissingContentExceptionHandler(
+                _logger,
+                _configuration,
+                _submissionService,
+                null!
+            )
+        );
     }
 
     [Fact]
-    public async Task Handle_DeletesSubmission_SetsTempData_And_Redirects()
+    public async Task Handle_WhenCalled_MarksSectionSubmissionInaccessibleForFocusedEstablishment()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<UserJourneyMissingContentExceptionHandler>>();
-        var submissionSvc = Substitute.For<ISubmissionService>();
-        var (currentUser, http) = MakeCurrentUser(establishmentId: 456);
-        var controller = MakeController(http);
-        var configValue = "Please try again — your answers may be out of date.";
-        var config = MakeConfig(configValue);
-
-        var sut = new UserJourneyMissingContentExceptionHandler(
-            logger,
-            config,
-            submissionSvc,
-            currentUser
-        );
-        var ex = MakeException(sectionId: "sec-1");
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        var controller = new TestController();
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var result = await sut.Handle(controller, ex);
+        await systemUnderTest.Handle(controller, BuildException());
 
-        // Assert: deletion called with current user's establishment and section id
-        await submissionSvc.Received(1).SetSubmissionInaccessibleAsync(456, "sec-1");
+        // Assert
+        await _submissionService
+            .Received(1)
+            .SetSubmissionInaccessibleAsync(FocusedEstablishmentId, SectionId);
+    }
 
-        // TempData set
-        Assert.True(
-            controller.TempData.ContainsKey(
-                UserJourneyMissingContentExceptionHandler.ErrorMessageTempDataKey
-            )
-        );
+    [Fact]
+    public async Task Handle_WhenCalled_SetsConfiguredErrorMessageInTempData()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        var controller = new TestController();
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.Handle(controller, BuildException());
+
+        // Assert
         Assert.Equal(
-            configValue,
+            ConfiguredErrorMessage,
             controller.TempData[UserJourneyMissingContentExceptionHandler.ErrorMessageTempDataKey]
         );
+    }
 
-        // Redirect to PagesController.GetPageByRouteAction with route = UrlConstants.Home
+    [Fact]
+    public async Task Handle_WhenCalled_RedirectsToHomePage()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        var controller = new TestController();
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.Handle(controller, BuildException());
+
+        // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
         Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
-        Assert.True(redirect.RouteValues!.ContainsKey("route"));
-        Assert.Equal(UrlConstants.Home, redirect.RouteValues["route"]);
+        Assert.Equal(UrlConstants.Home, redirect.RouteValues!["route"]);
     }
 
     [Fact]
-    public async Task Handle_Throws_When_CurrentUser_Has_No_EstablishmentId()
+    public async Task Handle_WhenCalled_LogsErrorWithSectionName()
     {
         // Arrange
-        var logger = Substitute.For<ILogger<UserJourneyMissingContentExceptionHandler>>();
-        var submissionSvc = Substitute.For<ISubmissionService>();
-        var (currentUser, http) = MakeCurrentUser(establishmentId: null);
-        var controller = MakeController(http);
-        var config = MakeConfig("ignored");
-        var sut = new UserJourneyMissingContentExceptionHandler(
-            logger,
-            config,
-            submissionSvc,
-            currentUser
-        );
-        var ex = MakeException();
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        var controller = new TestController();
+        var systemUnderTest = CreateSystemUnderTest();
 
-        // Act + Assert
-        var thrown = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.Handle(controller, ex)
-        );
-        Assert.Contains(nameof(CurrentUserProvider.GetActiveEstablishmentId), thrown.Message);
+        // Act
+        await systemUnderTest.Handle(controller, BuildException());
 
-        await submissionSvc
-            .DidNotReceiveWithAnyArgs()
-            .SetSubmissionInaccessibleAsync(default!, default!);
+        // Assert
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Error, logRecord.Level);
+        Assert.Contains(SectionName, logRecord.Message);
     }
 }

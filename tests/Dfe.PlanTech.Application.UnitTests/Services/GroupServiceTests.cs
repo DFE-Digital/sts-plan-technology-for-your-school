@@ -3,237 +3,96 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
-using NSubstitute;
-using System.Threading.Tasks;
 using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Tests.Shared.Assertions;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class GroupServiceTests
 {
-    private readonly IGroupWorkflow _groupWorkflow =
-        Substitute.For<IGroupWorkflow>();
+    private readonly IGroupWorkflow _groupWorkflow = Substitute.For<IGroupWorkflow>();
 
-    private GroupService CreateServiceUnderTest() =>
-        new GroupService(_groupWorkflow);
+    private GroupService CreateSystemUnderTest() => new(_groupWorkflow);
 
     [Fact]
-    public async Task GetGroupCompletedSubmissionsBySections_Calls_Workflow_And_Returns_Result()
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        ConstructorGuardAssert.AllNonNullableParametersAreGuarded<GroupService>(_groupWorkflow);
+    }
+
+    [Fact]
+    public async Task GetGroupCompletedSubmissionsBySections_WhenCalled_ReturnsWorkflowResult()
     {
         // Arrange
-        var sut = CreateServiceUnderTest();
-
-        var establishmentIds = new[] { 1, 2, 3 };
-
-        var expected = new List<SqlSubmissionDto>
-        {
-            new() { Id = 100, EstablishmentId = 1 },
-            new() { Id = 200, EstablishmentId = 2 },
-        };
-
+        int[] establishmentIds = [701, 702];
+        var expectedSubmissions = new List<SqlSubmissionDto>();
         _groupWorkflow
-            .GetGroupCompletedSubmissions(establishmentIds)
-            .Returns(expected);
+            .GetGroupCompletedSubmissions(Arg.Is<int[]>(ids => ids.SequenceEqual(establishmentIds)))
+            .Returns(expectedSubmissions);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var result = await sut.GetGroupCompletedSubmissionsBySections(establishmentIds);
+        var result = await systemUnderTest.GetGroupCompletedSubmissionsBySections(establishmentIds);
 
         // Assert
-        Assert.Same(expected, result);
-
-        await _groupWorkflow
-            .Received(1)
-            .GetGroupCompletedSubmissions(
-                Arg.Is<int[]>(ids =>
-                    ids.SequenceEqual(establishmentIds)
-                )
-            );
+        Assert.Same(expectedSubmissions, result);
     }
 
     [Fact]
-    public async Task GetGroupSubmissionStatusesBySection_Calls_Workflow_And_Returns_Result()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
-        {
-            new()
-            {
-                Urn = "testRef1",
-                EstablishmentName = "Test 1"
-            },
-            new()
-            {
-                Urn = "testRef2",
-                EstablishmentName = "Test 2"
-            },
-            new()
-            {
-                Urn = "testRef3",
-                EstablishmentName = "Test 3"
-            },
-
-        };
-        var sectionId = "sec1";
-
-        var expected = new List<SubmissionInformationModel>
-        {
-            new()
-            {
-                EstablishmentId = 1,
-                EstablishmentName = "Establishment One",
-                SectionId = sectionId,
-                SubmissionId = 100,
-                Status = SubmissionStatus.CompleteReviewed
-            },
-            new()
-            {
-                EstablishmentId = 2,
-                EstablishmentName = "Establishment Two",
-                SectionId = sectionId,
-                SubmissionId = 200,
-                Status = SubmissionStatus.InProgress
-            },
-            new()
-            {
-                EstablishmentId = 3,
-                EstablishmentName = "Establishment Three",
-                SectionId = sectionId,
-                Status = SubmissionStatus.NotStarted
-            }
-        };
-
-        _groupWorkflow
-            .GetGroupSubmissionInformationForSection(establishmentLinks, sectionId)
-            .Returns(expected);
-
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentLinks, sectionId);
-
-        Assert.Same(expected, result);
-
-        await _groupWorkflow
-            .Received(1)
-            .GetGroupSubmissionInformationForSection(
-                Arg.Is<List<SqlEstablishmentLinkDto>>(links => links.SequenceEqual(establishmentLinks)),
-                Arg.Is<string>(section => section.Equals(sectionId))
-            );
-    }
-
-    [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_GroupWorkflow_Is_Null()
-    {
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupService(null!));
-
-        // Assert
-        Assert.Equal("groupWorkflow", exception.ParamName);
-    }
-
-    [Fact]
-    public async Task GetGroupEstablishmentContextAsync_Calls_Workflow_And_Returns_Result()
+    public async Task GetGroupSubmissionInformationForSection_WhenCalled_ReturnsWorkflowResult()
     {
         // Arrange
-        var sut = CreateServiceUnderTest();
-
-        var groupEstablishmentId = 100;
-
-        var expected = new GroupEstablishmentModel
+        var groupSchools = new List<SelectedEstablishmentDataModel>
         {
-            Establishments =
-            [
-                new SqlEstablishmentDto
-            {
-                Id = 1,
-                OrgName = "School One"
-            },
-            new SqlEstablishmentDto
-            {
-                Id = 2,
-                OrgName = "School Two"
-            }
-            ],
-            EstablishmentIds = [1, 2],
-            CompletedSubmissions =
-            [
-                new SqlSubmissionDto
-            {
-                Id = 100,
-                EstablishmentId = 1,
-                SectionId = "section-1"
-            }
-            ]
+            new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(701).Build(),
         };
-
+        var expectedInformation = new List<SubmissionInformationModel>
+        {
+            new() { EstablishmentId = 701, Status = SubmissionStatus.InProgress },
+        };
         _groupWorkflow
-            .GetGroupEstablishmentContextAsync(groupEstablishmentId)
-            .Returns(expected);
+            .GetGroupSubmissionInformationForSection(groupSchools, "section-id")
+            .Returns(expectedInformation);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
+        var result = await systemUnderTest.GetGroupSubmissionInformationForSection(
+            groupSchools,
+            "section-id"
+        );
 
         // Assert
-        Assert.Same(expected, result);
-
-        await _groupWorkflow
-            .Received(1)
-            .GetGroupEstablishmentContextAsync(groupEstablishmentId);
+        Assert.Same(expectedInformation, result);
     }
 
     [Fact]
-    public async Task GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId_Calls_Workflow_And_Returns_Result()
+    public async Task GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRef_WhenCalled_ReturnsWorkflowResult()
     {
-        var sut = CreateServiceUnderTest();
-
-        var establishmentId = 1;
-        var recommendationId = 100;
-
-        var expected = new List<(
-            EstablishmentEntity establishment,
-            EstablishmentRecommendationHistoryEntity? recommendationHistory)>
-        {
-            (
-                new EstablishmentEntity
-                {
-                    Id = 1,
-                    OrgName = "Establishment One"
-                },
-                new EstablishmentRecommendationHistoryEntity
-                {
-                    Id = 10,
-                    EstablishmentId = 1,
-                    RecommendationId = recommendationId
-                }
-            ),
-            (
-                new EstablishmentEntity
-                {
-                    Id = 2,
-                    OrgName = "Establishment Two"
-                },
-                null
-            )
-        };
-
+        // Arrange
+        var expectedHistories =
+            new List<(
+                EstablishmentEntity establishment,
+                EstablishmentRecommendationHistoryEntity? recommendationHistory
+            )>();
         _groupWorkflow
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                establishmentId,
-                recommendationId
+            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRefAsync(
+                301,
+                "recommendation-ref"
             )
-            .Returns(expected);
+            .Returns(expectedHistories);
+        var systemUnderTest = CreateSystemUnderTest();
 
+        // Act
         var result =
-            await sut.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                establishmentId,
-                recommendationId
+            await systemUnderTest.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRef(
+                301,
+                "recommendation-ref"
             );
 
-        Assert.Same(expected, result);
-
-        await _groupWorkflow
-            .Received(1)
-            .GetLatestGroupEstablishmentRecommendationHistoryByRecommendationId(
-                establishmentId,
-                recommendationId
-            );
+        // Assert
+        Assert.Same(expectedHistories, result);
     }
 }

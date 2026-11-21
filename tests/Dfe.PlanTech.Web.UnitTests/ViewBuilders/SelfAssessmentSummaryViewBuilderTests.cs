@@ -4,103 +4,182 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Tests.Shared.Fakes;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class SelfAssessmentSummaryViewBuilderTests
 {
-    private readonly ILogger<SelfAssessmentSummaryViewBuilder> _logger = Substitute.For<
-        ILogger<SelfAssessmentSummaryViewBuilder>
-    >();
+    private const int FocusedEstablishmentId = 123;
+    private const int FirstSelectedEstablishmentId = 101;
+    private const int SecondSelectedEstablishmentId = 102;
+    private const string SectionId = "section-1";
+    private const string SectionSlug = "cyber-security";
+    private const string CategorySlug = "digital-leadership";
 
-    private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
+    private static readonly QuestionnaireSectionEntry Section = new()
+    {
+        Sys = new SystemDetails(SectionId),
+        Name = "Cyber security",
+    };
 
-    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
-
+    private readonly FakeLogger<SelfAssessmentSummaryViewBuilder> _logger = new();
+    private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
+    private readonly ICurrentUserProvider _currentUserProvider =
+        Substitute.For<ICurrentUserProvider>();
     private readonly IGroupService _groupService = Substitute.For<IGroupService>();
-
     private readonly IHttpContextAccessor _httpContextAccessor =
         Substitute.For<IHttpContextAccessor>();
 
-    private SelfAssessmentSummaryViewBuilder CreateSut() =>
-        new(_logger, _contentful, _currentUser, _groupService, _httpContextAccessor);
+    private readonly TestController _controller = new();
 
-    private static Controller MakeController()
+    private SelfAssessmentSummaryViewBuilder CreateSystemUnderTest() =>
+        new(_logger, _contentfulService, _currentUserProvider, _groupService, _httpContextAccessor);
+
+    [Fact]
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
     {
-        var controller = new DummyController();
-        var httpContext = new DefaultHttpContext { Session = new FakeSession() };
-
-        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
-
-        return controller;
+        // Act & Assert
+        // The logger is not null-guarded in production, so it is excluded here.
+        Assert.Throws<ArgumentNullException>("contentfulService", () =>
+            new SelfAssessmentSummaryViewBuilder(
+                _logger,
+                null!,
+                _currentUserProvider,
+                _groupService,
+                _httpContextAccessor
+            )
+        );
+        Assert.Throws<ArgumentNullException>("currentUser", () =>
+            new SelfAssessmentSummaryViewBuilder(
+                _logger,
+                _contentfulService,
+                null!,
+                _groupService,
+                _httpContextAccessor
+            )
+        );
+        Assert.Throws<ArgumentNullException>("groupService", () =>
+            new SelfAssessmentSummaryViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                null!,
+                _httpContextAccessor
+            )
+        );
+        Assert.Throws<ArgumentNullException>("httpContextAccessor", () =>
+            new SelfAssessmentSummaryViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                _groupService,
+                null!
+            )
+        );
     }
 
     [Fact]
-    public async Task RouteToSelfAssessmentSummary_WhenSchoolUser_ReturnsSchoolSummaryViewModel()
+    public async Task RouteToSelfAssessmentSummary_WhenSectionIsMissing_ThrowsContentfulDataUnavailableException()
     {
-        var sut = CreateSut();
-        var controller = MakeController();
+        // Arrange
+        _contentfulService
+            .GetSectionBySlugAsync("missing-section")
+            .Returns((QuestionnaireSectionEntry)null!);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        _currentUser.IsMat.Returns(false);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            systemUnderTest.RouteToSelfAssessmentSummary(
+                _controller,
+                CategorySlug,
+                "missing-section"
+            )
+        );
+        Assert.Contains("missing-section", exception.Message);
+    }
 
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            Name = "Cyber security",
-        };
+    [Fact]
+    public async Task RouteToSelfAssessmentSummary_WhenSectionHasNoId_ThrowsContentfulDataUnavailableException()
+    {
+        // Arrange
+        _contentfulService
+            .GetSectionBySlugAsync("section-without-id")
+            .Returns(new QuestionnaireSectionEntry { Name = "Cyber security" });
+        var systemUnderTest = CreateSystemUnderTest();
 
-        _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
-        _contentful.GetAllCategoriesAsync().Returns([]);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            systemUnderTest.RouteToSelfAssessmentSummary(
+                _controller,
+                CategorySlug,
+                "section-without-id"
+            )
+        );
+        Assert.Contains("section-without-id", exception.Message);
+    }
 
+    [Fact]
+    public async Task RouteToSelfAssessmentSummary_WhenSchoolUserHasCompletedSection_ReturnsSchoolSummaryView()
+    {
+        // Arrange
+        _currentUserProvider.CanSelectSchools.Returns(false);
+        _currentUserProvider.IsMat.Returns(false);
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        _contentfulService.GetSectionBySlugAsync(SectionSlug).Returns(Section);
+        _contentfulService.GetAllCategoriesAsync().Returns([]);
         _groupService
             .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 123 }))
+                Arg.Is<int[]>(establishmentIds =>
+                    establishmentIds.SequenceEqual(new[] { FocusedEstablishmentId })
+                )
             )
             .Returns([
                 new SqlSubmissionDto
                 {
-                    Id = 1,
-                    EstablishmentId = 123,
-                    SectionId = "section-1",
-                    SectionName = "Cyber security",
+                    EstablishmentId = FocusedEstablishmentId,
+                    SectionId = SectionId,
                 },
                 new SqlSubmissionDto
                 {
-                    Id = 2,
-                    EstablishmentId = 123,
+                    EstablishmentId = FocusedEstablishmentId,
                     SectionId = "other-section",
-                    SectionName = "Other",
                 },
             ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var result = await sut.RouteToSelfAssessmentSummary(
-            controller,
-            "digital-leadership",
-            "cyber-security"
+        // Act
+        var result = await systemUnderTest.RouteToSelfAssessmentSummary(
+            _controller,
+            CategorySlug,
+            SectionSlug
         );
 
+        // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal(SelfAssessmentSummaryViewBuilder.SelfAssessmentSummaryViewName, view.ViewName);
-
         var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
-
         Assert.False(model.IsMatSummary);
         Assert.Equal("Cyber security", model.SectionName);
         Assert.Equal("digital leadership", model.CategoryName);
         Assert.Equal(1, model.CompletedSchoolCount);
+        Assert.True(model.ShowSubmitAnotherSelfAssessment);
         Assert.Equal("/digital-leadership", model.SubmitAnotherSelfAssessmentHref);
         Assert.Equal(UrlConstants.HomePage, model.BackToHomeHref);
-
         var link = Assert.Single(model.RecommendationLinks);
         Assert.Equal("View the recommendations for cyber security", link.LinkText);
         Assert.Equal("/digital-leadership", link.Href);
@@ -109,103 +188,182 @@ public class SelfAssessmentSummaryViewBuilderTests
     }
 
     [Fact]
-    public async Task RouteToSelfAssessmentSummary_WhenMatUser_ReturnsMatSummaryViewModel()
+    public async Task RouteToSelfAssessmentSummary_WhenSchoolUserHasNoCompletedSection_ReturnsViewWithoutLinks()
     {
-        var sut = CreateSut();
-        var controller = MakeController();
+        // Arrange
+        _currentUserProvider.CanSelectSchools.Returns(false);
+        _currentUserProvider.IsMat.Returns(false);
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        _contentfulService.GetSectionBySlugAsync(SectionSlug).Returns(Section);
+        _contentfulService.GetAllCategoriesAsync().Returns([]);
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
+                {
+                    EstablishmentId = FocusedEstablishmentId,
+                    SectionId = "other-section",
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+        // Act
+        var result = await systemUnderTest.RouteToSelfAssessmentSummary(
+            _controller,
+            CategorySlug,
+            SectionSlug
+        );
 
-        _currentUser.IsMat.Returns(true);
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
+        Assert.Equal(0, model.CompletedSchoolCount);
+        Assert.Empty(model.RecommendationLinks);
+    }
 
-        var selectedEstablishments = new List<SelectedEstablishmentDataModel>
-        {
-            new SelectedEstablishmentDataModel
-            {
-                Id = 101,
-                Name = "Test School 1",
-                Urn = "11111",
-            },
-            new SelectedEstablishmentDataModel
-            {
-                Id = 102,
-                Name = "Test School 2",
-                Urn = "22222",
-            },
-        };
+    [Fact]
+    public async Task RouteToSelfAssessmentSummary_WhenSectionBelongsToCategory_UsesCategoryHeaderAndLandingPageSlug()
+    {
+        // Arrange
+        _currentUserProvider.CanSelectSchools.Returns(false);
+        _currentUserProvider.IsMat.Returns(false);
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        _contentfulService.GetSectionBySlugAsync(SectionSlug).Returns(Section);
+        _contentfulService
+            .GetAllCategoriesAsync()
+            .Returns([
+                new QuestionnaireCategoryEntry
+                {
+                    Header = new ComponentHeaderEntry
+                    {
+                        Text = "Digital leadership and governance",
+                    },
+                    LandingPage = new PageEntry { Slug = "leadership-governance-standard" },
+                    Sections = [Section],
+                },
+            ]);
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
+                {
+                    EstablishmentId = FocusedEstablishmentId,
+                    SectionId = SectionId,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        controller.HttpContext.Session.SetSelectedEstablishments(selectedEstablishments);
+        // Act
+        var result = await systemUnderTest.RouteToSelfAssessmentSummary(
+            _controller,
+            CategorySlug,
+            SectionSlug
+        );
 
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            Name = "Cyber security",
-        };
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
+        Assert.Equal("Digital leadership and governance", model.CategoryName);
+        Assert.Equal("/leadership-governance-standard", model.SubmitAnotherSelfAssessmentHref);
+        var link = Assert.Single(model.RecommendationLinks);
+        Assert.Equal("/leadership-governance-standard", link.Href);
+    }
 
-        var category = new QuestionnaireCategoryEntry
-        {
-            Header = new ComponentHeaderEntry { Text = "Digital leadership and governance" },
-            LandingPage = new PageEntry { Slug = "leadership-governance-standard" },
-            Sections = [section],
-        };
-
-        _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
-        _contentful.GetAllCategoriesAsync().Returns([category]);
-
+    [Fact]
+    public async Task RouteToSelfAssessmentSummary_WhenMatHasCompletedSchools_ReturnsMatSummaryView()
+    {
+        // Arrange
+        _currentUserProvider.CanSelectSchools.Returns(true);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider
+            .GetSelectedSchools()
+            .Returns([
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FirstSelectedEstablishmentId)
+                    .Build(),
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(SecondSelectedEstablishmentId)
+                    .Build(),
+            ]);
+        _contentfulService.GetSectionBySlugAsync(SectionSlug).Returns(Section);
+        _contentfulService
+            .GetAllCategoriesAsync()
+            .Returns([
+                new QuestionnaireCategoryEntry
+                {
+                    Header = new ComponentHeaderEntry
+                    {
+                        Text = "Digital leadership and governance",
+                    },
+                    LandingPage = new PageEntry { Slug = "leadership-governance-standard" },
+                    Sections = [Section],
+                },
+            ]);
         _groupService
             .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
+                Arg.Is<int[]>(establishmentIds =>
+                    establishmentIds.SequenceEqual(
+                        new[] { FirstSelectedEstablishmentId, SecondSelectedEstablishmentId }
+                    )
+                )
             )
             .Returns([
                 new SqlSubmissionDto
                 {
-                    Id = 1,
-                    EstablishmentId = 101,
-                    SectionId = "section-1",
-                    SectionName = "Cyber security",
-                    Establishment = new SqlEstablishmentDto
-                    {
-                        OrgName = "School One",
-                        EstablishmentRef = "100001",
-                    },
+                    EstablishmentId = FirstSelectedEstablishmentId,
+                    SectionId = SectionId,
+                    Establishment = new SqlEstablishmentDtoBuilder()
+                        .WithId(FirstSelectedEstablishmentId)
+                        .WithOrgName("School One")
+                        .WithEstablishmentRef("100001")
+                        .Build(),
                 },
                 new SqlSubmissionDto
                 {
-                    Id = 2,
-                    EstablishmentId = 102,
-                    SectionId = "section-1",
-                    SectionName = "Cyber security",
-                    Establishment = new SqlEstablishmentDto
-                    {
-                        OrgName = "School Two",
-                        EstablishmentRef = "100002",
-                    },
+                    EstablishmentId = SecondSelectedEstablishmentId,
+                    SectionId = SectionId,
+                    Establishment = new SqlEstablishmentDtoBuilder()
+                        .WithId(SecondSelectedEstablishmentId)
+                        .WithOrgName("School Two")
+                        .WithEstablishmentRef("100002")
+                        .Build(),
                 },
                 new SqlSubmissionDto
                 {
-                    Id = 3,
-                    EstablishmentId = 102,
+                    EstablishmentId = SecondSelectedEstablishmentId,
                     SectionId = "other-section",
-                    SectionName = "Other",
-                    Establishment = new SqlEstablishmentDto
-                    {
-                        OrgName = "School Two",
-                        EstablishmentRef = "100002",
-                    },
+                    Establishment = new SqlEstablishmentDtoBuilder()
+                        .WithId(SecondSelectedEstablishmentId)
+                        .WithOrgName("School Two")
+                        .WithEstablishmentRef("100002")
+                        .Build(),
                 },
             ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var result = await sut.RouteToSelfAssessmentSummary(
-            controller,
-            "digital-leadership",
-            "cyber-security"
+        // Act
+        var result = await systemUnderTest.RouteToSelfAssessmentSummary(
+            _controller,
+            CategorySlug,
+            SectionSlug
         );
 
+        // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal(SelfAssessmentSummaryViewBuilder.SelfAssessmentSummaryViewName, view.ViewName);
-
         var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
-
         Assert.True(model.IsMatSummary);
         Assert.Equal("Cyber security", model.SectionName);
         Assert.Equal("Digital leadership and governance", model.CategoryName);
@@ -214,7 +372,6 @@ public class SelfAssessmentSummaryViewBuilderTests
             $"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
             model.SubmitAnotherSelfAssessmentHref
         );
-
         Assert.Collection(
             model.RecommendationLinks,
             link =>
@@ -235,177 +392,87 @@ public class SelfAssessmentSummaryViewBuilderTests
     }
 
     [Fact]
-    public async Task RouteToSelfAssessmentSummary_WhenMatHasNoSelectedEstablishments_UsesActiveEstablishment()
+    public async Task RouteToSelfAssessmentSummary_WhenMatSchoolHasNoOrganisationName_ReturnsUnknownEstablishmentLinkText()
     {
-        var sut = CreateSut();
-        var controller = MakeController();
-
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        _currentUser.IsMat.Returns(true);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-1"),
-            Name = "Cyber security",
-        };
-
-        _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
-        _contentful.GetAllCategoriesAsync().Returns([]);
-
-        _groupService
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 999 }))
-            )
+        // Arrange
+        _currentUserProvider.CanSelectSchools.Returns(true);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider
+            .GetSelectedSchools()
             .Returns([
-                new SqlSubmissionDto
-                {
-                    Id = 1,
-                    EstablishmentId = 999,
-                    SectionId = "section-1",
-                    SectionName = "Cyber security",
-                    Establishment = new SqlEstablishmentDto
-                    {
-                        OrgName = "Active School",
-                        EstablishmentRef = "900999",
-                    },
-                },
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FirstSelectedEstablishmentId)
+                    .Build(),
             ]);
-
-        var result = await sut.RouteToSelfAssessmentSummary(
-            controller,
-            "digital-leadership",
-            "cyber-security"
-        );
-
-        var view = Assert.IsType<ViewResult>(result);
-        var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
-
-        Assert.True(model.IsMatSummary);
-        Assert.Equal(1, model.CompletedSchoolCount);
-
-        var link = Assert.Single(model.RecommendationLinks);
-        Assert.Equal("Active School", link.LinkText);
-        Assert.Equal("900999", link.SchoolUrn);
-
-        await _groupService
-            .Received(1)
-            .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 999 }))
-            );
-    }
-
-    [Fact]
-    public async Task RouteToSelfAssessmentSummary_WhenSectionMissing_ThrowsContentfulDataUnavailableException()
-    {
-        var sut = CreateSut();
-        var controller = MakeController();
-
-        _contentful
-            .GetSectionBySlugAsync("missing-section")
-            .Returns((QuestionnaireSectionEntry)null!);
-
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToSelfAssessmentSummary(controller, "category", "missing-section")
-        );
-    }
-
-    [Fact]
-    public async Task RouteToSelfAssessmentSummary_WhenSectionIdMissing_ThrowsContentfulDataUnavailableException()
-    {
-        var sut = CreateSut();
-        var controller = MakeController();
-
-        _contentful
-            .GetSectionBySlugAsync("missing-section-id")
-            .Returns(new QuestionnaireSectionEntry { Name = "Section" });
-
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToSelfAssessmentSummary(controller, "category", "missing-section-id")
-        );
-    }
-
-    [Fact]
-    public async Task RouteToSelfAssessmentSummary_WhenMatHasCompletedSchools_ReturnsSummaryView()
-    {
-        var sut = CreateSut();
-        _currentUser.IsMat.Returns(true);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(101);
-
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("section-id"),
-            Name = "Cyber risk assessment",
-        };
-
-        _contentful.GetSectionBySlugAsync("cyber-risk-assessment").Returns(section);
-
-        _contentful.GetAllCategoriesAsync().Returns([]);
-
+        _contentfulService.GetSectionBySlugAsync(SectionSlug).Returns(Section);
+        _contentfulService.GetAllCategoriesAsync().Returns([]);
         _groupService
             .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
             .Returns([
                 new SqlSubmissionDto
                 {
-                    SectionId = "section-id",
-                    Establishment = new SqlEstablishmentDto
-                    {
-                        OrgName = "Test School",
-                        EstablishmentRef = "123456",
-                    },
+                    EstablishmentId = FirstSelectedEstablishmentId,
+                    SectionId = SectionId,
+                    Establishment = new SqlEstablishmentDtoBuilder()
+                        .WithId(FirstSelectedEstablishmentId)
+                        .WithOrgName(null)
+                        .WithEstablishmentRef("100001")
+                        .Build(),
                 },
             ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var controller = new TestController();
-
-        var result = await sut.RouteToSelfAssessmentSummary(
-            controller,
-            "cyber-security-standard",
-            "cyber-risk-assessment"
+        // Act
+        var result = await systemUnderTest.RouteToSelfAssessmentSummary(
+            _controller,
+            CategorySlug,
+            SectionSlug
         );
 
+        // Assert
         var view = Assert.IsType<ViewResult>(result);
-
-        Assert.Equal(SelfAssessmentSummaryViewBuilder.SelfAssessmentSummaryViewName, view.ViewName);
-
         var model = Assert.IsType<SelfAssessmentSummaryViewModel>(view.Model);
-
-        Assert.Equal(1, model.CompletedSchoolCount);
-        Assert.Single(model.RecommendationLinks);
+        var link = Assert.Single(model.RecommendationLinks);
+        Assert.Equal("Unknown Establishment", link.LinkText);
+        Assert.Null(link.SchoolName);
+        Assert.Equal("100001", link.SchoolUrn);
     }
 
     [Fact]
-    public void Constructor_WithNullGroupService_ThrowsArgumentNullException()
+    public async Task RouteToSelfAssessmentSummary_WhenMatHasNoCompletedSchools_RedirectsToGroupSelfAssessmentSelection()
     {
-        var ex = Assert.Throws<ArgumentNullException>(() =>
-            new SelfAssessmentSummaryViewBuilder(
-                _logger,
-                _contentful,
-                _currentUser,
-                null!,
-                _httpContextAccessor
-            )
+        // Arrange
+        _currentUserProvider.CanSelectSchools.Returns(true);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider
+            .GetSelectedSchools()
+            .Returns([
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FirstSelectedEstablishmentId)
+                    .Build(),
+            ]);
+        _contentfulService.GetSectionBySlugAsync(SectionSlug).Returns(Section);
+        _contentfulService.GetAllCategoriesAsync().Returns([]);
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
+                {
+                    EstablishmentId = FirstSelectedEstablishmentId,
+                    SectionId = "other-section",
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.RouteToSelfAssessmentSummary(
+            _controller,
+            CategorySlug,
+            SectionSlug
         );
 
-        Assert.Equal("groupService", ex.ParamName);
+        // Assert
+        var redirect = Assert.IsType<RedirectResult>(result);
+        Assert.Equal($"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}", redirect.Url);
     }
-
-    [Fact]
-    public void Constructor_WithNullHttpContextAccessor_ThrowsArgumentNullException()
-    {
-        var ex = Assert.Throws<ArgumentNullException>(() =>
-            new SelfAssessmentSummaryViewBuilder(
-                _logger,
-                _contentful,
-                _currentUser,
-                _groupService,
-                null!
-            )
-        );
-
-        Assert.Equal("httpContextAccessor", ex.ParamName);
-    }
-
-    private sealed class DummyController : Controller { }
 }

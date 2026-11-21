@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -136,21 +137,8 @@ public class BannerConditionsContextProviderTests
         bool expectedVisibility
     )
     {
-        _currentUser
-            .OrganisationCategoryIdMatchesAny(
-                Arg.Is<IEnumerable<string>>(x =>
-                    x.SequenceEqual(DsiConstants.EstablishmentOrganisationCategoryIds)
-                )
-            )
-            .Returns(isSchool);
-
-        _currentUser
-            .OrganisationCategoryIdMatchesAny(
-                Arg.Is<IEnumerable<string>>(x =>
-                    x.SequenceEqual(DsiConstants.SelectASchoolOrganisationCategoryIds)
-                )
-            )
-            .Returns(isGroup);
+        _currentUser.IsSchool.Returns(isSchool);
+        _currentUser.CanSelectSchools.Returns(isGroup);
 
         var banner = new ComponentNotificationBannerEntry
         {
@@ -192,7 +180,9 @@ public class BannerConditionsContextProviderTests
         bool expectedVisibility
     )
     {
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+        _currentUser
+            .GetFocusedEstablishmentAsync()
+            .Returns(new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(1).Build());
 
         var questionnaireSectionEntry = new QuestionnaireSectionEntry
         {
@@ -253,7 +243,9 @@ public class BannerConditionsContextProviderTests
         bool expectedVisibility
     )
     {
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+        _currentUser
+            .GetFocusedEstablishmentAsync()
+            .Returns(new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(1).Build());
 
         var questionnaireSectionEntry = new RecommendationChunkEntry
         {

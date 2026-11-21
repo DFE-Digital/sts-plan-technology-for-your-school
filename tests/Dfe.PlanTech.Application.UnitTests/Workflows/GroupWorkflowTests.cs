@@ -1,869 +1,258 @@
-using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
-using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Dfe.PlanTech.Tests.Shared.Assertions;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 
 public class GroupWorkflowTests
 {
-    private static readonly int[] EstablishmentIdsOneAndTwo = [1, 2];
-    private static readonly int[] EstablishmentIdsOneTwoAndThree = [1, 2, 3];
-    private static readonly int[] EstablishmentIdsOneToFour = [1, 2, 3, 4];
-
+    private readonly IEstablishmentGroupRepository _establishmentGroupRepository =
+        Substitute.For<IEstablishmentGroupRepository>();
+    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
+        Substitute.For<IEstablishmentRecommendationHistoryRepository>();
     private readonly ISubmissionRepository _submissionRepository =
         Substitute.For<ISubmissionRepository>();
 
-    private readonly IEstablishmentService _establishmentService =
-        Substitute.For<IEstablishmentService>();
+    private GroupWorkflow CreateSystemUnderTest() =>
+        new(_establishmentGroupRepository, _recommendationHistoryRepository, _submissionRepository);
 
-    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
-        Substitute.For<IEstablishmentRecommendationHistoryRepository>();
-    private readonly IGiasRepository _giasRepository = Substitute.For<IGiasRepository>();
-    private readonly Dfe.PlanTech.Application.Workflows.Interfaces.IRecommendationWorkflow _recommendationWorkflow =
-        Substitute.For<Dfe.PlanTech.Application.Workflows.Interfaces.IRecommendationWorkflow>();
-
-    private GroupWorkflow CreateServiceUnderTest() =>
-        new(
-            _submissionRepository,
-            _establishmentService,
+    [Fact]
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        ConstructorGuardAssert.AllNonNullableParametersAreGuarded<GroupWorkflow>(
+            _establishmentGroupRepository,
             _recommendationHistoryRepository,
-            _giasRepository,
-            _recommendationWorkflow
+            _submissionRepository
         );
-
-    private static EstablishmentEntity BuildEstablishment(int id = 1)
-    {
-        return new EstablishmentEntity
-        {
-            Id = id,
-            EstablishmentRef = $"testRef{id}",
-            OrgName = $"testName{id}",
-            DateCreated = DateTime.UtcNow,
-        };
-    }
-
-    private static SubmissionEntity BuildSubmission(
-        int id,
-        int establishmentId,
-        string sectionId,
-        SubmissionStatus status = SubmissionStatus.CompleteReviewed
-    )
-    {
-        return new SubmissionEntity
-        {
-            Id = id,
-            EstablishmentId = establishmentId,
-            Establishment = BuildEstablishment(establishmentId),
-            SectionId = sectionId,
-            SectionName = $"Section {sectionId}",
-            Status = status,
-            Responses = new List<ResponseEntity>(),
-        };
     }
 
     [Fact]
-    public async Task GetGroupEstablishmentContextAsync_ReturnsEstablishmentsIdsAndCompletedSubmissions()
+    public async Task GetGroupCompletedSubmissions_WhenSubmissionsExist_ReturnsMappedSubmissions()
     {
-        var sut = CreateServiceUnderTest();
-
-        var groupEstablishmentId = 100;
-
-        _establishmentService
-            .GetEstablishmentByIdAsync(groupEstablishmentId)
-            .Returns(new SqlEstablishmentDto { Id = groupEstablishmentId, GroupUid = "500" });
-
-        _giasRepository
-            .GetSchoolsForGroupAsync(500)
-            .Returns([
-                new GiasEstablishmentEntity
-                {
-                    Urn = 1,
-                    EstablishmentName = "School One",
-                    EstablishmentStatusCode = 1,
-                    LocalAuthorityCode = 1,
-                    PhaseCode = 1,
-                    SyncedAt = DateTime.UtcNow,
-                    Ukprn = "",
-                },
-                new GiasEstablishmentEntity
-                {
-                    Urn = 2,
-                    EstablishmentName = "School Two",
-                    EstablishmentStatusCode = 1,
-                    LocalAuthorityCode = 1,
-                    PhaseCode = 1,
-                    SyncedAt = DateTime.UtcNow,
-                    Ukprn = "",
-                },
-            ]);
-
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("1", "School One")
-            .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 1,
-                    EstablishmentRef = "1",
-                    OrgName = "School One",
-                }
-            );
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("2", "School Two")
-            .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 2,
-                    EstablishmentRef = "2",
-                    OrgName = "School Two",
-                }
-            );
-
+        // Arrange
+        int[] establishmentIds = [701, 702];
         _submissionRepository
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(EstablishmentIdsOneAndTwo))
+            .GetEstablishmentsLatestCompletedSubmissionsBySectionsAsync(
+                Arg.Is<IEnumerable<int>>(ids => ids.SequenceEqual(establishmentIds))
             )
-            .Returns([BuildSubmission(id: 100, establishmentId: 1, sectionId: "SEC-1")]);
-
-        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
-
-        Assert.Equal(2, result.Establishments.Count);
-        Assert.Equal(EstablishmentIdsOneAndTwo, result.EstablishmentIds);
-
-        var submission = Assert.Single(result.CompletedSubmissions);
-
-        Assert.Equal(100, submission.Id);
-        Assert.Equal(1, submission.EstablishmentId);
-        Assert.Equal("SEC-1", submission.SectionId);
-
-        await _giasRepository.Received(1).GetSchoolsForGroupAsync(500);
-    }
-
-    [Fact]
-    public async Task GetGroupEstablishmentContextAsync_UsesDistinctEstablishmentIds()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var groupEstablishmentId = 100;
-
-        _establishmentService
-            .GetEstablishmentByIdAsync(groupEstablishmentId)
-            .Returns(new SqlEstablishmentDto { Id = groupEstablishmentId, GroupUid = "500" });
-
-        _giasRepository
-            .GetSchoolsForGroupAsync(500)
             .Returns([
-                new GiasEstablishmentEntity
-                {
-                    Urn = 1,
-                    EstablishmentName = "School One",
-                    EstablishmentStatusCode = 1,
-                    LocalAuthorityCode = 1,
-                    PhaseCode = 1,
-                    SyncedAt = DateTime.UtcNow,
-                    Ukprn = "",
-                },
-                new GiasEstablishmentEntity
-                {
-                    Urn = 2,
-                    EstablishmentName = "School Two",
-                    EstablishmentStatusCode = 1,
-                    LocalAuthorityCode = 1,
-                    PhaseCode = 1,
-                    SyncedAt = DateTime.UtcNow,
-                    Ukprn = "",
-                },
-                new GiasEstablishmentEntity
-                {
-                    Urn = 1,
-                    EstablishmentName = "School One",
-                    EstablishmentStatusCode = 1,
-                    LocalAuthorityCode = 1,
-                    PhaseCode = 1,
-                    SyncedAt = DateTime.UtcNow,
-                    Ukprn = "",
-                },
+                new SubmissionEntityBuilder()
+                    .WithId(100)
+                    .WithEstablishmentId(701)
+                    .WithSectionId("section-a")
+                    .Build(),
+                new SubmissionEntityBuilder()
+                    .WithId(200)
+                    .WithEstablishmentId(702)
+                    .WithSectionId("section-b")
+                    .Build(),
             ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("1", "School One")
-            .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 1,
-                    EstablishmentRef = "1",
-                    OrgName = "School One",
-                }
-            );
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("2", "School Two")
-            .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 2,
-                    EstablishmentRef = "2",
-                    OrgName = "School Two",
-                }
-            );
+        // Act
+        var result = await systemUnderTest.GetGroupCompletedSubmissions(establishmentIds);
 
-        _submissionRepository
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(EstablishmentIdsOneAndTwo))
-            )
-            .Returns([]);
-
-        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
-
-        Assert.Equal(EstablishmentIdsOneAndTwo, result.EstablishmentIds);
-
-        await _submissionRepository
-            .Received(1)
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(EstablishmentIdsOneAndTwo))
-            );
-    }
-
-    [Fact]
-    public async Task GetGroupEstablishmentContextAsync_WhenNoEstablishments_ReturnsEmptyContextWithoutRetrievingSubmissions()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var groupEstablishmentId = 100;
-
-        _establishmentService
-            .GetEstablishmentByIdAsync(groupEstablishmentId)
-            .Returns(new SqlEstablishmentDto { Id = groupEstablishmentId, GroupUid = "500" });
-        _giasRepository.GetSchoolsForGroupAsync(500).Returns([]);
-
-        var result = await sut.GetGroupEstablishmentContextAsync(groupEstablishmentId);
-
-        Assert.Empty(result.Establishments);
-        Assert.Empty(result.EstablishmentIds);
-        Assert.Empty(result.CompletedSubmissions);
-
-        await _submissionRepository
-            .DidNotReceive()
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(Arg.Any<int[]>());
-    }
-
-    [Fact]
-    public async Task GetGroupCompletedSubmissions_CallsRepository()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var establishmentIds = EstablishmentIdsOneTwoAndThree;
-
-        _submissionRepository
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds)
-            .Returns(new List<SubmissionEntity>());
-
-        await sut.GetGroupCompletedSubmissions(establishmentIds);
-
-        await _submissionRepository
-            .Received(1)
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(establishmentIds))
-            );
-    }
-
-    [Fact]
-    public async Task GetGroupCompletedSubmissions_ReturnsSubmissionDtos()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var establishmentIds = EstablishmentIdsOneAndTwo;
-
-        var submissions = new List<SubmissionEntity>
-        {
-            BuildSubmission(id: 100, establishmentId: 1, sectionId: "SEC-1"),
-            BuildSubmission(id: 200, establishmentId: 2, sectionId: "SEC-2"),
-        };
-
-        _submissionRepository
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds)
-            .Returns(submissions);
-
-        var result = await sut.GetGroupCompletedSubmissions(establishmentIds);
-
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-
+        // Assert
         Assert.Collection(
             result,
             submission =>
             {
                 Assert.Equal(100, submission.Id);
-                Assert.Equal(1, submission.EstablishmentId);
-                Assert.Equal("SEC-1", submission.SectionId);
-                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
+                Assert.Equal(701, submission.EstablishmentId);
+                Assert.Equal("section-a", submission.SectionId);
             },
             submission =>
             {
                 Assert.Equal(200, submission.Id);
-                Assert.Equal(2, submission.EstablishmentId);
-                Assert.Equal("SEC-2", submission.SectionId);
-                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
+                Assert.Equal(702, submission.EstablishmentId);
+                Assert.Equal("section-b", submission.SectionId);
             }
         );
     }
 
     [Fact]
-    public async Task GetGroupCompletedSubmissions_WhenNoSubmissions_ReturnsEmptyList()
+    public async Task GetGroupSubmissionInformationForSection_WhenSchoolHasNoSubmission_ReturnsNotStartedEntry()
     {
-        var sut = CreateServiceUnderTest();
-
-        var establishmentIds = EstablishmentIdsOneTwoAndThree;
-
+        // Arrange
+        var school = new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(701)
+            .WithUrn("100701")
+            .WithName("Northfield Primary")
+            .Build();
         _submissionRepository
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds)
-            .Returns(new List<SubmissionEntity>());
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Is<IEnumerable<int>>(ids => ids.SequenceEqual(new[] { 701 })),
+                "section-id"
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var result = await sut.GetGroupCompletedSubmissions(establishmentIds);
+        // Act
+        var result = await systemUnderTest.GetGroupSubmissionInformationForSection(
+            [school],
+            "section-id"
+        );
 
-        Assert.NotNull(result);
-        Assert.Empty(result);
-
-        await _submissionRepository
-            .Received(1)
-            .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds);
+        // Assert
+        var information = Assert.Single(result);
+        Assert.Equal(701, information.EstablishmentId);
+        Assert.Equal("Northfield Primary", information.EstablishmentName);
+        Assert.Equal("100701", information.EstablishmentRef);
+        Assert.Equal("section-id", information.SectionId);
+        Assert.Equal(SubmissionStatus.NotStarted, information.Status);
+        Assert.Null(information.SubmissionId);
     }
 
     [Fact]
-    public async Task GetGroupSubmissionInformationForSection_CallsSubmissionRepository()
+    public async Task GetGroupSubmissionInformationForSection_WhenSchoolHasSubmission_ReturnsSubmissionDetails()
     {
-        var sut = CreateServiceUnderTest();
+        // Arrange
+        var school = new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(701)
+            .WithUrn("100701")
+            .WithName("Northfield Primary")
+            .Build();
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Any<IEnumerable<int>>(),
+                "section-id"
+            )
+            .Returns([
+                new SubmissionEntityBuilder()
+                    .WithId(100)
+                    .WithEstablishmentId(701)
+                    .WithStatus(SubmissionStatus.CompleteReviewed)
+                    .WithDateCreated(new DateTime(2025, 1, 15, 9, 0, 0, DateTimeKind.Utc))
+                    .WithDateLastUpdated(new DateTime(2025, 2, 20, 9, 0, 0, DateTimeKind.Utc))
+                    .WithDateCompleted(new DateTime(2025, 3, 25, 9, 0, 0, DateTimeKind.Utc))
+                    .Build(),
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var sectionId = "sec1";
-
-        var establishmentLink1 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef1",
-            EstablishmentName = "testName1",
-        };
-
-        var establishmentLink2 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef2",
-            EstablishmentName = "testName2",
-        };
-
-        var establishmentLink3 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef3",
-            EstablishmentName = "testName3",
-        };
-
-        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
-        {
-            establishmentLink1,
-            establishmentLink2,
-            establishmentLink3,
-        };
-
-        var establishment1 = new SqlEstablishmentDto()
-        {
-            Id = 1,
-            EstablishmentRef = "testRef1",
-            OrgName = "testName1",
-        };
-
-        var establishment2 = new SqlEstablishmentDto()
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "testName2",
-        };
-
-        var establishment3 = new SqlEstablishmentDto()
-        {
-            Id = 3,
-            EstablishmentRef = "testRef3",
-            OrgName = "testName3",
-        };
-
-        var establishmentIds = EstablishmentIdsOneTwoAndThree;
-
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef1", "testName1")
-            .Returns(establishment1);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef2", "testName2")
-            .Returns(establishment2);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef3", "testName3")
-            .Returns(establishment3);
-
-        var result = await sut.GetGroupSubmissionInformationForSection(
-            establishmentLinks,
-            sectionId
+        // Act
+        var result = await systemUnderTest.GetGroupSubmissionInformationForSection(
+            [school],
+            "section-id"
         );
 
-        await _submissionRepository
-            .Received(1)
+        // Assert
+        var information = Assert.Single(result);
+        Assert.Equal(100, information.SubmissionId);
+        Assert.Equal(SubmissionStatus.CompleteReviewed, information.Status);
+        Assert.Equal("15 Jan 2025", information.DateCreated);
+        Assert.Equal("20 Feb 2025", information.DateLastUpdated);
+        Assert.Equal("25 Mar 2025", information.DateCompleted);
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_WhenSubmissionHasNoUpdateOrCompletionDate_LeavesThoseDatesNull()
+    {
+        // Arrange
+        var school = new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(701).Build();
+        _submissionRepository
             .GetLatestSubmissionPerEstablishmentForSectionAsync(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(establishmentIds)),
-                sectionId
+                Arg.Any<IEnumerable<int>>(),
+                "section-id"
+            )
+            .Returns([new SubmissionEntityBuilder().WithId(100).WithEstablishmentId(701).Build()]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetGroupSubmissionInformationForSection(
+            [school],
+            "section-id"
+        );
+
+        // Assert
+        var information = Assert.Single(result);
+        Assert.Null(information.DateLastUpdated);
+        Assert.Null(information.DateCompleted);
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_WhenRepositoryReturnsNull_ReturnsNotStartedEntries()
+    {
+        // Arrange
+        var school = new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(701).Build();
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Any<IEnumerable<int>>(),
+                "section-id"
+            )
+            .Returns((List<SubmissionEntity>)null!);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetGroupSubmissionInformationForSection(
+            [school],
+            "section-id"
+        );
+
+        // Assert
+        var information = Assert.Single(result);
+        Assert.Equal(SubmissionStatus.NotStarted, information.Status);
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_WhenSchoolsRepeatAnEstablishmentId_QueriesDistinctIds()
+    {
+        // Arrange
+        List<SelectedEstablishmentDataModel> schools =
+        [
+            new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(701).Build(),
+            new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(702).Build(),
+            new SelectedEstablishmentDataModelBuilder().WithEstablishmentId(701).Build(),
+        ];
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Is<IEnumerable<int>>(ids => ids.SequenceEqual(new[] { 701, 702 })),
+                "section-id"
+            )
+            .Returns([new SubmissionEntityBuilder().WithId(100).WithEstablishmentId(702).Build()]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetGroupSubmissionInformationForSection(
+            schools,
+            "section-id"
+        );
+
+        // Assert
+        Assert.Equal(
+            [SubmissionStatus.NotStarted, SubmissionStatus.InProgress, SubmissionStatus.NotStarted],
+            result.Select(information => information.Status).ToArray()
+        );
+    }
+
+    [Fact]
+    public async Task GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRefAsync_WhenCalled_ReturnsRepositoryResult()
+    {
+        // Arrange
+        var expectedHistories =
+            new List<(
+                EstablishmentEntity Establishment,
+                EstablishmentRecommendationHistoryEntity? History
+            )>();
+        _recommendationHistoryRepository
+            .GetLatestGroupRecommendationHistoryByRecommendationRefAsync(301, "recommendation-ref")
+            .Returns(expectedHistories);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result =
+            await systemUnderTest.GetLatestGroupEstablishmentRecommendationHistoryByRecommendationRefAsync(
+                301,
+                "recommendation-ref"
             );
-    }
 
-    [Fact]
-    public async Task GetGroupSubmissionInformationForSection_ReturnsSubmissionInformationModelsForAllSchools()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var sectionId = "sec1";
-
-        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
-        {
-            new() { Urn = "testRef1", EstablishmentName = "testName1" },
-            new() { Urn = "testRef2", EstablishmentName = "testName2" },
-            new() { Urn = "testRef3", EstablishmentName = "testName3" },
-            new() { Urn = "testRef4", EstablishmentName = "testName4" },
-        };
-
-        var establishment1 = new SqlEstablishmentDto()
-        {
-            Id = 1,
-            EstablishmentRef = "testRef1",
-            OrgName = "testName1",
-        };
-
-        var establishment2 = new SqlEstablishmentDto()
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "testName2",
-        };
-
-        var establishment3 = new SqlEstablishmentDto()
-        {
-            Id = 3,
-            EstablishmentRef = "testRef3",
-            OrgName = "testName3",
-        };
-
-        var establishment4 = new SqlEstablishmentDto()
-        {
-            Id = 4,
-            EstablishmentRef = "testRef4",
-            OrgName = "testName4",
-        };
-
-        var establishmentIds = EstablishmentIdsOneToFour;
-
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef1", "testName1")
-            .Returns(establishment1);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef2", "testName2")
-            .Returns(establishment2);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef3", "testName3")
-            .Returns(establishment3);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef4", "testName4")
-            .Returns(establishment4);
-
-        var submissions = new List<SubmissionEntity>
-        {
-            BuildSubmission(id: 100, establishmentId: 1, sectionId),
-            BuildSubmission(id: 200, establishmentId: 2, sectionId),
-        };
-
-        submissions[0].Establishment = new EstablishmentEntity
-        {
-            Id = 1,
-            EstablishmentRef = "testRef1",
-            OrgName = "Test 1",
-        };
-
-        submissions[1].Establishment = new EstablishmentEntity
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "Test 2",
-        };
-
-        _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(
-                Arg.Is<int[]>(x => x.SequenceEqual(establishmentIds)),
-                sectionId
-            )
-            .Returns(submissions);
-
-        var result = await sut.GetGroupSubmissionInformationForSection(
-            establishmentLinks,
-            sectionId
-        );
-
-        Assert.NotNull(result);
-        Assert.Equal(4, result.Count);
-
-        Assert.Collection(
-            result,
-            submission =>
-            {
-                Assert.Equal(1, submission.EstablishmentId);
-                Assert.Equal("testName1", submission.EstablishmentName);
-                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
-            },
-            submission =>
-            {
-                Assert.Equal(2, submission.EstablishmentId);
-                Assert.Equal("testName2", submission.EstablishmentName);
-                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
-            },
-            submission =>
-            {
-                Assert.Equal(3, submission.EstablishmentId);
-                Assert.Equal("testName3", submission.EstablishmentName);
-                Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
-            },
-            submission =>
-            {
-                Assert.Equal(4, submission.EstablishmentId);
-                Assert.Equal("testName4", submission.EstablishmentName);
-                Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
-            }
-        );
-    }
-
-    [Fact]
-    public async Task GetGroupSubmissionInformationForSection_ReturnsNotStartedWhereNoSubmissionExistsForSchool()
-    {
-        var sut = CreateServiceUnderTest();
-        var sectionId = "sec2";
-
-        var establishmentLink1 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef1",
-            EstablishmentName = "testName1",
-        };
-
-        var establishmentLink2 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef2",
-            EstablishmentName = "testName2",
-        };
-
-        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
-        {
-            establishmentLink1,
-            establishmentLink2,
-        };
-
-        var establishment1 = new SqlEstablishmentDto()
-        {
-            Id = 1,
-            EstablishmentRef = "testRef1",
-            OrgName = "testName1",
-        };
-        var establishment2 = new SqlEstablishmentDto()
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "testName2",
-        };
-
-        var establishmentIds = EstablishmentIdsOneAndTwo;
-
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef1", "testName1")
-            .Returns(establishment1);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef2", "testName2")
-            .Returns(establishment2);
-
-        var submissions = new List<SubmissionEntity>
-        {
-            BuildSubmission(
-                id: 200,
-                establishmentId: 2,
-                sectionId,
-                status: SubmissionStatus.InProgress
-            ),
-        };
-
-        submissions[0].Establishment = new EstablishmentEntity
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "testName2",
-        };
-
-        _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(
-                Arg.Is<int[]>(x => x.SequenceEqual(establishmentIds)),
-                sectionId
-            )
-            .Returns(submissions);
-
-        _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
-            .Returns(submissions);
-
-        var result = await sut.GetGroupSubmissionInformationForSection(
-            establishmentLinks,
-            sectionId
-        );
-
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-
-        Assert.Collection(
-            result,
-            submission =>
-            {
-                Assert.Equal(1, submission.EstablishmentId);
-                Assert.Equal("testName1", submission.EstablishmentName);
-                Assert.Equal(sectionId, submission.SectionId);
-                Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
-            },
-            submission =>
-            {
-                Assert.Equal(200, submission.SubmissionId);
-                Assert.Equal(2, submission.EstablishmentId);
-                Assert.Equal("testName2", submission.EstablishmentName);
-                Assert.Equal(sectionId, submission.SectionId);
-                Assert.Equal(SubmissionStatus.InProgress, submission.Status);
-            }
-        );
-    }
-
-    [Fact]
-    public async Task GetGroupSubmissionInformationForSection_ReturnsCorrectSubmissionInfo()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var sectionId = "sec3";
-
-        var establishmentLink1 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef1",
-            EstablishmentName = "Test 1",
-        };
-
-        var establishmentLink2 = new SqlEstablishmentLinkDto()
-        {
-            Urn = "testRef2",
-            EstablishmentName = "Test 2",
-        };
-
-        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
-        {
-            establishmentLink1,
-            establishmentLink2,
-        };
-
-        var establishment1 = new SqlEstablishmentDto()
-        {
-            Id = 1,
-            EstablishmentRef = "testRef1",
-            OrgName = "Test 1",
-        };
-
-        var establishment2 = new SqlEstablishmentDto()
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "Test 2",
-        };
-
-        var establishmentIds = EstablishmentIdsOneAndTwo;
-
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef1", "Test 1")
-            .Returns(establishment1);
-        _establishmentService
-            .GetOrCreateEstablishmentAsync("testRef2", "Test 2")
-            .Returns(establishment2);
-
-        var submissions = new List<SubmissionEntity>
-        {
-            BuildSubmission(
-                id: 101,
-                establishmentId: 1,
-                sectionId,
-                status: SubmissionStatus.InProgress
-            ),
-            BuildSubmission(
-                id: 201,
-                establishmentId: 2,
-                sectionId,
-                status: SubmissionStatus.CompleteReviewed
-            ),
-        };
-
-        submissions[0].Establishment = new EstablishmentEntity
-        {
-            Id = 1,
-            EstablishmentRef = "testRef1",
-            OrgName = "Test 1",
-        };
-        submissions[0].DateCreated = new DateTime(2025, 1, 1);
-        submissions[0].DateLastUpdated = new DateTime(2025, 2, 1);
-
-        submissions[1].Establishment = new EstablishmentEntity
-        {
-            Id = 2,
-            EstablishmentRef = "testRef2",
-            OrgName = "Test 2",
-        };
-        submissions[1].DateCreated = new DateTime(2025, 3, 1);
-        submissions[1].DateLastUpdated = new DateTime(2025, 4, 1);
-        submissions[1].DateCompleted = new DateTime(2025, 5, 1);
-
-        _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(
-                Arg.Is<int[]>(x => x.SequenceEqual(establishmentIds)),
-                sectionId
-            )
-            .Returns(submissions);
-
-        var result = await sut.GetGroupSubmissionInformationForSection(
-            establishmentLinks,
-            sectionId
-        );
-
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-
-        Assert.Collection(
-            result,
-            submission =>
-            {
-                Assert.Equal(101, submission.SubmissionId);
-                Assert.Equal(1, submission.EstablishmentId);
-                Assert.Equal("Test 1", submission.EstablishmentName);
-                Assert.Equal(sectionId, submission.SectionId);
-                Assert.Equal(SubmissionStatus.InProgress, submission.Status);
-                Assert.Equal(
-                    DateTimeHelper.FormattedDateShort(new DateTime(2025, 1, 1)),
-                    submission.DateCreated
-                );
-                Assert.Equal(
-                    DateTimeHelper.FormattedDateShort(new DateTime(2025, 2, 1)),
-                    submission.DateLastUpdated
-                );
-            },
-            submission =>
-            {
-                Assert.Equal(201, submission.SubmissionId);
-                Assert.Equal(2, submission.EstablishmentId);
-                Assert.Equal("Test 2", submission.EstablishmentName);
-                Assert.Equal(sectionId, submission.SectionId);
-                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
-                Assert.Equal(
-                    DateTimeHelper.FormattedDateShort(new DateTime(2025, 3, 1)),
-                    submission.DateCreated
-                );
-                Assert.Equal(
-                    DateTimeHelper.FormattedDateShort(new DateTime(2025, 4, 1)),
-                    submission.DateLastUpdated
-                );
-                Assert.Equal(
-                    DateTimeHelper.FormattedDateShort(new DateTime(2025, 5, 1)),
-                    submission.DateCompleted
-                );
-            }
-        );
-    }
-
-    [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_SubmissionRepository_Is_Null()
-    {
-        var exception = Record.Exception(() =>
-            new GroupWorkflow(
-                null!,
-                _establishmentService,
-                _recommendationHistoryRepository,
-                _giasRepository,
-                _recommendationWorkflow
-            )
-        );
-
-        Assert.Equal(
-            "submissionRepository",
-            Assert.IsType<ArgumentNullException>(exception).ParamName
-        );
-    }
-
-    [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_EstablishmentService_Is_Null()
-    {
-        var exception = Record.Exception(() =>
-            new GroupWorkflow(
-                _submissionRepository,
-                null!,
-                _recommendationHistoryRepository,
-                _giasRepository,
-                _recommendationWorkflow
-            )
-        );
-
-        Assert.Equal(
-            "establishmentService",
-            Assert.IsType<ArgumentNullException>(exception).ParamName
-        );
-    }
-
-    [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_RecommendationHistoryRepository_Is_Null()
-    {
-        var exception = Record.Exception(() =>
-            new GroupWorkflow(
-                _submissionRepository,
-                _establishmentService,
-                null!,
-                _giasRepository,
-                _recommendationWorkflow
-            )
-        );
-
-        Assert.Equal(
-            "recommendationHistoryRepository",
-            Assert.IsType<ArgumentNullException>(exception).ParamName
-        );
-    }
-
-    [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_GiasRepository_Is_Null()
-    {
-        var exception = Record.Exception(() =>
-            new GroupWorkflow(
-                _submissionRepository,
-                _establishmentService,
-                _recommendationHistoryRepository,
-                null!,
-                _recommendationWorkflow
-            )
-        );
-
-        Assert.Equal("giasRepository", Assert.IsType<ArgumentNullException>(exception).ParamName);
-    }
-
-    [Fact]
-    public void Constructor_Throws_ArgumentNullException_When_RecommendationWorkflow_Is_Null()
-    {
-        var exception = Record.Exception(() =>
-            new GroupWorkflow(
-                _submissionRepository,
-                _establishmentService,
-                _recommendationHistoryRepository,
-                _giasRepository,
-                null!
-            )
-        );
-
-        Assert.Equal(
-            "recommendationWorkflow",
-            Assert.IsType<ArgumentNullException>(exception).ParamName
-        );
+        // Assert
+        Assert.Same(expectedHistories, result);
     }
 }

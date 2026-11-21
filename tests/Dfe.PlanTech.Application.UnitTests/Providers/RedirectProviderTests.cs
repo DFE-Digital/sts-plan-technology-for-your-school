@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -15,7 +16,13 @@ public class RedirectProviderTests
     >();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
 
-    private RedirectProvider CreateSut() => new(_logger, _contentfulService);
+    private IServiceScopeFactory CreateScopeFactory() =>
+        new ServiceCollection()
+            .AddSingleton(_contentfulService)
+            .BuildServiceProvider()
+            .GetRequiredService<IServiceScopeFactory>();
+
+    private RedirectProvider CreateSut() => new(_logger, CreateScopeFactory());
 
     // ---------------------------------------------------------------
     // Constructor
@@ -24,13 +31,13 @@ public class RedirectProviderTests
     [Fact]
     public void Constructor_NullLogger_ThrowsArgumentNullException()
     {
-        var act = () => new RedirectProvider(null!, _contentfulService);
+        var act = () => new RedirectProvider(null!, CreateScopeFactory());
 
         Assert.Throws<ArgumentNullException>(act);
     }
 
     [Fact]
-    public void Constructor_NullContentfulService_ThrowsArgumentNullException()
+    public void Constructor_NullScopeFactory_ThrowsArgumentNullException()
     {
         var act = () => new RedirectProvider(_logger, null!);
 

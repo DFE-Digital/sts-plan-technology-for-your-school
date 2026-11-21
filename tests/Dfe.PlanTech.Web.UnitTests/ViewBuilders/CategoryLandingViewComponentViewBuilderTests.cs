@@ -1,15 +1,15 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -17,1251 +17,1378 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class CategoryLandingViewComponentViewBuilderTests
 {
-    private static CategoryLandingViewComponentViewBuilder CreateSut(
-        IContentfulService? contentful = null,
-        ISubmissionService? submission = null,
-        IEstablishmentService? establishment = null,
-        IUserActionTrackingService? userActionTracking = null,
-        IUserService? user = null,
-        IGroupService? groupService = null,
-        ICurrentUserProvider? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null
-    )
+    private const int UserId = 77;
+    private const int FocusedEstablishmentId = 1001;
+    private const int FirstGroupEstablishmentId = 101;
+    private const int SecondGroupEstablishmentId = 102;
+    private const int OutsideGroupEstablishmentId = 999;
+    private const string CategorySlug = "networking-category";
+    private const string NetworkingSectionId = "section-networking";
+    private const string DevicesSectionId = "section-devices";
+    private const string BroadbandSectionId = "section-broadband";
+    private const string AssessmentLinkPartialName =
+        "Components/CategoryLanding/SectionAssessmentLink";
+    private const string AssessmentLinkPrintPartialName =
+        "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
+
+    private static readonly DateTime OldestUpdate = new(2025, 1, 10, 9, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime MiddleUpdate = new(2025, 1, 11, 9, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime NewestUpdate = new(2025, 1, 12, 9, 0, 0, DateTimeKind.Utc);
+    private static readonly Guid FirstUserActionId = new("11111111-1111-4111-8111-111111111111");
+    private static readonly Guid SecondUserActionId = new("22222222-2222-4222-8222-222222222222");
+
+    private static readonly QuestionnaireSectionEntry NetworkingSection = new()
     {
-        contentful ??= Substitute.For<IContentfulService>();
-        submission ??= Substitute.For<ISubmissionService>();
-        establishment ??= Substitute.For<IEstablishmentService>();
-        userActionTracking ??= Substitute.For<IUserActionTrackingService>();
-        user ??= Substitute.For<IUserService>();
-        groupService ??= Substitute.For<IGroupService>();
-        currentUser ??= Substitute.For<ICurrentUserProvider>();
+        Sys = new SystemDetails(NetworkingSectionId),
+        Name = "Networking",
+        InterstitialPage = new PageEntry { Slug = "networking-slug" },
+    };
 
-        currentUser.GetActiveEstablishmentIdAsync().Returns(1001);
+    private static readonly QuestionnaireSectionEntry BroadbandSection = new()
+    {
+        Sys = new SystemDetails(BroadbandSectionId),
+        Name = "Broadband",
+        InterstitialPage = new PageEntry { Slug = "broadband-slug" },
+    };
 
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+    private static readonly QuestionnaireSectionEntry DevicesSection = new()
+    {
+        Sys = new SystemDetails(DevicesSectionId),
+        Name = "Devices",
+        InterstitialPage = new PageEntry { Slug = "devices-slug" },
+        CoreRecommendations =
+        [
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-1"),
+                Header = "Devices 1",
+                Slug = "devices-1",
+            },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-2"),
+                Header = "Devices 2",
+                Slug = "devices-2",
+            },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-3"),
+                Header = "Devices 3",
+                Slug = "devices-3",
+            },
+        ],
+    };
 
-        return new CategoryLandingViewComponentViewBuilder(
-            logger,
-            contentful,
-            currentUser,
-            submission,
-            userActionTracking,
-            establishment,
-            user,
-            groupService
-        );
+    private static readonly QuestionnaireCategoryEntry NetworkingCategory = new()
+    {
+        Sys = new SystemDetails("category-networking"),
+        Header = new ComponentHeaderEntry { Text = "Networking category" },
+        Sections = [NetworkingSection],
+    };
+
+    private static readonly QuestionnaireCategoryEntry NetworkingAndBroadbandCategory = new()
+    {
+        Sys = new SystemDetails("category-networking-broadband"),
+        Header = new ComponentHeaderEntry { Text = "Networking category" },
+        Sections = [NetworkingSection, BroadbandSection],
+    };
+
+    private static readonly QuestionnaireCategoryEntry DevicesCategory = new()
+    {
+        Sys = new SystemDetails("category-devices"),
+        Header = new ComponentHeaderEntry { Text = "Devices category" },
+        Sections = [DevicesSection],
+    };
+
+    private readonly FakeLogger<BaseViewBuilder> _logger = new();
+    private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
+    private readonly ICurrentUserProvider _currentUserProvider =
+        Substitute.For<ICurrentUserProvider>();
+    private readonly ISubmissionService _submissionService = Substitute.For<ISubmissionService>();
+    private readonly IUserActionTrackingService _userActionTrackingService =
+        Substitute.For<IUserActionTrackingService>();
+    private readonly IEstablishmentService _establishmentService =
+        Substitute.For<IEstablishmentService>();
+    private readonly IUserService _userService = Substitute.For<IUserService>();
+    private readonly IGroupService _groupService = Substitute.For<IGroupService>();
+
+    private readonly SelectedEstablishmentDataModel _firstGroupSchool =
+        new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(FirstGroupEstablishmentId)
+            .Build();
+
+    private readonly SelectedEstablishmentDataModel _secondGroupSchool =
+        new SelectedEstablishmentDataModelBuilder()
+            .WithEstablishmentId(SecondGroupEstablishmentId)
+            .Build();
+
+    private readonly Dictionary<string, SqlEstablishmentRecommendationHistoryDto> _devicesHistory =
+        new()
+        {
+            {
+                "chunk-1",
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.InProgress,
+                    DateCreated = MiddleUpdate,
+                }
+            },
+            {
+                "chunk-2",
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                    DateCreated = NewestUpdate,
+                }
+            },
+            {
+                "chunk-3",
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.NotStarted,
+                    DateCreated = OldestUpdate,
+                }
+            },
+        };
+
+    public CategoryLandingViewComponentViewBuilderTests()
+    {
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
     }
 
-    private static QuestionnaireCategoryEntry MakeCategory(
-        params QuestionnaireSectionEntry[] sections
-    ) =>
-        new QuestionnaireCategoryEntry
-        {
-            Sys = new SystemDetails("cat-1"),
-            Header = new ComponentHeaderEntry { Text = "Category Title" },
-            Sections = sections.ToList(),
-        };
-
-    private static QuestionnaireSectionEntry MakeSection(
-        string id,
-        string name,
-        string slug,
-        string? interstitialSlug = null
-    ) =>
-        new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails(id),
-            Name = name,
-            InterstitialPage = new PageEntry { Slug = interstitialSlug ?? slug },
-        };
-
-    // ---------- Tests ----------
+    private CategoryLandingViewComponentViewBuilder CreateSystemUnderTest() =>
+        new(
+            _logger,
+            _contentfulService,
+            _currentUserProvider,
+            _submissionService,
+            _userActionTrackingService,
+            _establishmentService,
+            _userService,
+            _groupService
+        );
 
     [Fact]
-    public async Task BuildViewModelAsync_Throws_When_No_Sections()
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
     {
-        // Arrange
-        var category = MakeCategory(); // no sections
-        var sut = CreateSut();
-
-        // Act + Assert
-        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.BuildViewModelAsync(
-                category,
-                "cat-slug",
-                null,
-                RecommendationConstants.DefaultSortOrder
+        // Act & Assert
+        // The logger is not null-guarded in production, so it is excluded here.
+        Assert.Throws<ArgumentNullException>("contentfulService", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                null!,
+                _currentUserProvider,
+                _submissionService,
+                _userActionTrackingService,
+                _establishmentService,
+                _userService,
+                _groupService
             )
         );
-
-        Assert.Contains("Found no sections", ex.Message);
+        Assert.Throws<ArgumentNullException>("currentUser", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                _contentfulService,
+                null!,
+                _submissionService,
+                _userActionTrackingService,
+                _establishmentService,
+                _userService,
+                _groupService
+            )
+        );
+        Assert.Throws<ArgumentNullException>("submissionService", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                null!,
+                _userActionTrackingService,
+                _establishmentService,
+                _userService,
+                _groupService
+            )
+        );
+        Assert.Throws<ArgumentNullException>("userActionTrackingService", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                _submissionService,
+                null!,
+                _establishmentService,
+                _userService,
+                _groupService
+            )
+        );
+        Assert.Throws<ArgumentNullException>("establishmentService", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                _submissionService,
+                _userActionTrackingService,
+                null!,
+                _userService,
+                _groupService
+            )
+        );
+        Assert.Throws<ArgumentNullException>("userService", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                _submissionService,
+                _userActionTrackingService,
+                _establishmentService,
+                null!,
+                _groupService
+            )
+        );
+        Assert.Throws<ArgumentNullException>("groupService", () =>
+            new CategoryLandingViewComponentViewBuilder(
+                _logger,
+                _contentfulService,
+                _currentUserProvider,
+                _submissionService,
+                _userActionTrackingService,
+                _establishmentService,
+                _userService,
+                null!
+            )
+        );
     }
 
     [Fact]
-    public async Task BuildViewModelAsync_When_Progress_Retrieval_Fails_Sets_Error_Message_And_Marks_Sections()
+    public async Task BuildViewModelAsync_WhenCategoryHasNoSections_ThrowsInvalidDataExceptionAndLogsError()
     {
         // Arrange
-        var sectionA = MakeSection("S1", "Sec 1", "sec-1");
-        var sectionB = MakeSection("S2", "Sec 2", "sec-2");
-        var category = MakeCategory(sectionA, sectionB);
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Throws(new Exception("boom"));
-
-        var sut = CreateSut(submission: submission);
-
-        // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat-slug",
-            "Some Section",
-            RecommendationConstants.DefaultSortOrder
-        );
-
-        // Assert
-        Assert.Equal("Category Title", vm.CategoryName);
-        Assert.Equal("cat-slug", vm.CategorySlug);
-        Assert.NotNull(vm.ProgressRetrievalErrorMessage);
-        Assert.NotEmpty(vm.CategoryLandingSections);
-        Assert.All(
-            vm.CategoryLandingSections,
-            s => Assert.Equal(SubmissionStatus.RetrievalError, s.ProgressStatus)
-        );
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(1)]
-    [InlineData(2)]
-    public async Task BuildViewModelAsync_Computed_Completion_Count_Correct(int completedCount)
-    {
-        // Arrange
-        var s1 = MakeSection("A", "A", "a");
-        var s2 = MakeSection("B", "B", "b");
-        var category = MakeCategory(s1, s2);
-
-        var statuses = new List<SqlSectionStatusDto>
+        var category = new QuestionnaireCategoryEntry
         {
-            new SqlSectionStatusDto
-            {
-                SectionId = "A",
-                LastCompletionDate = completedCount >= 1 ? DateTime.UtcNow : (DateTime?)null,
-            },
-            new SqlSectionStatusDto
-            {
-                SectionId = "B",
-                LastCompletionDate = completedCount >= 2 ? DateTime.UtcNow : (DateTime?)null,
-            },
+            Sys = new SystemDetails("category-empty"),
+            Header = new ComponentHeaderEntry { Text = "Empty category" },
+            Sections = [],
         };
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            systemUnderTest.BuildViewModelAsync(category, CategorySlug, null, null)
+        );
+        Assert.Contains("category-empty", exception.Message);
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Error, logRecord.Level);
+        Assert.Contains("category-empty", logRecord.Message);
+    }
 
-        var sut = CreateSut(submission: submission);
+    [Fact]
+    public async Task BuildViewModelAsync_WhenContextIsNotSupported_ThrowsArgumentOutOfRangeException()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            systemUnderTest.BuildViewModelAsync(
+                NetworkingCategory,
+                CategorySlug,
+                null,
+                null,
+                context: (CategoryLandingContext)99
+            )
+        );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenSchoolContext_ReturnsCategoryDetails()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Is<IEnumerable<string>>(sectionIds =>
+                    sectionIds.SequenceEqual(new[] { NetworkingSectionId })
+                )
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            null,
-            RecommendationConstants.DefaultSortOrder
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            "Networking",
+            null
         );
 
         // Assert
-        Assert.Equal(completedCount, vm.CompletedSectionsCount);
+        Assert.Equal("Networking category", result.CategoryName);
+        Assert.Equal(CategorySlug, result.CategorySlug);
+        Assert.Equal("Networking", result.SectionName);
+        Assert.Same(NetworkingSection, Assert.Single(result.Sections));
+        Assert.Equal(CategoryLandingContext.School, result.Context);
+        Assert.False(result.IsMat);
+        Assert.False(result.Print);
+        Assert.Equal(AssessmentLinkPartialName, result.StatusLinkPartialName);
+        Assert.Null(result.ProgressRetrievalErrorMessage);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenPrintIsRequested_ReturnsPrintStatusLinkPartial()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null,
+            print: true
+        );
+
+        // Assert
+        Assert.True(result.Print);
+        Assert.Equal(AssessmentLinkPrintPartialName, result.StatusLinkPartialName);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenSomeSectionsAreCompleted_ReturnsCompletedSectionsCount()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = NetworkingSectionId,
+                    Status = SubmissionStatus.CompleteNotReviewed,
+                    LastCompletionDate = NewestUpdate,
+                },
+                new SqlSectionStatusDto
+                {
+                    SectionId = BroadbandSectionId,
+                    Status = SubmissionStatus.InProgress,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingAndBroadbandCategory,
+            CategorySlug,
+            null,
+            null
+        );
+
+        // Assert
+        Assert.Equal(1, result.CompletedSectionsCount);
+        Assert.Collection(
+            result.CategoryLandingSections,
+            section =>
+            {
+                Assert.Equal("Networking", section.Name);
+                Assert.Equal(SubmissionStatus.CompleteNotReviewed, section.ProgressStatus);
+            },
+            section =>
+            {
+                Assert.Equal("Broadband", section.Name);
+                Assert.Equal(SubmissionStatus.InProgress, section.ProgressStatus);
+            }
+        );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenSectionHasNoStatus_ReturnsNotStartedSection()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null
+        );
+
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal(SubmissionStatus.NotStarted, section.ProgressStatus);
+        Assert.Equal("networking-slug", section.Slug);
+        Assert.Null(section.Recommendations);
+        Assert.Null(section.EstablishmentName);
+        Assert.Equal(0, result.CompletedSectionsCount);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenProgressRetrievalFails_ReturnsErrorMessageAndRetrievalErrorSections()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .ThrowsAsync(new InvalidOperationException("database unavailable"));
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingAndBroadbandCategory,
+            CategorySlug,
+            null,
+            null
+        );
+
+        // Assert
+        Assert.Equal(
+            "Unable to retrieve progress, please refresh your browser.",
+            result.ProgressRetrievalErrorMessage
+        );
+        Assert.Equal(2, result.CategoryLandingSections.Count);
+        Assert.All(result.CategoryLandingSections, section =>
+            Assert.Equal(SubmissionStatus.RetrievalError, section.ProgressStatus)
+        );
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Error, logRecord.Level);
+        Assert.Contains("database unavailable", logRecord.Message);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenSectionHasNoInterstitialSlug_ReturnsRetrievalErrorSectionAndLogsError()
+    {
+        // Arrange
+        var sectionWithoutSlug = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-no-slug"),
+            Name = "Section without slug",
+        };
+        var category = new QuestionnaireCategoryEntry
+        {
+            Sys = new SystemDetails("category-no-slug"),
+            Header = new ComponentHeaderEntry { Text = "Category without slug" },
+            Sections = [sectionWithoutSlug],
+        };
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(category, CategorySlug, null, null);
+
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal(SubmissionStatus.RetrievalError, section.ProgressStatus);
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Error, logRecord.Level);
+        Assert.Contains("section-no-slug", logRecord.Message);
     }
 
     [Theory]
-    [InlineData(null, RecommendationSortOrder.Default)]
     [InlineData("Default", RecommendationSortOrder.Default)]
     [InlineData("Last updated", RecommendationSortOrder.LastUpdated)]
     [InlineData("Status", RecommendationSortOrder.Status)]
-    public async Task BuildViewModelAsync_Computed_SortType_Is_Correct(
-        string? inputSortOrder,
+    [InlineData("unrecognised-sort-order", RecommendationSortOrder.Default)] // Unknown values fall back to the default
+    public async Task BuildViewModelAsync_WhenSortOrderIsProvided_ReturnsAndSavesSortOrder(
+        string sortOrder,
         RecommendationSortOrder expectedSortOrder
     )
     {
         // Arrange
-        var s1 = MakeSection("A", "A", "a");
-        var s2 = MakeSection("B", "B", "b");
-        var category = MakeCategory(s1, s2);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto { SectionId = "A", LastCompletionDate = DateTime.UtcNow },
-            new SqlSectionStatusDto { SectionId = "B", LastCompletionDate = DateTime.UtcNow },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var sut = CreateSut(submission: submission);
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, inputSortOrder);
-
-        // Assert
-        Assert.Equal(expectedSortOrder, vm.SortType);
-    }
-
-    [Fact]
-    public async Task Recommendations_When_Intro_Null_Sets_Error_Message()
-    {
-        // Arrange
-        var section = MakeSection("S1", "Networking", "net");
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.CompleteReviewed,
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var contentful = Substitute.For<IContentfulService>();
-
-        var sut = CreateSut(contentful: contentful, submission: submission);
-
-        // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            section.Name,
-            RecommendationConstants.DefaultSortOrder
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            sortOrder
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal(
-            $"Section '{section.Name}' has no recommendations",
-            secVm.Recommendations?.NoRecommendationFoundErrorMessage
-        );
+        Assert.Equal(expectedSortOrder, result.SortType);
+        await _userService
+            .Received(1)
+            .SetUserRecommendationSortOrderAsync(UserId, expectedSortOrder);
     }
 
     [Fact]
-    public async Task Recommendations_When_LatestResponses_Null_Returns_Error_Message()
+    public async Task BuildViewModelAsync_WhenSortOrderIsNotProvided_ReturnsUsersSavedSortOrder()
     {
         // Arrange
-        var section = MakeSection("S1", "Security", "sec");
-        var category = MakeCategory(section);
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([]);
+        _userService
+            .GetUserSettingsByUserIdAsync(UserId)
+            .Returns(
+                new SqlUserSettingsDto
+                {
+                    UserId = UserId,
+                    SortOrder = RecommendationSortOrder.Status,
+                }
+            );
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.CompleteReviewed,
-            },
-        };
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null
+        );
 
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        // Force the null-coalescing throw in SUT:
-        submission
-            .GetLatestSubmissionResponsesModel(
+        // Assert
+        Assert.Equal(RecommendationSortOrder.Status, result.SortType);
+        await _userService
+            .DidNotReceive()
+            .SetUserRecommendationSortOrderAsync(
                 Arg.Any<int>(),
-                section,
+                Arg.Any<RecommendationSortOrder>()
+            );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenSortOrderIsNotProvidedAndUserHasNoSettings_ReturnsDefaultSortOrder()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([]);
+        _userService.GetUserSettingsByUserIdAsync(UserId).Returns((SqlUserSettingsDto?)null);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null
+        );
+
+        // Assert
+        Assert.Equal(RecommendationSortOrder.Default, result.SortType);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenCompletedSectionHasNoCoreRecommendations_ReturnsNoRecommendationsMessage()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = NetworkingSectionId,
+                    Status = SubmissionStatus.CompleteReviewed,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null
+        );
+
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal(
+            "Section 'Networking' has no recommendations",
+            section.Recommendations?.NoRecommendationFoundErrorMessage
+        );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenCompletedSectionHasNoInterstitialPage_ReturnsUnableToRetrieveMessage()
+    {
+        // Arrange
+        var sectionWithoutInterstitialPage = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-no-interstitial"),
+            Name = "Cabling",
+            CoreRecommendations = DevicesSection.CoreRecommendations,
+        };
+        var category = new QuestionnaireCategoryEntry
+        {
+            Sys = new SystemDetails("category-cabling"),
+            Header = new ComponentHeaderEntry { Text = "Cabling category" },
+            Sections = [sectionWithoutInterstitialPage],
+        };
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = "section-no-interstitial",
+                    Status = SubmissionStatus.CompleteReviewed,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(category, CategorySlug, null, null);
+
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal(
+            "Unable to retrieve Cabling recommendation",
+            section.Recommendations?.NoRecommendationFoundErrorMessage
+        );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenCompletedSectionHasNoSubmissionResponses_ReturnsUnableToRetrieveMessage()
+    {
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = DevicesSectionId,
+                    Status = SubmissionStatus.CompleteReviewed,
+                },
+            ]);
+        _submissionService
+            .GetLatestSubmissionResponsesModel(
+                FocusedEstablishmentId,
+                DevicesSection,
                 SubmissionStatus.CompleteReviewed
             )
             .Returns((SubmissionResponsesModel?)null);
-
-        var contentful = Substitute.For<IContentfulService>();
-        var sut = CreateSut(contentful: contentful, submission: submission);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            section.Name,
-            RecommendationConstants.DefaultSortOrder
+        var result = await systemUnderTest.BuildViewModelAsync(
+            DevicesCategory,
+            CategorySlug,
+            null,
+            null
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
+        var section = Assert.Single(result.CategoryLandingSections);
         Assert.Equal(
-            $"Section '{section.Name}' has no recommendations",
-            secVm.Recommendations?.NoRecommendationFoundErrorMessage
+            "Unable to retrieve Devices recommendation",
+            section.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
     [Fact]
-    public async Task Recommendations_When_Exception_Thrown_Returns_Error_Message()
+    public async Task BuildViewModelAsync_WhenRetrievingRecommendationsFails_ReturnsUnableToRetrieveMessage()
     {
         // Arrange
-        var section = MakeSection("S1", "Devices", "devices");
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.CompleteReviewed,
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var contentful = Substitute.For<IContentfulService>();
-
-        // Throw anything inside the try block to trigger the catch path in SUT
-        submission
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = DevicesSectionId,
+                    Status = SubmissionStatus.CompleteReviewed,
+                },
+            ]);
+        _submissionService
             .GetLatestSubmissionResponsesModel(
-                Arg.Any<int>(),
-                section,
+                FocusedEstablishmentId,
+                DevicesSection,
                 SubmissionStatus.CompleteReviewed
             )
-            .Throws(new DatabaseException("boom"));
-
-        var sut = CreateSut(contentful: contentful, submission: submission);
+            .ThrowsAsync(new DatabaseException("database unavailable"));
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            section.Name,
-            RecommendationConstants.DefaultSortOrder
+        var result = await systemUnderTest.BuildViewModelAsync(
+            DevicesCategory,
+            CategorySlug,
+            null,
+            null
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
+        var section = Assert.Single(result.CategoryLandingSections);
         Assert.Equal(
-            $"Section '{section.Name}' has no recommendations",
-            secVm.Recommendations?.NoRecommendationFoundErrorMessage
+            "Unable to retrieve Devices recommendation",
+            section.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
     [Fact]
-    public async Task Recommendations_Success_Populates_Expected_Fields()
+    public async Task BuildViewModelAsync_WhenCompletedSectionHasRecommendations_ReturnsAnswersAndChunks()
     {
         // Arrange
-        var section = MakeSection("S4", "Broadband", "broadband", "broadband-connection");
-        section.CoreRecommendations = new List<RecommendationChunkEntry>
-        {
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-1"),
-                Header = "Broadband",
-            },
-        };
-
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new() { SectionId = "S4", Status = SubmissionStatus.CompleteReviewed },
-        };
-
-        var responses = new SubmissionResponsesModel(
-            submissionId: 42,
-            responses: new List<QuestionWithAnswerModel>
-            {
-                new()
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
                 {
-                    QuestionSysId = "Q1",
-                    QuestionText = "Do you have a safeguarding lead?",
-                    AnswerSysId = "A1",
-                    AnswerText = "Yes",
-                    DateCreated = DateTime.UtcNow,
+                    SectionId = DevicesSectionId,
+                    Status = SubmissionStatus.CompleteReviewed,
                 },
+            ]);
+        _submissionService
+            .GetLatestSubmissionResponsesModel(
+                FocusedEstablishmentId,
+                DevicesSection,
+                SubmissionStatus.CompleteReviewed
+            )
+            .Returns(
+                new SubmissionResponsesModel(
+                    42,
+                    [
+                        new QuestionWithAnswerModel
+                        {
+                            QuestionSysId = "question-1",
+                            QuestionText = "Do you have a device policy?",
+                            AnswerSysId = "answer-1",
+                            AnswerText = "Yes",
+                            DateCreated = OldestUpdate,
+                        },
+                    ]
+                )
+            );
+        _submissionService
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(FocusedEstablishmentId)
+            .Returns(_devicesHistory);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            DevicesCategory,
+            CategorySlug,
+            null,
+            null
+        );
+
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        var recommendations = section.Recommendations;
+        Assert.NotNull(recommendations);
+        Assert.Null(recommendations.NoRecommendationFoundErrorMessage);
+        Assert.Equal("Devices", recommendations.SectionName);
+        Assert.Equal("devices-slug", recommendations.SectionSlug);
+        var answer = Assert.Single(recommendations.Answers);
+        Assert.Equal("Yes", answer.AnswerText);
+        Assert.Collection(
+            recommendations.Chunks,
+            chunk =>
+            {
+                Assert.Equal("Devices 1", chunk.Header);
+                Assert.Equal("devices-1", chunk.Slug);
+                Assert.Equal(RecommendationStatus.InProgress, chunk.Status);
+                Assert.Equal(MiddleUpdate, chunk.LastUpdated);
+            },
+            chunk =>
+            {
+                Assert.Equal("Devices 2", chunk.Header);
+                Assert.Equal(RecommendationStatus.Complete, chunk.Status);
+                Assert.Equal(NewestUpdate, chunk.LastUpdated);
+            },
+            chunk =>
+            {
+                Assert.Equal("Devices 3", chunk.Header);
+                Assert.Equal(RecommendationStatus.NotStarted, chunk.Status);
+                Assert.Equal(OldestUpdate, chunk.LastUpdated);
             }
         );
-
-        var recommendationHistory = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
-        {
-            {
-                "chunk-1",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 201,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.InProgress,
-                    NewStatus = RecommendationStatus.Complete,
-                    NoteText = "Test note",
-                }
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-        submission
-            .GetLatestSubmissionResponsesModel(
-                Arg.Any<int>(),
-                section,
-                SubmissionStatus.CompleteReviewed
-            )
-            .Returns(responses);
-        submission
-            .GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
-            .Returns(recommendationHistory);
-
-        var sut = CreateSut(submission: submission);
-
-        // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            null,
-            RecommendationConstants.DefaultSortOrder
-        );
-
-        // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        var recs = secVm.Recommendations;
-        Assert.NotNull(recs);
-        Assert.Null(recs.NoRecommendationFoundErrorMessage);
-        Assert.Equal("Broadband", recs.SectionName);
-        Assert.Equal("broadband-connection", recs.SectionSlug);
-        Assert.Single(recs.Answers);
-        Assert.Equal("Yes", recs.Answers.First().AnswerText);
-        Assert.Single(recs.Chunks);
-        Assert.Equal(RecommendationStatus.Complete, recs.Chunks.First().Status);
     }
 
-    [Fact]
-    public async Task Recommendations_When_CoreRecommendations_Is_Null_Returns_Error_Message()
+    [Theory]
+    [InlineData("Default", new[] { "Devices 1", "Devices 2", "Devices 3" })]
+    [InlineData("Status", new[] { "Devices 3", "Devices 1", "Devices 2" })]
+    [InlineData("Last updated", new[] { "Devices 2", "Devices 1", "Devices 3" })]
+    public async Task BuildViewModelAsync_WhenSortOrderIsProvided_ReturnsRecommendationChunksInSortedOrder(
+        string sortOrder,
+        string[] expectedHeaders
+    )
     {
         // Arrange
-        var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = [];
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-        submission
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = DevicesSectionId,
+                    Status = SubmissionStatus.CompleteReviewed,
+                },
+            ]);
+        _submissionService
             .GetLatestSubmissionResponsesModel(
-                Arg.Any<int>(),
-                section,
+                FocusedEstablishmentId,
+                DevicesSection,
                 SubmissionStatus.CompleteReviewed
             )
-            .Returns(new SubmissionResponsesModel(1, []));
-
-        var sut = CreateSut(submission: submission);
+            .Returns(new SubmissionResponsesModel(42, []));
+        _submissionService
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(FocusedEstablishmentId)
+            .Returns(_devicesHistory);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            section.Name,
-            RecommendationConstants.DefaultSortOrder
+        var result = await systemUnderTest.BuildViewModelAsync(
+            DevicesCategory,
+            CategorySlug,
+            null,
+            sortOrder
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
+        var section = Assert.Single(result.CategoryLandingSections);
         Assert.Equal(
-            $"Section '{section.Name}' has no recommendations",
-            secVm.Recommendations?.NoRecommendationFoundErrorMessage
-        );
-    }
-
-    [Fact]
-    public async Task Recommendations_Sorted_Correctly_When_SortOrder_Is_Status()
-    {
-        // Arrange
-        var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = new List<RecommendationChunkEntry>
-        {
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-1"),
-                Header = "Devices 1",
-            },
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-2"),
-                Header = "Devices 2",
-            },
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-3"),
-                Header = "Devices 3",
-            },
-        };
-
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
-        };
-
-        var responses = new SubmissionResponsesModel(
-            submissionId: 42,
-            responses: new List<QuestionWithAnswerModel>
-            {
-                new()
-                {
-                    QuestionSysId = "Q1",
-                    QuestionText = "Do you have a safeguarding lead?",
-                    AnswerSysId = "A1",
-                    AnswerText = "Yes",
-                    DateCreated = DateTime.UtcNow,
-                },
-            }
-        );
-
-        var recommendationHistory = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
-        {
-            {
-                "chunk-1",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 201,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.InProgress,
-                    NewStatus = RecommendationStatus.Complete,
-                    NoteText = "Test note 1",
-                }
-            },
-            {
-                "chunk-2",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 202,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.NotStarted,
-                    NewStatus = RecommendationStatus.InProgress,
-                    NoteText = "Test note 2",
-                }
-            },
-            {
-                "chunk-3",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 204,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now,
-                    PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted,
-                    NoteText = "Test note 3",
-                }
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-        submission
-            .GetLatestSubmissionResponsesModel(
-                Arg.Any<int>(),
-                section,
-                SubmissionStatus.CompleteReviewed
-            )
-            .Returns(responses);
-        submission
-            .GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
-            .Returns(recommendationHistory);
-
-        var sut = CreateSut(submission: submission);
-
-        // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            null,
-            RecommendationSortOrder.Status.GetDisplayName()
-        );
-
-        // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.NotNull(secVm.Recommendations);
-        var chunks = secVm.Recommendations.Chunks;
-        Assert.NotEmpty(chunks);
-        Assert.Equal(RecommendationStatus.NotStarted, chunks[0].Status);
-        Assert.Equal(RecommendationStatus.InProgress, chunks[1].Status);
-        Assert.Equal(RecommendationStatus.Complete, chunks[2].Status);
-    }
-
-    [Fact]
-    public async Task Recommendations_Sorted_Correctly_When_SortOrder_Is_LastUpdated()
-    {
-        // Arrange
-        var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = new List<RecommendationChunkEntry>
-        {
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-1"),
-                Header = "Devices 1",
-            },
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-2"),
-                Header = "Devices 2",
-            },
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("chunk-3"),
-                Header = "Devices 3",
-            },
-        };
-
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
-        };
-
-        var responses = new SubmissionResponsesModel(
-            submissionId: 42,
-            responses: new List<QuestionWithAnswerModel>
-            {
-                new()
-                {
-                    QuestionSysId = "Q1",
-                    QuestionText = "Do you have a safeguarding lead?",
-                    AnswerSysId = "A1",
-                    AnswerText = "Yes",
-                    DateCreated = DateTime.UtcNow,
-                },
-            }
-        );
-
-        var recommendationHistory = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
-        {
-            {
-                "chunk-1",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 201,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now.AddDays(-2),
-                    PreviousStatus = RecommendationStatus.InProgress,
-                    NewStatus = RecommendationStatus.Complete,
-                    NoteText = "Test note 1",
-                }
-            },
-            {
-                "chunk-2",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 202,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now.AddDays(-1),
-                    PreviousStatus = RecommendationStatus.NotStarted,
-                    NewStatus = RecommendationStatus.InProgress,
-                    NoteText = "Test note 2",
-                }
-            },
-            {
-                "chunk-3",
-                new SqlEstablishmentRecommendationHistoryDto
-                {
-                    EstablishmentId = 101,
-                    RecommendationId = 204,
-                    UserId = 301,
-                    MatEstablishmentId = 401,
-                    DateCreated = DateTime.Now,
-                    PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted,
-                    NoteText = "Test note 3",
-                }
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-        submission
-            .GetLatestSubmissionResponsesModel(
-                Arg.Any<int>(),
-                section,
-                SubmissionStatus.CompleteReviewed
-            )
-            .Returns(responses);
-        submission
-            .GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
-            .Returns(recommendationHistory);
-
-        var sut = CreateSut(submission: submission);
-
-        // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
-            null,
-            RecommendationSortOrder.LastUpdated.GetDisplayName()
-        );
-
-        // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.NotNull(secVm.Recommendations);
-        var chunks = secVm.Recommendations.Chunks;
-        Assert.NotEmpty(chunks);
-        Assert.True(
-            chunks[0].LastUpdated > chunks[1].LastUpdated
-            && chunks[1].LastUpdated > chunks[2].LastUpdated
+            expectedHeaders,
+            section.Recommendations!.Chunks.Select(chunk => chunk.Header)
         );
     }
 
     [Theory]
     [InlineData(SubmissionStatus.InProgress)]
     [InlineData(SubmissionStatus.CompleteNotReviewed)]
-    public async Task
-        BuildViewModelAsync_When_Section_InProgress_Or_CompleteNotReviewed_Uses_LastUpdatedUserActionId_To_Set_EstablishmentName(
-            SubmissionStatus status
-        )
+    public async Task BuildViewModelAsync_WhenSectionIsNotReviewed_ReturnsEstablishmentNameFromLastUpdatedUserAction(
+        SubmissionStatus status
+    )
     {
         // Arrange
-        var section = MakeSection("S1", "Networking", "networking");
-        var category = MakeCategory(section);
-
-        var lastUpdatedUserActionId = Guid.NewGuid();
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = status,
-                LastUpdatedUserActionId = lastUpdatedUserActionId,
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var userActionTracking = Substitute.For<IUserActionTrackingService>();
-        userActionTracking
-            .GetAsync(lastUpdatedUserActionId)
-            .Returns(
-                new SqlUserActionDto
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
                 {
-                    Id = lastUpdatedUserActionId,
-                    EstablishmentId = 2001,
-                    MatEstablishmentId = null,
-                }
-            );
-
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
+                    SectionId = NetworkingSectionId,
+                    Status = status,
+                    LastUpdatedUserActionId = FirstUserActionId,
+                    CompletedUserActionId = SecondUserActionId,
+                },
+            ]);
+        _userActionTrackingService
+            .GetAsync(FirstUserActionId)
+            .Returns(new SqlUserActionDto { Id = FirstUserActionId, EstablishmentId = 2001 });
+        _establishmentService
             .GetEstablishmentByIdAsync(2001)
             .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 2001,
-                    OrgName = "Test School",
-                }
+                new SqlEstablishmentDtoBuilder().WithId(2001).WithOrgName("Updating School").Build()
             );
-
-        var sut = CreateSut(
-            submission: submission,
-            userActionTracking: userActionTracking,
-            establishment: establishment
-        );
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
-            RecommendationConstants.DefaultSortOrder
+            null
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Test School", secVm.EstablishmentName);
-
-        await userActionTracking.Received(1).GetAsync(lastUpdatedUserActionId);
-        await establishment.Received(1).GetEstablishmentByIdAsync(2001);
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal("Updating School", section.EstablishmentName);
     }
 
     [Fact]
-    public async Task
-        BuildViewModelAsync_When_Section_CompleteReviewed_Uses_CompletedUserActionId_To_Set_EstablishmentName()
+    public async Task BuildViewModelAsync_WhenSectionIsCompleteReviewed_ReturnsEstablishmentNameFromCompletedUserAction()
     {
         // Arrange
-        var section = MakeSection("S1", "Cyber security", "cyber-security");
-        var category = MakeCategory(section);
-
-        var createdUserActionId = Guid.NewGuid();
-        var completedUserActionId = Guid.NewGuid();
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.CompleteReviewed,
-                CreatedUserActionId = createdUserActionId,
-                CompletedUserActionId = completedUserActionId,
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var userActionTracking = Substitute.For<IUserActionTrackingService>();
-        userActionTracking
-            .GetAsync(completedUserActionId)
-            .Returns(
-                new SqlUserActionDto
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
                 {
-                    Id = completedUserActionId,
-                    EstablishmentId = 2002,
-                    MatEstablishmentId = null,
-                }
-            );
-
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
+                    SectionId = NetworkingSectionId,
+                    Status = SubmissionStatus.CompleteReviewed,
+                    LastUpdatedUserActionId = FirstUserActionId,
+                    CompletedUserActionId = SecondUserActionId,
+                },
+            ]);
+        _userActionTrackingService
+            .GetAsync(SecondUserActionId)
+            .Returns(new SqlUserActionDto { Id = SecondUserActionId, EstablishmentId = 2002 });
+        _establishmentService
             .GetEstablishmentByIdAsync(2002)
             .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 2002,
-                    OrgName = "Completed School",
-                }
+                new SqlEstablishmentDtoBuilder()
+                    .WithId(2002)
+                    .WithOrgName("Completed School")
+                    .Build()
             );
-
-        var sut = CreateSut(
-            submission: submission,
-            userActionTracking: userActionTracking,
-            establishment: establishment
-        );
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
-            RecommendationConstants.DefaultSortOrder
+            null
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Completed School", secVm.EstablishmentName);
-
-        await userActionTracking.Received(1).GetAsync(completedUserActionId);
-        await userActionTracking.DidNotReceive().GetAsync(createdUserActionId);
-        await establishment.Received(1).GetEstablishmentByIdAsync(2002);
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal("Completed School", section.EstablishmentName);
     }
 
     [Fact]
-    public async Task
-        BuildViewModelAsync_When_UserAction_Has_MatEstablishmentId_Uses_MatEstablishmentId_For_EstablishmentName()
+    public async Task BuildViewModelAsync_WhenUserActionHasTrustEstablishment_ReturnsTrustEstablishmentName()
     {
         // Arrange
-        var section = MakeSection("S1", "Devices", "devices");
-        var category = MakeCategory(section);
-
-        var lastUpdatedUserActionId = Guid.NewGuid();
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.InProgress,
-                LastUpdatedUserActionId = lastUpdatedUserActionId,
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var userActionTracking = Substitute.For<IUserActionTrackingService>();
-        userActionTracking
-            .GetAsync(lastUpdatedUserActionId)
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = NetworkingSectionId,
+                    Status = SubmissionStatus.InProgress,
+                    LastUpdatedUserActionId = FirstUserActionId,
+                },
+            ]);
+        _userActionTrackingService
+            .GetAsync(FirstUserActionId)
             .Returns(
                 new SqlUserActionDto
                 {
-                    Id = lastUpdatedUserActionId,
+                    Id = FirstUserActionId,
                     EstablishmentId = 2003,
                     MatEstablishmentId = 3003,
                 }
             );
-
-        var establishment = Substitute.For<IEstablishmentService>();
-        establishment
+        _establishmentService
             .GetEstablishmentByIdAsync(3003)
             .Returns(
-                new SqlEstablishmentDto
-                {
-                    Id = 3003,
-                    OrgName = "Test MAT",
-                }
+                new SqlEstablishmentDtoBuilder()
+                    .WithId(3003)
+                    .WithOrgName("Springfield Trust")
+                    .Build()
             );
-
-        var sut = CreateSut(
-            submission: submission,
-            userActionTracking: userActionTracking,
-            establishment: establishment
-        );
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
-            RecommendationConstants.DefaultSortOrder
+            null
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Test MAT", secVm.EstablishmentName);
-
-        await establishment.Received(1).GetEstablishmentByIdAsync(3003);
-        await establishment.DidNotReceive().GetEstablishmentByIdAsync(2003);
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal("Springfield Trust", section.EstablishmentName);
     }
 
     [Fact]
-    public async Task BuildViewModelAsync_When_No_UserActionId_Does_Not_Retrieve_EstablishmentName()
+    public async Task BuildViewModelAsync_WhenStatusHasNoRelevantUserActionId_DoesNotLookUpEstablishmentName()
     {
         // Arrange
-        var section = MakeSection("S1", "Broadband", "broadband");
-        var category = MakeCategory(section);
-
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto
-            {
-                SectionId = "S1",
-                Status = SubmissionStatus.InProgress,
-                CreatedUserActionId = null,
-                CompletedUserActionId = null,
-            },
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission
-            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-            .Returns(statuses);
-
-        var userActionTracking = Substitute.For<IUserActionTrackingService>();
-        var establishment = Substitute.For<IEstablishmentService>();
-
-        var sut = CreateSut(
-            submission: submission,
-            userActionTracking: userActionTracking,
-            establishment: establishment
-        );
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = NetworkingSectionId,
+                    Status = SubmissionStatus.InProgress,
+                    CompletedUserActionId = SecondUserActionId,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
-            RecommendationConstants.DefaultSortOrder
+            null
         );
 
         // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Null(secVm.EstablishmentName);
-
-        await userActionTracking.DidNotReceive().GetAsync(Arg.Any<Guid>());
-        await establishment.DidNotReceive().GetEstablishmentByIdAsync(Arg.Any<int>());
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Null(section.EstablishmentName);
+        await _userActionTrackingService.DidNotReceive().GetAsync(Arg.Any<Guid>());
     }
 
     [Fact]
-    public async Task BuildViewModelAsync_When_Mat_No_Submissions_Sets_Outstanding_Assessments()
+    public async Task BuildViewModelAsync_WhenUserActionIsNotFound_DoesNotLookUpEstablishmentName()
     {
-        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
-        section.CoreRecommendations =
-        [
-            new RecommendationChunkEntry
-            {
-                Sys = new SystemDetails("rec-1"),
-                Header = "Recommendation 1",
-                Slug = "recommendation-1",
-            },
-        ];
-        var category = MakeCategory(section);
+        // Arrange
+        _submissionService
+            .GetSectionStatusesForSchoolAsync(
+                FocusedEstablishmentId,
+                Arg.Any<IEnumerable<string>>()
+            )
+            .Returns([
+                new SqlSectionStatusDto
+                {
+                    SectionId = NetworkingSectionId,
+                    Status = SubmissionStatus.InProgress,
+                    LastUpdatedUserActionId = FirstUserActionId,
+                },
+            ]);
+        _userActionTrackingService.GetAsync(FirstUserActionId).Returns((SqlUserActionDto?)null);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var currentUser = Substitute.For<ICurrentUserProvider>();
-        currentUser.UserOrganisationId.Returns(5001);
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null
+        );
 
-        var groupService = Substitute.For<IGroupService>();
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Null(section.EstablishmentName);
+        await _establishmentService.DidNotReceive().GetEstablishmentByIdAsync(Arg.Any<int>());
+    }
 
-        groupService
-            .GetGroupEstablishmentContextAsync(5001)
+    [Fact]
+    public async Task BuildViewModelAsync_WhenMatContext_ReturnsCategoryDetailsForGroupSchools()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
             .Returns(
-                new GroupEstablishmentModel
+                new List<SelectedEstablishmentDataModel> { _firstGroupSchool, _secondGroupSchool }
+            );
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(establishmentIds =>
+                    establishmentIds.SequenceEqual(
+                        new[] { FirstGroupEstablishmentId, SecondGroupEstablishmentId }
+                    )
+                )
+            )
+            .Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            "Networking",
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        // Assert
+        Assert.Equal("Networking category", result.CategoryName);
+        Assert.Equal(CategorySlug, result.CategorySlug);
+        Assert.Equal("Networking", result.SectionName);
+        Assert.Equal(CategoryLandingContext.MAT, result.Context);
+        Assert.True(result.IsMat);
+        Assert.Equal(AssessmentLinkPartialName, result.StatusLinkPartialName);
+        Assert.Null(result.ProgressRetrievalErrorMessage);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenMatContext_DoesNotRetrieveSchoolSectionStatuses()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
+            .Returns(new List<SelectedEstablishmentDataModel> { _firstGroupSchool });
+        _groupService.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>()).Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        // Assert
+        await _submissionService
+            .DidNotReceive()
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>());
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenSomeGroupSchoolsHaveSubmitted_ReturnsRecommendationsAndOutstandingCount()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
+            .Returns(
+                new List<SelectedEstablishmentDataModel> { _firstGroupSchool, _secondGroupSchool }
+            );
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
                 {
-                    Establishments =
-                    [
-                        new SqlEstablishmentDto { Id = 101 },
-                new SqlEstablishmentDto { Id = 102 },
-                    ],
-                    EstablishmentIds = [101, 102],
-                    CompletedSubmissions =
-                    [
-                        new SqlSubmissionDto
+                    EstablishmentId = FirstGroupEstablishmentId,
+                    SectionId = DevicesSectionId,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            DevicesCategory,
+            CategorySlug,
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.True(section.HasSubmittedAssessments);
+        Assert.True(section.HasOutstandingAssessments);
+        Assert.Equal(1, section.OutstandingAssessmentCount);
+        Assert.Equal(1, result.CompletedSectionsCount);
+        var recommendations = section.Recommendations;
+        Assert.NotNull(recommendations);
+        Assert.Equal("Devices", recommendations.SectionName);
+        Assert.Equal("devices-slug", recommendations.SectionSlug);
+        Assert.Equal(
+            new[] { "Devices 1", "Devices 2", "Devices 3" },
+            recommendations.Chunks.Select(chunk => chunk.Header)
+        );
+        Assert.Equal(
+            new[] { "devices-1", "devices-2", "devices-3" },
+            recommendations.Chunks.Select(chunk => chunk.Slug)
+        );
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenAllGroupSchoolsHaveSubmitted_ReturnsNoOutstandingAssessments()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
+            .Returns(
+                new List<SelectedEstablishmentDataModel> { _firstGroupSchool, _secondGroupSchool }
+            );
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
                 {
-                    Id = 1,
-                    EstablishmentId = 101,
-                    SectionId = "S1",
+                    EstablishmentId = FirstGroupEstablishmentId,
+                    SectionId = NetworkingSectionId,
                 },
                 new SqlSubmissionDto
                 {
-                    Id = 2,
-                    EstablishmentId = 102,
-                    SectionId = "S1",
+                    EstablishmentId = SecondGroupEstablishmentId,
+                    SectionId = NetworkingSectionId,
                 },
-                    ],
-                }
-            );
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var submission = Substitute.For<ISubmissionService>();
-
-        var sut = CreateSut(
-          groupService: groupService,
-          currentUser: currentUser
-        );
-
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
             null,
             context: CategoryLandingContext.MAT
         );
 
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.True(secVm.HasSubmittedAssessments);
-        Assert.False(secVm.HasOutstandingAssessments);
-        Assert.Equal(0, secVm.OutstandingAssessmentCount);
-        Assert.NotNull(secVm.Recommendations);
-        Assert.Equal(1, vm.CompletedSectionsCount);
-
-        await submission
-            .DidNotReceive()
-            .GetSectionStatusesForSchoolAsync(
-                Arg.Any<int>(),
-                Arg.Any<IEnumerable<string>>()
-            );
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.True(section.HasSubmittedAssessments);
+        Assert.False(section.HasOutstandingAssessments);
+        Assert.Equal(0, section.OutstandingAssessmentCount);
     }
 
     [Fact]
-    public async Task BuildViewModelAsync_When_Mat_Some_Schools_Have_Submitted_Populates_Recommendations()
+    public async Task BuildViewModelAsync_WhenNoGroupSchoolHasSubmitted_ReturnsAllAssessmentsOutstandingWithoutRecommendations()
     {
-        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
-        section.CoreRecommendations =
-        [
-            new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("rec-1"),
-            Header = "Recommendation 1",
-            Slug = "recommendation-1",
-        },
-    ];
-
-        var category = MakeCategory(section);
-
-        var currentUser = Substitute.For<ICurrentUserProvider>();
-        currentUser.UserOrganisationId.Returns(5001);
-
-        var groupService = Substitute.For<IGroupService>();
-
-        groupService
-            .GetGroupEstablishmentContextAsync(5001)
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
             .Returns(
-                new GroupEstablishmentModel
-                {
-                    Establishments =
-                    [
-                        new SqlEstablishmentDto { Id = 101 },
-                    new SqlEstablishmentDto { Id = 102 },
-                    ],
-                    EstablishmentIds = [101, 102],
-                    CompletedSubmissions =
-                    [
-                        new SqlSubmissionDto
-                    {
-                        Id = 1,
-                        EstablishmentId = 101,
-                        SectionId = "S1",
-                    },
-                    ],
-                }
+                new List<SelectedEstablishmentDataModel> { _firstGroupSchool, _secondGroupSchool }
             );
+        _groupService.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>()).Returns([]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var sut = CreateSut(
-            groupService: groupService,
-            currentUser: currentUser
-        );
-
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            DevicesCategory,
+            CategorySlug,
             null,
             null,
             context: CategoryLandingContext.MAT
         );
 
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-
-        Assert.True(secVm.HasSubmittedAssessments);
-        Assert.True(secVm.HasOutstandingAssessments);
-        Assert.Equal(1, secVm.OutstandingAssessmentCount);
-        Assert.NotNull(secVm.Recommendations);
-        Assert.Single(secVm.Recommendations.Chunks);
-        Assert.Equal("Recommendation 1", secVm.Recommendations.Chunks[0].Header);
-        Assert.Equal("recommendation-1", secVm.Recommendations.Chunks[0].Slug);
-        Assert.Equal(1, vm.CompletedSectionsCount);
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.False(section.HasSubmittedAssessments);
+        Assert.True(section.HasOutstandingAssessments);
+        Assert.Equal(2, section.OutstandingAssessmentCount);
+        Assert.Null(section.Recommendations);
+        Assert.Equal(0, result.CompletedSectionsCount);
     }
 
     [Fact]
-    public async Task BuildViewModelAsync_When_Mat_All_Schools_Have_Submitted_Has_No_Outstanding_Assessments()
+    public async Task BuildViewModelAsync_WhenSameSchoolHasMultipleSubmissionsForSection_CountsSchoolOnce()
     {
-        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
-        section.CoreRecommendations =
-        [
-            new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails("rec-1"),
-            Header = "Recommendation 1",
-            Slug = "recommendation-1",
-        },
-    ];
-
-        var category = MakeCategory(section);
-
-        var currentUser = Substitute.For<ICurrentUserProvider>();
-        currentUser.UserOrganisationId.Returns(5001);
-
-        var groupService = Substitute.For<IGroupService>();
-
-        groupService
-            .GetGroupEstablishmentContextAsync(5001)
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
             .Returns(
-                new GroupEstablishmentModel
-                {
-                    Establishments =
-                    [
-                        new SqlEstablishmentDto { Id = 101 },
-                    new SqlEstablishmentDto { Id = 102 },
-                    ],
-                    EstablishmentIds = [101, 102],
-                    CompletedSubmissions =
-                    [
-                        new SqlSubmissionDto
-                    {
-                        Id = 1,
-                        EstablishmentId = 101,
-                        SectionId = "S1",
-                    },
-                    new SqlSubmissionDto
-                    {
-                        Id = 2,
-                        EstablishmentId = 102,
-                        SectionId = "S1",
-                    },
-                    ],
-                }
+                new List<SelectedEstablishmentDataModel> { _firstGroupSchool, _secondGroupSchool }
             );
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
+                {
+                    EstablishmentId = FirstGroupEstablishmentId,
+                    SectionId = NetworkingSectionId,
+                },
+                new SqlSubmissionDto
+                {
+                    EstablishmentId = FirstGroupEstablishmentId,
+                    SectionId = NetworkingSectionId,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var sut = CreateSut(
-            groupService: groupService,
-            currentUser: currentUser
-        );
-
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
             null,
             context: CategoryLandingContext.MAT
         );
 
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-
-        Assert.True(secVm.HasSubmittedAssessments);
-        Assert.False(secVm.HasOutstandingAssessments);
-        Assert.Equal(0, secVm.OutstandingAssessmentCount);
-        Assert.NotNull(secVm.Recommendations);
-        Assert.Equal(1, vm.CompletedSectionsCount);
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.Equal(1, section.OutstandingAssessmentCount);
     }
 
     [Fact]
-    public async Task BuildViewModelAsync_When_Mat_Retrieval_Fails_Sets_Error_Message()
+    public async Task BuildViewModelAsync_WhenSubmissionsAreFromSchoolsOutsideGroup_IgnoresThem()
     {
-        var section = MakeSection("S1", "Roles and responsibilities", "roles-and-responsibilities");
-        var category = MakeCategory(section);
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
+            .Returns(new List<SelectedEstablishmentDataModel> { _firstGroupSchool });
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns([
+                new SqlSubmissionDto
+                {
+                    EstablishmentId = OutsideGroupEstablishmentId,
+                    SectionId = NetworkingSectionId,
+                },
+            ]);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var currentUser = Substitute.For<ICurrentUserProvider>();
-        currentUser.UserOrganisationId.Returns(5001);
-
-        var groupService = Substitute.For<IGroupService>();
-        groupService
-            .GetGroupEstablishmentContextAsync(5001)
-            .Throws(new Exception("boom"));
-
-        var sut = CreateSut(
-            groupService: groupService,
-            currentUser: currentUser
-        );
-
-        var vm = await sut.BuildViewModelAsync(
-            category,
-            "cat",
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
             null,
             null,
             context: CategoryLandingContext.MAT
         );
 
-        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        // Assert
+        var section = Assert.Single(result.CategoryLandingSections);
+        Assert.False(section.HasSubmittedAssessments);
+        Assert.Equal(1, section.OutstandingAssessmentCount);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_WhenRetrievingGroupSchoolsFails_ReturnsErrorMessageAndLogsError()
+    {
+        // Arrange
+        _currentUserProvider
+            .GetGroupSchoolsAsync()
+            .ThrowsAsync(new InvalidOperationException("group unavailable"));
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.BuildViewModelAsync(
+            NetworkingCategory,
+            CategorySlug,
+            null,
+            null,
+            context: CategoryLandingContext.MAT
+        );
+
+        // Assert
+        Assert.Equal(CategoryLandingContext.MAT, result.Context);
         Assert.Equal(
             "Unable to retrieve recommendations, please refresh your browser.",
-            vm.ProgressRetrievalErrorMessage
+            result.ProgressRetrievalErrorMessage
         );
-        Assert.Empty(vm.CategoryLandingSections);
-
-        await groupService
-            .DidNotReceive()
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
+        Assert.Empty(result.CategoryLandingSections);
+        var logRecord = Assert.Single(_logger.Collector.GetSnapshot());
+        Assert.Equal(LogLevel.Error, logRecord.Level);
+        Assert.Contains(CategorySlug, logRecord.Message);
     }
-
 }

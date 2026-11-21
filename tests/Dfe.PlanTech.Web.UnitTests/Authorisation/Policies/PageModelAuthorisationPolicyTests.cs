@@ -4,7 +4,7 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
 using Dfe.PlanTech.Tests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -230,14 +230,11 @@ public class PageModelAuthorisationPolicyTests
             .GetPageBySlugAsync(Arg.Any<string>())
             .Returns(callInfo => AuthRequiredPage);
 
-        var org = new EstablishmentModel
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test School",
-            Urn = "123456",
-            Ukprn = "00000018",
-            Category = new IdWithNameModel { Id = "001", Name = "Establishment" },
-        };
+        var org = new EstablishmentModelBuilder()
+            .AsSchool()
+            .WithName("Test School")
+            .WithUrn("123456")
+            .Build();
 
         var claimsIdentity = new ClaimsIdentity(
             [

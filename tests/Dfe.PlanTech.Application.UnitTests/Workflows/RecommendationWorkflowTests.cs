@@ -297,7 +297,7 @@ public class RecommendationWorkflowTests
             )
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository
-            .GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "rec-001")
             .Returns(historyEntity);
 
         var workflow = CreateServiceUnderTest();
@@ -368,7 +368,7 @@ public class RecommendationWorkflowTests
             )
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository
-            .GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "rec-001")
             .Returns((EstablishmentRecommendationHistoryEntity?)null);
 
         var workflow = CreateServiceUnderTest();
@@ -462,7 +462,10 @@ public class RecommendationWorkflowTests
             )
             .Returns([recommendation]);
         _establishmentRecommendationHistoryRepository
-            .GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(establishmentId, 1)
+            .GetRecommendationHistoryByEstablishmentIdAndRecommendationRefAsync(
+                establishmentId,
+                "rec-001"
+            )
             .Returns(historyEntities);
 
         var workflow = CreateServiceUnderTest();
@@ -518,7 +521,7 @@ public class RecommendationWorkflowTests
             )
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository
-            .GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "rec-001")
             .Returns(currentHistoryEntity);
 
         var workflow = CreateServiceUnderTest();
@@ -575,7 +578,7 @@ public class RecommendationWorkflowTests
             )
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository
-            .GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "rec-001")
             .Returns((EstablishmentRecommendationHistoryEntity?)null);
 
         var workflow = CreateServiceUnderTest();
@@ -661,7 +664,7 @@ public class RecommendationWorkflowTests
             )
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository
-            .GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "rec-001")
             .Returns((EstablishmentRecommendationHistoryEntity?)null);
 
         var workflow = CreateServiceUnderTest();

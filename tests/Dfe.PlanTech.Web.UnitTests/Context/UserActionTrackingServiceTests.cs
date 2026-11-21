@@ -1,222 +1,291 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Dfe.PlanTech.Tests.Shared.Assertions;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
 
 public class UserActionTrackingServiceTests
 {
-    private readonly IUserActionRepository _userActionRepository =
-        Substitute.For<IUserActionRepository>();
+    private const int UserId = 101;
+    private const int UserEstablishmentId = 201;
+    private const int FocusedEstablishmentId = 301;
+    private const string RequestPath = "/test-path";
+    private const string RequestQueryString = "?id=1";
+    private const string ExpectedRequestedUrl = "/test-path?id=1";
+
+    private static readonly Guid SessionId = new("5f1c1a4e-3c0f-4d0a-9a53-0a8f2f0c2b11");
+    private static readonly Guid ExistingUserActionId = new("0b6a5c1d-7a79-4d57-8f6e-9f5b8f7f1d22");
+
+    private readonly FakeLogger<UserActionTrackingService> _logger = new();
+    private readonly ICurrentUserProvider _currentUserProvider =
+        Substitute.For<ICurrentUserProvider>();
     private readonly IHttpContextAccessor _httpContextAccessor =
         Substitute.For<IHttpContextAccessor>();
-    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
-    private readonly ILogger<UserActionTrackingService> _logger = Substitute.For<
-        ILogger<UserActionTrackingService>
-    >();
+    private readonly IUserActionRepository _userActionRepository =
+        Substitute.For<IUserActionRepository>();
     private readonly DefaultHttpContext _httpContext = new();
 
-    private UserActionTrackingService BuildService()
+    private UserActionTrackingService CreateSystemUnderTest()
     {
         _httpContextAccessor.HttpContext.Returns(_httpContext);
 
         return new UserActionTrackingService(
             _logger,
-            _currentUser,
+            _currentUserProvider,
             _httpContextAccessor,
             _userActionRepository
         );
     }
 
     [Fact]
-    public async Task RecordAsync_WhenCalled_ThenCreatesUserActionAndStoresIdInHttpContextItems()
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
     {
-        _currentUser.UserId.Returns(101);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(201);
-        _currentUser.IsMat.Returns(false);
+        // Act & Assert
+        ConstructorGuardAssert.AllNonNullableParametersAreGuarded<UserActionTrackingService>(
+            _logger,
+            _currentUserProvider,
+            _httpContextAccessor,
+            _userActionRepository
+        );
+    }
 
-        _httpContext.Request.Path = "/test-path";
-        _httpContext.Request.QueryString = new QueryString("?id=1");
+    [Fact]
+    public async Task RecordActionAsync_WhenUserIsNotTrust_CreatesUserActionForUserEstablishment()
+    {
+        // Arrange
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider.SessionId.Returns(SessionId);
+        _currentUserProvider.IsTrust.Returns(false);
+        _currentUserProvider
+            .GetUserEstablishmentAsync()
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(UserEstablishmentId).Build());
+        _httpContext.Request.Path = RequestPath;
+        _httpContext.Request.QueryString = new QueryString(RequestQueryString);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var service = BuildService();
+        // Act
+        await systemUnderTest.RecordActionAsync();
 
-        await service.RecordActionAsync();
-
+        // Assert
         await _userActionRepository
             .Received(1)
             .CreateAsync(
                 Arg.Is<UserActionEntity>(entity =>
                     entity.Id != Guid.Empty
-                    && entity.UserId == 101
-                    && entity.EstablishmentId == 201
+                    && entity.SessionId == SessionId
+                    && entity.UserId == UserId
+                    && entity.EstablishmentId == UserEstablishmentId
                     && entity.MatEstablishmentId == null
-                    && entity.RequestedUrl == "/test-path?id=1"
+                    && entity.RequestedUrl == ExpectedRequestedUrl
                 )
             );
-
-        Assert.True(_httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey));
-        Assert.IsType<Guid>(_httpContext.Items[UserActionIdConstants.HttpContextItemKey]);
-        Assert.True(
-            _httpContext.Items.ContainsKey(UserActionIdConstants.RecordedHttpContextItemKey)
-        );
-        Assert.True(
-            Assert.IsType<bool>(
-                _httpContext.Items[UserActionIdConstants.RecordedHttpContextItemKey]
-            )
-        );
     }
 
     [Fact]
-    public async Task RecordAsync_WhenCurrentUserIsMat_ThenCreatesUserActionWithMatEstablishmentId()
+    public async Task RecordActionAsync_WhenUserIsNotTrust_DoesNotReadFocusedEstablishment()
     {
-        _currentUser.UserId.Returns(101);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(201);
-        _currentUser.IsTrust.Returns(true);
-        _currentUser.UserOrganisationId.Returns(301);
+        // Arrange
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider.IsTrust.Returns(false);
+        _currentUserProvider
+            .GetUserEstablishmentAsync()
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(UserEstablishmentId).Build());
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var service = BuildService();
+        // Act
+        await systemUnderTest.RecordActionAsync();
 
-        await service.RecordActionAsync();
+        // Assert
+        await _currentUserProvider.DidNotReceive().GetFocusedEstablishmentAsync();
+    }
 
+    [Fact]
+    public async Task RecordActionAsync_WhenUserIsTrust_CreatesUserActionForFocusedEstablishmentAndTrust()
+    {
+        // Arrange
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider.IsTrust.Returns(true);
+        _currentUserProvider
+            .GetUserEstablishmentAsync()
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(UserEstablishmentId).Build());
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns(
+                new SelectedEstablishmentDataModelBuilder()
+                    .WithEstablishmentId(FocusedEstablishmentId)
+                    .Build()
+            );
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.RecordActionAsync();
+
+        // Assert
         await _userActionRepository
             .Received(1)
             .CreateAsync(
                 Arg.Is<UserActionEntity>(entity =>
-                    entity.EstablishmentId == 201 && entity.MatEstablishmentId == 301
+                    entity.EstablishmentId == FocusedEstablishmentId
+                    && entity.MatEstablishmentId == UserEstablishmentId
                 )
             );
     }
 
     [Fact]
-    public async Task RecordAsync_WhenUserIdIsNull_ThenDoesNotCreateUserAction()
+    public async Task RecordActionAsync_WhenTrustUserHasNoFocusedEstablishment_CreatesUserActionWithoutEstablishment()
     {
-        _currentUser.UserId.Returns((int?)null);
+        // Arrange
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider.IsTrust.Returns(true);
+        _currentUserProvider
+            .GetUserEstablishmentAsync()
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(UserEstablishmentId).Build());
+        _currentUserProvider
+            .GetFocusedEstablishmentAsync()
+            .Returns((SelectedEstablishmentDataModel?)null);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var service = BuildService();
+        // Act
+        await systemUnderTest.RecordActionAsync();
 
-        await service.RecordActionAsync();
-
-        await _userActionRepository.DidNotReceive().CreateAsync(Arg.Any<UserActionEntity>());
-        Assert.False(_httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey));
+        // Assert
+        await _userActionRepository
+            .Received(1)
+            .CreateAsync(
+                Arg.Is<UserActionEntity>(entity =>
+                    entity.EstablishmentId == null
+                    && entity.MatEstablishmentId == UserEstablishmentId
+                )
+            );
     }
 
     [Fact]
-    public async Task RecordAsync_WhenHttpContextIsNull_ThenThrowsInvalidOperationException()
+    public async Task RecordActionAsync_WhenCalled_StoresUserActionIdAndRecordedFlagInHttpContextItems()
     {
+        // Arrange
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider
+            .GetUserEstablishmentAsync()
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(UserEstablishmentId).Build());
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.RecordActionAsync();
+
+        // Assert
+        var userActionId = Assert.IsType<Guid>(
+            _httpContext.Items[UserActionIdConstants.HttpContextItemKey]
+        );
+        Assert.NotEqual(Guid.Empty, userActionId);
+        Assert.Equal(true, _httpContext.Items[UserActionIdConstants.RecordedHttpContextItemKey]);
+    }
+
+    [Fact]
+    public async Task RecordActionAsync_WhenMiddlewareHasCreatedUserActionId_UsesExistingId()
+    {
+        // Arrange
+        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] = ExistingUserActionId;
+        _currentUserProvider.UserId.Returns(UserId);
+        _currentUserProvider
+            .GetUserEstablishmentAsync()
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(UserEstablishmentId).Build());
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.RecordActionAsync();
+
+        // Assert
+        await _userActionRepository
+            .Received(1)
+            .CreateAsync(Arg.Is<UserActionEntity>(entity => entity.Id == ExistingUserActionId));
+        Assert.Equal(
+            ExistingUserActionId,
+            _httpContext.Items[UserActionIdConstants.HttpContextItemKey]
+        );
+    }
+
+    [Fact]
+    public async Task RecordActionAsync_WhenActionAlreadyRecorded_DoesNotCreateAnotherUserAction()
+    {
+        // Arrange
+        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] = ExistingUserActionId;
+        _httpContext.Items[UserActionIdConstants.RecordedHttpContextItemKey] = true;
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.RecordActionAsync();
+
+        // Assert
+        await _userActionRepository.DidNotReceive().CreateAsync(Arg.Any<UserActionEntity>());
+    }
+
+    [Fact]
+    public async Task RecordActionAsync_WhenHttpContextIsNull_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var systemUnderTest = CreateSystemUnderTest();
         _httpContextAccessor.HttpContext.Returns((HttpContext?)null);
 
-        var service = new UserActionTrackingService(
-            _logger,
-            _currentUser,
-            _httpContextAccessor,
-            _userActionRepository
-        );
-
+        // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.RecordActionAsync()
+            systemUnderTest.RecordActionAsync()
         );
-
         Assert.Equal("No active HttpContext found.", exception.Message);
     }
 
     [Fact]
-    public async Task GetAsync_Returns_Null_If_UserAction_Not_Found()
+    public async Task GetAsync_WhenUserActionDoesNotExist_ReturnsNull()
     {
         // Arrange
-        var id = Guid.NewGuid();
-
         _userActionRepository
-            .GetUserActionAsync(id)
+            .GetUserActionAsync(ExistingUserActionId)
             .Returns(Task.FromResult<UserActionEntity?>(null));
-
-        var sut = BuildService();
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var result = await sut.GetAsync(id);
+        var result = await systemUnderTest.GetAsync(ExistingUserActionId);
 
         // Assert
         Assert.Null(result);
-
-        await _userActionRepository.Received(1).GetUserActionAsync(id);
     }
 
     [Fact]
-    public async Task GetAsync_Maps_UserActionEntity_To_Dto()
+    public async Task GetAsync_WhenUserActionExists_ReturnsMappedDto()
     {
         // Arrange
-        var id = Guid.NewGuid();
-
         var userActionEntity = new UserActionEntity
         {
-            Id = id,
-            SessionId = Guid.NewGuid(),
+            Id = ExistingUserActionId,
+            SessionId = SessionId,
             UserId = 123,
             EstablishmentId = 456,
             MatEstablishmentId = 789,
             RequestedUrl = "/test-path?section=network",
         };
-
         _userActionRepository
-            .GetUserActionAsync(id)
+            .GetUserActionAsync(ExistingUserActionId)
             .Returns(Task.FromResult<UserActionEntity?>(userActionEntity));
-
-        var sut = BuildService();
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        var result = await sut.GetAsync(id);
+        var result = await systemUnderTest.GetAsync(ExistingUserActionId);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(userActionEntity.Id, result.Id);
-        Assert.Equal(userActionEntity.SessionId, result.SessionId);
-        Assert.Equal(userActionEntity.UserId, result.UserId);
-        Assert.Equal(userActionEntity.EstablishmentId, result.EstablishmentId);
-        Assert.Equal(userActionEntity.MatEstablishmentId, result.MatEstablishmentId);
-        Assert.Equal(userActionEntity.RequestedUrl, result.RequestedUrl);
-
-        await _userActionRepository.Received(1).GetUserActionAsync(id);
-    }
-
-    [Fact]
-    public async Task RecordAsync_WhenMiddlewareHasCreatedUserActionId_UsesExistingId()
-    {
-        var userActionId = Guid.NewGuid();
-
-        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
-
-        _currentUser.UserId.Returns(101);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(201);
-        _currentUser.IsMat.Returns(false);
-
-        var service = BuildService();
-
-        await service.RecordActionAsync();
-
-        await _userActionRepository
-            .Received(1)
-            .CreateAsync(Arg.Is<UserActionEntity>(entity => entity.Id == userActionId));
-
-        Assert.Equal(userActionId, _httpContext.Items[UserActionIdConstants.HttpContextItemKey]);
-    }
-
-    [Fact]
-    public async Task RecordAsync_WhenActionAlreadyRecorded_DoesNotCreateAnotherUserAction()
-    {
-        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] = Guid.NewGuid();
-
-        _httpContext.Items[UserActionIdConstants.RecordedHttpContextItemKey] = true;
-
-        _currentUser.UserId.Returns(101);
-
-        var service = BuildService();
-
-        await service.RecordActionAsync();
-
-        await _userActionRepository.DidNotReceive().CreateAsync(Arg.Any<UserActionEntity>());
+        Assert.Equal(ExistingUserActionId, result.Id);
+        Assert.Equal(SessionId, result.SessionId);
+        Assert.Equal(123, result.UserId);
+        Assert.Equal(456, result.EstablishmentId);
+        Assert.Equal(789, result.MatEstablishmentId);
+        Assert.Equal("/test-path?section=network", result.RequestedUrl);
     }
 }

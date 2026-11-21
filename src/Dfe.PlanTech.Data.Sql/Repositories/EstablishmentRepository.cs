@@ -8,13 +8,15 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class EstablishmentRepository(PlanTechDbContext dbContext) : IEstablishmentRepository
 {
-    protected readonly PlanTechDbContext _db =
-        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    protected readonly PlanTechDbContext _db = dbContext
+        ?? throw new ArgumentNullException(nameof(dbContext));
 
     public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(
         EstablishmentModel model
     )
     {
+        ArgumentNullException.ThrowIfNull(model);
+
         var establishments = await CreateEstablishmentsFromModelsAsync([model]);
         return establishments.Single();
     }
@@ -23,18 +25,21 @@ public class EstablishmentRepository(PlanTechDbContext dbContext) : IEstablishme
         IEnumerable<EstablishmentModel> models
     )
     {
-        var establishmentEntities = models.Select(model => new EstablishmentEntity
-        {
-            EstablishmentRef = model.Reference,
-            EstablishmentType = model.Type?.Name,
-            OrgName = model.Name,
-            GroupUid = model.GroupUid, // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
-        });
+        // Materialise now: a lazy Select would build new, unsaved entities on each enumeration.
+        var establishmentEntities = models
+            .Select(model => new EstablishmentEntity
+            {
+                EstablishmentRef = model.Reference,
+                EstablishmentType = model.Type?.Name,
+                OrgName = model.Name,
+                GroupUid = model.GroupUid, // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
+            })
+            .ToList();
 
         await _db.Establishments.AddRangeAsync(establishmentEntities);
         await _db.SaveChangesAsync();
 
-        return establishmentEntities.ToList();
+        return establishmentEntities;
     }
 
     public async Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId) =>

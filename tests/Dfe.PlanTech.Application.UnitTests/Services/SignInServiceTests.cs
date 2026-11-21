@@ -1,9 +1,12 @@
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Tests.Shared.Assertions;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Application.UnitTests.Workflows;
+namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class SignInServiceTests
 {
@@ -12,40 +15,66 @@ public class SignInServiceTests
     private readonly ISignInWorkflow _signInWorkflow = Substitute.For<ISignInWorkflow>();
     private readonly IUserWorkflow _userWorkflow = Substitute.For<IUserWorkflow>();
 
-    private SignInService CreateServiceUnderTest() =>
+    private SignInService CreateSystemUnderTest() =>
         new(_establishmentWorkflow, _signInWorkflow, _userWorkflow);
 
-    // ── ctor guards ────────────────────────────────────────────────────────────
     [Fact]
-    public void Ctor_NullDeps_Throw()
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() =>
-            new SignInService(null!, _signInWorkflow, _userWorkflow)
-        );
-        Assert.Throws<ArgumentNullException>(() =>
-            new SignInService(_establishmentWorkflow, null!, _userWorkflow)
-        );
-        Assert.Throws<ArgumentNullException>(() =>
-            new SignInService(_establishmentWorkflow, _signInWorkflow, null!)
+        // Act & Assert
+        ConstructorGuardAssert.AllNonNullableParametersAreGuarded<SignInService>(
+            _establishmentWorkflow,
+            _signInWorkflow,
+            _userWorkflow
         );
     }
 
-    // ── RecordSignInAsync: user & establishment ────────────────────────────
     [Fact]
-    public async Task RecordSignIn_UsesExistingUserAndEstablishment()
+    public async Task RecordSignInAsync_WhenCalled_CreatesSignInForUserAndOrganisationEstablishment()
     {
-        await _userWorkflow.Received(1).GetOrCreateUserAsync(Arg.Any<string>());
+        // Arrange
+        var organisation = new EstablishmentModelBuilder().AsMultiAcademyTrust().Build();
+        var expectedSignIn = new SqlSignInDtoBuilder()
+            .WithUserId(42)
+            .WithEstablishmentId(301)
+            .Build();
+        _userWorkflow
+            .GetOrCreateUserAsync("dsi-user-42")
+            .Returns(new SqlUserDto { Id = 42, DfeSignInRef = "dsi-user-42" });
+        _establishmentWorkflow
+            .GetOrCreateEstablishmentAsync(organisation)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(301).Build());
+        _signInWorkflow.CreateSignInAsync(42, 301).Returns(expectedSignIn);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.RecordSignInAsync("dsi-user-42", organisation);
+
+        // Assert
+        Assert.Same(expectedSignIn, result);
+    }
+
+    [Fact]
+    public async Task RecordSignInUserOnlyAsync_WhenCalled_CreatesSignInWithoutEstablishment()
+    {
+        // Arrange
+        var expectedSignIn = new SqlSignInDtoBuilder()
+            .WithUserId(42)
+            .WithEstablishmentId(null)
+            .Build();
+        _userWorkflow
+            .GetOrCreateUserAsync("dsi-user-42")
+            .Returns(new SqlUserDto { Id = 42, DfeSignInRef = "dsi-user-42" });
+        _signInWorkflow.CreateSignInAsync(42, null).Returns(expectedSignIn);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.RecordSignInUserOnlyAsync("dsi-user-42");
+
+        // Assert
+        Assert.Same(expectedSignIn, result);
         await _establishmentWorkflow
-            .Received(1)
-            .GetOrCreateEstablishmentAsync(Arg.Any<EstablishmentModel>());
-        await _signInWorkflow.Received(1).CreateSignInAsync(Arg.Any<int>(), Arg.Any<int>());
-    }
-
-    // ── RecordSignInUserOnly: user only ────────
-    [Fact]
-    public async Task RecordSignIn_Creates_Missing_User_And_Establishment_With_Copied_Fields()
-    {
-        await _userWorkflow.Received(1).GetOrCreateUserAsync(Arg.Any<string>());
-        await _signInWorkflow.Received(1).CreateSignInAsync(Arg.Any<int>(), Arg.Any<int>());
+            .DidNotReceive()
+            .GetOrCreateEstablishmentAsync(Arg.Any<Dfe.PlanTech.Core.Models.EstablishmentModel>());
     }
 }

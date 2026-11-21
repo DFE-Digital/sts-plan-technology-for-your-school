@@ -1,11 +1,10 @@
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Data.Sql.Entities;
-using Dfe.PlanTech.Data.Sql.Interfaces;
+using Dfe.PlanTech.Tests.Shared.Assertions;
+using Dfe.PlanTech.Tests.Shared.Builders.Models;
+using Dfe.PlanTech.Tests.Shared.Builders.Sql;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
@@ -14,194 +13,202 @@ public class EstablishmentServiceTests
 {
     private readonly IEstablishmentWorkflow _establishmentWorkflow =
         Substitute.For<IEstablishmentWorkflow>();
-    private readonly IEstablishmentRepository _establishmentRepository =
-        Substitute.For<IEstablishmentRepository>();
     private readonly IRecommendationWorkflow _recommendationWorkflow =
         Substitute.For<IRecommendationWorkflow>();
     private readonly IUserWorkflow _userWorkflow = Substitute.For<IUserWorkflow>();
-    private static readonly string[] urnAandB = ["URN-A", "URN-B"];
-    private static readonly string[] urnAandBandC = ["URN-A", "URN-B", "URN-C"];
 
-    private EstablishmentService CreateServiceUnderTest() =>
-        new EstablishmentService(
+    private EstablishmentService CreateSystemUnderTest() =>
+        new(_establishmentWorkflow, _recommendationWorkflow, _userWorkflow);
+
+    [Fact]
+    public void Constructor_WhenAnyDependencyIsNull_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        ConstructorGuardAssert.AllNonNullableParametersAreGuarded<EstablishmentService>(
             _establishmentWorkflow,
-            _establishmentRepository,
             _recommendationWorkflow,
             _userWorkflow
         );
-
-    [Fact]
-    public async Task GetOrCreateEstablishmentAsync_Delegates_To_Workflow()
-    {
-        // Arrange
-        var establishmentModel = new EstablishmentModel
-        {
-            Id = Guid.NewGuid(),
-            DistrictAdministrativeCode = "testCode",
-            LegacyId = "testLegacyId",
-            Name = "Test Establishment",
-            Sid = "testSid",
-            Urn = "123",
-        };
-
-        var expected = new SqlEstablishmentDto
-        {
-            Id = 1,
-            EstablishmentRef = "123",
-            OrgName = "Test Establishment",
-            DateCreated = DateTime.UtcNow,
-        };
-
-        _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel).Returns(expected);
-
-        var sut = CreateServiceUnderTest();
-
-        // Act
-        var actual = await sut.GetOrCreateEstablishmentAsync(establishmentModel);
-
-        // Assert
-        Assert.Same(expected, actual);
-        await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
     [Fact]
-    public async Task GetEstablishmentByIdAsync_Returns_Dto_When_Establishment_Exists()
-    {
-        var sut = CreateServiceUnderTest();
-
-        var entity = new EstablishmentEntity
-        {
-            Id = 123,
-            EstablishmentRef = "URN-123",
-            OrgName = "School 123",
-            GroupUid = "500",
-        };
-
-        _establishmentRepository.GetEstablishmentByIdAsync(123).Returns(entity);
-
-        var result = await sut.GetEstablishmentByIdAsync(123);
-
-        Assert.Equal(123, result.Id);
-        Assert.Equal("URN-123", result.EstablishmentRef);
-        Assert.Equal("School 123", result.OrgName);
-        Assert.Equal("500", result.GroupUid);
-    }
-
-    [Fact]
-    public async Task RecordGroupSelection_Null_UserEstablishmentId_Creates_UserEstablishment_And_Selected_If_Missing()
+    public async Task GetOrCreateEstablishmentAsync_WhenCalled_ReturnsWorkflowResult()
     {
         // Arrange
-        const string dsiRef = "testDsiReference";
-        const int establishmentId = 2;
-        const string orgName = "Test Establishment";
-        const string urn = "123";
-        const int userId = 1;
-
-        var user = new SqlUserDto { Id = userId, DfeSignInRef = dsiRef };
-
-        var establishmentModel = new EstablishmentModel
-        {
-            Id = Guid.NewGuid(),
-            DistrictAdministrativeCode = "testCode",
-            LegacyId = "testLegacyId",
-            Name = orgName,
-            Sid = "testSid",
-            Urn = urn,
-        };
-
-        var createdUserEstablishment = new SqlEstablishmentDto
-        {
-            Id = establishmentId,
-            EstablishmentRef = establishmentModel.Urn,
-            OrgName = establishmentModel.Name,
-        };
-
-        var createdSelectedEstablishment = new SqlEstablishmentDto
-        {
-            Id = establishmentId,
-            EstablishmentRef = urn,
-            OrgName = orgName,
-        };
-
-        _userWorkflow.GetUserBySignInRefAsync(dsiRef).Returns(user);
+        var establishmentModel = new EstablishmentModelBuilder().WithUrn("100301").Build();
+        var expectedEstablishment = new SqlEstablishmentDtoBuilder().WithId(301).Build();
         _establishmentWorkflow
             .GetOrCreateEstablishmentAsync(establishmentModel)
-            .Returns(createdUserEstablishment);
-        _establishmentWorkflow
-            .GetEstablishmentByReferenceAsync(urn)
-            .Returns((SqlEstablishmentDto?)null);
-        _establishmentWorkflow
-            .GetOrCreateEstablishmentAsync(urn, orgName)
-            .Returns(createdSelectedEstablishment);
-
-        // Record and return id
-        const int expectedSelectionId = 3;
-        _establishmentWorkflow
-            .RecordGroupSelection(Arg.Any<UserGroupSelectionModel>())
-            .Returns(expectedSelectionId);
-
-        var sut = CreateServiceUnderTest();
+            .Returns(expectedEstablishment);
+        var systemUnderTest = CreateSystemUnderTest();
 
         // Act
-        await sut.RecordGroupSelection(
-            dsiRef,
-            userEstablishmentId: null,
-            userEstablishmentModel: establishmentModel,
-            selectedEstablishmentUrn: urn,
-            selectedEstablishmentName: orgName
-        );
+        var result = await systemUnderTest.GetOrCreateEstablishmentAsync(establishmentModel);
 
-        await _userWorkflow.Received(1).GetUserBySignInRefAsync(dsiRef);
-
-        await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(establishmentModel);
-
-        await _establishmentWorkflow.Received(1).GetEstablishmentByReferenceAsync(urn);
-        await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(urn, orgName);
-
-        await _establishmentWorkflow
-            .Received(1)
-            .RecordGroupSelection(
-                Arg.Is<UserGroupSelectionModel>(m =>
-                    m.SelectedEstablishmentId == createdSelectedEstablishment.Id
-                    && m.SelectedEstablishmentName == orgName
-                    && m.UserEstablishmentId == createdUserEstablishment.Id
-                    && m.UserId == user.Id
-                )
-            );
+        // Assert
+        Assert.Same(expectedEstablishment, result);
     }
 
     [Fact]
-    public async Task RecordGroupSelection_Throws_If_User_Not_Found()
+    public async Task GetOrCreateSchoolAsync_WhenCalled_ReturnsWorkflowResult()
     {
         // Arrange
-        const string dsiRef = "missingUser";
-        _userWorkflow.GetUserBySignInRefAsync(dsiRef).Returns(Task.FromResult<SqlUserDto?>(null));
+        var expectedSchool = new SqlEstablishmentDtoBuilder().WithId(701).Build();
+        _establishmentWorkflow
+            .GetOrCreateSchoolAsync("100701", "Northfield Primary")
+            .Returns(expectedSchool);
+        var systemUnderTest = CreateSystemUnderTest();
 
-        var sut = CreateServiceUnderTest();
+        // Act
+        var result = await systemUnderTest.GetOrCreateSchoolAsync("100701", "Northfield Primary");
 
-        // Act + Assert
-        await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RecordGroupSelection(
-                dsiRef,
-                userEstablishmentId: null,
-                userEstablishmentModel: new EstablishmentModel { Urn = "U", Name = "N" },
-                selectedEstablishmentUrn: "SURN",
-                selectedEstablishmentName: "SNAME"
-            )
-        );
+        // Assert
+        Assert.Same(expectedSchool, result);
     }
 
     [Fact]
-    public async Task GetEstablishmentByIdAsync_Throws_When_Establishment_Does_Not_Exist()
+    public async Task GetOrCreateSchoolsAsync_WhenGivenSchools_ReturnsOneEstablishmentPerSchoolInOrder()
     {
-        var sut = CreateServiceUnderTest();
+        // Arrange
+        var firstSchool = new SelectedEstablishmentDataModelBuilder()
+            .WithUrn("100701")
+            .WithName("Northfield Primary")
+            .Build();
+        var secondSchool = new SelectedEstablishmentDataModelBuilder()
+            .WithUrn("100702")
+            .WithName("Southfield Primary")
+            .Build();
+        _establishmentWorkflow
+            .GetOrCreateSchoolAsync("100701", "Northfield Primary")
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(701).Build());
+        _establishmentWorkflow
+            .GetOrCreateSchoolAsync("100702", "Southfield Primary")
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(702).Build());
+        var systemUnderTest = CreateSystemUnderTest();
 
-        _establishmentRepository.GetEstablishmentByIdAsync(999).Returns((EstablishmentEntity?)null);
+        // Act
+        var result = await systemUnderTest.GetOrCreateSchoolsAsync([firstSchool, secondSchool]);
 
-        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            sut.GetEstablishmentByIdAsync(999)
+        // Assert
+        Assert.Equal([701, 702], result.Select(establishment => establishment.Id).ToArray());
+    }
+
+    [Fact]
+    public async Task GetEstablishmentsByReferencesAsync_WhenCalled_ReturnsWorkflowResult()
+    {
+        // Arrange
+        IEnumerable<SqlEstablishmentDto> expectedEstablishments =
+        [
+            new SqlEstablishmentDtoBuilder().WithId(701).Build(),
+        ];
+        _establishmentWorkflow
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(r => r.Single() == "100701")
+            )
+            .Returns(expectedEstablishments);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetEstablishmentsByReferencesAsync(["100701"]);
+
+        // Assert
+        Assert.Same(expectedEstablishments, result);
+    }
+
+    [Fact]
+    public async Task GetEstablishmentByReferenceAsync_WhenCalled_ReturnsWorkflowResult()
+    {
+        // Arrange
+        var expectedEstablishment = new SqlEstablishmentDtoBuilder().WithId(701).Build();
+        _establishmentWorkflow
+            .GetEstablishmentByReferenceAsync("100701")
+            .Returns(expectedEstablishment);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetEstablishmentByReferenceAsync("100701");
+
+        // Assert
+        Assert.Same(expectedEstablishment, result);
+    }
+
+    [Fact]
+    public async Task GetEstablishmentByIdAsync_WhenEstablishmentExists_ReturnsIt()
+    {
+        // Arrange
+        var expectedEstablishment = new SqlEstablishmentDtoBuilder().WithId(701).Build();
+        _establishmentWorkflow.GetEstablishmentByIdAsync(701).Returns(expectedEstablishment);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        var result = await systemUnderTest.GetEstablishmentByIdAsync(701);
+
+        // Assert
+        Assert.Same(expectedEstablishment, result);
+    }
+
+    [Fact]
+    public async Task GetEstablishmentByIdAsync_WhenEstablishmentDoesNotExist_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        _establishmentWorkflow.GetEstablishmentByIdAsync(999).Returns((SqlEstablishmentDto?)null);
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            systemUnderTest.GetEstablishmentByIdAsync(999)
         );
+        Assert.Equal("Establishment with ID 999 not found", exception.Message);
+    }
 
-        Assert.Equal("Establishment with id 999 not found", ex.Message);
+    [Fact]
+    public async Task RecordGroupSelection_WhenSelectedEstablishmentExists_RecordsSelectionWithItsId()
+    {
+        // Arrange
+        _establishmentWorkflow
+            .GetEstablishmentByIdAsync(701)
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(701).Build());
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.RecordGroupSelection(42, 301, 701, "100701", "Northfield Primary");
+
+        // Assert
+        await _establishmentWorkflow
+            .Received(1)
+            .RecordGroupSelectionAsync(
+                Arg.Is<UserGroupSelectionModel>(selection =>
+                    selection.UserId == 42
+                    && selection.UserEstablishmentId == 301
+                    && selection.SelectedEstablishmentId == 701
+                    && selection.SelectedEstablishmentName == "Northfield Primary"
+                )
+            );
+        await _establishmentWorkflow
+            .DidNotReceive()
+            .GetOrCreateSchoolAsync(Arg.Any<string>(), Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task RecordGroupSelection_WhenSelectedEstablishmentDoesNotExist_CreatesSchoolAndRecordsSelection()
+    {
+        // Arrange
+        _establishmentWorkflow.GetEstablishmentByIdAsync(701).Returns((SqlEstablishmentDto?)null);
+        _establishmentWorkflow
+            .GetOrCreateSchoolAsync("100701", "Northfield Primary")
+            .Returns(new SqlEstablishmentDtoBuilder().WithId(800).Build());
+        var systemUnderTest = CreateSystemUnderTest();
+
+        // Act
+        await systemUnderTest.RecordGroupSelection(42, 301, 701, "100701", "Northfield Primary");
+
+        // Assert
+        await _establishmentWorkflow
+            .Received(1)
+            .RecordGroupSelectionAsync(
+                Arg.Is<UserGroupSelectionModel>(selection =>
+                    selection.SelectedEstablishmentId == 800
+                )
+            );
     }
 }
