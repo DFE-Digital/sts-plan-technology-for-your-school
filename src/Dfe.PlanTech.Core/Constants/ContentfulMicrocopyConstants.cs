@@ -89,8 +89,7 @@ public static class ContentfulMicrocopyConstants
     public const string msmTopicStartText2 = "msmTopicStartText2";
 
     public const string GroupsSelectSchoolsToAssessHeader = "msmSelectHeader";
-    public const string GroupsSelectSchoolsToAssessBackLink =
-        "msmSeGroupsSelectViewRecommendationslectBack";
+    public const string GroupsSelectSchoolsToAssessBackLink = "msmSelectBack";
     public const string GroupsSelectSchoolsToAssessHint = "msmSelectHint";
     public const string GroupsSelectSchoolsToAssessSchoolHint = "msmSelectSchoolHint";
     public const string GroupsSelectSchoolsToAssessCheckboxAll = "msmSelectCheckboxAll";
@@ -219,7 +218,7 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToUpdateStatusHeaderFallback =
         "Which schools do you want to update the status of?";
     private const string GroupsSelectSchoolsToUpdateStatusHelpTextFallback =
-        "You can update the recommendation status for schools that have completed this self-assessment.Select one, more or all schools.";
+        "You can update the recommendation status for schools that have completed this self-assessment. Select one, more or all schools.";
     private const string GroupsSelectSchoolsToUpdateStatusPreContinueButtonTextFallback =
         "Anyone who uses the service for your school will be able to see status updates.";
     private const string GroupsSelectSchoolsToUpdateStatusContinueFallback = "Continue";
