@@ -51,7 +51,7 @@
                     <div class="govuk-task-list__status" id="@($"{s.SectionSlug}-status")">
                         @if (s.UncompletedGroupSubmissions == 0)
                         {
-                            <span>All self-assessments submitted.</span>
+                            <span>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSelectSelfAssessmentAllSubmitted)</span>
                         }
                         else
                         {
