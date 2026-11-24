@@ -9,8 +9,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             Controller controller,
             string categorySlug,
             string sectionSlug,
-            string questionSlug,
-            string? returnTo
+            string questionSlug
         );
         Task<IActionResult> RouteToInterstitialPage(
             Controller controller,
@@ -44,8 +43,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             SubmitAnswerInputViewModel answerViewModel,
             string categorySlug,
             string sectionSlug,
-            string questionSlug,
-            string? returnTo
+            string questionSlug
         );
     }
 }
