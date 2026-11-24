@@ -35,7 +35,7 @@
 </h2>
 
 <p class="govuk-body">
-    You can submit self-assessments for one or more schools at a time.
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectBody)
 </p>
 
 <hr class="govuk-section-break govuk-section-break--l">
@@ -68,7 +68,7 @@
 </div>
 
 <h2 class="govuk-heading-l">
-    View recommendations and track progress
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolRecsHeader)
 </h2>
 
 <p class="govuk-body govuk-!-margin-bottom-5">
