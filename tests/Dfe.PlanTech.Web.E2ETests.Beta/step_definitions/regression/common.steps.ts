@@ -301,8 +301,24 @@ When(
   }
 );
 
+When(
+  'I click the link to view the recommendations for {string} as a mat',
+  async function (categoryName: string) {
+    await this.page
+      .getByRole('link', {
+        name: `View ${categoryName} recommendations`,
+        exact: true,
+      })
+      .click();
+  }
+);
+
 Given('I visit the select-a-self-assessment page', async function () {
-  await this.page.goto(`${process.env.URL}groups/select-a-self-assessment`);
+  await this.page.goto(`${process.env.URL}trust/select-a-self-assessment`);
+});
+
+Given('I visit the track your schools progress page', async function () {
+  await this.page.goto(`${process.env.URL}trust/standards`);
 });
 
 Then(
@@ -330,3 +346,56 @@ When(
     await link.click();
   },
 );
+
+// Click a breadcrumb by its text
+When(
+  'I click the breadcrumb item {string}',
+  async function (breadcrumb: string) {
+    const link = this.page
+      .locator('.govuk-breadcrumbs')
+      .getByRole('link', { name: breadcrumb, exact: true });
+
+    await expect(link).toBeVisible();
+    await link.click();
+  }
+);
+
+// Click the last breadcrumb
+When(
+  'I click the last breadcrumb item',
+  async function () {
+    const link = this.page
+      .locator('.govuk-breadcrumbs__list-item')
+      .last()
+      .locator('a.govuk-breadcrumbs__link');
+
+    await expect(link).toBeVisible();
+    await link.click();
+  }
+);
+
+// Click a breadcrumb by position (1-based)
+When(
+  'I click breadcrumb item {int}',
+  async function (position: number) {
+    const items = this.page.locator(
+      '.govuk-breadcrumbs__list-item'
+    );
+
+    const count = await items.count();
+
+    if (position < 1 || position > count) {
+      throw new Error(
+        `Breadcrumb position ${position} is invalid. Found ${count} items.`
+      );
+    }
+
+    const link = items
+      .nth(position - 1)
+      .locator('a.govuk-breadcrumbs__link');
+
+    await expect(link).toBeVisible();
+    await link.click();
+  }
+);
+

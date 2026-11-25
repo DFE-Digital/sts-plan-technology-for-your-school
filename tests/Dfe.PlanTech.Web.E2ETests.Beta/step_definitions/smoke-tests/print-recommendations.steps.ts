@@ -55,7 +55,7 @@ Then(
   'I should see the print page recommendation text {string}',
   async function (recommendationText: string) {
     const recommendation = this.page.locator(
-      '.recommendation-action-header td.govuk-table__cell div',
+      '.recommendation-piece-content .govuk-heading-m',
       { hasText: recommendationText },
     );
 

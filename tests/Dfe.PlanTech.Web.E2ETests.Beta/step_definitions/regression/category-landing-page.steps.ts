@@ -2,17 +2,25 @@ import { Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { getCurrentShortDate, normaliseShortDateTimeText } from '../../helpers/datetime';
 
-async function getConfirmationPanel(context: any, sectionName: string) {
-  const expectedHeader = `Your self-assessment for ${sectionName.toLowerCase()} is complete`;
-  const headerLocator = context.page.locator('h1.govuk-panel__title', {
-    hasText: expectedHeader,
+
+async function getConfirmationPanel(
+  context: any,
+  sectionName: string,
+  schoolCount: number = 1
+) {
+  const panel = context.page.locator('.govuk-panel--confirmation');
+
+  const headerLocator = panel.locator('h1.govuk-panel__title', {
+    hasText: 'Self-assessment submitted',
   });
-  const bodyLocator = context.page.locator('.govuk-panel__body', {
-    hasText: 'Recommendations are available',
+
+  const bodyLocator = panel.locator('.govuk-panel__body', {
+    hasText: `${sectionName} has been submitted for ${schoolCount} ${schoolCount === 1 ? 'school' : 'schools'}`,
   });
 
   return { headerLocator, bodyLocator };
 }
+
 
 Then('I should see the confirmation panel for {string}', async function (sectionName: string) {
   const { headerLocator, bodyLocator } = await getConfirmationPanel(this, sectionName);
@@ -59,14 +67,23 @@ When(
   },
 );
 
+
+
+Then('I should not see any recommendation links', async function () {
+  const recommendationLinks = this.page.locator('ul.govuk-task-list a.govuk-task-list__link');
+
+  await expect(recommendationLinks).toHaveCount(0);
+});
+
+
 Then(
-  'I should see the completed self-assessment message for {string}',
-  async function (sectionName: string) {
+  'I should see the completed self-assessment message for section {string} and establishment {string}',
+  async function (sectionName: string, establishmentName: string) {
     // format todays date
     var currentDate = getCurrentShortDate();
 
     const sectionNameLower = sectionName.toLowerCase();
-    const expectedTextRaw = `The self-assessment for ${sectionNameLower} was submitted on ${currentDate} by DSI TEST Establishment (001) Miscellaneous (27).`;
+    const expectedTextRaw = `The self-assessment for ${sectionNameLower} was submitted on ${currentDate} by ${establishmentName}.`;
 
     // check the self assessment completed text
     const completionParagraph = this.page.locator('p', {
@@ -87,9 +104,3 @@ Then(
     await expect(viewLink).toBeVisible();
   },
 );
-
-Then('I should not see any recommendation links', async function () {
-  const recommendationLinks = this.page.locator('ul.govuk-task-list a.govuk-task-list__link');
-
-  await expect(recommendationLinks).toHaveCount(0);
-});

@@ -14,6 +14,14 @@ Then('I should see a back link to the previous page', async function () {
   expect(href).toContain('/');
 });
 
+Then('I should see a back link with govuk class to the previous page', async function () {
+  const backLink = this.page.locator('a.govuk-back-link', { hasText: /back/i });
+  await expect(backLink).toBeVisible();
+
+  const href = await backLink.getAttribute('href');
+  expect(href).toContain('/');
+});
+
 Then('I should see explanatory accessibility content', async function () {
   const paragraphs = this.page.locator('main p');
   await expect(paragraphs.first()).toBeVisible();

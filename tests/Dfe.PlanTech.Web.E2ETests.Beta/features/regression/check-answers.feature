@@ -10,7 +10,7 @@ Feature: Check answers page
     And I should see the caption heading "Category One Section One"
 
     And I should see a print button
-    And I should see a view recommendations button
+    And I should see the self-assessment submit button
     And I should see a back link to "/category-one/category-one-section-one/self-assessment/testing-question-two"
     And I should see the GOV.UK footer with expected links
     And I should see the beta header
