@@ -165,9 +165,23 @@ public class QuestionsViewBuilder(
                 .ToList();
         }
 
+        var category =
+        await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+        ?? throw new ContentfulDataUnavailableException(
+            $"Could not find category for slug {categorySlug}"
+        );
+
+        var categoryName =
+            category.Header?.Text
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category header text for slug {categorySlug}"
+            );
+
         var viewModel = new PageViewModel(interstitialPage)
         {
             ShowTrustSchoolAssessmentTable = isMatWithoutSelectedSchool,
+            CategoryName = categoryName,
+            CategorySlug = categorySlug,
         };
 
         var section =
@@ -185,7 +199,7 @@ public class QuestionsViewBuilder(
             );
 
             viewModel.TrustSchoolAssessmentContinueHref =
-                $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
+                $"/trust/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
         }
 
         return controller.View(InterstitialPagePath, viewModel);

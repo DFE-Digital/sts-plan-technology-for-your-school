@@ -58,7 +58,7 @@ jobs:
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{vars.DFE_PROJECT_NAME}}-tf
           account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
           verb: add
 
@@ -70,7 +70,7 @@ jobs:
       - name: Terraform init
         shell: bash
         run: |
-          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{vars.DFE_PROJECT_NAME}}-tf"
           terraform init \
               -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
               -backend-config="storage_account_name=${{secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}"  \
@@ -82,7 +82,7 @@ jobs:
         id: terraform-plan
         shell: bash
         run: |
-          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{vars.DFE_PROJECT_NAME}}"
           terraform plan \
           -var-file="terraform.tfvars.json" \
           -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
@@ -94,7 +94,7 @@ jobs:
         id: terraform-apply
         shell: bash
         run: |
-          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{vars.DFE_PROJECT_NAME}}"
           terraform apply -auto-approve \
           -var-file="terraform.tfvars.json" \
           -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
@@ -106,6 +106,6 @@ jobs:
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{vars.DFE_PROJECT_NAME}}-tf
           account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
           verb: remove

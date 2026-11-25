@@ -5,7 +5,9 @@ public static class DateTimeHelper
     public static string FormattedTime(DateTime dateTime) =>
         $"{dateTime:h:mmtt}".ToLowerInvariant();
 
-    public static string FormattedDateLong(DateTime dateTime) => $"{dateTime:d MMMM yyyy}";
+    public static string FormattedDateLong(DateTime? dateTime) =>
+        dateTime is null ? "Never" : $"{dateTime:d MMMM yyyy}";
 
-    public static string FormattedDateShort(DateTime dateTime) => $"{dateTime:d MMM yyyy}";
+    public static string FormattedDateShort(DateTime? dateTime) =>
+        dateTime is null ? "Never" : $"{dateTime:d MMM yyyy}";
 }

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -13,4 +14,6 @@ public class CategoryCardsViewComponentViewModel
     public string? NoSectionsErrorRedirectUrl { get; set; }
     public string? ProgressRetrievalErrorMessage { get; init; }
     public int TotalSectionCount { get; init; }
+    public CategoryLandingContext Context { get; init; } = CategoryLandingContext.School;
+    public bool IsMat => Context == CategoryLandingContext.MAT;
 }

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
@@ -10,7 +11,8 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string slug,
             string? sectionName,
             string? sortOrder,
-            bool print = false
+            bool print = false,
+            CategoryLandingContext context = CategoryLandingContext.School
         );
     }
 }

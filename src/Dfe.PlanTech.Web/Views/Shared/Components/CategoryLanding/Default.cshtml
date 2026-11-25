@@ -46,68 +46,128 @@
         insetMicrocopyKey = ContentfulMicrocopyConstants.LandingPageInsetIntroContinue;
     }
 
-    var landingHeader = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageHeader);
+    var landingHeader = await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.LandingPageHeader
+    );
 
     <span class="govuk-caption-xl">@landingHeader</span>
     <partial name="Components/PageComponentFactory" model="@title" />
 
-    if (!singleSectionCategory && !allSectionsCompleted)
+    if (Model.IsMat)
     {
-        <div class="govuk-inset-text">
-            @{
-                var insetText = await Microcopy.GetTextByKeyAsync(insetMicrocopyKey, dynamicValues);
+        var outstandingSections = Model.CategoryLandingSections
+            .Where(x => x.HasOutstandingAssessments)
+            .ToList();
 
-                <p>@insetText</p>
+        var notSubmittedSections = outstandingSections
+            .Where(x => !x.HasSubmittedAssessments)
+            .ToList();
 
-                if (anySectionsCompleted)
+        if (outstandingSections.Count != 0)
+        {
+            <div class="govuk-inset-text">
+                <p>
+                    @await Microcopy.GetTextByKeyAsync(
+                        ContentfulMicrocopyConstants.MatLandingPageInsetOutstanding
+                    )
+                </p>
+
+                 @foreach (var topic in notSubmittedSections)
                 {
-                    foreach (var topic in Model.CategoryLandingSections)
+                    var topicValues = new Dictionary<string, string>
                     {
-                        var vm = new StatusLinkViewModel
-                        {
-                            CategorySlug = Model.CategorySlug,
-                            Section = topic,
-                            Context = "Default",
-                        };
-                        <partial name="Components/CategoryLanding/SectionAssessmentLink" model='@vm' />
-                    }
+                        ["topic"] = topic.Name.ToLower()
+                    };
+
+                    <p>
+                        <a class="govuk-link"
+                           href="@Url.RouteUrl(
+                               GroupsController.GetSelectSchoolsToAssessAction,
+                               new
+                               {
+                                   categorySlug = Model.CategorySlug,
+                                   sectionSlug = topic.Slug
+                               })">
+                            @await Microcopy.GetTextByKeyAsync(
+                                ContentfulMicrocopyConstants.LandingPageTopicLinkNotStarted,
+                                topicValues
+                            )
+                        </a>
+                    </p>
                 }
-            }
-        </div>
+            </div>
+        }
     }
-
-    @if (anySectionsCompleted)
+    else
     {
-        <form method="get" class="govuk-form-group">
-            <label class="govuk-label" for="sort">
-                Sort recommendations by
-            </label>
+        if (!singleSectionCategory && !allSectionsCompleted)
+        {
+            <div class="govuk-inset-text">
+                @{
+                    var insetText = await Microcopy.GetTextByKeyAsync(
+                    insetMicrocopyKey,
+                    dynamicValues
+                    );
 
-            <select class="govuk-select" id="sort" name="sort">
-                @foreach (RecommendationSortOrder sortType in Enum.GetValues(typeof(RecommendationSortOrder)))
-                {
-                    var value = sortType.GetDisplayName();
-                    var label = sortType.GetDisplayName();
+                    <p>@insetText</p>
 
-                    var isSelected = Model.SortType.HasValue
-                    ? string.Equals(label, Model.SortType.GetDisplayName())
-                    : string.Equals(label, RecommendationSortOrder.Default.GetDisplayName());
-
-                    @if (isSelected)
+                    if (anySectionsCompleted)
                     {
-                        <option value="@value" selected>@label</option>
-                    }
-                    else
-                    {
-                        <option value="@value">@label</option>
+                        foreach (var topic in Model.CategoryLandingSections)
+                        {
+                            var vm = new StatusLinkViewModel
+                            {
+                                CategorySlug = Model.CategorySlug,
+                                Section = topic,
+                                Context = "Default",
+                            };
+
+                            <partial name="Components/CategoryLanding/SectionAssessmentLink"
+                                     model="@vm" />
+                        }
                     }
                 }
-            </select>
+            </div>
+        }
 
-            <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button">
-                Apply
-            </button>
-        </form>
+        @if (anySectionsCompleted)
+        {
+            <form method="get" class="govuk-form-group">
+                <label class="govuk-label" for="sort">
+                    Sort recommendations by
+                </label>
+
+                <select class="govuk-select" id="sort" name="sort">
+                    @foreach (RecommendationSortOrder sortType in Enum.GetValues(typeof(RecommendationSortOrder)))
+                    {
+                        var value = sortType.GetDisplayName();
+                        var label = sortType.GetDisplayName();
+
+                        var isSelected = Model.SortType.HasValue
+                        ? string.Equals(label, Model.SortType.GetDisplayName())
+                        : string.Equals(
+                        label,
+                        RecommendationSortOrder.Default.GetDisplayName()
+                        );
+
+                        @if (isSelected)
+                        {
+                            <option value="@value" selected>@label</option>
+                        }
+                        else
+                        {
+                            <option value="@value">@label</option>
+                        }
+                    }
+                </select>
+
+                <button type="submit"
+                        class="govuk-button govuk-button--secondary"
+                        data-module="govuk-button">
+                    Apply
+                </button>
+            </form>
+        }
     }
 }
 

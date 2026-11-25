@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
@@ -496,6 +497,31 @@ public class PagesViewBuilderTests
         var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
     }
 
+    [Fact]
+    public async Task RouteToCategoryLandingPrintPageAsync_WhenMatContext_ReturnsViewWithMatContext()
+    {
+        var category = CreateCategory("Networking");
+        var contentful = Substitute.For<IContentfulService>();
+        var slug = "networking";
+
+        contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+
+        var action = await sut.RouteToCategoryLandingPrintPageAsync(
+            controller,
+            slug,
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPagePrintView, view.ViewName);
+
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+    }
+
     // ---------- RouteToShareStandardPageAsync ----------
 
     [Fact]
@@ -520,6 +546,36 @@ public class PagesViewBuilderTests
         Assert.Equal("Category", model.Caption);
         Assert.Equal("Share list of recommendations by email", model.Heading);
         Assert.Null(model.InputModel);
+    }
+
+    [Fact]
+    public async Task RouteToShareStandardPageAsync_WhenMatContextAndInputModelIsNull_ReturnsMatShareView()
+    {
+        var controller = CreateController();
+        var category = CreateCategory("Category");
+
+        _contentfulService.GetCategoryBySlugAsync("category", 4).Returns(category);
+
+        var sut = CreateServiceUnderTest(useCurrentUserDefaults: false);
+
+        var result = await sut.RouteToShareStandardPageAsync(
+            controller,
+            "category",
+            null,
+            CategoryLandingContext.MAT
+        );
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Shared/Email/ShareByEmail.cshtml", viewResult.ViewName);
+
+        var model = Assert.IsType<ShareByEmailViewModel>(viewResult.Model);
+        Assert.Equal("Pages", model.PostController);
+        Assert.Equal(nameof(PagesController.ShareMatStandard), model.PostAction);
+        Assert.Equal("category", model.CategorySlug);
+        Assert.Equal("Category", model.Caption);
+        Assert.Equal("Share list of recommendations by email", model.Heading);
+        Assert.Null(model.InputModel);
+        Assert.True(model.IsMat);
     }
 
     [Fact]
@@ -712,6 +768,86 @@ public class PagesViewBuilderTests
     }
 
     [Fact]
+    public async Task RouteToShareStandardPageAsync_WhenMatContextAndNotifySendSucceeds_UsesMatShareFlow()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+        var category = CreateCategory("Category");
+
+        _contentfulService.GetCategoryBySlugAsync("category", 4).Returns(category);
+        _currentUser.UserOrganisationName.Returns("Test MAT");
+
+        _notifyService
+            .SendMatStandardEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<List<QuestionnaireSectionEntry>>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()
+            )
+            .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
+
+        var sut = CreateServiceUnderTest(useCurrentUserDefaults: false);
+
+        var result = await sut.RouteToShareStandardPageAsync(
+            controller,
+            "category",
+            inputModel,
+            CategoryLandingContext.MAT
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(
+            nameof(GroupsController.GetMatRecommendationsLanding),
+            redirect.ActionName
+        );
+        Assert.Equal(
+            nameof(GroupsController).GetControllerNameSlug(),
+            redirect.ControllerName
+        );
+
+        var routeValues = Assert.IsType<IDictionary<string, object>>(
+            redirect.RouteValues!,
+            exactMatch: false
+        );
+        Assert.Equal("category", routeValues["categorySlug"]);
+
+        _notifyService
+            .Received(1)
+            .SendMatStandardEmail(
+                Arg.Is<ShareByEmailModel>(m =>
+                    m.NameOfUser == inputModel.NameOfUser
+                    && m.EmailAddresses.SequenceEqual(inputModel.EmailAddresses)
+                    && m.UserMessage == inputModel.UserMessage
+                ),
+                category.Sections,
+                "Test MAT",
+                "Category"
+            );
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentNameAsync();
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>());
+        await _submissionService
+            .DidNotReceive()
+            .GetSectionStatusesForSchoolAsync(
+                Arg.Any<int>(),
+                Arg.Any<List<string>>()
+            );
+        _notifyService
+            .DidNotReceive()
+            .SendStandardEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<List<QuestionnaireSectionEntry>>(),
+                Arg.Any<List<SqlSectionStatusDto>>(),
+                Arg.Any<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()
+            );
+    }
+
+    [Fact]
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Populates_RelatedActions_From_Page()
     {
         var categoryTitle = "Networking";
@@ -770,6 +906,101 @@ public class PagesViewBuilderTests
         Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
         var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
         Assert.Empty(vm.RelatedActions);
+    }
+
+    [Fact]
+    public async Task RouteBasedOnOrganisationType_When_MatTopicStartPage_And_NoSchoolSelected_ReturnsPageView()
+    {
+        var page = new PageEntry
+        {
+            Sys = new SystemDetails("pg-1"),
+            Slug = "vision-and-strategy",
+            IsLandingPage = false,
+            Title = new ComponentTitleEntry("My Page"),
+            InternalName = "Vision and strategy topic start",
+            RequiresAuthorisation = true,
+        };
+
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        currentUser.IsMat.Returns(true);
+        currentUser.IsAuthenticated.Returns(true);
+        currentUser.UserOrganisationSelectsSchools.Returns(true);
+        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+
+        var sut = CreateServiceUnderTest(currentUser: currentUser, useCurrentUserDefaults: false);
+        var controller = new TestController();
+
+        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal("Page", view.ViewName);
+        var vm = Assert.IsType<PageViewModel>(view.Model);
+        Assert.True(vm.ShowTrustSchoolAssessmentTable);
+    }
+
+    [Fact]
+    public async Task RouteToMatCategoryLandingPageAsync_When_CategoryNotFound_RedirectsToHomePage()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        contentful
+            .GetCategoryBySlugAsync("missing-category", 4)
+            .Returns((QuestionnaireCategoryEntry?)null);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+
+        var action = await sut.RouteToMatCategoryLandingPageAsync(
+            controller,
+            "missing-category"
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(action);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToMatCategoryLandingPageAsync_When_CategoryFound_ReturnsMatLandingPageWithRelatedActions()
+    {
+        var categorySlug = "leadership-governance-standard";
+        var category = CreateCategory("Leadership and governance");
+        var page = CreatePage(categorySlug);
+        page.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Share this list of recommendations",
+                Url = "/leadership-governance-standard/share",
+            }
+        );
+        page.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Print recommendations",
+                Url = "/leadership-governance-standard/print",
+            }
+        );
+
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetCategoryBySlugAsync(categorySlug, 4).Returns(category);
+        contentful.GetPageBySlugAsync(categorySlug).Returns(page);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+
+        var action = await sut.RouteToMatCategoryLandingPageAsync(
+            controller,
+            categorySlug
+        );
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
+        Assert.Equal(CategoryLandingContext.MAT, vm.Context);
+        Assert.Equal(categorySlug, vm.Slug);
+        Assert.Equal(2, vm.RelatedActions.Count);
+        Assert.Equal("Share this list of recommendations", vm.RelatedActions[0].Text);
+        Assert.Equal("/leadership-governance-standard/share", vm.RelatedActions[0].Url);
+        Assert.Equal("Print recommendations", vm.RelatedActions[1].Text);
+        Assert.Equal("/leadership-governance-standard/print", vm.RelatedActions[1].Url);
     }
 
     // ---------- BuildNotFoundViewModel ----------

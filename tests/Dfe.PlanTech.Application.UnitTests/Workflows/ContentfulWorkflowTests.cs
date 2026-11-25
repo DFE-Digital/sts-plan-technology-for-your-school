@@ -360,4 +360,49 @@ public class ContentfulWorkflowTests
         var res = await sut.GetSectionBySlugAsync("intro", includeLevel: 6);
         Assert.Same(sec, res);
     }
+
+    // ---------- GetMicrocopyEntriesAsync ----------
+
+    [Fact]
+    public async Task GetMicrocopyEntriesAsync_Uses_Increased_Limit_And_Returns_Entries()
+    {
+        var sut = CreateServiceUnderTest();
+        var entries = new List<MicrocopyEntry>
+    {
+        new() { Sys = new SystemDetails("M1") },
+        new() { Sys = new SystemDetails("M2") },
+    };
+
+        _repo
+            .GetPaginatedEntriesAsync<MicrocopyEntry>(
+                Arg.Is<GetEntriesOptions>(o => o.Limit == 500)
+            )
+            .Returns(entries);
+
+        var result = await sut.GetMicrocopyEntriesAsync();
+
+        Assert.Equal(entries, result);
+
+        await _repo
+            .Received(1)
+            .GetPaginatedEntriesAsync<MicrocopyEntry>(
+                Arg.Is<GetEntriesOptions>(o => o.Limit == 500)
+            );
+    }
+
+    [Fact]
+    public async Task GetMicrocopyEntriesAsync_When_No_Entries_Throws()
+    {
+        var sut = CreateServiceUnderTest();
+
+        _repo
+            .GetPaginatedEntriesAsync<MicrocopyEntry>(
+                Arg.Any<GetEntriesOptions>()
+            )
+            .Returns([]);
+
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.GetMicrocopyEntriesAsync()
+        );
+    }
 }

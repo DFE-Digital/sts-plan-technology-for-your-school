@@ -1,0 +1,36 @@
+using System.ComponentModel.DataAnnotations;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
+
+namespace Dfe.PlanTech.Web.ViewModels.Inputs;
+
+public class GroupRecommendationInputViewModel : IValidatableObject
+{
+    public List<string> SelectedSchoolsRefs { get; set; } = [];
+    public string? SelectedStatus { get; set; } = string.Empty;
+
+    public string? Notes { get; set; }
+
+    public RecommendationStatus? SelectedStatusEnum => SelectedStatus.ToRecommendationStatus();
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (SelectedStatusEnum == null)
+        {
+            var error =
+                $"Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusEnum}";
+            yield return new ValidationResult(error);
+        }
+
+        if (SelectedSchoolsRefs.Count == 0)
+        {
+            yield return new ValidationResult("No schools selected");
+        }
+    }
+
+    public SingleRecommendationModel ToModel()
+    {
+        return new SingleRecommendationModel { SelectedStatus = SelectedStatusEnum, Notes = Notes };
+    }
+}

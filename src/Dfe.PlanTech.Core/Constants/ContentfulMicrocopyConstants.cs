@@ -19,10 +19,12 @@ public static class ContentfulMicrocopyConstants
     public const string LandingPageInsetIntroContinue = "insetIntroContinue";
     public const string LandingPageTopicLinkNotStarted = "topicLinkNotStarted";
     public const string LandingPageTopicIntroContinue = "topicIntroContinue";
-    public const string LandingPageTopicIntroContinueNoEstablishment = "topicIntroContinueNoEstablishment";
+    public const string LandingPageTopicIntroContinueNoEstablishment =
+        "topicIntroContinueNoEstablishment";
     public const string LandingPageTopicLinkContinue = "topicLinkContinue";
     public const string LandingPageTopicIntroCompleted = "topicIntroCompleted";
-    public const string LandingPageTopicIntroCompletedNoEstablishment = "topicIntroCompletedNoEstablishment";
+    public const string LandingPageTopicIntroCompletedNoEstablishment =
+        "topicIntroCompletedNoEstablishment";
     public const string LandingPageTopicLinkCompleted = "topicLinkCompleted";
     public const string LandingPageSuccessPanelHeader = "successHeader";
     public const string LandingPageSuccessPanelBody = "successBody";
@@ -63,13 +65,14 @@ public static class ContentfulMicrocopyConstants
     public const string CategoryPrintSectionCompleted = "printCompleted";
 
     public const string GroupsSelectHeader = "matSelect";
+    public const string GroupsSelectBody = "matBody";
     public const string GroupsSelectRecommendationCount = "matCount";
     public const string GroupsSelectContactUs = "matContact";
 
     public const string PhaseBannerText = "phaseBannerText";
     public const string PhaseBannerLink = "phaseBannerLink";
     public const string PhaseBannerLinkText = "phaseBannerLinkText";
-    
+
     public const string SchoolSummarySuccessBody = "schoolSummarySuccessBody";
     public const string SchoolSummaryHeader = "summaryHeader";
     public const string SchoolSummaryRecLink = "schoolSummaryRecLink";
@@ -95,8 +98,50 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectSchoolsToAssessNoSelectionError = "msmErrorNoSelection";
     public const string GroupsSelectSchoolsToAssessConflictError = "msmErrorConflictingSelection";
 
+    public const string GroupsUpdateStatusSelectedSchoolsText = "mssSelectedSchoolTextHeader";
+    public const string GroupsUpdateStatusSuccessPanelText = "mssUpdateStatusSuccessPanelText";
+
+    public const string GroupsSelectSchoolsToUpdateStatusHeader = "mssSelectHeader";
+    public const string GroupsSelectSchoolsToUpdateStatusBackLink = "mssSelectBack";
+    public const string GroupsSelectSchoolsToUpdateStatusHelpText = "mssSelectHelpText";
+    public const string GroupsSelectSchoolsToUpdateStatusContinue = "mssSelectSchoolContinue";
+    public const string GroupsSelectSchoolsToUpdateStatusPreContinueButtonText =
+        "mssSelectSchoolPreContinueButtonText";
+    public const string GroupsSelectSchoolsToUpdateStatusNoSelectionError =
+        "mssSelectErrorNoSelection";
+
+    public const string GroupsSelectStatusHeader = "mssSelectStatusHeader";
+    public const string GroupsSelectStatusBackLink = "mssSelectStatusBack";
+    public const string GroupsSelectStatusContinue = "mssSelectStatusContinue";
+    public const string GroupsSelectStatusPreContinueButtonText =
+        "mssSelectStatusPreContinueButtonText";
+
+    public const string GroupRecommendationProgressHeading = "mssRecommendationProgressHeading";
+    public const string GroupRecommendationProgressSchoolHeading =
+        "mssRecommendationProgressSchoolHeading";
+    public const string GroupRecommendationProgressLastUpdatedHeading =
+        "mssRecommendationProgressLastUpdatedHeading";
+    public const string GroupRecommendationProgressStatusHeading =
+        "mssRecommendationProgressStatusHeading";
+    public const string GroupRecommendationUpdateStatusLink = "mssRecommendationUpdateStatusLink";
+
     public const string GroupsSelectSelfAssessmentBackLink = "msmSelectAssessmentBackLink";
 
+    public const string GroupsSelectViewRecommendations = "mssSelectViewRecommendations";
+
+    public const string GroupsSelectSchoolRecsHeader = "mssGroupsSelectSchoolRecsHeader";
+    public const string GroupsSelectSelectSelfAssessmentAllSubmitted =
+        "mssSelectSelectSelfAssessmentAllSubmitted";
+
+    public const string GroupsStandardsListHeader = "mssStandardsListHeader";
+    public const string GroupsStandardsListBody = "mssStandardsListBody";
+    public const string GroupsStandardsListCategoriesHeader = "mssStandardsListCategoriesHeader";
+    public const string MatLandingPageInsetIntro = "mssLandingInsetIntro";
+    public const string MatLandingPageInsetOutstanding = "mssLandingInsetOutstanding";
+    public const string MatLandingPageTopicOutstanding = "mssLandingTopicOutstanding";
+    public const string MatLandingPageTopicOutstandingCount = "mssLandingTopicOutstandingCount";
+    public const string MatLandingPageTopicSubmitLink = "mssLandingTopicSubmitLink";
+    public const string MatLandingPageTopicStartLink = "mssLandingTopicStartLink";
 
     // Fallback text
     private const string EmptyFallback = "";
@@ -109,7 +154,12 @@ public static class ContentfulMicrocopyConstants
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
 
-    private const string GroupsSelectHeaderFallback = "Select a school";
+    private const string GroupsSelectHeaderFallback =
+        "Submit self-assessments and view recommendations";
+
+    private const string GroupsSelectBodyFallback =
+        "You can submit self-assessments and update recommendation statuses for one or more schools at a time.";
+    private const string GroupsSelectSchoolRecsHeaderFallback = "Your schools";
 
     private const string PrintSectionIncompleteFallback =
         "The self-assessment must be completed before recommendations are available.";
@@ -139,29 +189,92 @@ public static class ContentfulMicrocopyConstants
     private const string ContinueRestartButtonFallback = "Restart self-assessment";
 
     private const string MsmTopicStartHeadingFallback = "Submit a self-assessment for your schools";
-    private const string MsmTopicStartText1Fallback = "You can submit the self-assessment for one or more schools.";
-    private const string MsmTopicStartText2Fallback = "If a self-assessment has been started but not submitted for a school, you can check their answers or submit a new self-assessment for them.";
+    private const string MsmTopicStartText1Fallback =
+        "You can submit the self-assessment for one or more schools.";
+    private const string MsmTopicStartText2Fallback =
+        "If a self-assessment has been started but not submitted for a school, you can check their answers or submit a new self-assessment for them.";
+
+    private const string GroupsUpdateStatusSelectedSchoolsTextFallback =
+        "You are updating the recommendation status for these schools";
+    private const string GroupsUpdateStatusSuccessPanelTextFallback =
+        "Recommendation status have been updated";
 
     private const string GroupsSelectSchoolsToAssessBackLinkFallback = "Back";
-    private const string GroupsSelectSchoolsToAssessHeaderFallback = "Which schools do you want to submit the self-assessment for?";
-    private const string GroupsSelectSchoolsToAssessCheckboxAllFallback = "Submit self-assessment for all schools without a submission";
-    private const string GroupsSelectSchoolsToAssessWarningFallback = "Starting a new self-assessment will replace any previous answers.";
+    private const string GroupsSelectSchoolsToAssessHeaderFallback =
+        "Which schools do you want to submit the self-assessment for?";
+    private const string GroupsSelectSchoolsToAssessCheckboxAllFallback =
+        "Submit self-assessment for all schools without a submission";
+    private const string GroupsSelectSchoolsToAssessWarningFallback =
+        "Starting a new self-assessment will replace any previous answers.";
     private const string GroupsSelectSchoolsToAssessContinueFallback = "Continue";
-    private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback = "Select one, more or all schools";
-    private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
+    private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback =
+        "Select one, more or all schools";
+    private const string GroupsSelectSchoolsToAssessConflictErrorFallback =
+        "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
 
     private const string GroupsSelectSelfAssessmentBackLinkFallback = "Back to home";
+
+    private const string GroupsSelectSchoolsToUpdateStatusBackLinkFallback = "Back";
+    private const string GroupsSelectSchoolsToUpdateStatusHeaderFallback =
+        "Which schools do you want to update the status of?";
+    private const string GroupsSelectSchoolsToUpdateStatusHelpTextFallback =
+        "You can update the recommendation status for schools that have completed this self-assessment. Select one, more or all schools.";
+    private const string GroupsSelectSchoolsToUpdateStatusPreContinueButtonTextFallback =
+        "Anyone who uses the service for your school will be able to see status updates.";
+    private const string GroupsSelectSchoolsToUpdateStatusContinueFallback = "Continue";
+    private const string GroupsSelectSchoolsToUpdateStatusNoSelectionErrorFallback =
+        "Select one, more or all schools";
+
+    private const string GroupsSelectStatusBackLinkFallback = "Back";
+    private const string GroupsSelectStatusHeaderFallback =
+        "Have your schools completed this recommendation?";
+    private const string GroupsSelectStatusPreContinueButtonTextFallback =
+        "You're updating the recommendation status for these schools:";
+    private const string GroupsSelectStatusContinueFallback = "Update Status";
+
+    private const string GroupsSelectViewRecommendationsFallback = "Your schools";
+    private const string GroupsSelectSelectSelfAssessmentAllSubmittedFallback =
+        "All self-assessments submitted";
+
+    private const string GroupsStandardsListHeaderFallback = "Plan technology for your school";
+    private const string GroupsStandardsListBodyFallback =
+        "Submit self-assessments to get recommendations and track your progress towards meeting the core standards";
+    private const string GroupsStandardsListCategoriesHeaderFallback =
+        "View recommendations and track progress";
+    private const string GroupRecommendationProgressHeadingFallback = "Your schools' progress";
+    private const string GroupRecommendationProgressSchoolHeadingFallback = "School";
+    private const string GroupRecommendationProgressLastUpdatedHeadingFallback = "Last updated";
+    private const string GroupRecommendationProgressStatusHeadingFallback = "Status";
+    private const string GroupRecommendationUpdateStatusLinkFallback =
+        "Update recommendation status for one or more schools";
 
     public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
     public const string SchoolSummaryHeaderFallback = "What to do next";
     public const string SchoolSummaryRecLinkFallback = "View the recommendations";
-    public const string SchoolSummarySubmitAnotherBodyFallback = "Submit self-assessments to get recommendations and track your school's progress towards meeting the standards.";
-    public const string MatSummarySuccessBodyFallback = "Self-assessment has been submitted for the schools";
+    public const string SchoolSummarySubmitAnotherBodyFallback =
+        "Submit self-assessments to get recommendations and track your school's progress towards meeting the standards.";
+    public const string MatSummarySuccessBodyFallback =
+        "Self-assessment has been submitted for the schools";
     public const string MatSummaryRecLinkIntroFallback = "View recommendations:";
-    public const string MatSummarySubmitAnotherBodyFallback = "Self-assessments are required for some schools in your trust.";
+    public const string MatSummarySubmitAnotherBodyFallback =
+        "Self-assessments are required for some schools in your trust.";
     public const string SummaryRecHeaderFallback = "View recommendations and track progress";
-    public const string SummaryRecBodyFallback = "Completing recommendations will help you meet the {{category}} standard.";
+    public const string SummaryRecBodyFallback =
+        "Completing recommendations will help you meet the {{category}} standard.";
     public const string SummarySubmitAnotherHeadingFallback = "Submit another self-assessment";
+
+    private const string MatLandingPageInsetIntroFallback =
+        "You can view and update the recommendation status for schools that have submitted each self-assessment.";
+    private const string MatLandingPageInsetOutstandingFallback =
+        "Submit the remaining self-assessments to track all schools' progress towards meeting the standard.";
+    private const string MatLandingPageTopicOutstandingFallback =
+        "Self-assessment required for all schools.";
+    private const string MatLandingPageTopicOutstandingCountFallback =
+        "Self-assessment required for some schools.";
+    private const string MatLandingPageTopicSubmitLinkFallback =
+        "Submit self-assessment for schools.";
+    private const string MatLandingPageTopicStartLinkFallback =
+        "Start self-assessment for schools.";
 
     public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<
         string,
@@ -218,6 +331,7 @@ public static class ContentfulMicrocopyConstants
         { CategoryPrintSectionInProgress, PrintSectionIncompleteFallback },
         { CategoryPrintSectionCompleted, EmptyFallback },
         { GroupsSelectHeader, GroupsSelectHeaderFallback },
+        { GroupsSelectBody, GroupsSelectBodyFallback },
         { GroupsSelectRecommendationCount, EmptyFallback },
         { GroupsSelectContactUs, EmptyFallback },
         { msmTopicStartHeading, MsmTopicStartHeadingFallback },
@@ -230,8 +344,37 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectSchoolsToAssessCheckboxAll, GroupsSelectSchoolsToAssessCheckboxAllFallback },
         { GroupsSelectSchoolsToAssessWarning, GroupsSelectSchoolsToAssessWarningFallback },
         { GroupsSelectSchoolsToAssessContinue, GroupsSelectSchoolsToAssessContinueFallback },
-        { GroupsSelectSchoolsToAssessNoSelectionError, GroupsSelectSchoolsToAssessNoSelectionErrorFallback },
-        { GroupsSelectSchoolsToAssessConflictError, GroupsSelectSchoolsToAssessConflictErrorFallback },
+        {
+            GroupsSelectSchoolsToAssessNoSelectionError,
+            GroupsSelectSchoolsToAssessNoSelectionErrorFallback
+        },
+        {
+            GroupsSelectSchoolsToAssessConflictError,
+            GroupsSelectSchoolsToAssessConflictErrorFallback
+        },
+        { GroupsSelectViewRecommendations, GroupsSelectViewRecommendationsFallback },
+        { GroupsSelectSchoolRecsHeader, GroupsSelectSchoolRecsHeaderFallback },
+        {
+            GroupsSelectSelectSelfAssessmentAllSubmitted,
+            GroupsSelectSelectSelfAssessmentAllSubmittedFallback
+        },
+        { GroupsStandardsListHeader, GroupsStandardsListHeaderFallback },
+        { GroupsStandardsListBody, GroupsStandardsListBodyFallback },
+        { GroupsStandardsListCategoriesHeader, GroupsStandardsListCategoriesHeaderFallback },
+        { GroupRecommendationProgressHeading, GroupRecommendationProgressHeadingFallback },
+        {
+            GroupRecommendationProgressSchoolHeading,
+            GroupRecommendationProgressSchoolHeadingFallback
+        },
+        {
+            GroupRecommendationProgressLastUpdatedHeading,
+            GroupRecommendationProgressLastUpdatedHeadingFallback
+        },
+        {
+            GroupRecommendationProgressStatusHeading,
+            GroupRecommendationProgressStatusHeadingFallback
+        },
+        { GroupRecommendationUpdateStatusLink, GroupRecommendationUpdateStatusLinkFallback },
         { SchoolSummarySuccessBody, SchoolSummarySuccessBodyFallback },
         { SchoolSummaryHeader, SchoolSummaryHeaderFallback },
         { SchoolSummaryRecLink, SchoolSummaryRecLinkFallback },
@@ -243,6 +386,45 @@ public static class ContentfulMicrocopyConstants
         { SummaryRecBody, SummaryRecBodyFallback },
         { SummarySubmitAnotherHeading, SummarySubmitAnotherHeadingFallback },
         { GroupsSelectSelfAssessmentBackLink, GroupsSelectSelfAssessmentBackLinkFallback },
+        { MatLandingPageInsetIntro, MatLandingPageInsetIntroFallback },
+        { MatLandingPageInsetOutstanding, MatLandingPageInsetOutstandingFallback },
+        { MatLandingPageTopicOutstanding, MatLandingPageTopicOutstandingFallback },
+        { MatLandingPageTopicOutstandingCount, MatLandingPageTopicOutstandingCountFallback },
+        { MatLandingPageTopicSubmitLink, MatLandingPageTopicSubmitLinkFallback },
+        { MatLandingPageTopicStartLink, MatLandingPageTopicStartLinkFallback },
+        {
+            GroupsSelectSchoolsToUpdateStatusHeader,
+            GroupsSelectSchoolsToUpdateStatusHeaderFallback
+        },
+        {
+            GroupsSelectSchoolsToUpdateStatusHelpText,
+            GroupsSelectSchoolsToUpdateStatusHelpTextFallback
+        },
+        {
+            GroupsSelectSchoolsToUpdateStatusBackLink,
+            GroupsSelectSchoolsToUpdateStatusBackLinkFallback
+        },
+        {
+            GroupsSelectSchoolsToUpdateStatusContinue,
+            GroupsSelectSchoolsToUpdateStatusContinueFallback
+        },
+        {
+            GroupsSelectSchoolsToUpdateStatusPreContinueButtonText,
+            GroupsSelectSchoolsToUpdateStatusPreContinueButtonTextFallback
+        },
+        {
+            GroupsSelectSchoolsToUpdateStatusNoSelectionError,
+            GroupsSelectSchoolsToUpdateStatusNoSelectionErrorFallback
+        },
+        { GroupsUpdateStatusSelectedSchoolsText, GroupsUpdateStatusSelectedSchoolsTextFallback },
+        {
+            GroupsSelectStatusPreContinueButtonText,
+            GroupsSelectStatusPreContinueButtonTextFallback
+        },
+        { GroupsSelectStatusHeader, GroupsSelectStatusHeaderFallback },
+        { GroupsSelectStatusContinue, GroupsSelectStatusContinueFallback },
+        { GroupsSelectStatusBackLink, GroupsSelectStatusBackLinkFallback },
+        { GroupsUpdateStatusSuccessPanelText, GroupsUpdateStatusSuccessPanelTextFallback },
     };
 
     internal static class VariableNames
@@ -274,11 +456,20 @@ public static class ContentfulMicrocopyConstants
         { LandingPageInsetIntroNotStarted, [VariableNames.Standard] },
         { LandingPageInsetIntroContinue, [VariableNames.Standard] },
         { LandingPageTopicLinkNotStarted, [VariableNames.Topic] },
-        { LandingPageTopicIntroContinue, [VariableNames.DateUpdated, VariableNames.EstablishmentName] },
+        {
+            LandingPageTopicIntroContinue,
+            [VariableNames.DateUpdated, VariableNames.EstablishmentName]
+        },
         { LandingPageTopicIntroContinueNoEstablishment, [VariableNames.DateUpdated] },
         { LandingPageTopicLinkContinue, [VariableNames.Topic] },
-        { LandingPageTopicIntroCompleted, [VariableNames.Topic, VariableNames.DateCompleted, VariableNames.EstablishmentName] },
-        { LandingPageTopicIntroCompletedNoEstablishment, [VariableNames.Topic, VariableNames.DateCompleted] },
+        {
+            LandingPageTopicIntroCompleted,
+            [VariableNames.Topic, VariableNames.DateCompleted, VariableNames.EstablishmentName]
+        },
+        {
+            LandingPageTopicIntroCompletedNoEstablishment,
+            [VariableNames.Topic, VariableNames.DateCompleted]
+        },
         { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
         { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
@@ -298,7 +489,7 @@ public static class ContentfulMicrocopyConstants
                 VariableNames.EstablishmentName,
                 VariableNames.DateUpdated,
                 VariableNames.Count,
-                VariableNames.Total
+                VariableNames.Total,
             ]
         },
         { CategoryPrintSectionInProgress, [VariableNames.DateUpdated] },
@@ -312,6 +503,13 @@ public static class ContentfulMicrocopyConstants
         { MatSummaryRecLinkIntro, [VariableNames.Topic] },
         { MatSummarySubmitAnotherBody, [VariableNames.Link] },
         { GroupsSelectSchoolsToAssessBackLink, [VariableNames.Topic] },
-        { GroupsSelectSchoolsToAssessSchoolHint, [VariableNames.DateUpdated] }
+        { GroupsSelectSchoolsToAssessSchoolHint, [VariableNames.DateUpdated] },
+        { MatLandingPageTopicOutstandingCount, [VariableNames.SchoolCount] },
+        { MatLandingPageTopicSubmitLink, [VariableNames.Topic] },
+        { MatLandingPageTopicStartLink, [VariableNames.Topic] },
+        { GroupsSelectSchoolsToUpdateStatusHelpText, [VariableNames.Topic] },
+        { GroupsUpdateStatusSelectedSchoolsText, [VariableNames.SchoolCount] },
+        { GroupsSelectStatusPreContinueButtonText, [VariableNames.SchoolCount] },
+        { GroupsUpdateStatusSuccessPanelText, [VariableNames.SchoolCount] },
     };
 }

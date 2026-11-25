@@ -10,8 +10,10 @@ public class RecommendationWorkflowTests
 {
     private readonly IEstablishmentRecommendationHistoryRepository _establishmentRecommendationHistoryRepository =
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
+
     private readonly IRecommendationRepository _recommendationRepository =
         Substitute.For<IRecommendationRepository>();
+
     private readonly IStoredProcedureRepository _storedProcedureRepository =
         Substitute.For<IStoredProcedureRepository>();
 
@@ -191,7 +193,8 @@ public class RecommendationWorkflowTests
     }
 
     [Fact]
-    public async Task GetLatestRecommendationStatusesAsync_WhenSingleRecommendationMultipleHistory_ThenReturnsLatestByDateCreated()
+    public async Task
+        GetLatestRecommendationStatusesAsync_WhenSingleRecommendationMultipleHistory_ThenReturnsLatestByDateCreated()
     {
         // Arrange - Setup single recommendation with multiple history entries to test ordering by DateCreated
         var establishmentId = 123;
@@ -687,6 +690,112 @@ public class RecommendationWorkflowTests
                 Arg.Any<RecommendationStatus?>(),
                 Arg.Any<RecommendationStatus>(),
                 string.Empty // Confirms null noteText becomes empty string
+            );
+    }
+
+    [Fact]
+    public async Task GetRecommendationsByContentfulReferencesAsync_WhenCalled_ThenReturnsMappedDtos()
+    {
+        // Arrange
+        var recommendationContentfulReferences = new[]
+        {
+            "rec-001",
+            "rec-002"
+        };
+
+        var recommendations = new[]
+        {
+            new RecommendationEntity
+            {
+                Id = 1,
+                ContentfulRef = "rec-001",
+                RecommendationText = "Recommendation One",
+                QuestionId = 10
+            },
+            new RecommendationEntity
+            {
+                Id = 2,
+                ContentfulRef = "rec-002",
+                RecommendationText = "Recommendation Two",
+                QuestionId = 20
+            }
+        };
+
+        _recommendationRepository
+            .GetRecommendationsByContentfulReferencesAsync(
+                recommendationContentfulReferences
+            )
+            .Returns(recommendations);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result =
+            await workflow.GetRecommendationsByContentfulReferencesAsync(
+                recommendationContentfulReferences
+            );
+
+        // Assert
+        var resultList = result.ToList();
+
+        Assert.Equal(2, resultList.Count);
+
+        Assert.Collection(
+            resultList,
+            recommendation =>
+            {
+                Assert.Equal(1, recommendation.Id);
+                Assert.Equal("rec-001", recommendation.ContentfulSysId);
+            },
+            recommendation =>
+            {
+                Assert.Equal(2, recommendation.Id);
+                Assert.Equal("rec-002", recommendation.ContentfulSysId);
+            }
+        );
+
+        await _recommendationRepository
+            .Received(1)
+            .GetRecommendationsByContentfulReferencesAsync(
+                Arg.Is<IEnumerable<string>>(references =>
+                    references.SequenceEqual(recommendationContentfulReferences)
+                )
+            );
+    }
+
+    [Fact]
+    public async Task GetRecommendationsByContentfulReferencesAsync_WhenRepositoryReturnsEmpty_ThenReturnsEmpty()
+    {
+        // Arrange
+        var recommendationContentfulReferences = new[]
+        {
+            "rec-001",
+            "rec-002"
+        };
+
+        _recommendationRepository
+            .GetRecommendationsByContentfulReferencesAsync(
+                recommendationContentfulReferences
+            )
+            .Returns([]);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result =
+            await workflow.GetRecommendationsByContentfulReferencesAsync(
+                recommendationContentfulReferences
+            );
+
+        // Assert
+        Assert.Empty(result);
+
+        await _recommendationRepository
+            .Received(1)
+            .GetRecommendationsByContentfulReferencesAsync(
+                Arg.Is<IEnumerable<string>>(references =>
+                    references.SequenceEqual(recommendationContentfulReferences)
+                )
             );
     }
 }

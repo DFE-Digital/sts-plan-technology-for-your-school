@@ -32,7 +32,7 @@ public class RecommendationEntity : IUserActionEntity
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
             QuestionId = QuestionId,
-            Question = Question.AsDto(),
+            Question = Question?.AsDto(),
             Archived = Archived,
             QuestionContentfulRef = QuestionContentfulRef,
             UserActionId = UserActionId,

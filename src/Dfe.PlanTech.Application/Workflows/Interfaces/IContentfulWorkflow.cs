@@ -25,4 +25,6 @@ public interface IContentfulWorkflow
         string sectionSlug,
         int? includeLevel = null
     );
+
+    Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync();
 }

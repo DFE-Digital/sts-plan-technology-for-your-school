@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -16,4 +17,5 @@ public class CategoryLandingPageViewModel
     public bool HasBanner { get; init; } = false;
     public List<ContentfulEntry> AfterContentContent { get; init; } = [];
     public List<RelatedActionViewModel> RelatedActions { get; init; } = [];
+    public CategoryLandingContext Context { get; init; } = CategoryLandingContext.School;
 }

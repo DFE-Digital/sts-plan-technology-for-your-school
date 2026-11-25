@@ -20,12 +20,19 @@
             ? ContentfulMicrocopyConstants.HomeCardStatusContinue
             : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations;
     }
+
+    var cardHref = Model.IsMat
+        ? Url.RouteUrl(
+            GroupsController.GetMatRecommendationsLandingAction,
+            new { categorySlug = Model.CategorySlug }
+        )
+        : Model.CategorySlug;
 }
 
 <div class="dfe-card">
     <div class="dfe-card-container">
         <h3 class="govuk-heading-m">
-            <a href="@Model.CategorySlug" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+            <a href="@cardHref" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
                 @Model.CategoryHeaderText
             </a>
         </h3>

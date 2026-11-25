@@ -33,6 +33,7 @@ public class RecommendationsViewBuilderTests
         Substitute.For<IRecommendationService>();
     private readonly IMicrocopyProvider _microcopyProvider = Substitute.For<IMicrocopyProvider>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
+    private readonly IGroupService _groupService = Substitute.For<IGroupService>();
 
     // ---- Options
     private ContentfulOptions _contentfulOptions = new ContentfulOptions { UsePreviewApi = false };
@@ -47,7 +48,8 @@ public class RecommendationsViewBuilderTests
             _notifyService,
             _recommendationService,
             _submissions,
-            _microcopyProvider
+            _microcopyProvider,
+            _groupService
         );
 
     private static TestController CreateController() => new TestController();
@@ -706,6 +708,74 @@ public class RecommendationsViewBuilderTests
         Assert.Equal(expectedSlug, vm.OriginatingSlug);
     }
 
+
+    [Fact]
+    public async Task RouteToPrintSingle_Mat_ReturnsSingleRecommendationWithoutActiveEstablishment()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = CreateController();
+
+        var category = CreateCategory("Connectivity");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync("connectivity").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        var result = await sut.RouteToPrintSingle(
+            controller,
+            "connectivity",
+            "sec-1",
+            "second-chunk-2",
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("RecommendationsChecklist", view.ViewName);
+
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.True(vm.IsMat);
+        Assert.Single(vm.Chunks);
+        Assert.Equal("Second Chunk", vm.Chunks[0].Header);
+        Assert.Equal(2, vm.CurrentChunkCount);
+        Assert.Equal(3, vm.TotalChunks);
+        Assert.Equal("second-chunk-2", vm.OriginatingSlug);
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+    }
+
+    [Fact]
+    public async Task RouteToPrintAll_Mat_ReturnsAllRecommendationsWithoutActiveEstablishment()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = CreateController();
+
+        var category = CreateCategory("Connectivity");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync("connectivity").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        var result = await sut.RouteToPrintAll(
+            controller,
+            "connectivity",
+            "sec-1",
+            "second-chunk-2",
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("RecommendationsChecklist", view.ViewName);
+
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.True(vm.IsMat);
+        Assert.Equal(3, vm.Chunks.Count);
+        Assert.Null(vm.CurrentChunkCount);
+        Assert.Equal(3, vm.TotalChunks);
+        Assert.Equal("second-chunk-2", vm.OriginatingSlug);
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+    }
+
     // ---------- RouteToShareRecommendationAsync ----------
 
     [Fact]
@@ -743,6 +813,48 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Use MFA", model.Caption);
         Assert.Equal("Share a recommendation by email", model.Heading);
         Assert.Null(model.InputModel);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_Mat_WhenInputModelIsNull_ReturnsMatShareView()
+    {
+        var controller = CreateController();
+        var category = CreateCategory("category");
+        var section = CreateSection(
+            "section",
+            CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id")
+        );
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            null,
+            CategoryLandingContext.MAT
+        );
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Shared/Email/ShareByEmail.cshtml", viewResult.ViewName);
+
+        var model = Assert.IsType<ShareByEmailViewModel>(viewResult.Model);
+        Assert.Equal("Recommendations", model.PostController);
+        Assert.Equal(
+            nameof(RecommendationsController.ShareMatSingleRecommendation),
+            model.PostAction
+        );
+        Assert.Equal("category", model.CategorySlug);
+        Assert.Equal("section", model.SectionSlug);
+        Assert.Equal("chunk", model.ChunkSlug);
+        Assert.Equal("Use MFA", model.Caption);
+        Assert.Equal("Share a recommendation by email", model.Heading);
+        Assert.Null(model.InputModel);
+        Assert.True(model.IsMat);
     }
 
     [Fact]
@@ -867,12 +979,19 @@ public class RecommendationsViewBuilderTests
         var controller = CreateController();
         var inputModel = CreateInputModel();
 
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+
         var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
         var section = CreateSection("section", chunk);
         var category = CreateCategory("category");
 
         _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
         _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         _recommendationService
@@ -982,6 +1101,173 @@ public class RecommendationsViewBuilderTests
             "Cannot send an email without an active establishment name",
             exception.Message
         );
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_Mat_WhenNotifySendSucceeds_UsesMatShareFlow()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        section.Sys = new SystemDetails("section-id");
+
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserOrganisationName.Returns("Test MAT");
+
+        _groupService
+            .GetGroupEstablishmentContextAsync(999)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                        {
+                            Id = 101,
+                            OrgName = "School One",
+                        },
+                        new SqlEstablishmentDto
+                        {
+                            Id = 102,
+                            OrgName = "School Two",
+                        },
+                        new SqlEstablishmentDto
+                        {
+                            Id = 103,
+                            OrgName = "School Three",
+                        },
+                    ],
+                    EstablishmentIds = [101, 102, 103],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                        {
+                            EstablishmentId = 101,
+                            SectionId = "section-id",
+                        },
+                        new SqlSubmissionDto
+                        {
+                            EstablishmentId = 102,
+                            SectionId = "section-id",
+                        },
+                    ],
+                }
+            );
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(101, "chunk-id")
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                }
+            );
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(102, "chunk-id")
+            .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
+
+        var expectedSchoolsList = string.Join(
+            Environment.NewLine,
+            [
+                $"* School One: {RecommendationStatus.Complete.GetDisplayName()}",
+                $"* School Two: {RecommendationStatus.NotStarted.GetDisplayName()}",
+            ]
+        );
+
+        _notifyService
+            .SendMatSingleRecommendationEmail(
+                Arg.Any<ShareByEmailModel>(),
+                textBody,
+                "Test MAT",
+                "Use MFA",
+                "category",
+                "section",
+                expectedSchoolsList
+            )
+            .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            inputModel,
+            CategoryLandingContext.MAT
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(
+            nameof(RecommendationsController.GetMatSingleRecommendation),
+            redirect.ActionName
+        );
+        Assert.Equal(
+            nameof(RecommendationsController).GetControllerNameSlug(),
+            redirect.ControllerName
+        );
+        var routeValues = Assert.IsType<IDictionary<string, object>>(
+            redirect.RouteValues!,
+            exactMatch: false
+        );
+        Assert.Equal("category", routeValues["categorySlug"]);
+        Assert.Equal("section", routeValues["sectionSlug"]);
+        Assert.Equal("chunk", routeValues["chunkSlug"]);
+
+        _notifyService
+            .Received(1)
+            .SendMatSingleRecommendationEmail(
+                Arg.Is<ShareByEmailModel>(m =>
+                    m.NameOfUser == inputModel.NameOfUser
+                    && m.EmailAddresses.SequenceEqual(inputModel.EmailAddresses)
+                    && m.UserMessage == inputModel.UserMessage
+                ),
+                textBody,
+                "Test MAT",
+                "Use MFA",
+                "category",
+                "section",
+                expectedSchoolsList
+            );
+
+        await _currentUser.DidNotReceive().GetActiveEstablishmentIdAsync();
+        await _currentUser.DidNotReceive().GetActiveEstablishmentNameAsync();
+
+        await _recommendationService
+            .Received(1)
+            .GetLatestRecommendationHistoryAsync(101, "chunk-id");
+
+        await _recommendationService
+            .Received(1)
+            .GetLatestRecommendationHistoryAsync(102, "chunk-id");
+
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationHistoryAsync(103, "chunk-id");
+
+        _notifyService
+            .DidNotReceive()
+            .SendSingleRecommendationEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<ComponentTextBodyEntry>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<RecommendationStatus>()
+            );
     }
 
     [Fact]
@@ -1517,6 +1803,224 @@ public class RecommendationsViewBuilderTests
         var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
 
         Assert.Empty(vm.RelatedActions);
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_Mat_Renders_AllSchools_In_Alphabetical_Order()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.UserOrganisationId.Returns(999);
+
+        var categorySlug = "cat-a";
+        var category = CreateCategory("Networking");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _groupService
+            .GetGroupEstablishmentContextAsync(999)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                    {
+                        Id = 102,
+                        OrgName = "School Two"
+                    },
+                    new SqlEstablishmentDto
+                    {
+                        Id = 101,
+                        OrgName = "School One"
+                    },
+                    ],
+                    EstablishmentIds = [101, 102],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        EstablishmentId = 102,
+                        SectionId = "S1",
+                    },
+                    ],
+                }
+            );
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(102, "C2")
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                    DateCreated = new DateTime(2026, 9, 20),
+                }
+            );
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            categorySlug,
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false,
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("SingleRecommendation", view.ViewName);
+
+        var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
+        Assert.True(vm.IsMat);
+        Assert.Equal(2, vm.Schools.Count);
+
+        Assert.Equal(101, vm.Schools[0].EstablishmentId);
+        Assert.Equal("School One", vm.Schools[0].SchoolName);
+        Assert.True(vm.Schools[0].RequiresSelfAssessment);
+        Assert.Null(vm.Schools[0].Status);
+        Assert.Null(vm.Schools[0].LastUpdated);
+
+        Assert.Equal(102, vm.Schools[1].EstablishmentId);
+        Assert.Equal("School Two", vm.Schools[1].SchoolName);
+        Assert.False(vm.Schools[1].RequiresSelfAssessment);
+        Assert.Equal(RecommendationStatus.Complete, vm.Schools[1].Status);
+        Assert.Equal(new DateTime(2026, 9, 20), vm.Schools[1].LastUpdated);
+
+        Assert.Equal("first-chunk-1", vm.PreviousChunk!.Slug);
+        Assert.Equal("third-chunk-3", vm.NextChunk!.Slug);
+
+        await _recommendationService
+            .Received(1)
+            .GetLatestRecommendationHistoryAsync(102, "C2");
+
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationHistoryAsync(101, "C2");
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_Mat_Defaults_Status_When_History_Not_Found()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.UserOrganisationId.Returns(999);
+
+        var category = CreateCategory("Networking");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync("cat-a").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _groupService
+            .GetGroupEstablishmentContextAsync(999)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                    {
+                        Id = 101,
+                        OrgName = "School One"
+                    }
+                    ],
+                    EstablishmentIds = [101],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        EstablishmentId = 101,
+                        SectionId = "S1",
+                    },
+                    ],
+                }
+            );
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(101, "C2")
+            .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            "cat-a",
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false,
+            CategoryLandingContext.MAT
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
+        var school = Assert.Single(vm.Schools);
+
+        Assert.False(school.RequiresSelfAssessment);
+        Assert.Equal(RecommendationStatus.NotStarted, school.Status);
+        Assert.Null(school.LastUpdated);
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_Mat_NoCompletedSelfAssessments_Redirects_To_SelectSchools()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.UserOrganisationId.Returns(999);
+
+        var category = CreateCategory("Networking");
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryBySlugAsync("cat-a").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _groupService
+            .GetGroupEstablishmentContextAsync(999)
+            .Returns(
+                new GroupEstablishmentModel
+                {
+                    Establishments =
+                    [
+                        new SqlEstablishmentDto
+                    {
+                        Id = 101,
+                        OrgName = "School One"
+                    }
+                    ],
+                    EstablishmentIds = [101],
+                    CompletedSubmissions =
+                    [
+                        new SqlSubmissionDto
+                    {
+                        EstablishmentId = 101,
+                        SectionId = "S2",
+                    },
+                    ],
+                }
+            );
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            "cat-a",
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false,
+            CategoryLandingContext.MAT
+        );
+
+        var redirect = Assert.IsType<RedirectToRouteResult>(result);
+
+        Assert.Equal(GroupsController.GetSelectSchoolsToAssessAction, redirect.RouteName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat-a", redirect.RouteValues["categorySlug"]);
+        Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
+
+        await _recommendationService
+            .DidNotReceive()
+            .GetLatestRecommendationHistoryAsync(Arg.Any<int>(), Arg.Any<string>());
     }
 
     // ---------- Support ----------

@@ -15,7 +15,6 @@ public class SingleRecommendationViewModel
     public string CategorySlug { get; set; } = string.Empty;
     public string SectionSlug { get; set; } = string.Empty;
     public string? OriginatingSlug { get; set; }
-
     public string? SuccessMessageTitle { get; set; }
     public string? StatusErrorMessage { get; set; }
 
@@ -30,8 +29,13 @@ public class SingleRecommendationViewModel
 
     public IDictionary<RecommendationStatus, string> StatusOptions { get; set; } =
         new Dictionary<RecommendationStatus, string>();
-    public required RecommendationStatus SelectedStatusKey { get; init; }
-    public required DateTime? LastUpdated { get; init; }
+
+    public RecommendationStatus SelectedStatusKey { get; init; }
+    public DateTime? LastUpdated { get; init; }
+
+    public bool IsMat { get; init; }
+    public List<MatRecommendationSchoolViewModel> Schools { get; init; } = [];
+
     public Dictionary<
         string,
         IEnumerable<SqlEstablishmentRecommendationHistoryDto>
@@ -43,6 +47,7 @@ public class SingleRecommendationViewModel
         LastUpdated?.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
 
     public string StatusText => SelectedStatusKey.GetDisplayName();
+
     public string StatusTagClass =>
         ((RecommendationStatus?)SelectedStatusKey).GetCssClassOrDefault(
             RecommendationConstants.DefaultTagClass
