@@ -10,7 +10,7 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <None Update="Scripts/SeedTestData.sql">
+        <None Update="scripts/SeedTestData.sql">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </None>

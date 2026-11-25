@@ -9,7 +9,7 @@ public class SeedData(PlanTechDbContext db)
     {
         var scriptPath = Path.Combine(
             AppContext.BaseDirectory,
-            "Scripts",
+            "scripts",
             "SeedTestData.sql"
         );
 
