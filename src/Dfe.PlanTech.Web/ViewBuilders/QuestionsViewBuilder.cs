@@ -54,8 +54,7 @@ public class QuestionsViewBuilder(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        string questionSlug,
-        string? returnTo
+        string questionSlug
     )
     {
         var establishmentId = await GetRoutingEstablishmentId();
@@ -82,8 +81,7 @@ public class QuestionsViewBuilder(
                 submissionRoutingData.QuestionnaireSection,
                 categorySlug,
                 sectionSlug,
-                null,
-                returnTo
+                null
             );
 
             return controller.View(QuestionView, nextQuestionViewModel);
@@ -117,8 +115,7 @@ public class QuestionsViewBuilder(
                 submissionRoutingData.QuestionnaireSection,
                 categorySlug,
                 sectionSlug,
-                latestResponseForQuestion.AnswerSysId,
-                returnTo
+                latestResponseForQuestion.AnswerSysId
             );
 
             return controller.View(QuestionView, viewModel);
@@ -133,8 +130,7 @@ public class QuestionsViewBuilder(
                 controller,
                 categorySlug,
                 sectionSlug,
-                nextQuestionSlug,
-                returnTo
+                nextQuestionSlug
             );
         }
 
@@ -206,7 +202,7 @@ public class QuestionsViewBuilder(
 
         var question = await ContentfulService.GetQuestionByIdAsync(questionId);
 
-        var viewModel = await GenerateViewModel(controller, question, null, null, null, null, null);
+        var viewModel = await GenerateViewModel(controller, question, null, null, null, null);
         return controller.View(QuestionView, viewModel);
     }
 
@@ -419,8 +415,7 @@ public class QuestionsViewBuilder(
         SubmitAnswerInputViewModel answerViewModel,
         string categorySlug,
         string sectionSlug,
-        string questionSlug,
-        string? returnTo
+        string questionSlug
     )
     {
         var selectedEstablishmentIds = CurrentUser.IsGroup
@@ -450,8 +445,7 @@ public class QuestionsViewBuilder(
                 section,
                 categorySlug,
                 sectionSlug,
-                answerViewModel.ChosenAnswer?.Answer.Id,
-                returnTo
+                answerViewModel.ChosenAnswer?.Answer.Id
             );
 
             viewModel.ErrorMessages = controller
@@ -485,8 +479,7 @@ public class QuestionsViewBuilder(
                 section,
                 categorySlug,
                 sectionSlug,
-                questionSlug,
-                null
+                questionSlug
             );
 
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
@@ -523,8 +516,7 @@ public class QuestionsViewBuilder(
                 {
                     categorySlug,
                     sectionSlug,
-                    questionSlug = nextQuestion.Slug,
-                    returnTo,
+                    questionSlug = nextQuestion.Slug
                 }
             );
         }
@@ -605,16 +597,10 @@ public class QuestionsViewBuilder(
         QuestionnaireSectionEntry? section,
         string? categorySlug,
         string? sectionSlug,
-        string? latestAnswerContentfulId,
-        string? returnTo
+        string? latestAnswerContentfulId
     )
     {
         controller.ViewData[StatePassingMechanismConstants.Title] = question.Text;
-
-        if (!string.IsNullOrEmpty(returnTo))
-        {
-            controller.ViewData[StatePassingMechanismConstants.ReturnTo] = returnTo;
-        }
 
         // Workaround, to avoid infinite loop due to bi-directional/circular references:
         foreach (var nextQuestion in question.Answers.Select(a => a.NextQuestion))
