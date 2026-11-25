@@ -5,9 +5,10 @@
                 <img src="/assets/images/department-for-education_white.png" alt="Department for Education" class="govuk-header__logotype">
             </a>
         </div>
+
         @if (Context.User.Identity?.IsAuthenticated == true)
         {
-            <div class="app-auth-action">
+            <div class="app-auth-action noprint">
                 <a class="app-auth-action__link" href="/auth/sign-out">
                     Sign out
                 </a>
