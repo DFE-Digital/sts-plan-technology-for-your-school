@@ -19,7 +19,7 @@ public static class Program
 
         services.AddDbContext<PlanTechDbContext>(opts =>
         {
-            opts.UseSqlServer("Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw0rd@G0esH3r3~;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=testDb");
+            opts.UseSqlServer(configuration.GetConnectionString("Database"));
             opts.EnableSensitiveDataLogging();
         });
 
