@@ -2,13 +2,13 @@ import { Given, When, Then, DataTable } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 Then('I should see the selected school name {string}', async function (schoolName: string) {
-  const nameElement = this.page.locator('.school-ident .school-ident-name');
+  const nameElement = this.page.locator('span.govuk-caption-xl');
   await expect(nameElement).toBeVisible();
   await expect(nameElement).toHaveText(schoolName);
 });
 
 Then('I should see the select a school heading', async function () {
-  await expect(this.page.getByRole('heading', { name: 'Select a school', level: 2 })).toBeVisible();
+  await expect(this.page.getByRole('heading', { name: 'View recommendations and track progress', level: 2 })).toBeVisible();
 });
 
 Then('I should see the following schools:', async function (dataTable: DataTable) {
@@ -56,7 +56,7 @@ Then('I should see the following school progress:', async function (dataTable: D
 
 Given('I am on the select a school page', async function () {
   // If login already lands you here, just assert
-  await expect(this.page.getByRole('heading', { name: 'Select a school' })).toBeVisible();
+  await expect(this.page.getByRole('heading', { name: 'View recommendations and track progress' })).toBeVisible();
 });
 
 When('I select the school {string}', async function (schoolName: string) {

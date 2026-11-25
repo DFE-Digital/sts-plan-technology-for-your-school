@@ -26,7 +26,7 @@ Feature: Single Category Landing Page
       When I click the first recommendation link on the category landing page
       Then I should see the page heading "Recommendation Header - C1 - S1 - Q1"
 
-      When I click the back to "category one" link
+      When I click the last breadcrumb item
       Then I should be on the URL containing "/category-one"
 
       When I click the recommendation link "Recommendation Header - C1 - S1 - Q1" on the category landing page
@@ -41,4 +41,4 @@ Feature: Single Category Landing Page
       And I should not see the confirmation panel for "Category One Section One"
       And I should see a link to the recommendation "Recommendation Header - C1 - S1 - Q1"
       And I should see a link to the recommendation "Recommendation Header - C1 - S1 - Q2"
-      And I should see the completed self-assessment message for "Category One Section One"
+      And I should see the completed self-assessment message for section "Category One Section One" and establishment "DSI TEST Establishment (001) Miscellaneous (27)"

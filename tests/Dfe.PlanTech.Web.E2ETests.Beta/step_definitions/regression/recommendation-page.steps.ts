@@ -116,21 +116,29 @@ Then(
   },
 );
 
+
 Then(
   'I click the print all recommendations link in the related actions for {string}',
   async function (topic: string) {
-    const relatedActions = this.page
-      .getByRole('heading', { name: 'Related actions', exact: true })
-      .locator('..');
-
-    const printAllLink = relatedActions.locator('a[href$="/print-all"]').filter({
-      hasText: `Print your school's ${topic.toLowerCase()} recommendations`,
+    const relatedActions = this.page.locator(
+      '.govuk-grid-column-one-third-from-desktop'
+    ).filter({
+      has: this.page.getByRole('heading', {
+        name: 'Related actions',
+        exact: true,
+      }),
     });
 
-    await expect(printAllLink).toBeVisible();
-    await printAllLink.click();
-  },
+    const printLink = relatedActions.getByRole('link', {
+      name: `Print all recommendations for ${topic.toLowerCase()}`,
+      exact: true,
+    });
+
+    await expect(printLink).toBeVisible();
+    await printLink.click();
+  }
 );
+
 
 Then('I should see the print this page button', async function () {
   const printButton = this.page.locator('.noprint #print-page-button');
@@ -170,7 +178,7 @@ Then(
   'I should see the print page recommendation text {string}',
   async function (recommendationText: string) {
     const recommendation = this.page.locator(
-      '.recommendation-action-header td.govuk-table__cell div',
+      '.recommendation-piece-content .govuk-heading-m',
       { hasText: recommendationText },
     );
 
@@ -183,7 +191,7 @@ Then(
   async function (heading: string, content: string) {
     // find the header matching the h1
     const contentBlock = this.page.locator(
-      `div.recommendation-piece-content:has(h1.govuk-heading-l:has-text("${heading}"))`,
+      `div.recommendation-piece-content:has(h3.govuk-heading-m:has-text("${heading}"))`,
     );
 
     await expect(contentBlock).toBeVisible();

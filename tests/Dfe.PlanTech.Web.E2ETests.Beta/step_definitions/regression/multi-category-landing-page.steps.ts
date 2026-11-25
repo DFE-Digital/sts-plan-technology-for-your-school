@@ -3,12 +3,13 @@ import { expect } from '@playwright/test';
 import { getCurrentShortDate, normaliseShortDateTimeText } from '../../helpers/datetime';
 
 Then(
-  'I should see the {string} section {string} with description {string} and link href {string}',
+  'I should see the {string} section {string} with description {string} and link href {string} for a {string}',
   async function (
     state: 'not started' | 'in progress' | 'completed',
     heading: string,
     description: string,
     href: string,
+    userType: string
   ) {
     const container = this.page.locator('#main-content');
     const currentDate = getCurrentShortDate();
@@ -18,6 +19,14 @@ Then(
 
     const sectionLower = heading.toLowerCase();
     const descEl = headingEl.locator('xpath=following-sibling::p[1]');
+
+    let schoolTextName = "";
+      if (userType == 'mat') {
+        schoolTextName = "DSI TEST Multi-Academy Trust (010)";
+      }
+      else {
+        schoolTextName = "DSI TEST Establishment (001) Miscellaneous (27)";
+      }
 
     if (state === 'not started') {
       // first paragraph is the description
@@ -44,7 +53,7 @@ Then(
 
       const text = (await inProgressPara.innerText()).trim();
       const normalisedText = normaliseShortDateTimeText(text);
-      const expectedText = `A self-assessment was started by DSI TEST Establishment (001) Miscellaneous (27) on ${currentDate}.`;
+      const expectedText = `A self-assessment was started by ${schoolTextName} on ${currentDate}.`;
       expect(normalisedText).toMatch(expectedText);
 
       // Next paragraph that actually contains the link
@@ -65,7 +74,7 @@ Then(
 
       const completionText = (await completionPara.innerText()).trim();
       const normalisedText = normaliseShortDateTimeText(completionText);
-      const expectedText = `The self-assessment for ${sectionLower} was submitted on ${currentDate} by DSI TEST Establishment (001) Miscellaneous (27).`;
+      const expectedText = `The self-assessment for ${sectionLower} was submitted on ${currentDate} by ${schoolTextName}.`;
       expect(normalisedText).toMatch(expectedText);
 
       const viewLink = headingEl.locator(

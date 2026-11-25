@@ -13,11 +13,13 @@ fi
 
 # idempotent cleanup + start
 docker rm -f "$name" >/dev/null 2>&1 || true
-docker run --cap-add SYS_PTRACE \
-  -e 'ACCEPT_EULA=1' \
+docker run \
+  -e 'ACCEPT_EULA=Y' \
+  -e 'MSSQL_PID=Developer' \
   -e "MSSQL_SA_PASSWORD=$password" \
   -p 1433:1433 \
-  --name "$name" -d mcr.microsoft.com/azure-sql-edge:latest
+  --name "$name" \
+  -d mcr.microsoft.com/mssql/server:2025-latest
 
 echo "Waiting for readiness logs..."
 max_retries=180; i=0
@@ -63,7 +65,7 @@ echo "SQL Edge ready. Creating database..."
 
 # Create DB if missing (no shell in container; pass host $password directly)
 docker exec "$name" \
-  /opt/mssql-tools/bin/sqlcmd \
+  "$sqlcmd_path" $sqlcmd_tls_flag \
   -S localhost -U SA -P "$password" -b -h -1 -W -Q \
   "IF DB_ID(N'plantech-mock-db') IS NULL CREATE DATABASE [plantech-mock-db];"
 
@@ -71,14 +73,14 @@ docker exec "$name" \
 echo "Verifying database creation..."
 verify_retries=20
 until docker exec "$name" \
-  /opt/mssql-tools/bin/sqlcmd \
+  "$sqlcmd_path" $sqlcmd_tls_flag \
   -S localhost -U SA -P "$password" -b -h -1 -W -Q \
   "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N'plantech-mock-db';" \
   | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -x 'plantech-mock-db' >/dev/null; do
   sleep 1
   verify_retries=$((verify_retries-1))
   if [ $verify_retries -le 0 ]; then
-    echo "Database 'plantech-mock-db' not found after create. Recent logs:"
+    echo "Database not found after create. Recent logs:"
     docker logs --tail 200 "$name" || true
     exit 1
   fi
