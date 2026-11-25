@@ -8,7 +8,7 @@ Then('I should see the selected school name {string}', async function (schoolNam
 });
 
 Then('I should see the select a school heading', async function () {
-  await expect(this.page.getByRole('heading', { name: 'View recommendations and track progress', level: 2 })).toBeVisible();
+  await expect(this.page.getByRole('heading', { name: 'Your schools', exact:true, level: 2 })).toBeVisible();
 });
 
 Then('I should see the following schools:', async function (dataTable: DataTable) {
@@ -56,7 +56,7 @@ Then('I should see the following school progress:', async function (dataTable: D
 
 Given('I am on the select a school page', async function () {
   // If login already lands you here, just assert
-  await expect(this.page.getByRole('heading', { name: 'View recommendations and track progress' })).toBeVisible();
+  await expect(this.page.getByRole('heading', { name: 'Your schools', exact:true })).toBeVisible();
 });
 
 When('I select the school {string}', async function (schoolName: string) {

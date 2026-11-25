@@ -7,31 +7,14 @@ public class SeedData(PlanTechDbContext db)
 {
     public void CreateData()
     {
-        CreateBaseData();
-    }
-
-    /// <summary>
-    /// Creates the basic data like establishments, users,
-    /// that plan tech requires to operate.
-    /// </summary>
-    private void CreateBaseData()
-    {
-        // Add 100 dummy users & establishments to align with test account logins
-        db.Database.ExecuteSql(
-            @$"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
-Insert into [dbo].[user] (dfeSignInRef) Select CONCAT('sign-in-ref-', n) From Range"
+        var scriptPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Scripts",
+            "SeedTestData.sql"
         );
 
-        db.Database.ExecuteSql(
-            $@"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
-Insert into [dbo].[establishment] (establishmentRef, establishmentType, orgName)
-Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) from Range"
-        );
+        var sql = File.ReadAllText(scriptPath);
 
-        // Seed test MAT group + links
-        db.Database.ExecuteSqlRaw(SqlConstants.DsiSeedData);
-
-        // Seed User accounts for Mock Authentication
-        db.Database.ExecuteSqlRaw(SqlConstants.E2EUserSeedData);
+        db.Database.ExecuteSqlRaw(sql);
     }
 }

@@ -63,7 +63,7 @@ jobs:
           ls -la ./tests/Dfe.PlanTech.Web.SeedTestData || true
           ls -la ./tests/Dfe.PlanTech.Web.SeedTestData/scripts || true
 
-      - name: Start Azure SQL Edge and seed DB
+      - name: Start Sql 2025 and seed DB
         shell: bash
         working-directory: ./tests/Dfe.PlanTech.Web.SeedTestData/scripts
         env:
@@ -75,7 +75,7 @@ jobs:
           echo "---- first lines of script ----"
           head -n 30 ./setup-ci.sh
           chmod +x ./setup-ci.sh
-          ./setup-ci.sh azuresqledge "$SA_PASSWORD"
+          ./setup-ci.sh plantech-sql "$SA_PASSWORD"
 
       - name: Debug SQL Edge
         if: failure()

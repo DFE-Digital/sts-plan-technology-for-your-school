@@ -1,111 +1,139 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-name="${1:-azuresqledge}"
-password_raw="${2-}"
-# Fall back to env var if 2nd arg not provided
-if [ -z "${password_raw:-}" ] && [ -n "${SA_PASSWORD-}" ]; then password_raw="$SA_PASSWORD"; fi
-password="$(printf '%s' "${password_raw:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-if [ -z "$password" ] || [ "${#password}" -lt 12 ]; then
-  echo "SA password missing/too short"
-  exit 1
-fi
+# Configuration
+CONTAINER_NAME="${1:-plantech-sql}"
+SA_PASSWORD="${2:-${SA_PASSWORD:-}}"
+SQL_IMAGE="mcr.microsoft.com/mssql/server:2025-latest"
+SQL_PORT=1433
+SQLCMD_PATH="/opt/mssql-tools18/bin/sqlcmd"
+DATABASE_NAME="plantech-mock-db"
+MAX_WAIT_SECONDS=180
 
-# idempotent cleanup + start
-docker rm -f "$name" >/dev/null 2>&1 || true
-docker run \
-  -e 'ACCEPT_EULA=Y' \
-  -e 'MSSQL_PID=Developer' \
-  -e "MSSQL_SA_PASSWORD=$password" \
-  -p 1433:1433 \
-  --name "$name" \
-  -d mcr.microsoft.com/mssql/server:2025-latest
+DATABASE_UPGRADER_PROJECT="../../../src/Dfe.PlanTech.DatabaseUpgrader"
+SEED_DATA_PROJECT="../../../tests/Dfe.PlanTech.Web.SeedTestData"
 
-echo "Waiting for readiness logs..."
-max_retries=180; i=0
-until docker logs "$name" 2>&1 | grep -q "SQL Server is now ready for client connections"; do
-  sleep 1; i=$((i+1))
-  if [ "$i" -ge "$max_retries" ]; then
-    echo "Not ready in ${max_retries}s. Recent logs:"
-    docker logs --tail 200 "$name" || true
+validate_password() {
+    if [[ -z "$SA_PASSWORD" || ${#SA_PASSWORD} -lt 12 ]]; then
+        echo "SA password is missing or too short."
+        exit 1
+    fi
+}
+
+start_sql_server() {
+    echo "Starting SQL Server container: $CONTAINER_NAME"
+
+    # Remove any existing container with the same name
+    docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+
+    docker run \
+        --name "$CONTAINER_NAME" \
+        --env "ACCEPT_EULA=Y" \
+        --env "MSSQL_PID=Developer" \
+        --env "MSSQL_SA_PASSWORD=$SA_PASSWORD" \
+        --publish "$SQL_PORT:1433" \
+        --detach \
+        "$SQL_IMAGE"
+}
+
+execute_sql() {
+    docker exec "$CONTAINER_NAME" \
+        "$SQLCMD_PATH" \
+        -S localhost \
+        -U sa \
+        -P "$SA_PASSWORD" \
+        -C \
+        -b \
+        -h -1 \
+        -W \
+        -Q "$1"
+}
+
+wait_for_sql_server() {
+    echo "Waiting for SQL Server to become ready..."
+
+    for ((attempt = 1; attempt <= MAX_WAIT_SECONDS; attempt++)); do
+        if execute_sql "SELECT 1;" >/dev/null 2>&1; then
+            echo "SQL Server is ready."
+            return 0
+        fi
+
+        sleep 1
+    done
+
+    echo "SQL Server failed to become ready."
+    docker logs --tail 200 "$CONTAINER_NAME" || true
     exit 1
-  fi
-done
+}
 
-# pick sqlcmd path in container (+ TLS switch for tools18)
-choose_sqlcmd='
-  if [ -x /opt/mssql-tools/bin/sqlcmd ]; then
-    echo "/opt/mssql-tools/bin/sqlcmd";
-  elif [ -x /opt/mssql-tools18/bin/sqlcmd ]; then
-    echo "/opt/mssql-tools18/bin/sqlcmd";
-  else
-    echo "";
-  fi
-'
+create_database() {
+    echo "Creating database: $DATABASE_NAME"
 
-# sanity: show pw length inside container (no secret leak)
-len_in_container=$(docker exec "$name" /bin/bash -lc 'echo -n "${MSSQL_SA_PASSWORD}" | wc -c' || echo 0)
-echo "Container sees MSSQL_SA_PASSWORD length: $len_in_container"
+    execute_sql "
+        IF DB_ID(N'$DATABASE_NAME') IS NULL
+            CREATE DATABASE [$DATABASE_NAME];
+    "
 
-sqlcmd_path=$(docker exec "$name" /bin/bash -lc "$choose_sqlcmd")
-if [ -z "$sqlcmd_path" ]; then
-  echo "sqlcmd not found in container at /opt/mssql-tools{,18}/bin/sqlcmd"
-  docker logs --tail 200 "$name" || true
-  exit 1
-fi
-echo "Using sqlcmd: $sqlcmd_path"
+    echo "Database created successfully."
+}
 
-# if using tools18, add -C to trust server cert
-sqlcmd_tls_flag=""
-if [[ "$sqlcmd_path" == *"mssql-tools18"* ]]; then
-  sqlcmd_tls_flag="-C"
-fi
+verify_database() {
+    echo "Verifying database: $DATABASE_NAME"
 
-echo "SQL Edge ready. Creating database..."
+    execute_sql "
+        IF DB_ID(N'$DATABASE_NAME') IS NULL
+            THROW 50000, 'Database does not exist.', 1;
+    "
 
-# Create DB if missing (no shell in container; pass host $password directly)
-docker exec "$name" \
-  "$sqlcmd_path" $sqlcmd_tls_flag \
-  -S localhost -U SA -P "$password" -b -h -1 -W -Q \
-  "IF DB_ID(N'plantech-mock-db') IS NULL CREATE DATABASE [plantech-mock-db];"
+    echo "Database verified successfully."
+}
 
-# Verify DB exists before proceeding (retry a few seconds)
-echo "Verifying database creation..."
-verify_retries=20
-until docker exec "$name" \
-  "$sqlcmd_path" $sqlcmd_tls_flag \
-  -S localhost -U SA -P "$password" -b -h -1 -W -Q \
-  "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N'plantech-mock-db';" \
-  | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -x 'plantech-mock-db' >/dev/null; do
-  sleep 1
-  verify_retries=$((verify_retries-1))
-  if [ $verify_retries -le 0 ]; then
-    echo "Database not found after create. Recent logs:"
-    docker logs --tail 200 "$name" || true
-    exit 1
-  fi
-done
-echo "Database present."
+build_connection_string() {
+    CONNECTION_STRING="Server=tcp:localhost,$SQL_PORT;"
+    CONNECTION_STRING+="Database=$DATABASE_NAME;"
+    CONNECTION_STRING+="User ID=sa;"
+    CONNECTION_STRING+="Password=$SA_PASSWORD;"
+    CONNECTION_STRING+="Persist Security Info=False;"
+    CONNECTION_STRING+="MultipleActiveResultSets=False;"
+    CONNECTION_STRING+="Encrypt=True;"
+    CONNECTION_STRING+="TrustServerCertificate=True;"
+    CONNECTION_STRING+="Connection Timeout=30;"
+    CONNECTION_STRING+="Max Pool Size=1000;"
+}
 
+run_dotnet_project() {
+    local project_path="$1"
 
-conn_str="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$password;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+    dotnet user-secrets --project "$project_path" init || true
 
-echo "Writing user-secrets for DatabaseUpgrader..."
-dotnet user-secrets --project ../../../src/Dfe.PlanTech.DatabaseUpgrader init || true
-dotnet user-secrets --project ../../../src/Dfe.PlanTech.DatabaseUpgrader set \
-  "ConnectionStrings:Database" "$conn_str"
+    dotnet user-secrets --project "$project_path" set \
+        "ConnectionStrings:Database" "$CONNECTION_STRING"
 
-echo "Running DatabaseUpgrader..."
-dotnet run --project ../../../src/Dfe.PlanTech.DatabaseUpgrader \
-  --connectionstring "$conn_str"
+    dotnet run --project "$project_path" \
+        --connectionstring "$CONNECTION_STRING"
+}
 
+upgrade_database() {
+    echo "Running DatabaseUpgrader..."
+    run_dotnet_project "$DATABASE_UPGRADER_PROJECT"
+}
 
-dotnet user-secrets --project ../../../tests/Dfe.PlanTech.Web.SeedTestData init || true
-dotnet user-secrets --project ../../../tests/Dfe.PlanTech.Web.SeedTestData set \
-  "ConnectionStrings:Database" "$conn_str"
+seed_database() {
+    echo "Seeding test data..."
+    run_dotnet_project "$SEED_DATA_PROJECT"
+}
 
+main() {
+    validate_password
+    start_sql_server
+    wait_for_sql_server
+    create_database
+    verify_database
+    build_connection_string
+    upgrade_database
+    seed_database
 
-echo "Seeding test data..."
-dotnet run --project ../../../tests/Dfe.PlanTech.Web.SeedTestData --connectionstring "$conn_str"
+    echo "Database is ready for E2E tests."
+}
 
-echo "DB ready."
+main
