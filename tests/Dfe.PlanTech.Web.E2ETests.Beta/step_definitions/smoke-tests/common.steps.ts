@@ -321,6 +321,18 @@ When(
   async function (categoryName: string) {
     await this.page
       .getByRole('link', {
+        name: `View ${categoryName} recommendations`,
+        exact: true,
+      })
+      .click();
+  }
+);
+
+When(
+  'I click the link to view the recommendations for {string} as a school',
+  async function (categoryName: string) {
+    await this.page
+      .getByRole('link', {
         name: `View the recommendations for ${categoryName}`,
         exact: true,
       })
