@@ -39,13 +39,6 @@ namespace Dfe.PlanTech.Web
                     sp.GetRequiredService<IOptions<ContentSecurityPolicyConfiguration>>().Value
                 );
 
-            app.Services.Configure<TrackingOptionsConfiguration>(
-                    app.Configuration.GetSection("tracking")
-                )
-                .AddSingleton(sp =>
-                    sp.GetRequiredService<IOptions<TrackingOptionsConfiguration>>().Value
-                );
-
             app.Services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;

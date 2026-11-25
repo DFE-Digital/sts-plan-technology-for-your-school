@@ -33,11 +33,6 @@
     var nonce = Context.Items["nonce"]?.ToString();
 }
 
-@if (!string.IsNullOrEmpty(GtmConfiguration.SiteVerificationId))
-{
-    <meta name="google-site-verification" content="@GtmConfiguration.SiteVerificationId" />
-}
-
 <!-- Google Tag Manager -->
 <script nonce="@nonce">
     (function (w, d, s, l, i) {
