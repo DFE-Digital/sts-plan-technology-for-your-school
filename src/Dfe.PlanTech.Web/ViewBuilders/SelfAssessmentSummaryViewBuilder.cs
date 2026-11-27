@@ -17,11 +17,11 @@ public class SelfAssessmentSummaryViewBuilder(
     IHttpContextAccessor httpContextAccessor
 ) : BaseViewBuilder(logger, contentfulService, currentUser), ISelfAssessmentSummaryViewBuilder
 {
-    private readonly IGroupService _groupService =
-        groupService ?? throw new ArgumentNullException(nameof(groupService));
+    private readonly IGroupService _groupService = groupService
+        ?? throw new ArgumentNullException(nameof(groupService));
 
-    private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor
+        ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     public const string SelfAssessmentSummaryViewName =
         "~/Views/Shared/SelfAssessmentSummary.cshtml";
@@ -47,14 +47,12 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionSlug
     )
     {
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
 
-        var sectionId =
-            section.Sys?.Id
+        var sectionId = section.Sys?.Id
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section id for slug {sectionSlug}"
             );
@@ -66,19 +64,21 @@ public class SelfAssessmentSummaryViewBuilder(
         );
 
         var categoryName = category?.Header?.Text ?? categorySlug.Replace("-", " ");
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
         var recommendationCategorySlug = category?.LandingPage?.Slug ?? categorySlug;
-
         var submittedSubmissions = await GetSubmittedSubmissions(sectionId);
+
+        var actAsMat = CurrentUser.IsMat && focusedEstablishment is null;
 
         return new SelfAssessmentSummaryViewModel
         {
             SectionName = section.Name,
             CategoryName = categoryName,
             CompletedSchoolCount = submittedSubmissions.Count,
-            IsMatSummary = CurrentUser.IsMat,
+            IsMatSummary = actAsMat,
             RecommendationLinks = submittedSubmissions.Select(BuildRecommendationLink).ToList(),
             ShowSubmitAnotherSelfAssessment = true,
-            SubmitAnotherSelfAssessmentHref = CurrentUser.IsMat
+            SubmitAnotherSelfAssessmentHref = actAsMat
                 ? $"/trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
                 : $"/{recommendationCategorySlug}",
             BackToHomeHref = UrlConstants.HomePage,
@@ -90,20 +90,21 @@ public class SelfAssessmentSummaryViewBuilder(
         {
             var organisationName = submission.Establishment?.OrgName ?? "Unknown Establishment";
 
-            return new SelfAssessmentSummaryRecommendationLinkViewModel
-            {
-                LinkText = CurrentUser.IsMat
-                    ? organisationName
-                    : $"View the recommendations for {section.Name.ToLowerInvariant()}",
-
-                SchoolUrn = CurrentUser.IsMat ? submission.Establishment!.EstablishmentRef : null,
-
-                SchoolName = CurrentUser.IsMat ? submission.Establishment!.OrgName : null,
-
-                Href = CurrentUser.IsMat
-                    ? $"/trust/{recommendationCategorySlug}"
-                    : $"/{recommendationCategorySlug}",
-            };
+            return actAsMat
+                ? new SelfAssessmentSummaryRecommendationLinkViewModel
+                {
+                    LinkText = organisationName,
+                    SchoolUrn = submission.Establishment!.EstablishmentRef,
+                    SchoolName = submission.Establishment!.OrgName,
+                    Href = $"/trust/{recommendationCategorySlug}",
+                }
+                : new SelfAssessmentSummaryRecommendationLinkViewModel
+                {
+                    LinkText = $"View the recommendations for {section.Name.ToLowerInvariant()}",
+                    SchoolUrn = null,
+                    SchoolName = null,
+                    Href = $"/{recommendationCategorySlug}",
+                };
         }
     }
 

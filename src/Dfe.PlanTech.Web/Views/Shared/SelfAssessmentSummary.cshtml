@@ -116,7 +116,7 @@ else if (Model.RecommendationLinks.Any())
         )
     </h3>
 
-@if (Model.IsMatSummary)
+    @if (Model.IsMatSummary)
     {
         var submitRemainingLink = $"<a class=\"govuk-link\" href=\"{Model.SubmitAnotherSelfAssessmentHref}\">submit the remaining self-assessments</a>";
 
@@ -139,8 +139,7 @@ else if (Model.RecommendationLinks.Any())
         <p class="govuk-body">
             <a class="govuk-link"
                href="@Model.SubmitAnotherSelfAssessmentHref">
-                Submit self-assessments
-            </a>
+                Submit self-assessments</a>:
             @await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.SchoolSummarySubmitAnotherBody
         )

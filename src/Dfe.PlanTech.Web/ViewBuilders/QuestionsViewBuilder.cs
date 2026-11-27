@@ -153,8 +153,8 @@ public class QuestionsViewBuilder(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
 
-        var isMatWithoutSelectedSchool =
-            CurrentUser.IsMat && CurrentUser.GetSelectedSchools().Count == 0;
+        var selectedSchools = await GetFocusedOrSelectedSchoolsAsync();
+        var isMatWithoutSelectedSchool = CurrentUser.IsMat && selectedSchools.Count == 0;
 
         if (isMatWithoutSelectedSchool)
         {
@@ -219,13 +219,15 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var establishmentId = (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId;
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+        var selectedEstablishmentIds = (await GetFocusedOrSelectedSchoolsAsync()).Select(s =>
+            s.EstablishmentId
+        );
 
         try
         {
             var nextQuestion = await _questionService.GetNextUnansweredQuestion(
-                establishmentId,
+                selectedEstablishmentIds.First(),
                 section
             );
             if (nextQuestion is null)
@@ -245,8 +247,12 @@ public class QuestionsViewBuilder(
         }
         catch (DatabaseException)
         {
-            // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+            foreach (var establishmentId in selectedEstablishmentIds)
+                // Remove the current invalid submission and redirect to self-assessment page
+                await _submissionService.SetSubmissionInaccessibleAsync(
+                    establishmentId,
+                    section.Id
+                );
 
             controller.TempData[StatePassingMechanismConstants.SubtopicError] =
                 await BuildErrorMessage();
@@ -399,9 +405,10 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var focusedEstablishmentId = (
-            await CurrentUser.GetFocusedEstablishmentAsync()
-        ).EstablishmentId;
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
+        var focusedEstablishmentId = focusedEstablishment?.EstablishmentId
+            ?? throw new InvalidOperationException("User has no focused school");
+
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find interstitial page for section {sectionSlug}"
@@ -428,11 +435,13 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var selectedEstablishmentIds = CurrentUser.CanSelectSchools
-            ? CurrentUser.GetSelectedSchoolEstablishmentIds()
-            : [(await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId];
+        var selectedEstablishments = await GetFocusedOrSelectedSchoolsAsync();
+        var selectedEstablishmentIds = selectedEstablishments
+            ?.Select(e => e.EstablishmentId)
+            .ToArray()
+            ?? [];
 
-        if (selectedEstablishmentIds!.Count == 0)
+        if (selectedEstablishmentIds!.Length == 0)
         {
             throw new InvalidOperationException(
                 "User attempted to submit an answer but there are no focused or selected schools"

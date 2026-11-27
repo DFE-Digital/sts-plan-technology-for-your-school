@@ -19,10 +19,10 @@ public class BaseViewBuilder(
 )
 {
     protected readonly ILogger<BaseViewBuilder> Logger = logger;
-    protected IContentfulService ContentfulService =
-        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    protected ICurrentUserProvider CurrentUser =
-        currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+    protected IContentfulService ContentfulService = contentfulService
+        ?? throw new ArgumentNullException(nameof(contentfulService));
+    protected ICurrentUserProvider CurrentUser = currentUser
+        ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected const string ShareByEmailViewName = "~/Views/Shared/Email/ShareByEmail.cshtml";
 
@@ -58,13 +58,11 @@ public class BaseViewBuilder(
 
     protected async Task<List<SelectedEstablishmentDataModel>> GetFocusedOrSelectedSchoolsAsync()
     {
-        if (CurrentUser.CanSelectSchools)
-        {
-            return CurrentUser.GetSelectedSchools()!;
-        }
-
         var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
-        return [focusedEstablishment!];
+
+        return CurrentUser.CanSelectSchools && focusedEstablishment is null
+            ? CurrentUser.GetSelectedSchools()!
+            : [focusedEstablishment!];
     }
 
     protected static RedirectToActionResult HandleNotifyShareResults(

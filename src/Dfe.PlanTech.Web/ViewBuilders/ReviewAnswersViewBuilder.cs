@@ -141,18 +141,10 @@ public class ReviewAnswersViewBuilder(
 
         try
         {
-            var selectedEstablishmentIds = new List<int>();
-            if (CurrentUser.CanSelectSchools)
-            {
-                var selectedSchools = CurrentUser.GetSelectedSchools()!;
-                selectedEstablishmentIds.AddRange(selectedSchools.Select(s => s.EstablishmentId));
-            }
-            else
-            {
-                selectedEstablishmentIds.Add(
-                    (await CurrentUser.GetFocusedEstablishmentAsync())!.EstablishmentId
-                );
-            }
+            var selectedEstablishments = await GetFocusedOrSelectedSchoolsAsync();
+            var selectedEstablishmentIds = selectedEstablishments
+                .Select(s => s.EstablishmentId)
+                .ToList();
 
             if (selectedEstablishmentIds.Count == 0)
             {
@@ -204,8 +196,9 @@ public class ReviewAnswersViewBuilder(
 
         controller.TempData[StatePassingMechanismConstants.SectionName] = sectionName;
 
+        var focusedEstablishment = await CurrentUser.GetFocusedEstablishmentAsync();
         //Check to be removed when we have sorted routing of new pages
-        if (CurrentUser.IsMat)
+        if (CurrentUser.IsMat && focusedEstablishment is null)
         {
             return controller.RedirectToTrustSelfAssessmentSummary(categorySlug, sectionSlug);
         }
