@@ -81,7 +81,7 @@ async function ensureSectionCollapsed(page: Page, headingText: string) {
 }
 
 
-//show/hide all 
+//show/hide all
 
 When("I expand the most recent recent activity section", async function () {
   const page = this.page;
@@ -192,14 +192,14 @@ Then(
 
     // status + school validation
     const statusAndSchool = content.locator("p").filter({
-      hasText: "Status of",
+      hasText: "Status changed to",
     });
 
-    await expect(statusAndSchool).toContainText(`Status of '${status}'`);
+    await expect(statusAndSchool).toContainText(`Status changed to '${status}'.`);
 
-    var schoolName = MAT_SCHOOLS_BY_URN[process.env.DSI_SCHOOL_ESTABLISHMENT_REF as string].NAME;
+    //var schoolName = MAT_SCHOOLS_BY_URN[process.env.DSI_SCHOOL_ESTABLISHMENT_REF as string].NAME;
 
-    await expect(statusAndSchool).toContainText(`by ${schoolName}.`);
+    //await expect(statusAndSchool).toContainText(`by ${schoolName}.`);
 
     // question validation
     const questionStrong = content.locator("p strong", {
@@ -301,7 +301,7 @@ Then(
     const actualNote = normalizeSpaces(actualNoteRaw);
     expect(actualNote).toBe(normalizeSpaces(note));
 
-    // the date for this entry is 
+    // the date for this entry is
     const dateHeadingForEntry = noteP.locator(
       "xpath=preceding::h3[contains(@class,'govuk-heading-s')][1]"
     );

@@ -14,7 +14,7 @@ Feature: Multi Category Landing Page
       And I should see the "not started" section "Category Two Section One" with description "This is the Category Two Section One Description" and link href "/category-two/category-two-section-one/self-assessment"
       And I should see the "not started" section "Category Two Section Two" with description "This is the Category Two Section Two description" and link href "/category-two/category-two-section-two/self-assessment"
       And I should see the "not started" section "Category Two Section Three" with description "This is the Category Two Section Three description" and link href "/category-two/category-two-section-three/self-assessment"
-      And I should see an inset text containing "You have not completed any self-assessments for the category two standard. Complete self-assessments to view all recommendations."
+      And I should see an inset text containing "You have not submitted any self-assessments for the category two standard. Submit self-assessments to view all recommendations."
       And I should not see the confirmation panel for "Category Two Section One"
       And I should not see the confirmation panel for "Category Two Section Two"
       And I should not see the confirmation panel for "Category Two Section Three"

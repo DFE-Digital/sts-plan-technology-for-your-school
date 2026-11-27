@@ -65,6 +65,7 @@ public static class ContentfulMicrocopyConstants
     public const string CategoryPrintSectionCompleted = "printCompleted";
 
     public const string GroupsSelectHeader = "matSelect";
+    public const string GroupsSelectBody = "matBody";
     public const string GroupsSelectRecommendationCount = "matCount";
     public const string GroupsSelectContactUs = "matContact";
 
@@ -128,6 +129,13 @@ public static class ContentfulMicrocopyConstants
 
     public const string GroupsSelectViewRecommendations = "mssSelectViewRecommendations";
 
+    public const string GroupsSelectSchoolRecsHeader = "mssGroupsSelectSchoolRecsHeader";
+    public const string GroupsSelectSelectSelfAssessmentAllSubmitted =
+        "mssSelectSelectSelfAssessmentAllSubmitted";
+
+    public const string GroupsStandardsListHeader = "mssStandardsListHeader";
+    public const string GroupsStandardsListBody = "mssStandardsListBody";
+    public const string GroupsStandardsListCategoriesHeader = "mssStandardsListCategoriesHeader";
     public const string MatLandingPageInsetIntro = "mssLandingInsetIntro";
     public const string MatLandingPageInsetOutstanding = "mssLandingInsetOutstanding";
     public const string MatLandingPageTopicOutstanding = "mssLandingTopicOutstanding";
@@ -146,7 +154,12 @@ public static class ContentfulMicrocopyConstants
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
 
-    private const string GroupsSelectHeaderFallback = "Select a school";
+    private const string GroupsSelectHeaderFallback =
+        "Submit self-assessments and view recommendations";
+
+    private const string GroupsSelectBodyFallback =
+        "You can submit self-assessments and update recommendation statuses for one or more schools at a time.";
+    private const string GroupsSelectSchoolRecsHeaderFallback = "Your schools";
 
     private const string PrintSectionIncompleteFallback =
         "The self-assessment must be completed before recommendations are available.";
@@ -205,7 +218,7 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToUpdateStatusHeaderFallback =
         "Which schools do you want to update the status of?";
     private const string GroupsSelectSchoolsToUpdateStatusHelpTextFallback =
-        "You can update the recommendation status for schools that have completed this self-assessment.Select one, more or all schools.";
+        "You can update the recommendation status for schools that have completed this self-assessment. Select one, more or all schools.";
     private const string GroupsSelectSchoolsToUpdateStatusPreContinueButtonTextFallback =
         "Anyone who uses the service for your school will be able to see status updates.";
     private const string GroupsSelectSchoolsToUpdateStatusContinueFallback = "Continue";
@@ -217,11 +230,17 @@ public static class ContentfulMicrocopyConstants
         "Have your schools completed this recommendation?";
     private const string GroupsSelectStatusPreContinueButtonTextFallback =
         "You're updating the recommendation status for these schools:";
-    private const string GroupsSelectStatusContinueFallback = "Save";
+    private const string GroupsSelectStatusContinueFallback = "Update Status";
 
-    private const string GroupsSelectViewRecommendationsFallback =
+    private const string GroupsSelectViewRecommendationsFallback = "Your schools";
+    private const string GroupsSelectSelectSelfAssessmentAllSubmittedFallback =
+        "All self-assessments submitted";
+
+    private const string GroupsStandardsListHeaderFallback = "Plan technology for your school";
+    private const string GroupsStandardsListBodyFallback =
+        "Submit self-assessments to get recommendations and track your progress towards meeting the core standards";
+    private const string GroupsStandardsListCategoriesHeaderFallback =
         "View recommendations and track progress";
-
     private const string GroupRecommendationProgressHeadingFallback = "Your schools' progress";
     private const string GroupRecommendationProgressSchoolHeadingFallback = "School";
     private const string GroupRecommendationProgressLastUpdatedHeadingFallback = "Last updated";
@@ -312,6 +331,7 @@ public static class ContentfulMicrocopyConstants
         { CategoryPrintSectionInProgress, PrintSectionIncompleteFallback },
         { CategoryPrintSectionCompleted, EmptyFallback },
         { GroupsSelectHeader, GroupsSelectHeaderFallback },
+        { GroupsSelectBody, GroupsSelectBodyFallback },
         { GroupsSelectRecommendationCount, EmptyFallback },
         { GroupsSelectContactUs, EmptyFallback },
         { MsmTopicStartHeading, MsmTopicStartHeadingFallback },
@@ -333,6 +353,14 @@ public static class ContentfulMicrocopyConstants
             GroupsSelectSchoolsToAssessConflictErrorFallback
         },
         { GroupsSelectViewRecommendations, GroupsSelectViewRecommendationsFallback },
+        { GroupsSelectSchoolRecsHeader, GroupsSelectSchoolRecsHeaderFallback },
+        {
+            GroupsSelectSelectSelfAssessmentAllSubmitted,
+            GroupsSelectSelectSelfAssessmentAllSubmittedFallback
+        },
+        { GroupsStandardsListHeader, GroupsStandardsListHeaderFallback },
+        { GroupsStandardsListBody, GroupsStandardsListBodyFallback },
+        { GroupsStandardsListCategoriesHeader, GroupsStandardsListCategoriesHeaderFallback },
         { GroupRecommendationProgressHeading, GroupRecommendationProgressHeadingFallback },
         {
             GroupRecommendationProgressSchoolHeading,

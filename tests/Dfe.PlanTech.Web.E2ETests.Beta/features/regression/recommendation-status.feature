@@ -39,8 +39,7 @@ Feature: Recommendations Status
       Then I should see a confirmation panel saying "Status updated to 'In progress'"
       Then recommendation status is shown as "In progress"
       Then recommendation status in the header matches the selected status in the form
-
-      When I click the non-js back link
+      When I click the last breadcrumb item
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "In progress"
       Then I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page
 
@@ -50,8 +49,8 @@ Feature: Recommendations Status
       Then I should see a confirmation panel saying "Status updated to 'Complete'"
       Then recommendation status is shown as "Complete"
       Then recommendation status in the header matches the selected status in the form
+      When I click the last breadcrumb item
 
-      When I click the non-js back link
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Complete"
       Then I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page
 
@@ -60,7 +59,6 @@ Feature: Recommendations Status
       Then I should see a confirmation panel saying "Status updated to 'Not started'"
       Then recommendation status is shown as "Not started"
       Then recommendation status in the header matches the selected status in the form
-
-      When I click the non-js back link
+      When I click the last breadcrumb item
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Not started"
       Then I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page

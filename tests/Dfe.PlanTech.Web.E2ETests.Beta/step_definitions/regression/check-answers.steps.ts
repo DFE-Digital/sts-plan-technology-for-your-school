@@ -35,14 +35,15 @@ Then('I should see the following ordered check answer rows:', async function (da
   }
 });
 
-Then('I should see a view recommendations button', async function () {
+
+Then('I should see the self-assessment submit button', async function () {
   const form = this.page.locator('form[action="/ConfirmCheckAnswers"]');
 
   await expect(form).toHaveCount(1);
   await expect(form).toHaveAttribute('method', /post/i);
-  await expect(form).toHaveAttribute('class', /noprint/);
+  await expect(form).toHaveClass(/noprint/);
 
-  // check the hidden input fields
+  // Check the hidden input fields
   const hiddenFields = [
     'submissionId',
     'sectionName',
@@ -50,23 +51,32 @@ Then('I should see a view recommendations button', async function () {
     'categorySlug',
     '__RequestVerificationToken',
   ];
+
   for (const name of hiddenFields) {
-    await expect(form.locator(`input[type="hidden"][name="${name}"]`)).toHaveCount(1);
+    await expect(
+      form.locator(`input[type="hidden"][name="${name}"]`)
+    ).toHaveCount(1);
   }
 
-  // check the heading
-  await expect(form.locator('h2.govuk-heading-l')).toHaveCount(1);
-
-  // check the submit & view recommendations button
-  const submitButton = form.locator('button.govuk-button');
-  await expect(submitButton).toHaveCount(1);
-  await expect(submitButton).toHaveAttribute('type', 'submit');
-  await expect(submitButton).toContainText('Submit');
-
+  // Check the heading
   await expect(
-    this.page.getByRole('button', { name: 'Submit' }),
+    form.getByRole('heading', {
+      name: 'What happens next',
+      level: 2,
+    })
   ).toBeVisible();
+
+  // Check the Submit button
+  const submitButton = form.getByRole('button', {
+    name: 'Submit',
+    exact: true,
+  });
+
+  await expect(submitButton).toBeVisible();
+  await expect(submitButton).toHaveAttribute('type', 'submit');
+  await expect(submitButton).toHaveClass(/govuk-button/);
 });
+
 
 Then(
   'I click the change link on check answers for {string} and should see the question heading',

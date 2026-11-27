@@ -2,24 +2,24 @@ import { Given, When, Then, DataTable } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 Then('I should see the selected school name {string}', async function (schoolName: string) {
-  const nameElement = this.page.locator('.school-ident .school-ident-name');
+  const nameElement = this.page.locator('span.govuk-caption-xl');
   await expect(nameElement).toBeVisible();
   await expect(nameElement).toHaveText(schoolName);
 });
 
 Then('I should see the select a school page', async function () {
-  await expect(this.page.getByRole('heading', { name: 'Select a school' })).toBeVisible();
+  await expect(this.page.getByRole('heading', { name: 'Your schools', exact:true })).toBeVisible();
 });
 
 Then('I should not see the select a school page', async function () {
-  await expect(this.page.getByRole('heading', { name: 'Select a school' })).toHaveCount(0);
+  await expect(this.page.getByRole('heading', { name: 'Your schools', exact:true })).toHaveCount(0);
 });
 
 Then('I should see the following schools:', async function (dataTable: DataTable) {
   const schoolNames = dataTable.raw().flat(); // single column
 
   for (const schoolName of schoolNames) {
-    const button = this.page.getByRole('button', { name: schoolName });
+    const button = this.page.getByRole('button', { name: schoolName, exact: true });
     await expect(button, `School button not visible: ${schoolName}`).toBeVisible();
   }
 });
@@ -41,11 +41,11 @@ Then('I should see the following school progress:', async function (dataTable: D
 
 Given('I am on the select a school page', async function () {
   // If login already lands you here, just assert
-  await expect(this.page.getByRole('heading', { name: 'Select a school' })).toBeVisible();
+  await expect(this.page.getByRole('heading', { name: 'Your schools', exact: true })).toBeVisible();
 });
 
-When('I select the school {string}', async function (schoolName: string) {
-  await this.page.getByRole('button', { name: schoolName }).click();
+When('I am on the select a school page and I select the school {string}', async function (schoolName: string) {
+  await this.page.getByRole('button', { name: schoolName, exact:true }).click();
 });
 
 Then(

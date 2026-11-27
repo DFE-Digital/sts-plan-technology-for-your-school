@@ -27,23 +27,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "category";
             var sectionSlug = "section";
             var questionSlug = "question";
-            var returnTo = "return";
 
             _viewBuilder
                 .RouteBySlugAndQuestionAsync(
                     _controller,
                     categorySlug,
                     sectionSlug,
-                    questionSlug,
-                    returnTo
+                    questionSlug
                 )
                 .Returns(new OkResult());
 
             var result = await _controller.GetQuestionBySlug(
                 categorySlug,
                 sectionSlug,
-                questionSlug,
-                returnTo
+                questionSlug
             );
 
             await _viewBuilder
@@ -52,8 +49,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     _controller,
                     categorySlug,
                     sectionSlug,
-                    questionSlug,
-                    returnTo
+                    questionSlug
                 );
             Assert.IsType<OkResult>(result);
         }
@@ -113,7 +109,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "cat";
             var sectionSlug = "sec";
             var questionSlug = "q";
-            var returnTo = "return";
             var answerViewModel = new SubmitAnswerInputViewModel();
 
             _viewBuilder
@@ -122,8 +117,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     answerViewModel,
                     categorySlug,
                     sectionSlug,
-                    questionSlug,
-                    returnTo
+                    questionSlug
                 )
                 .Returns(new OkResult());
 
@@ -131,8 +125,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 categorySlug,
                 sectionSlug,
                 questionSlug,
-                answerViewModel,
-                returnTo
+                answerViewModel
             );
 
             await _viewBuilder
@@ -142,8 +135,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     answerViewModel,
                     categorySlug,
                     sectionSlug,
-                    questionSlug,
-                    returnTo
+                    questionSlug
                 );
             Assert.IsType<OkResult>(result);
         }

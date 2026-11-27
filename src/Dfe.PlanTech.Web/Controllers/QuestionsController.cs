@@ -34,8 +34,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> GetQuestionBySlug(
         string categorySlug,
         string sectionSlug,
-        string questionSlug,
-        string? returnTo
+        string questionSlug
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
@@ -46,8 +45,7 @@ public class QuestionsController : BaseController<QuestionsController>
             this,
             categorySlug,
             sectionSlug,
-            questionSlug,
-            returnTo
+            questionSlug
         );
     }
 
@@ -151,8 +149,7 @@ public class QuestionsController : BaseController<QuestionsController>
         string categorySlug,
         string sectionSlug,
         string questionSlug,
-        SubmitAnswerInputViewModel answerViewModel,
-        string? returnTo = ""
+        SubmitAnswerInputViewModel answerViewModel
     )
     {
         return await _questionsViewBuilder.SubmitAnswerAndRedirect(
@@ -160,8 +157,7 @@ public class QuestionsController : BaseController<QuestionsController>
             answerViewModel,
             categorySlug,
             sectionSlug,
-            questionSlug,
-            returnTo
+            questionSlug
         );
     }
 }
