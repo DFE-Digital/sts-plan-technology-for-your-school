@@ -217,6 +217,11 @@ public class CurrentUserProvider(
 
     public void ClearSelectedSchools()
     {
+        if (CanSelectSchools)
+        {
+            Session.ClearFocusedEstablishment();
+        }
+
         Session.ClearSelectedEstablishments();
     }
 

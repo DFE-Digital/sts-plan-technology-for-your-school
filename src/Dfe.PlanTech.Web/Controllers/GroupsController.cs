@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -44,17 +43,15 @@ public class GroupsController : BaseController<GroupsController>
         : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-        _groupsViewBuilder =
-            groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
-        _groupSelectSchoolsToAssessValidator =
-            groupSelectSchoolsToAssessValidator
+        _groupsViewBuilder = groupsViewBuilder
+            ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
+        _groupSelectSchoolsToAssessValidator = groupSelectSchoolsToAssessValidator
             ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToAssessValidator));
-        _groupSelectSchoolsToUpdateStatusValidator =
-            groupSelectSchoolsToUpdateStatusValidator
+        _groupSelectSchoolsToUpdateStatusValidator = groupSelectSchoolsToUpdateStatusValidator
             ?? throw new ArgumentNullException(nameof(groupSelectSchoolsToUpdateStatusValidator));
 
-        _pagesViewBuilder =
-            pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
+        _pagesViewBuilder = pagesViewBuilder
+            ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
     }
 
     [HttpGet(
@@ -74,7 +71,7 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
-        HttpContext.Session.ClearSelectedEstablishments();
+        _currentUser.ClearSelectedSchools();
 
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
     }
